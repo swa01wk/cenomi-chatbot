@@ -1,0 +1,26 @@
+[
+  {
+    "tenant_id": "t-001",
+    "visibility_weight": 1.0,
+    "recommendation_boost": 0.0,
+    "preferred_scenarios": ["shopping", "fashion", "family-outing"],
+    "tone_hints": ["trendy", "affordable"],
+    "suppressed": false
+  },
+  {
+    "tenant_id": "t-002",
+    "visibility_weight": 1.2,
+    "recommendation_boost": 0.1,
+    "preferred_scenarios": ["dining", "family-outing", "date-night", "celebration"],
+    "tone_hints": ["family-friendly", "generous portions"],
+    "suppressed": false
+  },
+  {
+    "tenant_id": "t-003",
+    "visibility_weight": 1.5,
+    "recommendation_boost": 0.2,
+    "preferred_scenarios": ["shopping", "tech", "gift"],
+    "tone_hints": ["premium", "innovative"],
+    "suppressed": false
+  }
+]

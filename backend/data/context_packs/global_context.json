@@ -1,0 +1,560 @@
+{
+  "mall_id": "cenomi_mall_01",
+  "version": "1.0",
+
+  "mall_profile_summary": {
+    "name": "Cenomi Mall",
+    "city": "Riyadh, Saudi Arabia",
+    "tagline": "A premier shopping and entertainment destination on King Fahd Road with over 350 stores, world-class dining, VOX Cinemas, and family entertainment.",
+    "floors": ["Ground", "First", "Second", "Third"],
+    "key_zones": {
+      "North Wing (Ground)": "Fashion and lifestyle — Zara, H&M, Nike, Starbucks",
+      "East Wing (Ground)": "Beauty and jewelry — Sephora, L'azurde, Pandora, Bath & Body Works",
+      "South Wing (First)": "Electronics and premium — Apple Store",
+      "West Wing (First)": "Kids and home — Mothercare, Pottery Barn",
+      "Food Court (Second)": "30+ dining options — Al Romansiah, Cheesecake Factory, Shake Shack, Baskin-Robbins",
+      "Entertainment Zone (Third)": "VOX Cinemas (12 screens), Billy Beez, KidZania"
+    },
+    "highlights": [
+      "350+ stores across 4 floors",
+      "VOX Cinemas with IMAX, 4DX, Gold, and Kids screens",
+      "Cenomi Rewards loyalty program with 200+ participating stores",
+      "Free WiFi, valet parking, prayer rooms on every floor",
+      "Family rooms with baby changing on First floor"
+    ]
+  },
+
+  "operational_context": {
+    "hours": {
+      "weekday": "10:00-22:00",
+      "friday": "14:00-23:00 (most stores open after Dhuhr prayer)",
+      "saturday": "10:00-23:00",
+      "ramadan": "13:00-02:00",
+      "note": "Entertainment zone open until midnight on weekends. Starbucks opens at 07:00."
+    },
+    "parking": {
+      "capacity": "5,000 spaces across 3 basement levels",
+      "rate": "Free for first 4 hours, 10 SAR/hour after",
+      "valet": "Available at Main Entrance and South Entrance (30 SAR, free for Gold/Platinum members)",
+      "ev_charging": "Available on B1"
+    },
+    "accessibility": [
+      "Wheelchair ramps at all entrances",
+      "Accessible elevators and restrooms on every floor",
+      "Free wheelchair and stroller loans from Information Desk",
+      "Braille signage at elevators",
+      "Priority parking near entrances"
+    ],
+    "essential_services": {
+      "information_desk": "Ground floor, immediately inside Main Entrance — directions, lost & found, wheelchair/stroller loans",
+      "prayer_rooms": "Ground floor (West Wing) and Second floor (near Food Court) — separate areas for men and women",
+      "family_room": "First floor, West Wing — baby changing, nursing room",
+      "currency_exchange": "Ground floor, West Wing",
+      "atms": "Multiple locations across all floors"
+    },
+    "current_season": "Spring 2026",
+    "active_promotions": [
+      "Zara End of Season Sale — up to 50% off winter collection (until Mar 20)",
+      "Sephora Spring Beauty Sale — up to 20% off selected skincare & fragrance (Mar 15–31)",
+      "VOX Cinema Combo Deal — free combo with 2 Standard tickets on weekdays (until Apr 30)"
+    ],
+    "upcoming_events": [
+      "Spring Fashion Week — Mar 15–22, runway shows at Central Atrium, free entry",
+      "Eid Family Carnival — Mar 31–Apr 5, rides and entertainment in Entertainment Zone"
+    ]
+  },
+
+  "topic_blocks": {
+    "dining": {
+      "topic": "dining",
+      "summary": "Cenomi Mall offers 30+ dining options from quick bites to premium sit-down restaurants. The main Food Court is on the Second floor. Eataly (premium Italian) is separately located on Second floor West Wing.",
+      "entities": [
+        {
+          "name": "Al Romansiah",
+          "type": "casual_dining",
+          "cuisine": "Saudi / Arabian",
+          "price": "mid_range",
+          "location": "Second floor, Food Court",
+          "best_for": "families, groups, authentic local food",
+          "meal_time": "45 min",
+          "kids_menu": true,
+          "key_note": "Private dining available. Near prayer room."
+        },
+        {
+          "name": "The Cheesecake Factory",
+          "type": "casual_dining",
+          "cuisine": "American / International",
+          "price": "mid_range",
+          "location": "Second floor, Food Court",
+          "best_for": "families, groups, dessert lovers, indecisive groups (huge menu)",
+          "meal_time": "50 min",
+          "kids_menu": true,
+          "key_note": "250+ menu items. Signature cheesecakes are a must-try."
+        },
+        {
+          "name": "Eataly",
+          "type": "casual_dining (premium)",
+          "cuisine": "Italian",
+          "price": "premium",
+          "location": "Second floor, West Wing (separate from Food Court)",
+          "best_for": "couples, date night, special occasions, food enthusiasts",
+          "meal_time": "60 min",
+          "kids_menu": true,
+          "key_note": "Open kitchen, private dining. Italian grocery attached. Top romantic spot."
+        },
+        {
+          "name": "Shake Shack",
+          "type": "fast_casual",
+          "cuisine": "American / Burgers",
+          "price": "mid_range",
+          "location": "Second floor, Food Court (near Entertainment escalators)",
+          "best_for": "quick meals, pre/post movie, families with kids, teens",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Ideal before or after VOX Cinemas. Halal Angus beef."
+        },
+        {
+          "name": "Starbucks",
+          "type": "cafe",
+          "cuisine": "Coffee / Light bites",
+          "price": "mid_range",
+          "location": "Ground floor, North Wing (near Main Entrance)",
+          "best_for": "solo visitors, quick coffee, meeting point, WiFi",
+          "meal_time": "15-20 min",
+          "key_note": "Opens at 7 AM — earliest option. Good starting point."
+        },
+        {
+          "name": "Baskin-Robbins",
+          "type": "dessert",
+          "cuisine": "Ice cream / Dessert",
+          "price": "budget",
+          "location": "Second floor, Food Court (near Entertainment escalators)",
+          "best_for": "kids, after-movie treat, quick dessert, budget-friendly",
+          "meal_time": "10 min",
+          "kids_menu": true,
+          "key_note": "Near the escalators to Third floor. Birthday cakes available."
+        }
+      ],
+      "semantic_highlights": [
+        "Quick lunch: Shake Shack (20 min) or Starbucks (15 min)",
+        "Romantic dinner: Eataly (private dining, open kitchen)",
+        "Family dining: Al Romansiah (Saudi, private dining) or Cheesecake Factory (huge menu)",
+        "Post-movie treat: Baskin-Robbins (10 min, near cinema escalators)",
+        "Dessert: Cheesecake Factory cheesecakes or Baskin-Robbins ice cream"
+      ],
+      "concierge_tips": [
+        "For pre-movie meals, recommend Shake Shack — fast enough to fit before a showtime",
+        "For undecided groups, Cheesecake Factory works because the menu has something for everyone",
+        "Al Romansiah is near the prayer room — mention this for families during prayer times",
+        "Eataly is separate from the Food Court — guide couples there for a quieter experience"
+      ]
+    },
+
+    "gift": {
+      "topic": "gift_shopping",
+      "summary": "The East Wing on the Ground floor is Cenomi Mall's gift corridor — L'azurde (fine jewelry), Sephora (beauty), Pandora (charm jewelry), and Bath & Body Works (home fragrance) are all within walking distance of each other.",
+      "entities": [
+        {
+          "name": "L'azurde",
+          "type": "fine_jewelry",
+          "price": "premium",
+          "location": "Ground floor, East Wing",
+          "best_for": "girlfriend, wife, mother, bridal, anniversary",
+          "key_note": "Saudi brand. Engraving and custom designs. Bridal collection."
+        },
+        {
+          "name": "Sephora",
+          "type": "beauty_retail",
+          "price": "premium",
+          "location": "Ground floor, East Wing",
+          "best_for": "girlfriend, wife, friend, self-treat",
+          "key_note": "Pre-made gift sets. Beauty advisor service. Spring Sale active (20% off)."
+        },
+        {
+          "name": "Pandora",
+          "type": "fashion_jewelry",
+          "price": "mid_range",
+          "location": "Ground floor, East Wing",
+          "best_for": "girlfriend, friend, teen, personalized gift",
+          "key_note": "Charm customization. More accessible than fine jewelry. Quick to shop."
+        },
+        {
+          "name": "Bath & Body Works",
+          "type": "home_fragrance_body_care",
+          "price": "mid_range",
+          "location": "Ground floor, East Wing",
+          "best_for": "friend, coworker, corporate gift, last-minute",
+          "key_note": "Ready-wrapped gift sets. Mix-and-match deals. Seasonal collections."
+        },
+        {
+          "name": "Apple Store",
+          "type": "electronics",
+          "price": "premium",
+          "location": "First floor, South Wing",
+          "best_for": "husband, tech lover, teen, corporate gift",
+          "key_note": "AirPods for quick gift. Engraving available. Trade-in program."
+        }
+      ],
+      "semantic_highlights": [
+        "Girlfriend gift: L'azurde (jewelry) > Sephora (beauty) > Pandora (charms)",
+        "Wife gift: L'azurde (premium jewelry) or Sephora (luxury skincare)",
+        "Last-minute gift: Sephora gift sets, Pandora (quick pick), Bath & Body Works (ready-wrapped)",
+        "Budget gift: Bath & Body Works or Pandora",
+        "Tech gift: Apple Store (AirPods, accessories)",
+        "Gift corridor path: L'azurde → Pandora → Sephora → Bath & Body Works (all East Wing Ground floor)"
+      ],
+      "concierge_tips": [
+        "The East Wing is the gift express corridor — all key gift stores within 2-minute walk",
+        "For undecided gift buyers, start at Sephora (fragrance sampling helps narrow down)",
+        "Mention engraving/personalization at L'azurde and Pandora for extra thoughtfulness",
+        "Bath & Body Works is the best fallback for any budget — ready-wrapped sets need no wrapping"
+      ]
+    },
+
+    "family": {
+      "topic": "family_and_kids",
+      "summary": "Cenomi Mall is built for families. The First floor West Wing has kids and family stores (Mothercare, Family Room). The Third floor Entertainment Zone has Billy Beez, KidZania, and VOX Cinemas with a Kids screen.",
+      "entities": [
+        {
+          "name": "Mothercare",
+          "type": "kids_retail",
+          "price": "mid_range",
+          "location": "First floor, West Wing",
+          "best_for": "baby essentials, children's clothing, new parents",
+          "key_note": "Near Family Room. Car seat fitting service. Baby registry."
+        },
+        {
+          "name": "Billy Beez",
+          "type": "kids_entertainment",
+          "location": "Third floor, Entertainment Zone",
+          "best_for": "kids play (ages 2-12), supervised activity, burn energy",
+          "key_note": "Supervised play area. 1-2 hour sessions. Parents can shop while kids play."
+        },
+        {
+          "name": "KidZania",
+          "type": "kids_entertainment",
+          "location": "Third floor, Entertainment Zone",
+          "best_for": "role-play experiences (ages 4-14), educational fun, longer activity",
+          "key_note": "2-4 hour experience. Kids try real-world jobs. Highly supervised."
+        },
+        {
+          "name": "VOX Cinemas (Kids screen)",
+          "type": "kids_cinema",
+          "location": "Third floor, Entertainment Zone",
+          "best_for": "family movies, animated films, gentle cinema experience",
+          "key_note": "Dedicated kids auditorium. Currently showing Cosmic Explorers (G-rated)."
+        }
+      ],
+      "semantic_highlights": [
+        "Kids drop-off: Billy Beez (1-2 hrs) or KidZania (2-4 hrs) while parents shop",
+        "Family movie: Cosmic Explorers on Kids screen",
+        "Baby essentials: Mothercare (near Family Room for nursing/changing)",
+        "Family dining: Al Romansiah (kids menu, private dining) or Shake Shack (quick, milkshakes)",
+        "After-activity treat: Baskin-Robbins (near Entertainment escalators)"
+      ],
+      "concierge_tips": [
+        "Mention the Family Room (First floor, West Wing) proactively for parents with infants",
+        "Billy Beez for active play, KidZania for educational experiences — ask about kids' ages",
+        "Suggest Baskin-Robbins as a meeting point after kids' activities",
+        "Free stroller loans from Information Desk — mention early in the conversation"
+      ]
+    },
+
+    "movie": {
+      "topic": "cinema_and_movies",
+      "summary": "VOX Cinemas on the Third floor is a 12-screen multiplex with IMAX, 4DX, Gold (luxury), VIP, and Kids formats. Three movies currently showing.",
+      "entities": [
+        {
+          "name": "Desert Kingdoms",
+          "genre": "Action / Adventure / Family",
+          "rating": "PG",
+          "duration": "125 min",
+          "formats": ["IMAX", "Standard", "4DX"],
+          "showtimes": ["12:00", "15:30", "18:00", "21:00", "23:30"],
+          "best_for": "families, teens, adventure lovers",
+          "key_note": "New release. IMAX recommended for the best experience."
+        },
+        {
+          "name": "Starlight Romance",
+          "genre": "Romance / Drama",
+          "rating": "PG-13",
+          "duration": "110 min",
+          "formats": ["Standard", "Gold"],
+          "showtimes": ["13:00", "16:30", "19:30", "22:00"],
+          "best_for": "couples, date night",
+          "key_note": "New release. Gold screen for a luxury date night experience."
+        },
+        {
+          "name": "Cosmic Explorers",
+          "genre": "Animation / Sci-Fi / Family",
+          "rating": "G",
+          "duration": "95 min",
+          "formats": ["Standard", "Kids", "IMAX"],
+          "showtimes": ["10:30", "13:00", "15:30", "17:30"],
+          "best_for": "young children, families",
+          "key_note": "Kids screen available for a gentler experience."
+        }
+      ],
+      "semantic_highlights": [
+        "Date night: Starlight Romance on Gold screen → Eataly dinner",
+        "Family: Cosmic Explorers on Kids screen → Shake Shack → Baskin-Robbins",
+        "Blockbuster: Desert Kingdoms on IMAX for the best experience",
+        "Weekday deal: 2 Standard tickets + free combo (popcorn + 2 drinks)"
+      ],
+      "concierge_tips": [
+        "Gold screens are the premium couples option — suggest for date nights",
+        "Kids screen has softer sound and lighting — best for young children",
+        "Shake Shack on Second floor is 5 minutes from cinema — perfect pre-movie meal",
+        "Suggest Baskin-Robbins after the movie as a sweet ending",
+        "Weekday combo deal adds great value — mention it for budget-conscious visitors"
+      ]
+    },
+
+    "quick_visit": {
+      "topic": "quick_visit",
+      "summary": "For visitors with limited time, Cenomi Mall's Ground floor and Second floor Food Court offer the fastest experiences. Most quick options are near the Main Entrance.",
+      "entities": [
+        {
+          "name": "Starbucks",
+          "location": "Ground floor, North Wing",
+          "time_needed": "15 min",
+          "best_for": "coffee stop, light bite"
+        },
+        {
+          "name": "Shake Shack",
+          "location": "Second floor, Food Court",
+          "time_needed": "20 min",
+          "best_for": "quick lunch, burger"
+        },
+        {
+          "name": "Baskin-Robbins",
+          "location": "Second floor, Food Court",
+          "time_needed": "10 min",
+          "best_for": "quick dessert"
+        },
+        {
+          "name": "Sephora (gift sets)",
+          "location": "Ground floor, East Wing",
+          "time_needed": "15 min",
+          "best_for": "quick gift pickup"
+        },
+        {
+          "name": "Bath & Body Works",
+          "location": "Ground floor, East Wing",
+          "time_needed": "10 min",
+          "best_for": "last-minute gift (ready-wrapped)"
+        }
+      ],
+      "semantic_highlights": [
+        "Fastest meal: Baskin-Robbins (10 min) or Starbucks (15 min)",
+        "Fastest gift: Bath & Body Works gift set (10 min) or Sephora set (15 min)",
+        "Quick lunch: Shake Shack (20 min)"
+      ],
+      "concierge_tips": [
+        "Direct quick visitors to the Ground floor — most accessible from Main Entrance",
+        "For food, Second floor Food Court has the highest concentration of quick options",
+        "Mention exact floor and zone so they can navigate directly"
+      ]
+    },
+
+    "services": {
+      "topic": "services_and_facilities",
+      "summary": "Cenomi Mall provides comprehensive visitor services including information desk, valet, prayer rooms, family facilities, and accessibility support.",
+      "entities": [
+        {
+          "name": "Information Desk",
+          "location": "Ground floor, North Wing (inside Main Entrance)",
+          "services": "Directions, lost & found, wheelchair/stroller loans, general help"
+        },
+        {
+          "name": "Valet Parking",
+          "location": "Main Entrance and South Entrance",
+          "cost": "30 SAR (free for Gold/Platinum members)"
+        },
+        {
+          "name": "Prayer Rooms",
+          "locations": "Ground floor (West Wing) and Second floor (near Food Court)",
+          "note": "Separate areas for men and women, ablution facilities"
+        },
+        {
+          "name": "Family Room",
+          "location": "First floor, West Wing",
+          "services": "Baby changing, nursing room, child rest area"
+        },
+        {
+          "name": "Currency Exchange",
+          "location": "Ground floor, West Wing",
+          "hours": "10:00-21:00"
+        }
+      ],
+      "concierge_tips": [
+        "Proactively mention prayer rooms for visitors during prayer times",
+        "Mention Family Room for parents with infants without being asked",
+        "Lost & Found is at the Information Desk — mention if someone seems distressed",
+        "Wheelchair and stroller loans are free — useful proactive mention for elderly or families"
+      ]
+    }
+  },
+
+  "events_and_offers": [
+    {
+      "type": "event",
+      "title": "Spring Fashion Week",
+      "dates": "Mar 15-22, 2026",
+      "location": "Central Atrium, Ground floor",
+      "description": "Runway shows, exclusive discounts at Zara/H&M/Nike, styling workshops",
+      "audience": "fashion lovers, shoppers",
+      "free": true
+    },
+    {
+      "type": "event",
+      "title": "Eid Family Carnival",
+      "dates": "Mar 31 - Apr 5, 2026",
+      "location": "Entertainment Zone, Third floor",
+      "description": "Carnival rides, face painting, live performances, character meet-and-greets",
+      "audience": "families, kids",
+      "free": true
+    },
+    {
+      "type": "offer",
+      "title": "Zara End of Season Sale",
+      "valid": "Until Mar 20, 2026",
+      "discount": "Up to 50% off winter collection",
+      "store": "Zara (Ground floor, North Wing)"
+    },
+    {
+      "type": "offer",
+      "title": "Sephora Spring Beauty Sale",
+      "valid": "Mar 15-31, 2026",
+      "discount": "Up to 20% off selected skincare & fragrance",
+      "store": "Sephora (Ground floor, East Wing)"
+    },
+    {
+      "type": "offer",
+      "title": "VOX Cinema Combo Deal",
+      "valid": "Until Apr 30, 2026",
+      "discount": "Free popcorn + 2 drinks with 2 Standard tickets",
+      "conditions": "Weekdays only"
+    }
+  ],
+
+  "playbooks": [
+    {
+      "id": "pb-family-visit",
+      "scenario": "family_visit_plan",
+      "trigger": "family, kids, children",
+      "approach": "Shopping (Mothercare, H&M) → Entertainment (Billy Beez/KidZania/cinema) → Dining (Al Romansiah/Shake Shack) → Treat (Baskin-Robbins)"
+    },
+    {
+      "id": "pb-date-plan",
+      "scenario": "date_plan",
+      "trigger": "date, couples, romantic",
+      "approach": "Browse jewelry (L'azurde/Pandora) → Dinner (Eataly) → Movie (Gold screen, Starlight Romance)"
+    },
+    {
+      "id": "pb-gift-girlfriend",
+      "scenario": "gift_for_girlfriend",
+      "trigger": "gift for girlfriend, present for her",
+      "approach": "L'azurde (premium) > Sephora (beauty) > Pandora (accessible) — all in East Wing gift corridor"
+    },
+    {
+      "id": "pb-movie-food",
+      "scenario": "movie_plus_food",
+      "trigger": "movie and food, dinner and movie",
+      "approach": "Shake Shack before → Movie → Baskin-Robbins after. Couples: Eataly → Gold screen."
+    },
+    {
+      "id": "pb-quick-lunch",
+      "scenario": "quick_lunch",
+      "trigger": "quick meal, in a hurry, fast food",
+      "approach": "Shake Shack (20 min) or Starbucks (15 min) or Baskin-Robbins (10 min)"
+    },
+    {
+      "id": "pb-budget-family",
+      "scenario": "budget_family_outing",
+      "trigger": "budget, affordable, cheap",
+      "approach": "H&M + Zara sale → Shake Shack → Free events. Mention: free parking 4 hrs, Cenomi Rewards."
+    },
+    {
+      "id": "pb-luxury-shopping",
+      "scenario": "luxury_shopping_plan",
+      "trigger": "luxury, premium, high-end",
+      "approach": "L'azurde → Sephora → Apple Store → Eataly dinner. Mention valet, VIP cinema."
+    },
+    {
+      "id": "pb-last-minute-gift",
+      "scenario": "last_minute_gift",
+      "trigger": "quick gift, last minute, rush",
+      "approach": "East Wing express: Sephora gift sets → Pandora → Bath & Body Works (all Ground floor)"
+    },
+    {
+      "id": "pb-anniversary",
+      "scenario": "anniversary_plan",
+      "trigger": "anniversary, wedding anniversary",
+      "approach": "L'azurde jewelry → Eataly private dining → VOX Gold screen"
+    },
+    {
+      "id": "pb-kid-movie-food",
+      "scenario": "kid_friendly_movie_plus_food",
+      "trigger": "family movie, kids cinema",
+      "approach": "Cosmic Explorers (Kids screen) → Shake Shack (before) → Baskin-Robbins (after)"
+    },
+    {
+      "id": "pb-dessert-combo",
+      "scenario": "shopping_plus_dessert_combo",
+      "trigger": "shopping and dessert, sweet treat",
+      "approach": "Shopping first → Baskin-Robbins or Cheesecake Factory cheesecake as reward"
+    },
+    {
+      "id": "pb-child-activity-parents",
+      "scenario": "child_activity_while_parents_shop",
+      "trigger": "kids play, drop off kids, parents shop",
+      "approach": "Kids: Billy Beez (1-2 hrs) or KidZania (2-4 hrs). Parents shop freely. Meet at Baskin-Robbins."
+    }
+  ],
+
+  "contextual_reasoning_hints": [
+    "When a user mentions a specific floor, prioritize entities on that floor or adjacent floors",
+    "If the user mentions prayer time or prayer room, proactively mention the nearest prayer room",
+    "When recommending dining, consider meal time (quick vs. sit-down) based on the conversation context",
+    "For gift recommendations, always ask about the recipient if not specified — gender, age, interests, budget",
+    "If a user seems to be a tourist, mention currency exchange, WiFi, and prayer room locations proactively",
+    "When suggesting a movie, consider the user's group composition — families get PG options, couples get Gold screen suggestions",
+    "Current promotions and offers should be mentioned when relevant — they add value and show awareness",
+    "The East Wing is the gift corridor — create walking paths there for gift shoppers",
+    "The Food Court to Entertainment Zone transition (Second → Third floor) is natural — use it for movie + food plans",
+    "For budget-conscious visitors, mention free parking (first 4 hours), current sales, and Cenomi Rewards",
+    "During Ramadan, mall hours shift to 13:00-02:00 — proactively clarify if a user asks about timing",
+    "If a user asks about something the mall doesn't have, honestly say so and suggest the Information Desk or an alternative",
+    "Billy Beez and KidZania are supervised — this is important context for parents considering drop-off",
+    "Eataly's separate location from the Food Court makes it quieter — use this as a selling point for couples"
+  ],
+
+  "concierge_guidelines": {
+    "persona_name": "Cenomi Concierge",
+    "tone": "friendly, knowledgeable, helpful, professional",
+    "language": "English (with Arabic cultural awareness)",
+    "response_style": "Answer first, then elaborate. Be concise but thorough. Use a warm, conversational tone like a knowledgeable friend.",
+    "grounding_rules": [
+      "Always base answers on verified mall information from this context pack",
+      "Never invent store names, locations, hours, or prices",
+      "If unsure, say so honestly and suggest the Information Desk",
+      "Respect cultural context and local customs (prayer times, Ramadan, halal)",
+      "Mention specific locations (floor, zone, unit) to help visitors navigate"
+    ],
+    "cultural_notes": [
+      "Saudi Arabia observes prayer times — be sensitive about timing recommendations",
+      "All dining is halal — this can be stated when relevant for international visitors",
+      "Friday opening times are later due to Friday prayer — clarify when asked about Friday plans",
+      "Ramadan hours are significantly different — always clarify if the visitor is asking during Ramadan",
+      "Gender-separated prayer rooms are standard — mention this proactively"
+    ],
+    "do_not": [
+      "Do not recommend alcohol or non-halal dining (not applicable in SA)",
+      "Do not make assumptions about visitor gender or family structure",
+      "Do not share personal opinions about brands — present options objectively",
+      "Do not provide outdated prices or hours — qualify with 'as of our latest information'",
+      "Do not ignore accessibility needs — mention wheelchair access proactively when relevant"
+    ]
+  }
+}

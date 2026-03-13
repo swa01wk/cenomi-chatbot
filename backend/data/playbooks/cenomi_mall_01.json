@@ -1,0 +1,491 @@
+[
+  {
+    "playbook_id": "pb-family-visit",
+    "scenario": "family_visit_plan",
+    "description": "A full family visit plan covering shopping, dining, and entertainment for families with children.",
+    "trigger_conditions": [
+      "User mentions family, kids, or children",
+      "User asks for things to do as a family",
+      "User mentions visiting with spouse and kids",
+      "Detected intent: family_outing, family_plan"
+    ],
+    "preferred_entity_types": ["store", "dining", "cinema", "service"],
+    "preferred_semantic_tags": [
+      "family_friendly", "kid_friendly", "child_activity",
+      "family_entertainment", "has_kids_menu"
+    ],
+    "ranking_biases": {
+      "family_friendly": 1.0,
+      "kid_friendly": 0.9,
+      "child_activity": 0.85,
+      "has_kids_menu": 0.8,
+      "near_kids_zone": 0.7
+    },
+    "fallback_rules": [
+      "If no kid-friendly dining found, suggest casual dining with broad menus",
+      "If no kids entertainment available, suggest cinema (Kids screen)",
+      "Always include at least one dining option and one entertainment option"
+    ],
+    "response_shape_hint": "Provide a structured itinerary: 1) Shopping stops, 2) Dining recommendation, 3) Entertainment/activity, 4) Practical tips (family room, stroller, prayer times)",
+    "shortlist_size_hint": 5,
+    "next_step_hint": "Ask if they'd like to add a movie or specific shopping categories",
+    "do_not_include": [
+      "Luxury-only stores without family appeal",
+      "Fine dining restaurants without kids menus",
+      "Adult-oriented entertainment"
+    ],
+    "concierge_reasoning_notes": "Think like a parent planning a half-day mall visit. Start with practical needs (baby essentials at Mothercare), move to entertainment (Billy Beez or KidZania for kids, browse stores while kids play), then dining (family-friendly with kids menu), and end with a treat (Baskin-Robbins). Mention prayer rooms, family rooms, and stroller availability proactively."
+  },
+  {
+    "playbook_id": "pb-solo-visit",
+    "scenario": "solo_visit_plan",
+    "description": "A relaxed solo visit plan for individual shoppers — browsing, coffee, and personal shopping.",
+    "trigger_conditions": [
+      "User visiting alone",
+      "No mention of companions or family",
+      "User wants to browse or explore",
+      "Detected intent: solo_visit, personal_shopping"
+    ],
+    "preferred_entity_types": ["store", "dining"],
+    "preferred_semantic_tags": [
+      "solo_friendly", "solo_browsing", "coffee_spot",
+      "self_treat", "trendy"
+    ],
+    "ranking_biases": {
+      "solo_friendly": 1.0,
+      "coffee_spot": 0.7,
+      "self_treat": 0.65,
+      "trendy": 0.6
+    },
+    "fallback_rules": [
+      "Default to popular fashion stores and a coffee recommendation",
+      "Suggest browsing path through well-known brands"
+    ],
+    "response_shape_hint": "Suggest a relaxed itinerary: coffee first, then browsing route through key zones, ending with a treat or meal",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about specific interests (fashion, electronics, beauty) to narrow recommendations",
+    "do_not_include": [
+      "Kids-only stores",
+      "Group-only activities"
+    ],
+    "concierge_reasoning_notes": "Solo visitors appreciate efficiency and discovery. Start with Starbucks near the entrance to settle in. Suggest a walking route through the zones that match their interests. Mention current sales and new arrivals. WiFi availability is useful for solo visitors."
+  },
+  {
+    "playbook_id": "pb-anniversary",
+    "scenario": "anniversary_plan",
+    "description": "A curated anniversary experience combining luxury shopping, romantic dining, and possibly cinema.",
+    "trigger_conditions": [
+      "User mentions anniversary, wedding anniversary",
+      "User planning a special couples outing",
+      "Detected intent: anniversary, celebration, romantic"
+    ],
+    "preferred_entity_types": ["store", "dining", "cinema"],
+    "preferred_semantic_tags": [
+      "romantic", "special_occasion", "premium", "luxury",
+      "date_spot", "elegant", "gift_friendly"
+    ],
+    "ranking_biases": {
+      "romantic": 1.0,
+      "special_occasion": 0.95,
+      "premium": 0.85,
+      "elegant": 0.8,
+      "date_spot": 0.9,
+      "gift_friendly": 0.7
+    },
+    "fallback_rules": [
+      "If no premium jewelry available, suggest beauty/fragrance as gift alternative",
+      "If no fine dining available, suggest best casual dining with private seating",
+      "Always include a gift component and a dining component"
+    ],
+    "response_shape_hint": "Present as a curated experience: 1) Gift shopping (jewelry/beauty), 2) Romantic dinner, 3) Optional movie (Gold screen). Add a heartfelt concierge touch.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about budget range and whether they'd like to add cinema",
+    "do_not_include": [
+      "Budget stores",
+      "Fast food / quick service",
+      "Kids-focused entities",
+      "Practical/utilitarian stores"
+    ],
+    "concierge_reasoning_notes": "An anniversary plan should feel curated and special. Lead with L'azurde for jewelry (Saudi craftsmanship angle), then Eataly for romantic Italian dinner with private dining. Suggest VOX Gold screen for a movie if time allows. Mention Sephora as an add-on gift. The path should flow naturally: East Wing jewelry → Second floor dining → Third floor cinema."
+  },
+  {
+    "playbook_id": "pb-gift-girlfriend",
+    "scenario": "gift_for_girlfriend",
+    "description": "Gift recommendations for someone shopping for their girlfriend — jewelry, beauty, fashion accessories.",
+    "trigger_conditions": [
+      "User says 'gift for girlfriend', 'surprise for her', 'present for my partner'",
+      "User asks what to buy for a woman they're dating",
+      "Detected intent: gift, girlfriend, romantic_gift"
+    ],
+    "preferred_entity_types": ["store"],
+    "preferred_semantic_tags": [
+      "girlfriend_gift", "gift_friendly", "romantic",
+      "premium", "personalized"
+    ],
+    "ranking_biases": {
+      "girlfriend_gift": 1.0,
+      "gift_friendly": 0.9,
+      "premium": 0.7,
+      "personalized": 0.65,
+      "romantic": 0.6
+    },
+    "fallback_rules": [
+      "If user budget is limited, suggest Pandora over L'azurde",
+      "If user unsure about jewelry, default to Sephora fragrance",
+      "Always offer a dessert add-on as a bonus suggestion"
+    ],
+    "response_shape_hint": "Present 2-3 gift options ranked by thoughtfulness, with price context. Add a bonus suggestion (dessert/coffee afterward).",
+    "shortlist_size_hint": 3,
+    "next_step_hint": "Ask about her interests or budget to refine",
+    "do_not_include": [
+      "Kids stores",
+      "Home furnishing (too impersonal for girlfriend)",
+      "Electronics (unless specifically asked)",
+      "Fast food"
+    ],
+    "concierge_reasoning_notes": "Jewelry is the top recommendation (L'azurde for premium, Pandora for accessible). Beauty/fragrance from Sephora is a strong second. Bath & Body Works as a budget-friendly alternative. Suggest engraving or personalization when available. Add a dessert stop to round out the experience. The East Wing has all three jewelry/beauty options close together — create a gift corridor path."
+  },
+  {
+    "playbook_id": "pb-gift-family",
+    "scenario": "gift_for_family",
+    "description": "Gift recommendations for someone shopping for family members — parents, siblings, children.",
+    "trigger_conditions": [
+      "User says 'gift for family', 'present for my parents', 'gift for my kids'",
+      "User shopping for multiple family members",
+      "Detected intent: gift, family_gift"
+    ],
+    "preferred_entity_types": ["store"],
+    "preferred_semantic_tags": [
+      "gift_friendly", "child_gift", "parent_gift",
+      "family_friendly", "practical_shopping"
+    ],
+    "ranking_biases": {
+      "gift_friendly": 1.0,
+      "child_gift": 0.8,
+      "parent_gift": 0.75,
+      "practical_shopping": 0.5
+    },
+    "fallback_rules": [
+      "Segment suggestions by family member (kids, wife/husband, parents)",
+      "If unsure about ages, suggest universal gifts (fragrance, electronics)"
+    ],
+    "response_shape_hint": "Organize by family member: 'For the kids: ...', 'For your wife/husband: ...', 'For parents: ...'",
+    "shortlist_size_hint": 5,
+    "next_step_hint": "Ask about specific family members and their ages/interests",
+    "do_not_include": [
+      "Romantic-only items when context is family",
+      "Adult entertainment"
+    ],
+    "concierge_reasoning_notes": "Think about gift diversity. Kids: toys/games from KidZania shop or Mothercare. Wife: Sephora or L'azurde. Husband: Apple Store or Nike. Parents: Pottery Barn or Bath & Body Works. Create a shopping route that covers multiple zones efficiently."
+  },
+  {
+    "playbook_id": "pb-movie-food",
+    "scenario": "movie_plus_food",
+    "description": "Movie plus food plan — dining before or after a cinema visit.",
+    "trigger_conditions": [
+      "User wants to watch a movie and eat",
+      "User asks about cinema and restaurants",
+      "User mentions 'movie night', 'dinner and a movie'",
+      "Detected intent: movie, cinema, movie_food_combo"
+    ],
+    "preferred_entity_types": ["cinema", "movie", "dining"],
+    "preferred_semantic_tags": [
+      "near_cinema", "before_movie", "after_movie",
+      "quick_bite", "dessert_spot"
+    ],
+    "ranking_biases": {
+      "near_cinema": 1.0,
+      "before_movie": 0.9,
+      "after_movie": 0.85,
+      "quick_bite": 0.8
+    },
+    "fallback_rules": [
+      "If no near-cinema dining, suggest Food Court options",
+      "Always include a dessert option as post-movie add-on",
+      "If timing is tight, prioritize quick service over sit-down"
+    ],
+    "response_shape_hint": "Present as a plan: 1) Movie suggestion with showtimes, 2) Food before/after based on timing, 3) Dessert add-on. Include format options.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about movie preferences, timing, and whether they want quick or sit-down dining",
+    "do_not_include": [
+      "Stores unrelated to food or entertainment",
+      "Fine dining if timing is tight"
+    ],
+    "concierge_reasoning_notes": "Think about the flow: Food Court is on Second floor, cinema on Third. Shake Shack is ideal for pre-movie (20 min meal). For post-movie, Cheesecake Factory if time allows, or Baskin-Robbins for a quick treat. Mention current movies and suggest formats. For couples: Gold screen + Eataly. For families: Standard/Kids screen + Shake Shack + Baskin-Robbins."
+  },
+  {
+    "playbook_id": "pb-kid-movie-food",
+    "scenario": "kid_friendly_movie_plus_food",
+    "description": "Family movie outing with kid-friendly food options.",
+    "trigger_conditions": [
+      "User wants a family movie outing with kids",
+      "User mentions kids and movies together",
+      "Detected intent: family_movie, kids_cinema"
+    ],
+    "preferred_entity_types": ["cinema", "movie", "dining"],
+    "preferred_semantic_tags": [
+      "kid_friendly", "family_friendly", "near_cinema",
+      "quick_bite", "dessert_spot", "has_kids_menu"
+    ],
+    "ranking_biases": {
+      "kid_friendly": 1.0,
+      "family_friendly": 0.95,
+      "has_kids_menu": 0.9,
+      "near_cinema": 0.85,
+      "dessert_spot": 0.7
+    },
+    "fallback_rules": [
+      "Prioritize movies rated G or PG",
+      "Always include a dessert option for kids",
+      "If no kids' movies showing, suggest the Kids screen format for any PG movie"
+    ],
+    "response_shape_hint": "Present as a family plan: 1) Kid-appropriate movie, 2) Pre/post meal with kids menu, 3) Dessert treat. Mention Kids screen option.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about kids' ages and food preferences",
+    "do_not_include": [
+      "PG-13 or R-rated movies",
+      "Fine dining without kids menus",
+      "Adult-oriented venues"
+    ],
+    "concierge_reasoning_notes": "For families with kids: Cosmic Explorers (animated, G-rated) on the Kids screen is the top pick. Shake Shack before the movie (kids love milkshakes, 20-min meal). Baskin-Robbins after for ice cream. If more time, suggest Billy Beez or KidZania before the movie to burn energy. Mention the Family Room for younger kids."
+  },
+  {
+    "playbook_id": "pb-quick-lunch",
+    "scenario": "quick_lunch",
+    "description": "Fast lunch recommendation for visitors with limited time.",
+    "trigger_conditions": [
+      "User wants a quick meal or lunch",
+      "User mentions being in a hurry",
+      "User asks 'where can I eat quickly'",
+      "Detected intent: quick_food, fast_lunch, hungry"
+    ],
+    "preferred_entity_types": ["dining"],
+    "preferred_semantic_tags": [
+      "quick_bite", "fast_casual", "coffee_spot"
+    ],
+    "ranking_biases": {
+      "quick_bite": 1.0,
+      "fast_casual": 0.9,
+      "near_food_court": 0.7
+    },
+    "fallback_rules": [
+      "If no quick-service options, suggest cafe with light bites",
+      "Prioritize shortest average_meal_time"
+    ],
+    "response_shape_hint": "Give 2-3 quick options with estimated meal times. Be direct — they're in a hurry.",
+    "shortlist_size_hint": 3,
+    "next_step_hint": "Ask about cuisine preference or location in the mall",
+    "do_not_include": [
+      "Sit-down restaurants with long meal times",
+      "Fine dining",
+      "Non-food entities"
+    ],
+    "concierge_reasoning_notes": "Speed is key. Shake Shack (20 min), Starbucks with a sandwich (15 min), Baskin-Robbins for a quick sweet fix (10 min). Mention which floor they're on and direct to the nearest option. Food Court on Second floor has the most concentrated options."
+  },
+  {
+    "playbook_id": "pb-dessert-combo",
+    "scenario": "shopping_plus_dessert_combo",
+    "description": "Shopping trip with a dessert or sweet treat reward.",
+    "trigger_conditions": [
+      "User mentions wanting dessert after shopping",
+      "User asks about sweet treats or ice cream",
+      "User wants to combine shopping with a cafe/dessert stop",
+      "Detected intent: shopping_dessert, sweet_treat"
+    ],
+    "preferred_entity_types": ["store", "dining"],
+    "preferred_semantic_tags": [
+      "dessert_spot", "coffee_spot", "self_treat",
+      "quick_bite"
+    ],
+    "ranking_biases": {
+      "dessert_spot": 1.0,
+      "coffee_spot": 0.7,
+      "self_treat": 0.5
+    },
+    "fallback_rules": [
+      "If no dessert-specific outlet, suggest Cheesecake Factory for their signature desserts",
+      "Coffee shops work as a dessert alternative"
+    ],
+    "response_shape_hint": "Suggest shopping first, then dessert as a reward. 'After you finish browsing [stores], head to [dessert spot] for a treat.'",
+    "shortlist_size_hint": 3,
+    "next_step_hint": "Ask what they're shopping for to tailor the store recommendations",
+    "do_not_include": [
+      "Non-dessert dining",
+      "Services or facilities"
+    ],
+    "concierge_reasoning_notes": "Frame the dessert as a reward for shopping. Baskin-Robbins for ice cream, Cheesecake Factory for cheesecake, Starbucks for a coffee and pastry. Consider proximity — if shopping in East Wing (beauty), Starbucks is nearby in North Wing. If heading upstairs, Baskin-Robbins is in the Food Court."
+  },
+  {
+    "playbook_id": "pb-date-plan",
+    "scenario": "date_plan",
+    "description": "A complete date plan combining shopping, dining, and entertainment for couples.",
+    "trigger_conditions": [
+      "User mentions a date, date night, or outing with partner",
+      "User asking for couple-friendly recommendations",
+      "Detected intent: date, couples_outing, romantic"
+    ],
+    "preferred_entity_types": ["store", "dining", "cinema"],
+    "preferred_semantic_tags": [
+      "date_spot", "romantic", "couple_friendly",
+      "premium", "elegant"
+    ],
+    "ranking_biases": {
+      "date_spot": 1.0,
+      "romantic": 0.95,
+      "couple_friendly": 0.9,
+      "premium": 0.7,
+      "elegant": 0.65
+    },
+    "fallback_rules": [
+      "If no romantic dining, suggest upscale casual options",
+      "Cinema Gold screen is the premium couples option",
+      "Include a browsing suggestion (jewelry, beauty) before dinner"
+    ],
+    "response_shape_hint": "Present as a curated date experience: 1) Start with browsing (jewelry/beauty), 2) Dinner at a romantic spot, 3) Optional movie (Gold screen). Keep it elegant.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about budget, time available, and whether they want cinema included",
+    "do_not_include": [
+      "Kids stores and activities",
+      "Fast food / quick service",
+      "Budget-only options",
+      "Practical/utilitarian stores"
+    ],
+    "concierge_reasoning_notes": "A great date plan flows naturally. Start at the East Wing (Pandora or L'azurde to browse jewelry), walk to Eataly for Italian dinner (romantic ambiance, open kitchen), then up to VOX Gold for a movie (Starlight Romance is the couples pick). If they skip cinema, suggest a coffee at Starbucks to end the evening. Mention current offers that add value."
+  },
+  {
+    "playbook_id": "pb-budget-family",
+    "scenario": "budget_family_outing",
+    "description": "Family outing plan optimized for budget-conscious visitors.",
+    "trigger_conditions": [
+      "User mentions budget, affordable, or not wanting to spend too much",
+      "Family context with cost sensitivity",
+      "Detected intent: budget_shopping, affordable_family"
+    ],
+    "preferred_entity_types": ["store", "dining", "cinema"],
+    "preferred_semantic_tags": [
+      "budget", "family_friendly", "kid_friendly",
+      "quick_bite", "practical_shopping"
+    ],
+    "ranking_biases": {
+      "budget": 1.0,
+      "family_friendly": 0.9,
+      "kid_friendly": 0.8,
+      "practical_shopping": 0.7
+    },
+    "fallback_rules": [
+      "Prefer budget and mid_range over premium/luxury",
+      "Highlight current sales and promotions",
+      "Mention free activities (Billy Beez play areas, mall events)"
+    ],
+    "response_shape_hint": "Lead with current sales, budget-friendly stores, then affordable dining. Highlight free activities and savings tips.",
+    "shortlist_size_hint": 5,
+    "next_step_hint": "Ask what they need most — clothing, food, or entertainment",
+    "do_not_include": [
+      "Luxury stores",
+      "Premium dining",
+      "Expensive entertainment options"
+    ],
+    "concierge_reasoning_notes": "Budget families appreciate deals. Lead with Zara's End of Season Sale (up to 50% off) and H&M's everyday affordability. Shake Shack or Food Court for meals. Baskin-Robbins for a cheap treat. VOX weekday combo deal saves on cinema. Mention free mall events (Spring Fashion Week, Eid Carnival). Free parking for first 4 hours. Cenomi Rewards points for future savings."
+  },
+  {
+    "playbook_id": "pb-luxury-shopping",
+    "scenario": "luxury_shopping_plan",
+    "description": "Premium shopping experience for luxury-oriented visitors.",
+    "trigger_conditions": [
+      "User wants premium or luxury shopping",
+      "User asks about high-end brands",
+      "User mentions wanting the best quality",
+      "Detected intent: luxury, premium_shopping, high_end"
+    ],
+    "preferred_entity_types": ["store", "dining"],
+    "preferred_semantic_tags": [
+      "premium", "luxury", "elegant", "upscale",
+      "special_occasion"
+    ],
+    "ranking_biases": {
+      "luxury": 1.0,
+      "premium": 0.95,
+      "elegant": 0.8,
+      "upscale": 0.75
+    },
+    "fallback_rules": [
+      "If few luxury options, include top premium stores",
+      "Pair with premium dining for a complete experience",
+      "Mention valet parking and VIP services"
+    ],
+    "response_shape_hint": "Present as a curated luxury experience. Mention valet, VIP services, and premium dining to complete the visit.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about specific categories (jewelry, fashion, beauty, home)",
+    "do_not_include": [
+      "Budget stores",
+      "Fast food",
+      "Quick-service dining"
+    ],
+    "concierge_reasoning_notes": "Luxury shoppers want a curated, unhurried experience. L'azurde for jewelry, Sephora for beauty, Apple Store for tech, Pottery Barn for home. Dining at Eataly. Mention valet parking (free for Platinum members), and suggest VIP cinema if they want entertainment. The East Wing is the premium corridor — build the route there."
+  },
+  {
+    "playbook_id": "pb-last-minute-gift",
+    "scenario": "last_minute_gift",
+    "description": "Quick gift recommendations for someone in a hurry to find a present.",
+    "trigger_conditions": [
+      "User mentions being in a rush for a gift",
+      "User says 'quick gift', 'last minute present', 'need a gift now'",
+      "Detected intent: urgent_gift, quick_shopping"
+    ],
+    "preferred_entity_types": ["store"],
+    "preferred_semantic_tags": [
+      "gift_friendly", "quick_visit", "personalized"
+    ],
+    "ranking_biases": {
+      "gift_friendly": 1.0,
+      "quick_visit": 0.8
+    },
+    "fallback_rules": [
+      "Default to Sephora gift sets (ready to go) or Pandora (quick pick)",
+      "Bath & Body Works for budget-friendly ready-wrapped sets",
+      "Mention gift wrapping services if available"
+    ],
+    "response_shape_hint": "Be direct and actionable. Give 2-3 options with exact locations and what to grab. Speed is the priority.",
+    "shortlist_size_hint": 3,
+    "next_step_hint": "Ask about recipient (man/woman, age) and budget",
+    "do_not_include": [
+      "Custom or made-to-order items",
+      "Stores far from entrances",
+      "Anything requiring long browsing"
+    ],
+    "concierge_reasoning_notes": "Speed and convenience. Sephora has pre-made gift sets (Ground floor, East Wing — close to entrance). Pandora for jewelry (same wing). Bath & Body Works for budget option (same wing). Apple AirPods for a tech gift (First floor, quick grab). The East Wing is the gift express corridor — send them there. Mention exact store locations and what to ask for."
+  },
+  {
+    "playbook_id": "pb-child-activity-parents",
+    "scenario": "child_activity_while_parents_shop",
+    "description": "Drop kids at an activity center while parents shop freely.",
+    "trigger_conditions": [
+      "User wants to shop while kids are entertained",
+      "User asks about kids play areas or drop-off activities",
+      "Detected intent: kids_activity, parents_free_time"
+    ],
+    "preferred_entity_types": ["store", "dining"],
+    "preferred_semantic_tags": [
+      "child_activity", "family_entertainment",
+      "kid_friendly", "solo_browsing"
+    ],
+    "ranking_biases": {
+      "child_activity": 1.0,
+      "family_entertainment": 0.9,
+      "solo_browsing": 0.6
+    },
+    "fallback_rules": [
+      "If no dedicated kids zone, suggest cinema Kids screen as supervised entertainment",
+      "Pair with parent-friendly shopping near the kids zone",
+      "Mention time estimates for activities"
+    ],
+    "response_shape_hint": "Present as a two-track plan: 1) Kids activity with timing/details, 2) Parent shopping suggestions in the same area or nearby floors.",
+    "shortlist_size_hint": 4,
+    "next_step_hint": "Ask about kids' ages and how long they want to shop",
+    "do_not_include": [
+      "Unsupervised activities for young children",
+      "Adult-only venues for the kids track"
+    ],
+    "concierge_reasoning_notes": "Billy Beez (Third floor) has supervised play for kids — typically 1-2 hours. KidZania offers role-play experiences (2-4 hours). While kids are busy, parents can shop freely. If kids are in the Entertainment Zone (Third floor), parents can quickly go to Second floor (dining/Food Court) or First floor (electronics, home). Suggest meeting back at Baskin-Robbins for a treat after."
+  }
+]

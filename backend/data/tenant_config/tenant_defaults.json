@@ -1,0 +1,89 @@
+{
+  "config_version": "1.0.0",
+  "description": "Global defaults for all Cenomi malls. Override per-mall via <mall_id>.json.",
+
+  "tone": {
+    "warmth": 0.75,
+    "directness": 0.80,
+    "formality": 0.35,
+    "emoji_level": 0.15,
+    "concierge_confidence": 0.85,
+    "promotional_intensity": 0.30,
+    "mall_branding_prominence": 0.40,
+    "practicalness_vs_exploratory": 0.65
+  },
+
+  "clarification": {
+    "ambiguity_tolerance": 0.80,
+    "answer_first_bias": 0.90,
+    "max_followups_before_answer": 1,
+    "correction_sensitivity": 0.70,
+    "refinement_bias": 0.60,
+    "assumption_aggressiveness": 0.75
+  },
+
+  "strategy_weights": {
+    "direct_fact": 1.0,
+    "shortlist_recommendation": 1.2,
+    "mini_itinerary": 0.8,
+    "gift_formula": 0.9,
+    "family_plan": 1.0,
+    "solo_plan": 0.7,
+    "movie_plus_food": 0.8,
+    "budget_plan": 0.8,
+    "fallback_guided_response": 0.5
+  },
+
+  "response_shape": {
+    "default_response_length": "moderate",
+    "default_shortlist_size": 3,
+    "default_itinerary_steps": 3,
+    "location_detail_level": "floor_zone",
+    "suggest_next_step": true,
+    "paragraph_vs_bullets": "mixed",
+    "recommendation_density": 0.70,
+    "exact_name_usage_bias": 0.85
+  },
+
+  "context_weights": {
+    "prioritize_playbooks": 0.80,
+    "prioritize_semantic_tags": 0.70,
+    "prioritize_current_topic": 0.85,
+    "prioritize_current_area": 0.60,
+    "prioritize_current_mall": 1.00,
+    "prioritize_family_signals": 0.75,
+    "prioritize_kid_signals": 0.70,
+    "prioritize_budget_signals": 0.65,
+    "prioritize_romantic_signals": 0.60,
+    "prioritize_exact_entity_examples": 0.75
+  },
+
+  "retrieval": {
+    "require_exact_lookup_for_store_timing": true,
+    "require_exact_lookup_for_live_offers": true,
+    "require_exact_lookup_for_events": true,
+    "require_exact_lookup_for_loyalty": true,
+    "avoid_retrieval_for_general_recommendations": true,
+    "avoid_retrieval_for_vague_queries": true
+  },
+
+  "ranking": {
+    "favor_budget": 0.50,
+    "favor_premium": 0.50,
+    "favor_family_friendly": 0.60,
+    "favor_kid_friendly": 0.55,
+    "favor_couple_friendly": 0.50,
+    "favor_proximity": 0.40,
+    "favor_anchor_entities": 0.55,
+    "favor_diversity_vs_confidence": 0.45
+  },
+
+  "session_adaptation": {
+    "preserve_companions_strongly": 0.85,
+    "preserve_budget_strongly": 0.80,
+    "preserve_current_area_strongly": 0.60,
+    "preserve_active_topic_strongly": 0.75,
+    "reinterpret_short_followups_aggressively": 0.80,
+    "correction_overrides_previous_scope": 0.90
+  }
+}

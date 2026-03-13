@@ -1,0 +1,62 @@
+[
+  {
+    "tenant_id": "t-001",
+    "name": "Zara",
+    "category": "Fashion",
+    "subcategory": "Fast Fashion",
+    "floor": "Ground",
+    "zone": "North Wing",
+    "description": "International fast fashion retailer offering trendy clothing for men, women, and children.",
+    "tags": ["fashion", "clothing", "international", "fast-fashion", "family"],
+    "operating_hours": {"default": "10:00-22:00"},
+    "contact": {"phone": "+966-11-000-0001"}
+  },
+  {
+    "tenant_id": "t-002",
+    "name": "The Cheesecake Factory",
+    "category": "Dining",
+    "subcategory": "Casual Dining",
+    "floor": "Second",
+    "zone": "Food Court",
+    "description": "American restaurant chain known for extensive menu and signature cheesecakes.",
+    "tags": ["dining", "restaurant", "american", "family", "casual", "dessert"],
+    "operating_hours": {"default": "11:00-23:00"},
+    "contact": {"phone": "+966-11-000-0002"}
+  },
+  {
+    "tenant_id": "t-003",
+    "name": "Apple Store",
+    "category": "Electronics",
+    "subcategory": "Consumer Electronics",
+    "floor": "First",
+    "zone": "South Wing",
+    "description": "Official Apple retail store offering products, accessories, and Genius Bar support.",
+    "tags": ["electronics", "technology", "apple", "premium", "gadgets"],
+    "operating_hours": {"default": "10:00-22:00"},
+    "contact": {"phone": "+966-11-000-0003"}
+  },
+  {
+    "tenant_id": "t-004",
+    "name": "VOX Cinemas",
+    "category": "Entertainment",
+    "subcategory": "Cinema",
+    "floor": "Third",
+    "zone": "Entertainment",
+    "description": "Premium cinema experience with IMAX, 4DX, and luxury Gold screens.",
+    "tags": ["entertainment", "cinema", "movies", "imax", "family", "date-night"],
+    "operating_hours": {"default": "11:00-01:00"},
+    "contact": {"phone": "+966-11-000-0004"}
+  },
+  {
+    "tenant_id": "t-005",
+    "name": "Sephora",
+    "category": "Beauty",
+    "subcategory": "Cosmetics",
+    "floor": "Ground",
+    "zone": "East Wing",
+    "description": "Global beauty retailer with makeup, skincare, fragrance, and beauty tools.",
+    "tags": ["beauty", "cosmetics", "skincare", "fragrance", "premium"],
+    "operating_hours": {"default": "10:00-22:00"},
+    "contact": {"phone": "+966-11-000-0005"}
+  }
+]

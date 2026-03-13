@@ -1,0 +1,30 @@
+[
+  {
+    "entry_id": "sem-001",
+    "layer": "semantic",
+    "content": "Cenomi Mall has a dedicated Entertainment zone on the Third floor featuring VOX Cinemas with IMAX and 4DX screens, a bowling alley, and a family fun center.",
+    "tags": ["entertainment", "cinema", "family", "third-floor"],
+    "source": "mall_guide"
+  },
+  {
+    "entry_id": "sem-002",
+    "layer": "semantic",
+    "content": "The Food Court on the Second floor offers over 30 dining options ranging from quick-service to full-service restaurants, with a family seating area and prayer room access nearby.",
+    "tags": ["dining", "food-court", "family", "second-floor"],
+    "source": "mall_guide"
+  },
+  {
+    "entry_id": "sem-003",
+    "layer": "semantic",
+    "content": "Cenomi Mall provides complimentary wheelchair access, family rooms with baby changing facilities on every floor, and a lost-and-found service at the Ground floor Information Desk.",
+    "tags": ["accessibility", "family", "services", "amenities"],
+    "source": "mall_services"
+  },
+  {
+    "entry_id": "sem-004",
+    "layer": "semantic",
+    "content": "During Ramadan, mall hours shift to 13:00-02:00. Most dining outlets open after Iftar. Special Ramadan promotions are available at participating stores.",
+    "tags": ["ramadan", "hours", "seasonal", "dining"],
+    "source": "seasonal_updates"
+  }
+]

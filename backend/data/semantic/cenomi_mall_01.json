@@ -1,0 +1,645 @@
+{
+  "mall_id": "cenomi_mall_01",
+  "tag_taxonomy_version": "1.0",
+  "enrichment_rules": [
+    {
+      "rule_id": "er-jewelry-premium",
+      "description": "Premium/luxury jewelry stores are gift-friendly, romantic, and suited for special occasions",
+      "match_conditions": { "category": ["Jewelry"], "price_range": ["premium", "luxury"] },
+      "apply_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "special_occasion", "romantic"],
+      "apply_audience": ["couple_friendly", "solo_friendly"],
+      "apply_vibe": ["elegant", "upscale"],
+      "apply_outing_fit": ["date_spot", "special_occasion", "relaxed_visit"],
+      "apply_gift_fit": ["girlfriend_gift", "wife_gift", "parent_gift", "self_treat"],
+      "priority_boost": { "gift_for_girlfriend": 0.9, "anniversary_plan": 0.85, "luxury_shopping_plan": 0.8 }
+    },
+    {
+      "rule_id": "er-jewelry-mid",
+      "description": "Mid-range jewelry/accessories are accessible gift options",
+      "match_conditions": { "category": ["Jewelry"], "price_range": ["mid_range"] },
+      "apply_tags": ["gift_friendly", "girlfriend_gift", "friend_gift", "self_treat"],
+      "apply_audience": ["couple_friendly", "teen_friendly", "solo_friendly"],
+      "apply_vibe": ["trendy", "modern"],
+      "apply_outing_fit": ["quick_visit", "practical_shopping"],
+      "apply_gift_fit": ["girlfriend_gift", "friend_gift", "self_treat"],
+      "priority_boost": { "gift_for_girlfriend": 0.7, "last_minute_gift": 0.75 }
+    },
+    {
+      "rule_id": "er-kids-baby",
+      "description": "Kids and baby stores are family-friendly, practical shopping",
+      "match_conditions": { "category": ["Kids"], "subcategory": ["Baby & Kidswear", "Kids Entertainment"] },
+      "apply_tags": ["kid_friendly", "family_friendly", "child_shopping", "child_gift", "practical_shopping"],
+      "apply_audience": ["family_friendly", "kid_friendly"],
+      "apply_vibe": ["playful", "casual"],
+      "apply_outing_fit": ["family_outing", "practical_shopping"],
+      "apply_gift_fit": ["child_gift"],
+      "priority_boost": { "family_visit_plan": 0.8, "budget_family_outing": 0.75, "child_activity_while_parents_shop": 0.6 }
+    },
+    {
+      "rule_id": "er-beauty-premium",
+      "description": "Premium beauty stores are strong gift and self-treat options",
+      "match_conditions": { "category": ["Beauty"], "price_range": ["premium", "luxury"] },
+      "apply_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "self_treat"],
+      "apply_audience": ["solo_friendly", "couple_friendly"],
+      "apply_vibe": ["upscale", "modern"],
+      "apply_outing_fit": ["relaxed_visit", "special_occasion"],
+      "apply_gift_fit": ["girlfriend_gift", "wife_gift", "friend_gift", "self_treat"],
+      "priority_boost": { "gift_for_girlfriend": 0.8, "luxury_shopping_plan": 0.7 }
+    },
+    {
+      "rule_id": "er-beauty-mid",
+      "description": "Mid-range beauty/home fragrance stores work for casual gifting",
+      "match_conditions": { "category": ["Beauty"], "price_range": ["mid_range"] },
+      "apply_tags": ["gift_friendly", "friend_gift", "self_treat"],
+      "apply_audience": ["solo_friendly", "group_friendly"],
+      "apply_vibe": ["casual", "cozy"],
+      "apply_outing_fit": ["quick_visit", "relaxed_visit"],
+      "apply_gift_fit": ["friend_gift", "corporate_gift", "self_treat"],
+      "priority_boost": { "last_minute_gift": 0.7 }
+    },
+    {
+      "rule_id": "er-quick-dining",
+      "description": "Quick-service and fast-casual dining are suited for quick visits and pre/post movie",
+      "match_conditions": { "dining_style": ["quick_service", "fast_casual"] },
+      "apply_tags": ["quick_bite", "before_movie", "after_movie", "family_friendly"],
+      "apply_audience": ["family_friendly", "kid_friendly", "teen_friendly", "solo_friendly"],
+      "apply_vibe": ["casual", "energetic"],
+      "apply_meal_fit": ["quick_bite"],
+      "apply_outing_fit": ["quick_visit", "family_outing"],
+      "priority_boost": { "movie_plus_food": 0.8, "quick_lunch": 0.9, "kid_friendly_movie_plus_food": 0.75 }
+    },
+    {
+      "rule_id": "er-casual-dining",
+      "description": "Casual dining restaurants suit families and relaxed outings",
+      "match_conditions": { "dining_style": ["casual_dining"] },
+      "apply_tags": ["sit_down_dining", "family_friendly"],
+      "apply_audience": ["family_friendly", "couple_friendly", "group_friendly"],
+      "apply_vibe": ["casual"],
+      "apply_meal_fit": ["sit_down_dining"],
+      "apply_outing_fit": ["family_outing", "relaxed_visit"],
+      "priority_boost": { "family_visit_plan": 0.7, "date_plan": 0.5 }
+    },
+    {
+      "rule_id": "er-fine-premium-dining",
+      "description": "Premium/fine dining suits dates, special occasions, and couples",
+      "match_conditions": { "dining_style": ["casual_dining", "fine_dining"], "price_range": ["premium", "luxury"] },
+      "apply_tags": ["sit_down_dining", "date_spot", "special_occasion", "romantic"],
+      "apply_audience": ["couple_friendly"],
+      "apply_vibe": ["romantic", "elegant", "upscale"],
+      "apply_meal_fit": ["sit_down_dining"],
+      "apply_outing_fit": ["date_spot", "special_occasion", "relaxed_visit"],
+      "priority_boost": { "date_plan": 0.9, "anniversary_plan": 0.85 }
+    },
+    {
+      "rule_id": "er-dessert",
+      "description": "Dessert spots are after-meal and after-movie add-ons",
+      "match_conditions": { "dining_style": ["dessert"] },
+      "apply_tags": ["dessert_spot", "after_movie", "quick_bite", "kid_friendly"],
+      "apply_audience": ["family_friendly", "kid_friendly", "couple_friendly"],
+      "apply_vibe": ["playful", "casual"],
+      "apply_meal_fit": ["dessert_spot"],
+      "apply_outing_fit": ["quick_visit", "family_outing"],
+      "priority_boost": { "shopping_plus_dessert_combo": 0.9, "movie_plus_food": 0.6 }
+    },
+    {
+      "rule_id": "er-cafe",
+      "description": "Cafes are solo-friendly, meeting spots, and quick-visit options",
+      "match_conditions": { "dining_style": ["cafe"] },
+      "apply_tags": ["coffee_spot", "solo_browsing", "quick_bite"],
+      "apply_audience": ["solo_friendly", "couple_friendly"],
+      "apply_vibe": ["cozy", "quiet"],
+      "apply_meal_fit": ["coffee_spot", "quick_bite"],
+      "apply_outing_fit": ["quick_visit", "solo_browsing"],
+      "priority_boost": { "solo_visit_plan": 0.7, "quick_lunch": 0.5 }
+    },
+    {
+      "rule_id": "er-entertainment-zone",
+      "description": "Entities in the Entertainment Zone get cinema-proximity tags",
+      "match_conditions": { "zone": ["Entertainment Zone", "Entertainment"] },
+      "apply_tags": ["near_cinema", "entertainment_anchor"],
+      "apply_outing_fit": ["family_outing"],
+      "priority_boost": { "kid_friendly_movie_plus_food": 0.3, "movie_plus_food": 0.3 }
+    },
+    {
+      "rule_id": "er-food-court",
+      "description": "Entities in the Food Court get food-court proximity tags",
+      "match_conditions": { "zone": ["Food Court"] },
+      "apply_tags": ["near_food_court"],
+      "priority_boost": {}
+    },
+    {
+      "rule_id": "er-fashion-budget",
+      "description": "Budget fashion stores suit practical shopping and budget-conscious families",
+      "match_conditions": { "category": ["Fashion"], "price_range": ["budget"] },
+      "apply_tags": ["budget", "practical_shopping", "family_friendly"],
+      "apply_audience": ["family_friendly", "teen_friendly"],
+      "apply_vibe": ["casual", "trendy"],
+      "apply_outing_fit": ["practical_shopping", "quick_visit"],
+      "priority_boost": { "budget_family_outing": 0.8 }
+    },
+    {
+      "rule_id": "er-electronics-premium",
+      "description": "Premium electronics stores are strong gift options for tech lovers",
+      "match_conditions": { "category": ["Electronics"], "price_range": ["premium", "luxury"] },
+      "apply_tags": ["gift_friendly", "husband_gift", "corporate_gift"],
+      "apply_audience": ["solo_friendly", "teen_friendly"],
+      "apply_vibe": ["modern"],
+      "apply_outing_fit": ["practical_shopping", "relaxed_visit"],
+      "apply_gift_fit": ["husband_gift", "friend_gift", "corporate_gift", "self_treat"],
+      "priority_boost": { "gift_for_family": 0.6 }
+    },
+    {
+      "rule_id": "er-kids-entertainment",
+      "description": "Kids entertainment venues are key for family visits and child activities",
+      "match_conditions": { "subcategory": ["Kids Entertainment"], "entity_type": ["store"] },
+      "apply_tags": ["child_activity", "family_entertainment", "kid_friendly", "family_friendly"],
+      "apply_audience": ["kid_friendly", "family_friendly"],
+      "apply_vibe": ["playful", "energetic"],
+      "apply_outing_fit": ["family_outing"],
+      "priority_boost": { "child_activity_while_parents_shop": 0.95, "family_visit_plan": 0.85, "kid_friendly_movie_plus_food": 0.7 }
+    }
+  ],
+  "profiles": [
+    {
+      "entity_id": "t-store-002",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "special_occasion", "romantic", "premium", "near_main_entrance"],
+      "audience_fit": ["couple_friendly", "solo_friendly"],
+      "vibe": ["elegant", "upscale"],
+      "price_band": "premium",
+      "outing_fit": ["date_spot", "special_occasion", "relaxed_visit"],
+      "gift_fit": ["girlfriend_gift", "wife_gift", "parent_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for a gift for girlfriend, wife, or mother",
+        "Anniversary or special occasion shopping",
+        "User wants premium or luxury jewelry",
+        "Bridal jewelry shopping",
+        "User mentions gold or diamond"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User looking for kids items only",
+        "User wants quick practical shopping"
+      ],
+      "priority_scores": {
+        "gift_for_girlfriend": 0.95,
+        "anniversary_plan": 0.90,
+        "luxury_shopping_plan": 0.85,
+        "date_plan": 0.60,
+        "last_minute_gift": 0.70,
+        "gift_for_family": 0.65
+      },
+      "concierge_notes": "L'azurde is a Saudi brand — highlight this for visitors who appreciate local craftsmanship. Excellent for bridal jewelry and milestone gifts. Suggest engraving for personalization. Pairs well with a romantic dinner at Eataly afterward."
+    },
+    {
+      "entity_id": "t-store-003",
+      "entity_type": "store",
+      "semantic_tags": ["kid_friendly", "family_friendly", "child_shopping", "child_gift", "practical_shopping", "budget"],
+      "audience_fit": ["family_friendly", "kid_friendly"],
+      "vibe": ["playful", "casual"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "practical_shopping", "quick_visit"],
+      "gift_fit": ["child_gift"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User shopping for baby or children's items",
+        "New parents looking for essentials",
+        "Gift for a child or baby shower",
+        "User mentions kids, baby, or maternity"
+      ],
+      "avoid_if": [
+        "User looking for adult fashion or luxury items",
+        "User looking for entertainment only",
+        "No child context in the conversation"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.80,
+        "budget_family_outing": 0.75,
+        "child_activity_while_parents_shop": 0.40,
+        "gift_for_family": 0.70,
+        "practical_shopping": 0.85
+      },
+      "concierge_notes": "Mothercare is the go-to for baby essentials. Located near the Family Room for convenience — mention this to parents. Offers car seat fitting service which is valuable for new parents. Good pairing with Billy Beez or KidZania for kids' entertainment afterward."
+    },
+    {
+      "entity_id": "t-dining-003",
+      "entity_type": "dining",
+      "semantic_tags": ["sit_down_dining", "date_spot", "special_occasion", "romantic", "premium", "couple_friendly"],
+      "audience_fit": ["couple_friendly", "group_friendly", "solo_friendly"],
+      "vibe": ["romantic", "elegant", "upscale"],
+      "price_band": "premium",
+      "outing_fit": ["date_spot", "special_occasion", "relaxed_visit", "celebration"],
+      "gift_fit": [],
+      "meal_fit": ["sit_down_dining"],
+      "when_to_recommend": [
+        "User looking for a romantic dinner spot",
+        "Anniversary or date night dining",
+        "User wants Italian cuisine",
+        "Special occasion meal",
+        "User wants upscale but not overly formal"
+      ],
+      "avoid_if": [
+        "User wants a quick bite",
+        "User is on a tight budget",
+        "User needs kid-focused fast dining",
+        "User is rushing before a movie"
+      ],
+      "priority_scores": {
+        "date_plan": 0.95,
+        "anniversary_plan": 0.90,
+        "gift_for_girlfriend": 0.30,
+        "luxury_shopping_plan": 0.40,
+        "family_visit_plan": 0.45,
+        "special_occasion_dining": 0.92
+      },
+      "concierge_notes": "Eataly is the top romantic dining option in the mall. Open kitchen adds to the experience. Suggest the private dining area for anniversaries. The attached Italian grocery is a nice post-dinner browse. Pairs beautifully with jewelry shopping at L'azurde as part of a date plan."
+    },
+    {
+      "entity_id": "t-dining-004",
+      "entity_type": "dining",
+      "semantic_tags": ["quick_bite", "before_movie", "after_movie", "family_friendly", "kid_friendly", "near_food_court", "near_cinema"],
+      "audience_fit": ["family_friendly", "kid_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["casual", "energetic"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "family_outing", "before_movie", "after_movie"],
+      "gift_fit": [],
+      "meal_fit": ["quick_bite"],
+      "when_to_recommend": [
+        "User wants a quick meal before or after a movie",
+        "Family looking for kid-friendly quick food",
+        "User mentions burgers, shakes, or quick lunch",
+        "User is on the Second floor near Food Court or heading to Third floor"
+      ],
+      "avoid_if": [
+        "User wants a fine dining or romantic experience",
+        "User looking for healthy or light options only",
+        "User wants a leisurely sit-down meal"
+      ],
+      "priority_scores": {
+        "movie_plus_food": 0.90,
+        "quick_lunch": 0.88,
+        "kid_friendly_movie_plus_food": 0.85,
+        "family_visit_plan": 0.60,
+        "budget_family_outing": 0.70
+      },
+      "concierge_notes": "Shake Shack is the ideal pre/post-movie meal — close to the escalators up to VOX Cinemas. 20-minute meal time makes it perfect for tight schedules. Kids love the milkshakes. Suggest the Shack Burger for first-timers."
+    },
+    {
+      "entity_id": "t-store-005",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "self_treat", "premium", "special_occasion"],
+      "audience_fit": ["solo_friendly", "couple_friendly"],
+      "vibe": ["upscale", "modern", "trendy"],
+      "price_band": "premium",
+      "outing_fit": ["relaxed_visit", "special_occasion", "solo_browsing"],
+      "gift_fit": ["girlfriend_gift", "wife_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for beauty or fragrance gifts",
+        "User wants skincare recommendations",
+        "Gift for girlfriend, wife, or friend",
+        "User browsing beauty products",
+        "User mentions makeup, perfume, or skincare"
+      ],
+      "avoid_if": [
+        "User on a tight budget looking for essentials",
+        "User not interested in beauty products",
+        "Male user shopping only for self with no interest in beauty"
+      ],
+      "priority_scores": {
+        "gift_for_girlfriend": 0.85,
+        "luxury_shopping_plan": 0.70,
+        "anniversary_plan": 0.55,
+        "last_minute_gift": 0.75,
+        "solo_visit_plan": 0.50
+      },
+      "concierge_notes": "Sephora is a top gift destination — the gift sets are curated and ready to go. Beauty advisor can help personalize choices. Currently running Spring Beauty Sale (20% off selected items). Mention the fragrance sampling for undecided gift buyers."
+    },
+    {
+      "entity_id": "t-store-001",
+      "entity_type": "store",
+      "semantic_tags": ["family_friendly", "trending", "practical_shopping", "mid_range"],
+      "audience_fit": ["family_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["trendy", "casual", "modern"],
+      "price_band": "mid_range",
+      "outing_fit": ["practical_shopping", "quick_visit", "family_outing", "solo_browsing"],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for fashion or clothing",
+        "User wants trending or affordable fashion",
+        "Family shopping trip",
+        "User mentions Zara specifically"
+      ],
+      "avoid_if": [
+        "User wants luxury or high-end only",
+        "User not interested in fashion"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.55,
+        "budget_family_outing": 0.60,
+        "solo_visit_plan": 0.65,
+        "practical_shopping": 0.80
+      },
+      "concierge_notes": "Zara currently has End of Season Sale (up to 50% off). First store after Main Entrance — easy stop for fashion browsing. New arrivals weekly. Has a kids section for family shoppers."
+    },
+    {
+      "entity_id": "t-store-006",
+      "entity_type": "store",
+      "semantic_tags": ["budget", "family_friendly", "practical_shopping", "kid_friendly"],
+      "audience_fit": ["family_friendly", "teen_friendly", "kid_friendly"],
+      "vibe": ["casual", "trendy"],
+      "price_band": "budget",
+      "outing_fit": ["practical_shopping", "quick_visit", "family_outing"],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for affordable family fashion",
+        "Budget-conscious shopping",
+        "User wants basic wardrobe staples",
+        "User mentions H&M or budget fashion"
+      ],
+      "avoid_if": [
+        "User wants premium or luxury only"
+      ],
+      "priority_scores": {
+        "budget_family_outing": 0.85,
+        "family_visit_plan": 0.55,
+        "practical_shopping": 0.80
+      },
+      "concierge_notes": "H&M is the best budget-friendly fashion option. Great for stocking up on basics for the whole family. Has a sustainable line for eco-conscious shoppers. Opposite Zara for easy comparison shopping."
+    },
+    {
+      "entity_id": "t-store-004",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "husband_gift", "corporate_gift", "premium", "self_treat"],
+      "audience_fit": ["solo_friendly", "teen_friendly"],
+      "vibe": ["modern", "upscale"],
+      "price_band": "premium",
+      "outing_fit": ["practical_shopping", "relaxed_visit", "solo_browsing"],
+      "gift_fit": ["husband_gift", "friend_gift", "corporate_gift", "self_treat", "child_gift"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants to buy electronics or gadgets",
+        "Gift for a tech-savvy person",
+        "User needs Apple product support (Genius Bar)",
+        "User mentions iPhone, iPad, MacBook, or Apple"
+      ],
+      "avoid_if": [
+        "User on a tight budget for non-tech items",
+        "User only looking for fashion or dining"
+      ],
+      "priority_scores": {
+        "gift_for_family": 0.70,
+        "luxury_shopping_plan": 0.60,
+        "solo_visit_plan": 0.55,
+        "last_minute_gift": 0.50
+      },
+      "concierge_notes": "Apple Store offers Genius Bar support — useful for visitors with device issues. Today at Apple workshops are free and engaging. AirPods and accessories make excellent last-minute gifts. Engraving available on select products."
+    },
+    {
+      "entity_id": "t-cinema-001",
+      "entity_type": "cinema",
+      "semantic_tags": ["entertainment_anchor", "family_friendly", "couple_friendly", "date_spot", "kid_friendly", "near_cinema"],
+      "audience_fit": ["family_friendly", "couple_friendly", "kid_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["energetic", "modern"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "solo_browsing"],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants to watch a movie",
+        "Family looking for entertainment",
+        "Date night plan",
+        "User mentions cinema, movies, IMAX, or VOX"
+      ],
+      "avoid_if": [
+        "User only looking for shopping or dining",
+        "User has very young infants (no infant screenings)"
+      ],
+      "priority_scores": {
+        "movie_plus_food": 0.95,
+        "kid_friendly_movie_plus_food": 0.90,
+        "date_plan": 0.80,
+        "family_visit_plan": 0.70
+      },
+      "concierge_notes": "VOX Cinemas is the entertainment anchor. Gold screens for romantic date nights — suggest for anniversary plans. Kids screen for families. IMAX for blockbusters. Currently showing Desert Kingdoms (family), Starlight Romance (couples), and Cosmic Explorers (kids). Weekend combo deal available."
+    },
+    {
+      "entity_id": "t-dining-001",
+      "entity_type": "dining",
+      "semantic_tags": ["sit_down_dining", "family_friendly", "kid_friendly", "near_food_court"],
+      "audience_fit": ["family_friendly", "kid_friendly", "group_friendly"],
+      "vibe": ["casual", "cozy"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "relaxed_visit"],
+      "gift_fit": [],
+      "meal_fit": ["sit_down_dining"],
+      "when_to_recommend": [
+        "Family looking for traditional Saudi food",
+        "Group dining with generous portions",
+        "User wants authentic local cuisine",
+        "User mentions kabsa, mandi, or Saudi food"
+      ],
+      "avoid_if": [
+        "User wants quick service only",
+        "User looking for international/Western cuisine",
+        "User wants a romantic fine dining setting"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.80,
+        "budget_family_outing": 0.70,
+        "quick_lunch": 0.30
+      },
+      "concierge_notes": "Al Romansiah is the local favorite for authentic Saudi dining. Private dining section available for families who prefer privacy. Large portions ideal for sharing. Near the prayer room — convenient for families during prayer times."
+    },
+    {
+      "entity_id": "t-dining-002",
+      "entity_type": "dining",
+      "semantic_tags": ["sit_down_dining", "family_friendly", "dessert_spot", "date_spot", "near_food_court"],
+      "audience_fit": ["family_friendly", "couple_friendly", "group_friendly"],
+      "vibe": ["casual", "upscale"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "celebration"],
+      "gift_fit": [],
+      "meal_fit": ["sit_down_dining", "dessert_spot"],
+      "when_to_recommend": [
+        "User wants a family restaurant with variety",
+        "User specifically craves cheesecake or American food",
+        "Birthday or celebration dinner",
+        "User wants a large menu with many options"
+      ],
+      "avoid_if": [
+        "User wants a very quick meal",
+        "User wants authentic local cuisine only"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.75,
+        "date_plan": 0.55,
+        "shopping_plus_dessert_combo": 0.70,
+        "budget_family_outing": 0.50
+      },
+      "concierge_notes": "Cheesecake Factory works for almost any group thanks to the huge menu. Perfect for indecisive groups. The cheesecake is a must-try dessert — mention it as a post-shopping reward. Weekend brunch is popular."
+    },
+    {
+      "entity_id": "t-dining-005",
+      "entity_type": "dining",
+      "semantic_tags": ["coffee_spot", "solo_browsing", "quick_bite", "near_main_entrance"],
+      "audience_fit": ["solo_friendly", "couple_friendly"],
+      "vibe": ["cozy", "quiet"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "solo_browsing"],
+      "gift_fit": [],
+      "meal_fit": ["coffee_spot", "quick_bite"],
+      "when_to_recommend": [
+        "User wants coffee or a quick drink",
+        "Solo visitor looking for a comfortable spot",
+        "User needs WiFi for work",
+        "Meeting spot suggestion"
+      ],
+      "avoid_if": [
+        "User wants a full meal",
+        "User looking for unique local coffee"
+      ],
+      "priority_scores": {
+        "solo_visit_plan": 0.75,
+        "quick_lunch": 0.40
+      },
+      "concierge_notes": "Starbucks is near the Main Entrance — suggest as a starting point or meeting spot. Opens earlier than most stores (7 AM) for early visitors. Good for a caffeine stop before a shopping marathon."
+    },
+    {
+      "entity_id": "t-dining-006",
+      "entity_type": "dining",
+      "semantic_tags": ["dessert_spot", "after_movie", "kid_friendly", "family_friendly", "quick_bite", "near_food_court", "near_cinema"],
+      "audience_fit": ["family_friendly", "kid_friendly", "teen_friendly", "couple_friendly"],
+      "vibe": ["playful", "casual"],
+      "price_band": "budget",
+      "outing_fit": ["quick_visit", "family_outing", "after_movie"],
+      "gift_fit": [],
+      "meal_fit": ["dessert_spot"],
+      "when_to_recommend": [
+        "After a movie, suggest ice cream",
+        "Kids asking for a treat",
+        "Post-shopping sweet reward",
+        "User mentions ice cream or dessert"
+      ],
+      "avoid_if": [
+        "User looking for a full meal",
+        "User wants healthy options only"
+      ],
+      "priority_scores": {
+        "shopping_plus_dessert_combo": 0.90,
+        "movie_plus_food": 0.65,
+        "kid_friendly_movie_plus_food": 0.80,
+        "family_visit_plan": 0.50,
+        "budget_family_outing": 0.60
+      },
+      "concierge_notes": "Baskin-Robbins is the perfect add-on dessert stop. Near the escalators to the Entertainment Zone — suggest after a movie. Birthday cakes available for spontaneous celebrations. Budget-friendly treat for kids."
+    },
+    {
+      "entity_id": "t-store-007",
+      "entity_type": "store",
+      "semantic_tags": ["family_friendly", "teen_friendly", "gift_friendly", "trending"],
+      "audience_fit": ["teen_friendly", "solo_friendly", "family_friendly"],
+      "vibe": ["energetic", "modern", "trendy"],
+      "price_band": "mid_range",
+      "outing_fit": ["practical_shopping", "solo_browsing", "family_outing"],
+      "gift_fit": ["husband_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for sportswear or sneakers",
+        "Gift for a fitness enthusiast",
+        "Teen shopping",
+        "User mentions Nike, sneakers, or athletic wear"
+      ],
+      "avoid_if": [
+        "User wants formal or luxury fashion"
+      ],
+      "priority_scores": {
+        "gift_for_family": 0.50,
+        "solo_visit_plan": 0.55,
+        "practical_shopping": 0.70
+      },
+      "concierge_notes": "Nike flagship has the latest sneaker drops — teens love it. Shoe customization service available. Good gift option for active/fitness-minded recipients."
+    },
+    {
+      "entity_id": "t-store-008",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "girlfriend_gift", "friend_gift", "self_treat", "personalized"],
+      "audience_fit": ["couple_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["trendy", "modern"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "practical_shopping", "relaxed_visit"],
+      "gift_fit": ["girlfriend_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for an affordable jewelry gift",
+        "Charm bracelet customization",
+        "Quick gift pickup",
+        "User mentions Pandora, charms, or bracelet"
+      ],
+      "avoid_if": [
+        "User wants high-end fine jewelry (gold/diamonds)",
+        "User looking for men's items only"
+      ],
+      "priority_scores": {
+        "gift_for_girlfriend": 0.75,
+        "last_minute_gift": 0.80,
+        "solo_visit_plan": 0.40
+      },
+      "concierge_notes": "Pandora is a great mid-range gift alternative to L'azurde. Charm customization makes it personal and meaningful. Quick to shop — great for last-minute gifts. In the same corridor as Sephora and L'azurde for a gift-shopping path."
+    },
+    {
+      "entity_id": "t-store-009",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "friend_gift", "corporate_gift", "self_treat"],
+      "audience_fit": ["solo_friendly", "group_friendly"],
+      "vibe": ["cozy", "casual"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "relaxed_visit"],
+      "gift_fit": ["friend_gift", "corporate_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for home fragrance or candles",
+        "Gift for a friend or coworker",
+        "User wants body care products",
+        "Last-minute gift that smells great"
+      ],
+      "avoid_if": [
+        "User wants high-end beauty/skincare (suggest Sephora instead)"
+      ],
+      "priority_scores": {
+        "last_minute_gift": 0.75,
+        "gift_for_girlfriend": 0.45,
+        "gift_for_family": 0.40
+      },
+      "concierge_notes": "Bath & Body Works is an excellent last-minute gift option — gift sets are ready-wrapped. Mix-and-match deals make it budget-friendly. Seasonal collections create urgency. Good fallback when Sephora feels too premium."
+    },
+    {
+      "entity_id": "t-store-010",
+      "entity_type": "store",
+      "semantic_tags": ["premium", "gift_friendly", "special_occasion"],
+      "audience_fit": ["couple_friendly", "solo_friendly"],
+      "vibe": ["elegant", "modern"],
+      "price_band": "premium",
+      "outing_fit": ["relaxed_visit", "special_occasion"],
+      "gift_fit": ["corporate_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User shopping for home decor or furniture",
+        "Wedding or housewarming gift",
+        "User mentions home, interior design, or Pottery Barn"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User looking for personal fashion or beauty"
+      ],
+      "priority_scores": {
+        "luxury_shopping_plan": 0.50,
+        "gift_for_family": 0.45
+      },
+      "concierge_notes": "Pottery Barn has an interior design service — useful for serious home shoppers. Gift registry available for weddings. Located near Mothercare in the family/home wing."
+    }
+  ]
+}

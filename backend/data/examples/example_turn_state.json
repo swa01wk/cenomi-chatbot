@@ -1,0 +1,205 @@
+{
+  "_description": "Example ConciergeState snapshot after processing: 'Where should I eat?'",
+
+  "session_id": "session-a1b2c3d4e5f6g7h8",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-x1y2z3a4b5c6",
+
+  "raw_user_message": "Where should I eat?",
+  "normalized_user_message": "Where should I eat?",
+
+  "mode": "single_mall",
+  "active_mall_id": "cenomi_mall_01",
+
+  "messages": [
+    {
+      "role": "user",
+      "content": "Where should I eat?",
+      "turn_id": "msg-x1y2z3a4b5c6",
+      "metadata": {}
+    },
+    {
+      "role": "assistant",
+      "content": "Here are my top dining picks at Cenomi Mall right now:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Italian market + restaurant, great for browsing and tasting (Ground Floor, North Wing)\n3. **PF Chang's** — Asian fusion with generous portions (Second Floor, East Wing)\n\nWant me to narrow it down? Tell me if you're in the mood for something specific — quick bite, romantic dinner, family-friendly, or a cuisine you love.",
+      "turn_id": "msg-x1y2z3a4b5c6",
+      "metadata": {
+        "strategy": "shortlist_recommendation"
+      }
+    }
+  ],
+
+  "intent": {
+    "domain": "dining",
+    "sub_intent": "general_dining",
+    "message_kind": "fresh_request",
+    "confidence": 0.7,
+    "raw_signals": {}
+  },
+
+  "scene": {
+    "visit_type": "",
+    "companions": [],
+    "occasion": "",
+    "budget": "",
+    "audience": [],
+    "current_area": "",
+    "current_need": "Where should I eat?",
+    "active_topic": "dining",
+    "previous_topic": "",
+    "active_shortlist": [],
+    "rejected_options": [],
+    "current_preferences": {}
+  },
+
+  "playbook": {
+    "matched_playbooks": [],
+    "selected_playbook": "",
+    "playbook_confidence": 0.0
+  },
+
+  "context": {
+    "selected_topic_blocks": ["dining", "food_court", "restaurants", "cafes", "events_and_offers"],
+    "selected_entities": [],
+    "selected_semantic_signals": [],
+    "ranking_notes": []
+  },
+
+  "retrieval": {
+    "retrieval_needed": false,
+    "retrieval_reason": "General recommendation — context-only",
+    "retrieval_targets": [],
+    "retrieval_results": []
+  },
+
+  "active_tenant_parameters": null,
+  "active_session_tuning": {},
+
+  "response_plan": {
+    "chosen_strategy": "shortlist_recommendation",
+    "response_shape_hint": "numbered_shortlist",
+    "response_constraints": ["answer_first", "ground_in_real_entities"]
+  },
+
+  "final_response_text": "Here are my top dining picks at Cenomi Mall right now:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Italian market + restaurant, great for browsing and tasting (Ground Floor, North Wing)\n3. **PF Chang's** — Asian fusion with generous portions (Second Floor, East Wing)\n\nWant me to narrow it down? Tell me if you're in the mood for something specific — quick bite, romantic dinner, family-friendly, or a cuisine you love.",
+  "response_debug_summary": "strategy=shortlist_recommendation | playbook=none | topics=['dining', 'food_court', 'restaurants', 'cafes', 'events_and_offers'] | retrieval=no",
+
+  "node_trace": [
+    {
+      "node": "load_session",
+      "started_at": "2026-03-13T10:00:00.000Z",
+      "latency_ms": 2.1,
+      "summary": "Session loaded for cenomi_mall_01, turn msg-x1y2z3a4b5c6",
+      "output_keys": ["turn_id", "tenant_id", "active_mall_id", "active_tenant_parameters", "normalized_user_message", "messages"],
+      "warnings": []
+    },
+    {
+      "node": "interpret_turn",
+      "started_at": "2026-03-13T10:00:00.002Z",
+      "latency_ms": 1.5,
+      "summary": "Intent: dining/general_dining (fresh_request)",
+      "output_keys": ["intent"],
+      "warnings": []
+    },
+    {
+      "node": "update_scene_memory",
+      "started_at": "2026-03-13T10:00:00.004Z",
+      "latency_ms": 0.8,
+      "summary": "Scene: topic → dining",
+      "output_keys": ["scene"],
+      "warnings": []
+    },
+    {
+      "node": "resolve_playbooks",
+      "started_at": "2026-03-13T10:00:00.005Z",
+      "latency_ms": 1.2,
+      "summary": "Playbook: none (conf=0.0)",
+      "output_keys": ["playbook"],
+      "warnings": []
+    },
+    {
+      "node": "choose_strategy",
+      "started_at": "2026-03-13T10:00:00.006Z",
+      "latency_ms": 0.5,
+      "summary": "Strategy: shortlist_recommendation | shape: numbered_shortlist",
+      "output_keys": ["response_plan"],
+      "warnings": []
+    },
+    {
+      "node": "compose_context",
+      "started_at": "2026-03-13T10:00:00.007Z",
+      "latency_ms": 3.2,
+      "summary": "Context: 5 topics, 0 signals, 0 entities",
+      "output_keys": ["context"],
+      "warnings": []
+    },
+    {
+      "node": "decide_retrieval",
+      "started_at": "2026-03-13T10:00:00.010Z",
+      "latency_ms": 0.3,
+      "summary": "Retrieval: NO — General recommendation — context-only",
+      "output_keys": ["retrieval"],
+      "warnings": []
+    },
+    {
+      "node": "generate_response",
+      "started_at": "2026-03-13T10:00:00.010Z",
+      "latency_ms": 850.0,
+      "summary": "Generated 384 chars via shortlist_recommendation",
+      "output_keys": ["final_response_text", "response_debug_summary", "messages"],
+      "warnings": []
+    },
+    {
+      "node": "update_memory",
+      "started_at": "2026-03-13T10:00:00.860Z",
+      "latency_ms": 0.4,
+      "summary": "Memory: active_topic confirmed: dining",
+      "output_keys": ["scene"],
+      "warnings": []
+    },
+    {
+      "node": "emit_debug_payload",
+      "started_at": "2026-03-13T10:00:00.861Z",
+      "latency_ms": 0.2,
+      "summary": "Debug emitted — 860.20ms total across 10 nodes",
+      "output_keys": ["response_debug_summary", "latency_by_node", "evaluator_stub"],
+      "warnings": []
+    }
+  ],
+
+  "latency_by_node": {
+    "load_session": 2.1,
+    "interpret_turn": 1.5,
+    "update_scene_memory": 0.8,
+    "resolve_playbooks": 1.2,
+    "choose_strategy": 0.5,
+    "compose_context": 3.2,
+    "decide_retrieval": 0.3,
+    "generate_response": 850.0,
+    "update_memory": 0.4,
+    "emit_debug_payload": 0.2
+  },
+
+  "evaluator_stub": {
+    "turn_id": "msg-x1y2z3a4b5c6",
+    "session_id": "session-a1b2c3d4e5f6g7h8",
+    "mall_id": "cenomi_mall_01",
+    "intent_domain": "dining",
+    "intent_sub": "general_dining",
+    "intent_confidence": 0.7,
+    "message_kind": "fresh_request",
+    "playbook_used": "",
+    "playbook_confidence": 0.0,
+    "strategy_used": "shortlist_recommendation",
+    "retrieval_used": false,
+    "topics_count": 5,
+    "entities_count": 0,
+    "signals_count": 0,
+    "response_length": 384,
+    "total_latency_ms": 860.2,
+    "node_count": 10,
+    "warning_count": 0
+  },
+
+  "warnings": []
+}

@@ -1,0 +1,28 @@
+{
+  "mall_id": "cenomi_mall_01",
+  "name": "Cenomi Mall",
+  "location": "Riyadh, Saudi Arabia",
+  "floors": ["Ground", "First", "Second", "Third"],
+  "zones": ["North Wing", "South Wing", "East Wing", "West Wing", "Food Court", "Entertainment"],
+  "operating_hours": {
+    "sunday_thursday": "10:00-22:00",
+    "friday": "14:00-23:00",
+    "saturday": "10:00-23:00"
+  },
+  "amenities": [
+    "Free WiFi",
+    "Valet Parking",
+    "Prayer Rooms",
+    "Family Rooms",
+    "Wheelchair Access",
+    "ATMs",
+    "Information Desk",
+    "Lost & Found",
+    "EV Charging"
+  ],
+  "metadata": {
+    "total_tenants": 350,
+    "parking_capacity": 5000,
+    "year_opened": 2020
+  }
+}

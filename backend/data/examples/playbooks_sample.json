@@ -1,0 +1,43 @@
+[
+  {
+    "playbook_id": "pb-001",
+    "scenario": "Family dining on weekend evening",
+    "description": "Visitor looking for a restaurant suitable for the whole family on a Friday or Saturday evening.",
+    "trigger_intents": ["dining", "family", "restaurant", "weekend"],
+    "steps": [
+      "Identify family-friendly dining options",
+      "Check operating hours for weekend evenings",
+      "Prioritize restaurants with kids' menus or play areas",
+      "Suggest nearby entertainment for after dinner"
+    ],
+    "tenant_ids": ["t-002"],
+    "tags": ["dining", "family", "weekend"]
+  },
+  {
+    "playbook_id": "pb-002",
+    "scenario": "Quick lunch near cinema",
+    "description": "Visitor wants to grab a quick meal before or after watching a movie.",
+    "trigger_intents": ["dining", "quick", "cinema", "lunch", "movies"],
+    "steps": [
+      "Find fast-casual or quick-service restaurants near Entertainment zone",
+      "Consider timing relative to showtime",
+      "Suggest grab-and-go options if time is tight"
+    ],
+    "tenant_ids": ["t-002", "t-004"],
+    "tags": ["dining", "quick", "entertainment"]
+  },
+  {
+    "playbook_id": "pb-003",
+    "scenario": "Luxury gift shopping",
+    "description": "Visitor looking for a premium gift for a special occasion.",
+    "trigger_intents": ["gift", "luxury", "premium", "anniversary", "birthday"],
+    "steps": [
+      "Identify premium/luxury tenants by category",
+      "Ask about recipient preferences if not specified",
+      "Suggest a curated gift path across stores",
+      "Mention gift wrapping services if available"
+    ],
+    "tenant_ids": ["t-003", "t-005"],
+    "tags": ["shopping", "luxury", "gift"]
+  }
+]
