@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-c3fc16c4b955",
+  "session_id": "session-0cf586c9c0bc496c",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-9571f3092ad7",
+  "user_message": "Anything quick before movie?",
+  "previous_assistant_response": "For a quick bite before your movie, here are some great options near VOX Cinemas on the Second floor:\n\n1. Shake Shack \u2014 Fast, tasty burgers and shakes, perfect for a 20-minute meal before the movie. Located in the Food Court near the escalators to VOX.\n2. Starbucks \u2014 Quick coffee and snacks if you want something lighter or just a caffeine boost. On the Ground floor, North Wing near the main entrance.\n\nShake Shack is your best bet for a filling, speedy meal right by the cinema. Want me to guide you there?",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-03-13 07:49:21.192270"
+}

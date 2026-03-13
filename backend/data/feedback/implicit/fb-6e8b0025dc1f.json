@@ -1,0 +1,25 @@
+{
+  "event_id": "fb-6e8b0025dc1f",
+  "session_id": "session-fafa6598cd254a58",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-bf22a83df6f5",
+  "user_message": "I want it to be something affordable",
+  "previous_assistant_response": "For an affordable family meal, I recommend Shake Shack on the second floor in the Food Court. It's quick, budget-friendly, and great for families with kids. You can get burgers, fries, and shakes without breaking the bank. Plus, it's right by the escalators to VOX Cinemas if you want to catch a movie afterward.\n\nIf you want something more traditional but still reasonable, Al Romansiah on the same floor offers generous portions of authentic Saudi food at good prices, especially for groups.\n\nWould you like directions to either spot or a look at their current menu deals?",
+  "detected_signals": [
+    "price_mismatch",
+    "preference_override"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\baffordable\\b",
+      "confidence": 0.9500000000000001
+    },
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-13 08:19:19.948609"
+}

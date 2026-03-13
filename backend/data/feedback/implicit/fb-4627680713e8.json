@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-4627680713e8",
+  "session_id": "session-fafa6598cd254a58",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-1a2f90ae1d48",
+  "user_message": "I want to buy jackets",
+  "previous_assistant_response": "For jackets, here are some great spots in the mall:\n\n1. Zara \u2014 Ground, Central Zone. They have a wide range of stylish jackets, and right now they\u2019re running their End of Season Sale with up to 50% off.\n2. Nike \u2014 First, North Wing. Perfect if you want sporty or casual jackets, plus they offer shoe customization if you\u2019re interested.\n3. H&M \u2014 Ground, West Wing. Good for trendy and affordable jacket options for men and women.\n4. Mango \u2014 First, East Wing. Offers chic and modern jacket styles, great for a polished look.\n\nWould you like directions to any of these? Or are you looking for a specific style or brand?",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-13 08:13:34.414360"
+}

@@ -1,0 +1,17 @@
+{
+  "signal_id": "fb-134b680a597f",
+  "source_event_id": "fb-daa2c8545af2",
+  "source_type": "implicit",
+  "session_id": "session-fafa6598cd254a58",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "signal_type": "strategy_mismatch",
+  "severity": 0.41250000000000003,
+  "strategy_used": "",
+  "playbook_used": "",
+  "entity_types_involved": [],
+  "semantic_tags_involved": [],
+  "intent_domain": "",
+  "context": {},
+  "timestamp": "2026-03-13 08:14:02.089505"
+}

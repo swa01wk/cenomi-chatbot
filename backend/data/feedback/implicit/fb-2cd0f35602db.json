@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-2cd0f35602db",
+  "session_id": "session-0cf586c9c0bc496c",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-9089eea832a2",
+  "user_message": "lets plan like this date with gf and then something for my son",
+  "previous_assistant_response": "Perfect! Here\u2019s a plan for your anniversary date with your girlfriend plus a fun outing for your son:\n\nFor you and your girlfriend:\n1. Dinner at Eataly (Second, West Wing) \u2014 Romantic private dining.\n2. Movie \"Starlight Romance\" at VOX Cinemas Gold Screen (Third, Entertainment Zone).\n\nFor your son:\n1. Movie \"Cosmic Explorers\" at VOX Cinemas Kids Screen.\n2. After the movie, take him to the Eid Family Carnival in the Entertainment Zone for rides and face painting.\n\nWould you like me to help with dinner reservations and movie ticket bookings?",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+my\\s+(?:son|daughter|kid|child|baby|toddler)\\b",
+      "confidence": 0.9500000000000001
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-13 07:52:28.897904"
+}

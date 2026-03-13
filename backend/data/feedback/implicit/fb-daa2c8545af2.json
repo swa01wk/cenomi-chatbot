@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-daa2c8545af2",
+  "session_id": "session-fafa6598cd254a58",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-b52087feec51",
+  "user_message": "I want to buy it for my 5 year old son",
+  "previous_assistant_response": "For your 5-year-old son, here are some great shopping spots:\n\n1. Mothercare \u2014 First Floor, West Wing  \n   Perfect for baby and kids' essentials, toys, and clothes. They also offer car seat fitting near the Family Room.\n\n2. Nike \u2014 First Floor, North Wing  \n   Great for sporty kids with trendy sneakers and activewear. They even have shoe customization if he likes unique kicks.\n\nWould you like me to guide you to either store or suggest some kid-friendly dining nearby after shopping?",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-13 08:14:02.088874"
+}
