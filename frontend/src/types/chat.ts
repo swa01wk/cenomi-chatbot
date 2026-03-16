@@ -22,6 +22,15 @@ export interface ChatMessage {
   feedback?: MessageFeedback;
 }
 
+export interface ShortlistedEntity {
+  name: string;
+  reason: string;
+  type?: string;
+  floor?: string;
+  wing?: string;
+  category?: string;
+}
+
 export interface DebugPayload {
   turn_id: string;
   session_id: string;
@@ -57,6 +66,14 @@ export interface DebugPayload {
 
   warnings: string[];
   node_trace: Array<Record<string, unknown>>;
+
+  continuity_anchor?: string;
+  thread_preservation_decision?: string;
+  expected_playbook_candidates?: string[];
+  shortlisted_entities?: ShortlistedEntity[];
+  response_contract?: string;
+  price_expectation_mode?: boolean;
+  narrowing_followup_opportunity?: string;
 }
 
 export interface Session {

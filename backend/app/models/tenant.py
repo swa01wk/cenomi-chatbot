@@ -551,6 +551,266 @@ SESSION_ADAPTATION_MUTABILITY: dict[str, Mutability] = {
 
 
 # ---------------------------------------------------------------------------
+# 9. Response Policy (AI Findr-style behavior controls)
+# ---------------------------------------------------------------------------
+
+
+class ResponsePolicy(BaseModel):
+    """
+    Governs the high-level response philosophy — how the concierge
+    presents information, handles context, and avoids common
+    chatbot anti-patterns.
+
+    The ``style_family`` selector activates a named behavior preset.
+    Boolean flags fine-tune individual behaviors within that preset.
+    Shortlist bounds are policy-level caps that override response_shape
+    when the policy is more restrictive.
+    """
+
+    style_family: Literal[
+        "ai_findr",
+        "traditional_concierge",
+        "minimal",
+        "custom",
+    ] = Field(
+        default="ai_findr",
+        description=(
+            "Named behavior preset. 'ai_findr' = curated, conversational, "
+            "decision-helping. 'traditional_concierge' = formal, thorough. "
+            "'minimal' = bare essentials. 'custom' = rely entirely on flags."
+        ),
+    )
+
+    always_acknowledge_scene: bool = Field(
+        default=True,
+        description=(
+            "When True the first response in a thread briefly mirrors the "
+            "visitor's expressed situation (e.g. 'Since you're here with kids…') "
+            "before presenting recommendations."
+        ),
+    )
+    prefer_short_contextual_intro: bool = Field(
+        default=True,
+        description=(
+            "Lead with a one-sentence contextual intro instead of a generic "
+            "greeting or preamble.  Keeps the top of the response useful."
+        ),
+    )
+
+    prefer_curated_shortlist: bool = Field(
+        default=True,
+        description=(
+            "When True the response favors a curated shortlist of best-fit "
+            "options over a long directory-style dump."
+        ),
+    )
+    default_shortlist_size: int = Field(
+        default=3, ge=1, le=10,
+        description="Policy-level default number of items in a shortlist.",
+    )
+    max_shortlist_size: int = Field(
+        default=5, ge=1, le=15,
+        description="Hard cap — even if context suggests more, never exceed this.",
+    )
+
+    prefer_one_line_reasons: bool = Field(
+        default=True,
+        description=(
+            "Each shortlist item gets at most one line of 'why this fits you' "
+            "reasoning, not a paragraph."
+        ),
+    )
+    show_location_only_when_useful: bool = Field(
+        default=True,
+        description=(
+            "Include floor/zone only when it helps the visitor decide or act — "
+            "e.g. when comparing proximity, not as boilerplate on every item."
+        ),
+    )
+    deprioritize_floor_zone_details: bool = Field(
+        default=True,
+        description=(
+            "Push floor/zone info to the end of the item line or omit "
+            "unless the visitor asked for directions."
+        ),
+    )
+
+    prefer_followup_narrowing_question: bool = Field(
+        default=True,
+        description=(
+            "End the response with a narrowing question that helps the visitor "
+            "decide (e.g. 'Looking for something under 300 SAR?') rather than "
+            "an open-ended 'anything else?'."
+        ),
+    )
+
+    avoid_brochure_tone: bool = Field(
+        default=True,
+        description=(
+            "Suppress corporate-speak like 'wide array of', 'boasts', "
+            "'plethora of options'.  Use natural conversational language."
+        ),
+    )
+    avoid_repeating_full_mall_name: bool = Field(
+        default=True,
+        description=(
+            "After the first mention, refer to the mall as 'here' or 'the mall' "
+            "instead of repeating the full branded name."
+        ),
+    )
+
+    prefer_decision_help_over_description: bool = Field(
+        default=True,
+        description=(
+            "When describing an entity, emphasize what helps the visitor choose "
+            "(price positioning, audience fit, vibe) over marketing copy."
+        ),
+    )
+
+    preserve_thread_continuity: bool = Field(
+        default=True,
+        description=(
+            "Responses reference what was discussed earlier in the thread "
+            "when it would feel unnatural not to."
+        ),
+    )
+    preserve_topic_on_short_followups: bool = Field(
+        default=True,
+        description=(
+            "Short follow-ups like 'affordable?' or 'something quieter' refine "
+            "the active thread instead of starting a new topic."
+        ),
+    )
+
+    prefer_contextual_grouping: bool = Field(
+        default=True,
+        description=(
+            "Group shortlist items by visitor-relevant dimension (e.g. by vibe, "
+            "by budget tier) rather than alphabetically or by entity type."
+        ),
+    )
+    prefer_price_range_when_exact_price_missing: bool = Field(
+        default=True,
+        description=(
+            "If exact pricing is unavailable, provide a rough price range or "
+            "tier ('mid-range', '~200 SAR') instead of asking the user or "
+            "staying silent about price."
+        ),
+    )
+
+
+RESPONSE_POLICY_MUTABILITY: dict[str, Mutability] = {
+    "style_family": Mutability.ADMIN_ONLY,
+    "always_acknowledge_scene": Mutability.TENANT,
+    "prefer_short_contextual_intro": Mutability.TENANT,
+    "prefer_curated_shortlist": Mutability.TENANT,
+    "default_shortlist_size": Mutability.SESSION,
+    "max_shortlist_size": Mutability.ADMIN_ONLY,
+    "prefer_one_line_reasons": Mutability.TENANT,
+    "show_location_only_when_useful": Mutability.TENANT,
+    "deprioritize_floor_zone_details": Mutability.TENANT,
+    "prefer_followup_narrowing_question": Mutability.TENANT,
+    "avoid_brochure_tone": Mutability.ADMIN_ONLY,
+    "avoid_repeating_full_mall_name": Mutability.TENANT,
+    "prefer_decision_help_over_description": Mutability.TENANT,
+    "preserve_thread_continuity": Mutability.SESSION,
+    "preserve_topic_on_short_followups": Mutability.SESSION,
+    "prefer_contextual_grouping": Mutability.TENANT,
+    "prefer_price_range_when_exact_price_missing": Mutability.TENANT,
+}
+
+
+# ---------------------------------------------------------------------------
+# 10. Strategy Behavior Weights (AI Findr scoring signals)
+# ---------------------------------------------------------------------------
+
+
+class StrategyBehaviorWeights(BaseModel):
+    """
+    Scoring weights used across strategy selection, response generation,
+    and candidate ranking to enforce AI Findr-style quality.
+
+    Positive weights *boost* desirable behaviors; negative-signed
+    ``*_penalty`` fields *penalize* undesirable patterns.  The runtime
+    multiplies these into the scoring formula at each decision point.
+
+    All weights are 0.0–1.0.  Higher = stronger influence.
+    """
+
+    # --- positive reward signals ---
+    continuity_preservation_weight: float = Field(
+        default=0.85, ge=0.0, le=1.0,
+        description=(
+            "How much to reward a strategy/response that maintains "
+            "thread continuity with the prior turn."
+        ),
+    )
+    shortlist_quality_weight: float = Field(
+        default=0.80, ge=0.0, le=1.0,
+        description=(
+            "Reward strategies that produce a tight, curated shortlist "
+            "over those that dump many results."
+        ),
+    )
+    scene_acknowledgment_weight: float = Field(
+        default=0.75, ge=0.0, le=1.0,
+        description=(
+            "Reward responses that reflect the visitor's stated scene "
+            "(companions, occasion, budget) in the opening line."
+        ),
+    )
+    followup_usefulness_weight: float = Field(
+        default=0.70, ge=0.0, le=1.0,
+        description=(
+            "Reward follow-up questions that narrow the decision space "
+            "rather than asking open-ended 'anything else?'."
+        ),
+    )
+
+    # --- penalty signals (higher = harsher penalty) ---
+    overdescription_penalty: float = Field(
+        default=0.65, ge=0.0, le=1.0,
+        description=(
+            "Penalize responses that include unnecessary marketing copy "
+            "or entity descriptions beyond what helps the visitor decide."
+        ),
+    )
+    clarification_penalty: float = Field(
+        default=0.60, ge=0.0, le=1.0,
+        description=(
+            "Penalize strategies that require asking the visitor "
+            "a clarification question before providing value."
+        ),
+    )
+    wrong_thread_penalty: float = Field(
+        default=0.80, ge=0.0, le=1.0,
+        description=(
+            "Penalize responses that ignore the active topic thread "
+            "and address an unrelated domain."
+        ),
+    )
+    brochure_tone_penalty: float = Field(
+        default=0.70, ge=0.0, le=1.0,
+        description=(
+            "Penalize responses whose language resembles corporate "
+            "marketing copy rather than natural conversation."
+        ),
+    )
+
+
+STRATEGY_BEHAVIOR_MUTABILITY: dict[str, Mutability] = {
+    "continuity_preservation_weight": Mutability.TENANT,
+    "shortlist_quality_weight": Mutability.TENANT,
+    "scene_acknowledgment_weight": Mutability.TENANT,
+    "followup_usefulness_weight": Mutability.TENANT,
+    "overdescription_penalty": Mutability.TENANT,
+    "clarification_penalty": Mutability.TENANT,
+    "wrong_thread_penalty": Mutability.ADMIN_ONLY,
+    "brochure_tone_penalty": Mutability.ADMIN_ONLY,
+}
+
+
+# ---------------------------------------------------------------------------
 # Composed tenant configuration
 # ---------------------------------------------------------------------------
 
@@ -576,6 +836,10 @@ class TenantConfig(BaseModel):
     retrieval: RetrievalPolicy = Field(default_factory=RetrievalPolicy)
     ranking: RankingBiases = Field(default_factory=RankingBiases)
     session_adaptation: SessionAdaptationBiases = Field(default_factory=SessionAdaptationBiases)
+    response_policy: ResponsePolicy = Field(default_factory=ResponsePolicy)
+    strategy_behavior_weights: StrategyBehaviorWeights = Field(
+        default_factory=StrategyBehaviorWeights,
+    )
 
     # Per-entity commercial overrides (keyed by entity_id)
     entity_params: dict[str, TenantParams] = Field(default_factory=dict)
@@ -591,6 +855,8 @@ class TenantConfig(BaseModel):
             "retrieval": RETRIEVAL_MUTABILITY,
             "ranking": RANKING_MUTABILITY,
             "session_adaptation": SESSION_ADAPTATION_MUTABILITY,
+            "response_policy": RESPONSE_POLICY_MUTABILITY,
+            "strategy_behavior_weights": STRATEGY_BEHAVIOR_MUTABILITY,
         }
 
     def get_tunable_params(self, tier: Mutability) -> dict[str, list[str]]:

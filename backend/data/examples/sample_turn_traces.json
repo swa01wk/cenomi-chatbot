@@ -1,0 +1,262 @@
+{
+  "_description": "Sample multi-turn traces demonstrating continuity anchor, routing rules, and response contract behavior.",
+
+  "trace_1_jackets_to_son_to_price_to_affordable": {
+    "_scenario": "Shopping thread with progressive refinement: jackets → son → price → affordable",
+
+    "turn_1": {
+      "user_message": "I'm looking for jackets",
+      "intent": {
+        "domain": "shopping",
+        "sub_intent": "fashion_shopping",
+        "message_kind": "fresh_request",
+        "is_refinement_of_current_topic": false,
+        "detected_refinement_cues": []
+      },
+      "continuity_anchor_after": {
+        "domain": "shopping",
+        "topic": "fashion_shopping",
+        "subtopic": "",
+        "audience": "",
+        "budget": "",
+        "last_strategy": "shortlist_recommendation",
+        "last_successful_shortlist": ["Zara", "Mango", "H&M"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "default: no switch detected" },
+      "response_contract": {
+        "intro_style": "scene_aware",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "followup_style": "narrowing_question"
+      },
+      "candidate_reason_map": [
+        { "entity_name": "Zara", "chosen_reason_type": "general", "one_line_reason": "Trendy jackets with quick seasonal turnover" },
+        { "entity_name": "Mango", "chosen_reason_type": "general", "one_line_reason": "Modern cuts at accessible prices" },
+        { "entity_name": "H&M", "chosen_reason_type": "general", "one_line_reason": "Wide range from casual to smart" }
+      ],
+      "narrowing_followup": { "is_useful": true, "suggested_question": "Who are you shopping for — yourself, family, or someone special?", "narrowing_dimension": "audience" },
+      "response_sketch": "Here are some great jacket options:\n\n1. **Zara** — Trendy jackets with quick seasonal turnover\n2. **Mango** — Modern cuts at accessible prices\n3. **H&M** — Wide range from casual to smart\n\nWho are you shopping for — yourself, family, or someone special?"
+    },
+
+    "turn_2": {
+      "user_message": "for my son",
+      "_routing_rule": "Short follow-up (3 words) + strong continuity anchor → refinement, NOT topic_switch. Audience bias added: kids.",
+      "intent": {
+        "domain": "shopping",
+        "sub_intent": "fashion_shopping",
+        "message_kind": "refinement",
+        "is_refinement_of_current_topic": true,
+        "detected_refinement_cues": ["for my son"]
+      },
+      "continuity_anchor_after": {
+        "domain": "shopping",
+        "topic": "fashion_shopping",
+        "subtopic": "for my son",
+        "audience": "kids",
+        "budget": "",
+        "last_strategy": "shortlist_recommendation",
+        "last_successful_shortlist": ["Zara Kids", "H&M Kids", "OVS Kids"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "refinement cues: ['for my son']" },
+      "response_contract": {
+        "intro_style": "topic_continuation",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "followup_style": "narrowing_question"
+      },
+      "candidate_reason_map": [
+        { "entity_name": "Zara Kids", "chosen_reason_type": "audience_fit", "one_line_reason": "Good boys' jacket selection — durable and stylish" },
+        { "entity_name": "H&M Kids", "chosen_reason_type": "audience_fit", "one_line_reason": "Affordable kids' outerwear in fun designs" },
+        { "entity_name": "OVS Kids", "chosen_reason_type": "audience_fit", "one_line_reason": "Italian kids' brand with warm winter jackets" }
+      ],
+      "narrowing_followup": { "is_useful": true, "suggested_question": "Looking for something specific budget-wise?", "narrowing_dimension": "budget" },
+      "response_sketch": "For your son, these stores have great boys' jackets:\n\n1. **Zara Kids** — Durable and stylish selections\n2. **H&M Kids** — Fun designs at friendly prices\n3. **OVS Kids** — Warm Italian-brand winter jackets\n\nLooking for something specific budget-wise?"
+    },
+
+    "turn_3": {
+      "user_message": "price?",
+      "_routing_rule": "Price question inside active shopping thread → stays in shopping (refinement). Does NOT trigger topic_switch or services/store_hours.",
+      "intent": {
+        "domain": "shopping",
+        "sub_intent": "fashion_shopping",
+        "message_kind": "followup",
+        "is_refinement_of_current_topic": true,
+        "detected_refinement_cues": ["price"]
+      },
+      "continuity_anchor_after": {
+        "domain": "shopping",
+        "topic": "fashion_shopping",
+        "subtopic": "for my son + price",
+        "audience": "kids",
+        "budget": "",
+        "last_strategy": "shortlist_recommendation",
+        "last_successful_shortlist": ["Zara Kids", "H&M Kids", "OVS Kids"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "refinement cues: ['price']" },
+      "response_contract": {
+        "intro_style": "topic_continuation",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "exact_price_mode": "range_only"
+      },
+      "response_sketch": "Here's a rough price guide for boys' jackets:\n\n1. **Zara Kids** — Mid-range, typically 200-400 SAR\n2. **H&M Kids** — Budget-friendly, around 100-250 SAR\n3. **OVS Kids** — Mid-range, 150-350 SAR\n\nWant me to focus on budget-friendly options?"
+    },
+
+    "turn_4": {
+      "user_message": "affordable",
+      "_routing_rule": "Short adjective follow-up + strong anchor → refinement. Budget set to 'budget'. Shortlist re-ranked with budget bias.",
+      "intent": {
+        "domain": "shopping",
+        "sub_intent": "fashion_shopping",
+        "message_kind": "refinement",
+        "is_refinement_of_current_topic": true,
+        "detected_refinement_cues": ["affordable"]
+      },
+      "continuity_anchor_after": {
+        "domain": "shopping",
+        "topic": "fashion_shopping",
+        "subtopic": "for my son + affordable",
+        "audience": "kids",
+        "budget": "budget",
+        "last_strategy": "shortlist_recommendation",
+        "last_successful_shortlist": ["H&M Kids", "OVS Kids", "LC Waikiki"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "refinement cues: ['affordable']" },
+      "response_contract": {
+        "intro_style": "topic_continuation",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "exact_price_mode": "range_only"
+      },
+      "candidate_reason_map": [
+        { "entity_name": "H&M Kids", "chosen_reason_type": "budget_fit", "one_line_reason": "Best value — boys' jackets from around 100 SAR" },
+        { "entity_name": "OVS Kids", "chosen_reason_type": "budget_fit", "one_line_reason": "Quality Italian brand at accessible prices" },
+        { "entity_name": "LC Waikiki", "chosen_reason_type": "budget_fit", "one_line_reason": "Very budget-friendly kids' outerwear" }
+      ],
+      "response_sketch": "For affordable boys' jackets:\n\n1. **H&M Kids** — Best value, jackets from around 100 SAR\n2. **OVS Kids** — Quality Italian brand at accessible prices\n3. **LC Waikiki** — Very budget-friendly kids' outerwear\n\nWant me to check if any of these have current promotions?"
+    }
+  },
+
+  "trace_2_food_with_son": {
+    "_scenario": "Dining thread with child-specific follow-up preserving the topic and adding audience bias.",
+
+    "turn_1": {
+      "user_message": "Where can we eat?",
+      "intent": {
+        "domain": "dining",
+        "sub_intent": "general_dining",
+        "message_kind": "fresh_request",
+        "is_refinement_of_current_topic": false
+      },
+      "continuity_anchor_after": {
+        "domain": "dining",
+        "topic": "general_dining",
+        "audience": "",
+        "last_strategy": "shortlist_recommendation"
+      },
+      "response_sketch": "Here are my top dining picks:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting\n2. **Eataly** — Italian market + restaurant, great for browsing\n3. **PF Chang's** — Asian fusion with generous portions\n\nAre you dining with anyone specific — kids, partner, friends?"
+    },
+
+    "turn_2": {
+      "user_message": "with my son",
+      "_routing_rule": "Child-specific follow-up → preserve dining topic, add audience bias: kids. Re-rank for family_friendly + kid_friendly. DO NOT switch to shopping or entertainment.",
+      "intent": {
+        "domain": "dining",
+        "sub_intent": "family_dining",
+        "message_kind": "refinement",
+        "is_refinement_of_current_topic": true,
+        "detected_refinement_cues": ["with my son"]
+      },
+      "continuity_anchor_after": {
+        "domain": "dining",
+        "topic": "family_dining",
+        "subtopic": "with my son",
+        "audience": "kids",
+        "budget": "",
+        "last_strategy": "shortlist_recommendation",
+        "last_successful_shortlist": ["PF Chang's", "Eataly", "Shake Shack"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "refinement cues: ['with my son']" },
+      "response_contract": {
+        "intro_style": "topic_continuation",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "followup_style": "narrowing_question"
+      },
+      "candidate_reason_map": [
+        { "entity_name": "PF Chang's", "chosen_reason_type": "audience_fit", "one_line_reason": "Kids' menu available, fun atmosphere for families" },
+        { "entity_name": "Eataly", "chosen_reason_type": "audience_fit", "one_line_reason": "Kids love the pizza counter and the browsing" },
+        { "entity_name": "Shake Shack", "chosen_reason_type": "audience_fit", "one_line_reason": "Burgers and shakes — a hit with kids" }
+      ],
+      "response_sketch": "Great choices for dining with your son:\n\n1. **PF Chang's** — Kids' menu available, fun atmosphere\n2. **Eataly** — Kids love the pizza counter\n3. **Shake Shack** — Burgers and shakes, always a hit\n\nLooking for something quick or a sit-down meal?"
+    }
+  },
+
+  "trace_3_movie_with_child": {
+    "_scenario": "Entertainment thread with child follow-up. movie_showtime should NOT inherit a budget shopping strategy from a prior session.",
+
+    "turn_1": {
+      "user_message": "What movies are showing?",
+      "intent": {
+        "domain": "entertainment",
+        "sub_intent": "movie_showtime",
+        "message_kind": "fresh_request",
+        "is_refinement_of_current_topic": false
+      },
+      "continuity_anchor_after": {
+        "domain": "entertainment",
+        "topic": "movie_showtime",
+        "audience": "",
+        "last_strategy": "movie_plus_food"
+      },
+      "response_contract": {
+        "intro_style": "scene_aware",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "followup_style": "narrowing_question"
+      },
+      "response_sketch": "Here's what's showing at Muvi Cinemas today:\n\n1. **Kung Fu Panda 4** — Family-friendly, fun for all ages (2:00 PM, 5:30 PM)\n2. **Dune: Part Two** — Sci-fi epic, stunning visuals (3:00 PM, 7:00 PM)\n3. **The Fall Guy** — Action comedy, light and entertaining (4:15 PM, 8:00 PM)\n\nWho are you going with — planning to make it a family outing?"
+    },
+
+    "turn_2": {
+      "user_message": "with my child",
+      "_routing_rule": "Child follow-up in movie thread → preserve entertainment topic, add audience bias: kids. Filter movies to kid-friendly. Do NOT inherit budget_plan or shopping strategy.",
+      "intent": {
+        "domain": "entertainment",
+        "sub_intent": "movie_showtime",
+        "message_kind": "refinement",
+        "is_refinement_of_current_topic": true,
+        "detected_refinement_cues": ["with my child"]
+      },
+      "continuity_anchor_after": {
+        "domain": "entertainment",
+        "topic": "movie_showtime",
+        "subtopic": "with my child",
+        "audience": "kids",
+        "budget": "",
+        "last_strategy": "movie_plus_food",
+        "last_successful_shortlist": ["Kung Fu Panda 4", "Muvi Cinemas Kids Zone"]
+      },
+      "thread_preservation": { "preserve_current_topic": true, "reason": "refinement cues: ['with my child']" },
+      "response_contract": {
+        "intro_style": "topic_continuation",
+        "shortlist_size": 3,
+        "explanation_style": "one_line_reason",
+        "followup_style": "narrowing_question"
+      },
+      "candidate_reason_map": [
+        { "entity_name": "Kung Fu Panda 4", "chosen_reason_type": "audience_fit", "one_line_reason": "Perfect for kids — funny, colorful, all ages" },
+        { "entity_name": "Muvi Cinemas VIP Kids", "chosen_reason_type": "audience_fit", "one_line_reason": "Special kids' screenings with lower volume and lights" }
+      ],
+      "response_sketch": "For a movie with your child, **Kung Fu Panda 4** is the perfect pick — fun for all ages, showing at 2:00 PM and 5:30 PM.\n\nMuvi Cinemas also has special kids' screenings with softer sound and lighting.\n\nWant me to suggest a quick bite nearby before or after the movie?"
+    }
+  },
+
+  "_routing_rules_summary": {
+    "rule_1_short_adjective_noun_followup": "If the message is a short adjective/noun (<=4 words) and the continuity_anchor is strong, default to refinement — NOT topic_switch.",
+    "rule_2_price_in_shopping_thread": "A price question inside an active shopping thread stays in shopping. The domain does not switch to services or general.",
+    "rule_3_child_followup_preserves_topic": "A child-specific follow-up ('for my son', 'with my child') preserves the active topic and adds audience bias: kids. It does NOT start a new topic.",
+    "rule_4_movie_no_budget_inheritance": "movie_showtime should NOT inherit a budget_plan strategy from a prior shopping session. Entertainment gets its own strategy (movie_plus_food).",
+    "rule_5_explicit_switch_required": "Only classify as topic_switch when there is an EXPLICIT domain change cue ('forget that', 'instead', 'something else', 'new question')."
+  }
+}

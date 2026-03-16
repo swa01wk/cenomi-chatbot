@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-163f35eecaca",
+  "session_id": "session-9db58e4d908a4aff",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-778a16a5b474",
+  "user_message": "\u201cBest quick lunch before shopping.\u201d",
+  "previous_assistant_response": "For a quick lunch before shopping, Shake Shack is ideal with fast, tasty burgers near the escalators to the cinema, making it super convenient. Al Romansiah offers authentic Saudi dishes with generous portions if you want something more filling but still efficient. The Cheesecake Factory also works well for quick service and a variety of options to suit everyone. All three are on the second floor food court, so you can grab your meal and hit the shops quickly. Do you want something light or a more substantial meal?",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-03-16 06:52:12.871992"
+}

@@ -1,0 +1,25 @@
+{
+  "event_id": "fb-2f791886ce73",
+  "session_id": "session-2a7f01d4e8be48d1",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-5c38d7c3a026",
+  "user_message": "\u201cI want something affordable for men's clothing.\u201d",
+  "previous_assistant_response": "Since you\u2019re looking for affordable men\u2019s clothing, Brands For Less is a solid option for budget-friendly casual and sportswear. Max usually offers good value basics and seasonal styles at wallet-friendly prices. Zara is a bit higher but often has sales, so you might find trendy pieces at reasonable prices. Would you like me to focus on casual wear or something more formal?",
+  "detected_signals": [
+    "price_mismatch",
+    "preference_override"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\baffordable\\b",
+      "confidence": 0.9500000000000001
+    },
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-13 14:50:35.965951"
+}

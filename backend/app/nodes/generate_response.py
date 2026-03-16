@@ -4,10 +4,17 @@ Generate Response node — builds the LLM prompt and produces the response.
 CONTRACT
 ────────
   Purpose:  Assemble the full prompt from context, scene, playbook, strategy,
-            and retrieval results.  Call the LLM and produce the final text.
+            retrieval results, response_contract, candidate_reason_map, and
+            narrowing_followup.  Call the LLM and produce the final text.
+            Consume response_contract strictly — all intro style, shortlist
+            size, explanation style, location visibility, follow-up style,
+            continuity, brochure-tone, and price-mode rules are binding.
   Reads:    messages, intent, scene, playbook, context, response_plan,
-            retrieval, active_tenant_parameters
+            response_contract, candidate_reason_map, narrowing_followup,
+            continuity_anchor, retrieval, active_tenant_parameters
   Writes:   final_response_text, response_debug_summary,
+            continuity_anchor (update last_strategy, last_playbook,
+            last_successful_shortlist),
             messages (appends assistant Message)
   Failure:  LLM error → short fallback response + warning
   Routing:  Always → update_memory
@@ -78,7 +85,11 @@ async def generate_response(state: ConciergeState) -> dict:
         f"playbook={state.playbook.selected_playbook or 'none'} | "
         f"topics={state.context.selected_topic_blocks} | "
         f"entities={len(state.context.selected_entities)} | "
-        f"retrieval={'yes' if state.retrieval.retrieval_needed else 'no'}"
+        f"retrieval={'yes' if state.retrieval.retrieval_needed else 'no'} | "
+        f"contract_intro={state.response_contract.intro_style} | "
+        f"contract_shortlist={state.response_contract.shortlist_size} | "
+        f"reasons={len(state.candidate_reason_map)} | "
+        f"narrowing={'yes' if state.narrowing_followup.is_useful else 'no'}"
     )
 
     assistant_msg = Message(
@@ -88,16 +99,28 @@ async def generate_response(state: ConciergeState) -> dict:
         metadata={
             "strategy": state.response_plan.chosen_strategy,
             "playbook": state.playbook.selected_playbook,
+            "response_contract": state.response_contract.model_dump(),
         },
     )
+
+    # Update continuity anchor with this turn's outputs
+    anchor = state.continuity_anchor.model_copy(deep=True)
+    anchor.last_strategy = state.response_plan.chosen_strategy
+    anchor.last_playbook = state.playbook.selected_playbook
+    entity_names = [
+        e.get("name", "") for e in state.context.selected_entities if e.get("name")
+    ]
+    anchor.last_successful_shortlist = entity_names
 
     result: dict = {
         "final_response_text": final_text,
         "response_debug_summary": debug_summary,
+        "continuity_anchor": anchor,
         "messages": [assistant_msg],
         "_trace_summary": (
             f"Generated {len(final_text)} chars via "
-            f"{state.response_plan.chosen_strategy}"
+            f"{state.response_plan.chosen_strategy} | "
+            f"contract enforced"
         ),
     }
     if warnings:
@@ -109,6 +132,7 @@ def _build_fallback_response(state: ConciergeState) -> str:
     """Produce a graceful fallback when the LLM is unavailable."""
     domain = state.intent.domain
     entities = state.context.selected_entities
+    reasons = {r.entity_name: r for r in state.candidate_reason_map}
 
     if domain == "exploration" and entities:
         dining = [e for e in entities if e.get("entity_type") in ("dining", "restaurant", "cafe")]
@@ -129,21 +153,26 @@ def _build_fallback_response(state: ConciergeState) -> str:
         return "\n\n".join(parts)
 
     if entities:
-        by_type: dict[str, list[str]] = {}
-        for e in entities[:6]:
-            etype = e.get("entity_type", "option")
+        parts_list: list[str] = []
+        for e in entities[:state.response_contract.shortlist_size]:
             name = e.get("name", "")
-            if name:
-                by_type.setdefault(etype, []).append(name)
+            reason_entry = reasons.get(name)
+            if reason_entry and reason_entry.one_line_reason:
+                parts_list.append(f"**{name}** — {reason_entry.one_line_reason}")
+            elif name:
+                parts_list.append(f"**{name}**")
 
-        parts = []
-        for etype, names in by_type.items():
-            parts.append(f"{', '.join(names[:3])}")
-        if parts:
-            return (
-                f"Here are some suggestions: {'; '.join(parts)}. "
-                f"Would you like more details on any of these?"
-            )
+        if parts_list:
+            numbered = [f"{i+1}. {p}" for i, p in enumerate(parts_list)]
+            body = "\n".join(numbered)
+
+            followup = ""
+            if state.narrowing_followup.is_useful:
+                followup = f"\n\n{state.narrowing_followup.suggested_question}"
+            elif state.response_contract.followup_style == "open_ended":
+                followup = "\n\nWould you like more details on any of these?"
+
+            return f"Here are my picks:\n\n{body}{followup}"
 
     return (
         "I'd love to help! Could you tell me a bit more about "

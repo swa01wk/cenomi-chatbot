@@ -1,6 +1,6 @@
 {
   "mall_id": "cenomi_mall_01",
-  "tag_taxonomy_version": "1.0",
+  "tag_taxonomy_version": "2.0",
   "enrichment_rules": [
     {
       "rule_id": "er-jewelry-premium",
@@ -33,7 +33,7 @@
       "apply_vibe": ["playful", "casual"],
       "apply_outing_fit": ["family_outing", "practical_shopping"],
       "apply_gift_fit": ["child_gift"],
-      "priority_boost": { "family_visit_plan": 0.8, "budget_family_outing": 0.75, "child_activity_while_parents_shop": 0.6 }
+      "priority_boost": { "family_visit_plan": 0.8, "budget_family_outing": 0.75, "child_activity_while_parents_shop": 0.6, "kids_jackets": 0.85, "affordable_kids_jackets": 0.8 }
     },
     {
       "rule_id": "er-beauty-premium",
@@ -66,7 +66,7 @@
       "apply_vibe": ["casual", "energetic"],
       "apply_meal_fit": ["quick_bite"],
       "apply_outing_fit": ["quick_visit", "family_outing"],
-      "priority_boost": { "movie_plus_food": 0.8, "quick_lunch": 0.9, "kid_friendly_movie_plus_food": 0.75 }
+      "priority_boost": { "movie_plus_food": 0.8, "quick_lunch": 0.9, "kid_friendly_movie_plus_food": 0.75, "quick_food_before_movie": 0.9, "food_with_child": 0.7 }
     },
     {
       "rule_id": "er-casual-dining",
@@ -77,7 +77,7 @@
       "apply_vibe": ["casual"],
       "apply_meal_fit": ["sit_down_dining"],
       "apply_outing_fit": ["family_outing", "relaxed_visit"],
-      "priority_boost": { "family_visit_plan": 0.7, "date_plan": 0.5 }
+      "priority_boost": { "family_visit_plan": 0.7, "date_plan": 0.5, "family_food_budget": 0.65 }
     },
     {
       "rule_id": "er-fine-premium-dining",
@@ -135,7 +135,7 @@
       "apply_audience": ["family_friendly", "teen_friendly"],
       "apply_vibe": ["casual", "trendy"],
       "apply_outing_fit": ["practical_shopping", "quick_visit"],
-      "priority_boost": { "budget_family_outing": 0.8 }
+      "priority_boost": { "budget_family_outing": 0.8, "affordable_kids_jackets": 0.7 }
     },
     {
       "rule_id": "er-electronics-premium",
@@ -160,6 +160,65 @@
     }
   ],
   "profiles": [
+    {
+      "entity_id": "t-store-001",
+      "entity_type": "store",
+      "semantic_tags": ["family_friendly", "trending", "practical_shopping", "mid_range", "kid_friendly"],
+      "audience_fit": ["family_friendly", "teen_friendly", "solo_friendly", "kid_friendly"],
+      "vibe": ["trendy", "casual", "modern"],
+      "price_band": "mid_range",
+      "outing_fit": ["practical_shopping", "quick_visit", "family_outing", "solo_browsing"],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for fashion or clothing",
+        "User wants trending or affordable fashion",
+        "Family shopping trip including kids section",
+        "User mentions Zara specifically",
+        "User looking for kids jackets or outerwear in mid-range"
+      ],
+      "avoid_if": [
+        "User wants luxury or high-end only",
+        "User not interested in fashion"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.55,
+        "budget_family_outing": 0.60,
+        "solo_visit_plan": 0.65,
+        "practical_shopping": 0.80,
+        "kids_jackets": 0.70,
+        "affordable_kids_jackets": 0.65,
+        "girlfriend_plus_family_shopping": 0.50
+      },
+      "concierge_notes": "Zara currently has End of Season Sale (up to 50% off). First store after Main Entrance — easy stop for fashion browsing. New arrivals weekly. Has a kids section for family shoppers including jackets and outerwear.",
+      "concierge_reasons": {
+        "short_reason": "trendy mid-range fashion with a good kids section and current end-of-season sale",
+        "kid_reason": "has a kids section with jackets, outerwear, and seasonal pieces for children",
+        "budget_reason": "end-of-season sale brings prices down to budget-friendly levels for many items",
+        "couple_reason": "both can browse — men's, women's, and kids' sections under one roof",
+        "family_reason": "one-stop shop for the whole family including a well-stocked kids department",
+        "quick_reason": "right by the Main Entrance so you can grab what you need without walking far",
+        "movie_reason": "",
+        "gift_reason": "",
+        "when_best_used": "when the family needs fashion basics or seasonal clothing, especially during sales",
+        "avoid_when": "the user specifically wants luxury, premium labels, or non-fashion items",
+        "followup_hint": "ask if they want to compare with H&M across the corridor for budget options"
+      },
+      "response_fit_tags": ["shortlist", "comparison", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "fashion_family",
+        "continuity_keywords": ["fashion", "clothes", "clothing", "zara", "kids section", "sale", "jacket"],
+        "refinement_keywords": ["kids", "boys", "girls", "men", "women", "sale items", "new arrivals", "size"],
+        "likely_followups": ["price range", "kids sizes", "current sale items", "comparison with H&M", "where exactly in the mall"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Typical items 100-400 SAR. Kids items 60-200 SAR. Currently up to 50% off winter collection.",
+        "price_question_response_hint": "I don't have exact prices, but Zara is mid-range — expect around 100-400 SAR for most items. Their current end-of-season sale has discounts up to 50% off, so you might find great deals."
+      }
+    },
     {
       "entity_id": "t-store-002",
       "entity_type": "store",
@@ -188,9 +247,37 @@
         "luxury_shopping_plan": 0.85,
         "date_plan": 0.60,
         "last_minute_gift": 0.70,
-        "gift_for_family": 0.65
+        "gift_for_family": 0.65,
+        "girlfriend_plus_family_shopping": 0.80
       },
-      "concierge_notes": "L'azurde is a Saudi brand — highlight this for visitors who appreciate local craftsmanship. Excellent for bridal jewelry and milestone gifts. Suggest engraving for personalization. Pairs well with a romantic dinner at Eataly afterward."
+      "concierge_notes": "L'azurde is a Saudi brand — highlight this for visitors who appreciate local craftsmanship. Excellent for bridal jewelry and milestone gifts. Suggest engraving for personalization. Pairs well with a romantic dinner at Eataly afterward.",
+      "concierge_reasons": {
+        "short_reason": "Saudi fine jewelry brand — ideal for meaningful gifts with local craftsmanship",
+        "kid_reason": "",
+        "budget_reason": "",
+        "couple_reason": "the go-to for a romantic surprise — gold, diamonds, and engraving available",
+        "family_reason": "strong choice for gifting a wife or mother something truly special",
+        "quick_reason": "",
+        "movie_reason": "",
+        "gift_reason": "top recommendation for girlfriend/wife gifts — engraving and bridal collections set it apart",
+        "when_best_used": "when the user wants a premium, meaningful gift for a woman they care about",
+        "avoid_when": "the user is on a tight budget or shopping purely for kids or practical items",
+        "followup_hint": "ask about budget range — if too high, pivot to Pandora as accessible alternative"
+      },
+      "response_fit_tags": ["shortlist", "standalone", "gift_formula"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "jewelry_gift",
+        "continuity_keywords": ["jewelry", "gold", "diamond", "gift", "lazurde", "necklace", "ring", "bracelet"],
+        "refinement_keywords": ["budget", "engraving", "bridal", "custom", "gold vs silver", "price"],
+        "likely_followups": ["how much does it cost", "do they engrave", "is there something cheaper", "can I pair it with dinner"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "premium",
+        "price_expectation_notes": "Fine jewelry: rings from ~500 SAR, necklaces from ~800 SAR, bridal pieces significantly higher. Wide range depending on materials.",
+        "price_question_response_hint": "L'azurde is premium jewelry — prices vary widely depending on the piece and materials. Expect starting points around 500 SAR for simpler items, going up significantly for gold and diamond pieces. I'd recommend visiting to see their range."
+      }
     },
     {
       "entity_id": "t-store-003",
@@ -206,7 +293,8 @@
         "User shopping for baby or children's items",
         "New parents looking for essentials",
         "Gift for a child or baby shower",
-        "User mentions kids, baby, or maternity"
+        "User mentions kids, baby, or maternity",
+        "User looking for kids jackets or outerwear"
       ],
       "avoid_if": [
         "User looking for adult fashion or luxury items",
@@ -218,9 +306,542 @@
         "budget_family_outing": 0.75,
         "child_activity_while_parents_shop": 0.40,
         "gift_for_family": 0.70,
-        "practical_shopping": 0.85
+        "practical_shopping": 0.85,
+        "kids_jackets": 0.90,
+        "affordable_kids_jackets": 0.85,
+        "gift_for_child": 0.80
       },
-      "concierge_notes": "Mothercare is the go-to for baby essentials. Located near the Family Room for convenience — mention this to parents. Offers car seat fitting service which is valuable for new parents. Good pairing with Billy Beez or KidZania for kids' entertainment afterward."
+      "concierge_notes": "Mothercare is the go-to for baby essentials. Located near the Family Room for convenience — mention this to parents. Offers car seat fitting service which is valuable for new parents. Good pairing with Billy Beez or KidZania for kids' entertainment afterward.",
+      "concierge_reasons": {
+        "short_reason": "specialist kids retailer — the most focused option for children's clothing and essentials",
+        "kid_reason": "dedicated kidswear store with jackets, coats, and seasonal outerwear for ages 0-8",
+        "budget_reason": "mid-range pricing with regular promotions on kids basics and outerwear",
+        "couple_reason": "",
+        "family_reason": "near the Family Room with everything from baby gear to kids jackets in one place",
+        "quick_reason": "well-organized kids store — easy to find what you need without browsing the whole mall",
+        "movie_reason": "",
+        "gift_reason": "great for a practical child gift — especially clothing sets and baby essentials",
+        "when_best_used": "when a parent needs kids clothing, jackets, or baby essentials — this is the first stop",
+        "avoid_when": "the conversation has zero child context or the user is looking for adult items",
+        "followup_hint": "ask about the child's age — Mothercare covers 0-8 years; older kids may need Zara or H&M"
+      },
+      "response_fit_tags": ["shortlist", "itinerary", "standalone"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "kidswear_essentials",
+        "continuity_keywords": ["kids", "baby", "children", "mothercare", "kidswear", "jacket", "coat", "outerwear"],
+        "refinement_keywords": ["age", "size", "boy", "girl", "infant", "toddler", "price", "formal", "sporty"],
+        "likely_followups": ["what ages do they cover", "do they have jackets", "price range", "is it near anything else for kids", "compare with H&M kids"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Kids jackets 80-200 SAR. Baby essentials 30-150 SAR. Pushchairs and car seats are premium items.",
+        "price_question_response_hint": "Mothercare is mid-range for kidswear. Kids jackets typically run 80-200 SAR, everyday basics 30-100 SAR. They often have promotions on seasonal items."
+      }
+    },
+    {
+      "entity_id": "t-store-004",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "husband_gift", "corporate_gift", "premium", "self_treat"],
+      "audience_fit": ["solo_friendly", "teen_friendly"],
+      "vibe": ["modern", "upscale"],
+      "price_band": "premium",
+      "outing_fit": ["practical_shopping", "relaxed_visit", "solo_browsing"],
+      "gift_fit": ["husband_gift", "friend_gift", "corporate_gift", "self_treat", "child_gift"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants to buy electronics or gadgets",
+        "Gift for a tech-savvy person",
+        "User needs Apple product support (Genius Bar)",
+        "User mentions iPhone, iPad, MacBook, or Apple"
+      ],
+      "avoid_if": [
+        "User on a tight budget for non-tech items",
+        "User only looking for fashion or dining"
+      ],
+      "priority_scores": {
+        "gift_for_family": 0.70,
+        "luxury_shopping_plan": 0.60,
+        "solo_visit_plan": 0.55,
+        "last_minute_gift": 0.50,
+        "gift_for_child": 0.45,
+        "gift_for_girlfriend": 0.40
+      },
+      "concierge_notes": "Apple Store offers Genius Bar support — useful for visitors with device issues. Today at Apple workshops are free and engaging. AirPods and accessories make excellent last-minute gifts. Engraving available on select products.",
+      "concierge_reasons": {
+        "short_reason": "official Apple store with full product range, Genius Bar, and engraving service",
+        "kid_reason": "iPad or Apple Watch can work as a premium child gift for older kids",
+        "budget_reason": "",
+        "couple_reason": "matching AirPods or Apple Watches make thoughtful couple gifts",
+        "family_reason": "iPads for kids, accessories for parents — covers multiple family gift needs",
+        "quick_reason": "AirPods are a quick, universally liked grab-and-go gift",
+        "movie_reason": "",
+        "gift_reason": "AirPods, engraved iPads, or Apple Watch — premium gifts that always land well",
+        "when_best_used": "when the user wants a premium tech gift or needs Apple support",
+        "avoid_when": "the user is on a tight budget or has no interest in technology",
+        "followup_hint": "ask who the gift is for — teen (AirPods), professional (MacBook), kid (iPad)"
+      },
+      "response_fit_tags": ["shortlist", "standalone", "gift_formula"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "electronics_tech",
+        "continuity_keywords": ["apple", "iphone", "ipad", "macbook", "airpods", "electronics", "tech", "gadget"],
+        "refinement_keywords": ["model", "price", "color", "engraving", "genius bar", "repair", "trade-in"],
+        "likely_followups": ["how much", "do they have the latest model", "can they engrave it", "is there a sale"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "premium",
+        "price_expectation_notes": "AirPods from ~500 SAR, iPads from ~1500 SAR, iPhones from ~3500 SAR. Apple pricing is standardized globally.",
+        "price_question_response_hint": "Apple pricing is fairly standardized. AirPods start around 500 SAR, iPads from about 1,500 SAR, and iPhones from roughly 3,500 SAR. For exact pricing on a specific model, I'd recommend checking at the store."
+      }
+    },
+    {
+      "entity_id": "t-store-005",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "self_treat", "premium", "special_occasion"],
+      "audience_fit": ["solo_friendly", "couple_friendly"],
+      "vibe": ["upscale", "modern", "trendy"],
+      "price_band": "premium",
+      "outing_fit": ["relaxed_visit", "special_occasion", "solo_browsing"],
+      "gift_fit": ["girlfriend_gift", "wife_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for beauty or fragrance gifts",
+        "User wants skincare recommendations",
+        "Gift for girlfriend, wife, or friend",
+        "User browsing beauty products",
+        "User mentions makeup, perfume, or skincare"
+      ],
+      "avoid_if": [
+        "User on a tight budget looking for essentials",
+        "User not interested in beauty products",
+        "Male user shopping only for self with no interest in beauty"
+      ],
+      "priority_scores": {
+        "gift_for_girlfriend": 0.85,
+        "luxury_shopping_plan": 0.70,
+        "anniversary_plan": 0.55,
+        "last_minute_gift": 0.75,
+        "solo_visit_plan": 0.50,
+        "girlfriend_plus_family_shopping": 0.75
+      },
+      "concierge_notes": "Sephora is a top gift destination — the gift sets are curated and ready to go. Beauty advisor can help personalize choices. Currently running Spring Beauty Sale (20% off selected items). Mention the fragrance sampling for undecided gift buyers.",
+      "concierge_reasons": {
+        "short_reason": "top beauty retailer with curated gift sets and in-store beauty advisors",
+        "kid_reason": "",
+        "budget_reason": "",
+        "couple_reason": "fragrance sampling makes a fun couples activity; gift sets are ready to go",
+        "family_reason": "",
+        "quick_reason": "pre-made gift sets mean you can grab a beautiful present in under 10 minutes",
+        "movie_reason": "",
+        "gift_reason": "best place for beauty gifts — curated sets, fragrance sampling, and 20% spring sale right now",
+        "when_best_used": "when the user needs a gift for a woman or wants premium beauty shopping",
+        "avoid_when": "user has zero interest in beauty or is on a very tight budget",
+        "followup_hint": "ask if they want fragrance, skincare, or makeup — advisor can personalize the pick"
+      },
+      "response_fit_tags": ["shortlist", "standalone", "gift_formula"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "beauty_gift",
+        "continuity_keywords": ["sephora", "beauty", "makeup", "skincare", "fragrance", "perfume", "cosmetics"],
+        "refinement_keywords": ["brand", "budget", "gift set", "specific product", "skin type", "fragrance type"],
+        "likely_followups": ["what brands do they carry", "any current deals", "gift sets under X SAR", "fragrance recommendations"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid_to_premium",
+        "price_expectation_notes": "Gift sets 150-500 SAR. Individual fragrances 200-800 SAR. Skincare varies widely by brand. Currently 20% off selected lines.",
+        "price_question_response_hint": "Sephora carries a wide range — gift sets typically 150-500 SAR, fragrances 200-800 SAR. They currently have a Spring Beauty Sale with up to 20% off selected items, which is a great time to shop."
+      }
+    },
+    {
+      "entity_id": "t-store-006",
+      "entity_type": "store",
+      "semantic_tags": ["budget", "family_friendly", "practical_shopping", "kid_friendly"],
+      "audience_fit": ["family_friendly", "teen_friendly", "kid_friendly"],
+      "vibe": ["casual", "trendy"],
+      "price_band": "budget",
+      "outing_fit": ["practical_shopping", "quick_visit", "family_outing"],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for affordable family fashion",
+        "Budget-conscious shopping",
+        "User wants basic wardrobe staples",
+        "User mentions H&M or budget fashion",
+        "User wants affordable kids jackets or outerwear"
+      ],
+      "avoid_if": [
+        "User wants premium or luxury only"
+      ],
+      "priority_scores": {
+        "budget_family_outing": 0.85,
+        "family_visit_plan": 0.55,
+        "practical_shopping": 0.80,
+        "kids_jackets": 0.75,
+        "affordable_kids_jackets": 0.90,
+        "family_food_budget": 0.40
+      },
+      "concierge_notes": "H&M is the best budget-friendly fashion option. Great for stocking up on basics for the whole family. Has a sustainable line for eco-conscious shoppers. Opposite Zara for easy comparison shopping.",
+      "concierge_reasons": {
+        "short_reason": "best budget-friendly place to start for kids' jackets and family basics",
+        "kid_reason": "easy option for parents shopping for boys or girls aged 2-14 — affordable and well-stocked",
+        "budget_reason": "usually the safest first stop for affordable kidswear and family clothing",
+        "couple_reason": "",
+        "family_reason": "affordable fashion for the whole family — men's, women's, and kids under one roof",
+        "quick_reason": "right in the North Wing near the entrance — easy in-and-out for basics",
+        "movie_reason": "",
+        "gift_reason": "",
+        "when_best_used": "when the user wants budget-friendly clothing, especially kids jackets under 100 SAR",
+        "avoid_when": "user explicitly wants premium or luxury items",
+        "followup_hint": "good if the user wants under-100 SAR options — ask about size and style preference"
+      },
+      "response_fit_tags": ["shortlist", "comparison", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "fashion_budget",
+        "continuity_keywords": ["h&m", "budget", "affordable", "cheap", "basics", "kids clothes", "jacket"],
+        "refinement_keywords": ["size", "age", "boy", "girl", "color", "style", "under 100", "sale"],
+        "likely_followups": ["do they have jackets under 100 SAR", "compare with Zara", "sustainable options", "kids sizes available"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "budget",
+        "price_expectation_notes": "Kids jackets 50-120 SAR. Adult basics 30-150 SAR. Very affordable compared to mall average.",
+        "price_question_response_hint": "H&M is one of the most affordable options in the mall. Kids jackets are typically 50-120 SAR, and adult basics start around 30 SAR. Great value for families on a budget."
+      }
+    },
+    {
+      "entity_id": "t-store-007",
+      "entity_type": "store",
+      "semantic_tags": ["family_friendly", "teen_friendly", "gift_friendly", "trending"],
+      "audience_fit": ["teen_friendly", "solo_friendly", "family_friendly"],
+      "vibe": ["energetic", "modern", "trendy"],
+      "price_band": "mid_range",
+      "outing_fit": ["practical_shopping", "solo_browsing", "family_outing"],
+      "gift_fit": ["husband_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for sportswear or sneakers",
+        "Gift for a fitness enthusiast",
+        "Teen shopping",
+        "User mentions Nike, sneakers, or athletic wear"
+      ],
+      "avoid_if": [
+        "User wants formal or luxury fashion"
+      ],
+      "priority_scores": {
+        "gift_for_family": 0.50,
+        "solo_visit_plan": 0.55,
+        "practical_shopping": 0.70,
+        "gift_for_child": 0.55,
+        "kids_jackets": 0.50
+      },
+      "concierge_notes": "Nike flagship has the latest sneaker drops — teens love it. Shoe customization service available. Good gift option for active/fitness-minded recipients.",
+      "concierge_reasons": {
+        "short_reason": "flagship Nike store with latest sneakers, sportswear, and kids athletic range",
+        "kid_reason": "good for sporty kids — athletic jackets, sneakers, and team gear",
+        "budget_reason": "",
+        "couple_reason": "matching sneakers or fitness gear makes a fun, casual couples stop",
+        "family_reason": "men's, women's, and kids sections with athletic wear for the whole family",
+        "quick_reason": "if they know what they want, quick grab on sneakers or accessories",
+        "movie_reason": "",
+        "gift_reason": "sneakers and sportswear make great gifts for teens and fitness enthusiasts",
+        "when_best_used": "when the user wants sportswear, sneakers, or athletic gifts",
+        "avoid_when": "user wants formal fashion or non-athletic clothing",
+        "followup_hint": "ask about the recipient's sport or preferred sneaker style"
+      },
+      "response_fit_tags": ["shortlist", "comparison"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "sportswear",
+        "continuity_keywords": ["nike", "sneakers", "sportswear", "athletic", "shoes", "running", "fitness"],
+        "refinement_keywords": ["size", "color", "model", "sport", "kids nike", "customization"],
+        "likely_followups": ["latest releases", "kids sizes", "do they customize", "price range"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Sneakers 350-800 SAR. Apparel 150-400 SAR. Kids items slightly less.",
+        "price_question_response_hint": "Nike is mid-range for sportswear. Sneakers typically 350-800 SAR, apparel 150-400 SAR. Kids items are a bit less. Pricing is fairly standardized across Nike stores."
+      }
+    },
+    {
+      "entity_id": "t-store-008",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "girlfriend_gift", "friend_gift", "self_treat", "personalized"],
+      "audience_fit": ["couple_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["trendy", "modern"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "practical_shopping", "relaxed_visit"],
+      "gift_fit": ["girlfriend_gift", "friend_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for an affordable jewelry gift",
+        "Charm bracelet customization",
+        "Quick gift pickup",
+        "User mentions Pandora, charms, or bracelet"
+      ],
+      "avoid_if": [
+        "User wants high-end fine jewelry (gold/diamonds)",
+        "User looking for men's items only"
+      ],
+      "priority_scores": {
+        "gift_for_girlfriend": 0.75,
+        "last_minute_gift": 0.80,
+        "solo_visit_plan": 0.40,
+        "girlfriend_plus_family_shopping": 0.70
+      },
+      "concierge_notes": "Pandora is a great mid-range gift alternative to L'azurde. Charm customization makes it personal and meaningful. Quick to shop — great for last-minute gifts. In the same corridor as Sephora and L'azurde for a gift-shopping path.",
+      "concierge_reasons": {
+        "short_reason": "mid-range charm jewelry with personalization — meaningful gift without premium prices",
+        "kid_reason": "",
+        "budget_reason": "accessible alternative to fine jewelry — charms start at lower price points",
+        "couple_reason": "customizable charm bracelets tell a personal story — thoughtful and romantic",
+        "family_reason": "",
+        "quick_reason": "fast shopping — pick a bracelet and charms in 10-15 minutes",
+        "movie_reason": "",
+        "gift_reason": "personalized charm bracelet makes a memorable, mid-budget girlfriend gift",
+        "when_best_used": "when the user wants a meaningful, personalized jewelry gift at accessible prices",
+        "avoid_when": "user wants fine gold/diamond jewelry or is shopping for men",
+        "followup_hint": "ask what the bracelet should represent — charms can be themed to interests or milestones"
+      },
+      "response_fit_tags": ["shortlist", "gift_formula", "comparison"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "jewelry_gift",
+        "continuity_keywords": ["pandora", "charm", "bracelet", "jewelry", "gift", "personalized"],
+        "refinement_keywords": ["budget", "specific charm", "engraving", "bracelet type", "rose gold vs silver"],
+        "likely_followups": ["price range", "can they engrave", "what charms are popular", "compare with L'azurde"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Charms 100-300 SAR each. Bracelets 250-500 SAR. Complete gift sets 400-800 SAR.",
+        "price_question_response_hint": "Pandora is mid-range — individual charms typically 100-300 SAR, bracelets 250-500 SAR. A complete bracelet with a few charms makes a lovely gift in the 400-800 SAR range."
+      }
+    },
+    {
+      "entity_id": "t-store-009",
+      "entity_type": "store",
+      "semantic_tags": ["gift_friendly", "friend_gift", "corporate_gift", "self_treat"],
+      "audience_fit": ["solo_friendly", "group_friendly"],
+      "vibe": ["cozy", "casual"],
+      "price_band": "mid_range",
+      "outing_fit": ["quick_visit", "relaxed_visit"],
+      "gift_fit": ["friend_gift", "corporate_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for home fragrance or candles",
+        "Gift for a friend or coworker",
+        "User wants body care products",
+        "Last-minute gift that smells great"
+      ],
+      "avoid_if": [
+        "User wants high-end beauty/skincare (suggest Sephora instead)"
+      ],
+      "priority_scores": {
+        "last_minute_gift": 0.75,
+        "gift_for_girlfriend": 0.45,
+        "gift_for_family": 0.40,
+        "girlfriend_plus_family_shopping": 0.40
+      },
+      "concierge_notes": "Bath & Body Works is an excellent last-minute gift option — gift sets are ready-wrapped. Mix-and-match deals make it budget-friendly. Seasonal collections create urgency. Good fallback when Sephora feels too premium.",
+      "concierge_reasons": {
+        "short_reason": "fragrance and body care with ready-wrapped gift sets — great fallback gift option",
+        "kid_reason": "",
+        "budget_reason": "more affordable than Sephora — mix-and-match deals bring value",
+        "couple_reason": "",
+        "family_reason": "",
+        "quick_reason": "grab a pre-wrapped gift set in under 5 minutes — ideal for last-minute needs",
+        "movie_reason": "",
+        "gift_reason": "ready-wrapped seasonal gift sets — easy, fragrant, and crowd-pleasing",
+        "when_best_used": "when the user needs a quick, affordable gift or home fragrance",
+        "avoid_when": "user wants premium beauty or skincare (Sephora is better)",
+        "followup_hint": "ask if they prefer candles, body mists, or full gift sets"
+      },
+      "response_fit_tags": ["shortlist", "gift_formula"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "fragrance_bodycare",
+        "continuity_keywords": ["bath body works", "candles", "fragrance", "body care", "gift set", "lotion"],
+        "refinement_keywords": ["scent", "seasonal", "budget", "gift wrapping", "specific product"],
+        "likely_followups": ["current seasonal scents", "gift sets under X SAR", "compare with Sephora"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "budget_to_mid",
+        "price_expectation_notes": "Individual items 30-80 SAR. Gift sets 80-200 SAR. Mix-and-match deals frequently available.",
+        "price_question_response_hint": "Bath & Body Works is very accessible — individual items 30-80 SAR, gift sets around 80-200 SAR. They frequently have mix-and-match deals that add extra value."
+      }
+    },
+    {
+      "entity_id": "t-store-010",
+      "entity_type": "store",
+      "semantic_tags": ["premium", "gift_friendly", "special_occasion"],
+      "audience_fit": ["couple_friendly", "solo_friendly"],
+      "vibe": ["elegant", "modern"],
+      "price_band": "premium",
+      "outing_fit": ["relaxed_visit", "special_occasion"],
+      "gift_fit": ["corporate_gift", "self_treat"],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User shopping for home decor or furniture",
+        "Wedding or housewarming gift",
+        "User mentions home, interior design, or Pottery Barn"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User looking for personal fashion or beauty"
+      ],
+      "priority_scores": {
+        "luxury_shopping_plan": 0.50,
+        "gift_for_family": 0.45
+      },
+      "concierge_notes": "Pottery Barn has an interior design service — useful for serious home shoppers. Gift registry available for weddings. Located near Mothercare in the family/home wing.",
+      "concierge_reasons": {
+        "short_reason": "premium home furnishings with design services — best for home decor and housewarming gifts",
+        "kid_reason": "",
+        "budget_reason": "",
+        "couple_reason": "great for couples furnishing a new home — interior design service available",
+        "family_reason": "near Mothercare for families combining kids shopping with home browsing",
+        "quick_reason": "",
+        "movie_reason": "",
+        "gift_reason": "elegant housewarming or wedding registry gifts with classic American aesthetic",
+        "when_best_used": "when the user is shopping for home decor, furniture, or housewarming gifts",
+        "avoid_when": "user is on a tight budget or only interested in personal fashion/beauty",
+        "followup_hint": "ask what room they're decorating or if it's a gift registry situation"
+      },
+      "response_fit_tags": ["shortlist", "standalone"],
+      "topic_continuity": {
+        "topic_domain": "shopping",
+        "topic_subdomain": "home_decor",
+        "continuity_keywords": ["pottery barn", "home", "furniture", "decor", "interior", "design"],
+        "refinement_keywords": ["room", "style", "budget", "delivery", "registry"],
+        "likely_followups": ["do they deliver", "interior design service details", "price range for furniture"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "premium",
+        "price_expectation_notes": "Decorative items 100-500 SAR. Furniture pieces 1000-10000+ SAR. Premium pricing.",
+        "price_question_response_hint": "Pottery Barn is premium — decorative items start around 100-500 SAR, while furniture ranges from 1,000 SAR to well over 10,000 SAR. They offer a design service if you'd like help planning a whole room."
+      }
+    },
+    {
+      "entity_id": "t-dining-001",
+      "entity_type": "dining",
+      "semantic_tags": ["sit_down_dining", "family_friendly", "kid_friendly", "near_food_court"],
+      "audience_fit": ["family_friendly", "kid_friendly", "group_friendly"],
+      "vibe": ["casual", "cozy"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "relaxed_visit"],
+      "gift_fit": [],
+      "meal_fit": ["sit_down_dining"],
+      "when_to_recommend": [
+        "Family looking for traditional Saudi food",
+        "Group dining with generous portions",
+        "User wants authentic local cuisine",
+        "User mentions kabsa, mandi, or Saudi food"
+      ],
+      "avoid_if": [
+        "User wants quick service only",
+        "User looking for international/Western cuisine",
+        "User wants a romantic fine dining setting"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.80,
+        "budget_family_outing": 0.70,
+        "quick_lunch": 0.30,
+        "food_with_child": 0.75,
+        "family_food_budget": 0.80
+      },
+      "concierge_notes": "Al Romansiah is the local favorite for authentic Saudi dining. Private dining section available for families who prefer privacy. Large portions ideal for sharing. Near the prayer room — convenient for families during prayer times.",
+      "concierge_reasons": {
+        "short_reason": "authentic Saudi restaurant — generous portions of kabsa and grilled meats",
+        "kid_reason": "has a kids menu and family seating; kids usually enjoy the rice dishes",
+        "budget_reason": "mid-range pricing but large portions make it great value for families",
+        "couple_reason": "",
+        "family_reason": "private section for families, near prayer room, kids menu available",
+        "quick_reason": "",
+        "movie_reason": "",
+        "gift_reason": "",
+        "when_best_used": "when a family wants a proper sit-down Saudi meal with generous portions",
+        "avoid_when": "user wants quick service, Western food, or a romantic setting",
+        "followup_hint": "ask if they'd like the private section — great for families with young kids"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "saudi_family_dining",
+        "continuity_keywords": ["romansiah", "saudi food", "kabsa", "mandi", "arabic food", "traditional"],
+        "refinement_keywords": ["private section", "portions", "halal", "kids menu", "reservation"],
+        "likely_followups": ["do I need a reservation", "private section available", "what to order", "is it halal"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Mains 40-80 SAR per person. Family platters 120-200 SAR. Very good value for portion sizes.",
+        "price_question_response_hint": "Al Romansiah is mid-range — expect around 40-80 SAR per person for mains. Their family platters (120-200 SAR) are excellent value and easily feed 3-4 people."
+      }
+    },
+    {
+      "entity_id": "t-dining-002",
+      "entity_type": "dining",
+      "semantic_tags": ["sit_down_dining", "family_friendly", "dessert_spot", "date_spot", "near_food_court"],
+      "audience_fit": ["family_friendly", "couple_friendly", "group_friendly"],
+      "vibe": ["casual", "upscale"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "celebration"],
+      "gift_fit": [],
+      "meal_fit": ["sit_down_dining", "dessert_spot"],
+      "when_to_recommend": [
+        "User wants a family restaurant with variety",
+        "User specifically craves cheesecake or American food",
+        "Birthday or celebration dinner",
+        "User wants a large menu with many options"
+      ],
+      "avoid_if": [
+        "User wants a very quick meal",
+        "User wants authentic local cuisine only"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.75,
+        "date_plan": 0.55,
+        "shopping_plus_dessert_combo": 0.70,
+        "budget_family_outing": 0.50,
+        "food_with_child": 0.70,
+        "family_food_budget": 0.60
+      },
+      "concierge_notes": "Cheesecake Factory works for almost any group thanks to the huge menu. Perfect for indecisive groups. The cheesecake is a must-try dessert — mention it as a post-shopping reward. Weekend brunch is popular.",
+      "concierge_reasons": {
+        "short_reason": "massive menu with something for everyone plus 30+ cheesecake varieties",
+        "kid_reason": "kids menu available and the huge menu means even picky eaters find something",
+        "budget_reason": "portions are large enough to share, which helps stretch the budget",
+        "couple_reason": "great for date night with shared cheesecake — casual-upscale atmosphere",
+        "family_reason": "works for families because everyone picks something different from the 250-item menu",
+        "quick_reason": "",
+        "movie_reason": "good post-movie dinner if you have time — sit-down meal with dessert built in",
+        "gift_reason": "",
+        "when_best_used": "when the group can't agree on cuisine — the massive menu solves that problem",
+        "avoid_when": "user is in a rush or wants specifically local/Saudi food",
+        "followup_hint": "mention the cheesecake as a post-meal must-try or suggest weekend brunch"
+      },
+      "response_fit_tags": ["shortlist", "itinerary", "comparison"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "casual_family_dining",
+        "continuity_keywords": ["cheesecake factory", "american food", "cheesecake", "brunch", "big menu"],
+        "refinement_keywords": ["reservation", "kids menu", "dessert", "brunch", "wait time"],
+        "likely_followups": ["do I need a reservation", "best cheesecake flavor", "wait time", "weekend brunch details"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Mains 60-120 SAR. Cheesecake slices 40-60 SAR. Family of four: roughly 300-500 SAR.",
+        "price_question_response_hint": "The Cheesecake Factory is mid-range — mains typically 60-120 SAR, cheesecake slices around 40-60 SAR. For a family of four, expect roughly 300-500 SAR for a full meal including dessert."
+      }
     },
     {
       "entity_id": "t-dining-003",
@@ -251,9 +872,37 @@
         "gift_for_girlfriend": 0.30,
         "luxury_shopping_plan": 0.40,
         "family_visit_plan": 0.45,
-        "special_occasion_dining": 0.92
+        "special_occasion_dining": 0.92,
+        "girlfriend_plus_family_shopping": 0.35
       },
-      "concierge_notes": "Eataly is the top romantic dining option in the mall. Open kitchen adds to the experience. Suggest the private dining area for anniversaries. The attached Italian grocery is a nice post-dinner browse. Pairs beautifully with jewelry shopping at L'azurde as part of a date plan."
+      "concierge_notes": "Eataly is the top romantic dining option in the mall. Open kitchen adds to the experience. Suggest the private dining area for anniversaries. The attached Italian grocery is a nice post-dinner browse. Pairs beautifully with jewelry shopping at L'azurde as part of a date plan.",
+      "concierge_reasons": {
+        "short_reason": "romantic Italian dining with open kitchen — the premium date spot in the mall",
+        "kid_reason": "has a kids menu, but the ambiance is really designed for adults",
+        "budget_reason": "",
+        "couple_reason": "the best date-night restaurant in the mall — romantic, Italian, with private dining",
+        "family_reason": "works for special family celebrations with private dining available",
+        "quick_reason": "",
+        "movie_reason": "",
+        "gift_reason": "",
+        "when_best_used": "when the user wants a romantic, special-occasion, or upscale dining experience",
+        "avoid_when": "user wants quick food, budget dining, or purely kid-focused options",
+        "followup_hint": "suggest pairing with jewelry shopping at L'azurde for a complete date experience"
+      },
+      "response_fit_tags": ["shortlist", "itinerary", "standalone"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "romantic_premium_dining",
+        "continuity_keywords": ["eataly", "italian", "romantic dinner", "pasta", "pizza", "date night", "private dining"],
+        "refinement_keywords": ["reservation", "private dining", "menu", "price", "vegetarian options"],
+        "likely_followups": ["do I need a reservation", "is there private dining", "what to order", "how much per person"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "premium",
+        "price_expectation_notes": "Mains 80-180 SAR. Couple dinner with drinks: ~400-600 SAR. Private dining may have minimum spend.",
+        "price_question_response_hint": "Eataly is premium Italian dining — mains typically 80-180 SAR. A dinner for two usually runs 400-600 SAR. It's the kind of place where the experience justifies the price."
+      }
     },
     {
       "entity_id": "t-dining-004",
@@ -281,206 +930,39 @@
         "quick_lunch": 0.88,
         "kid_friendly_movie_plus_food": 0.85,
         "family_visit_plan": 0.60,
-        "budget_family_outing": 0.70
-      },
-      "concierge_notes": "Shake Shack is the ideal pre/post-movie meal — close to the escalators up to VOX Cinemas. 20-minute meal time makes it perfect for tight schedules. Kids love the milkshakes. Suggest the Shack Burger for first-timers."
-    },
-    {
-      "entity_id": "t-store-005",
-      "entity_type": "store",
-      "semantic_tags": ["gift_friendly", "girlfriend_gift", "wife_gift", "self_treat", "premium", "special_occasion"],
-      "audience_fit": ["solo_friendly", "couple_friendly"],
-      "vibe": ["upscale", "modern", "trendy"],
-      "price_band": "premium",
-      "outing_fit": ["relaxed_visit", "special_occasion", "solo_browsing"],
-      "gift_fit": ["girlfriend_gift", "wife_gift", "friend_gift", "self_treat"],
-      "meal_fit": [],
-      "when_to_recommend": [
-        "User looking for beauty or fragrance gifts",
-        "User wants skincare recommendations",
-        "Gift for girlfriend, wife, or friend",
-        "User browsing beauty products",
-        "User mentions makeup, perfume, or skincare"
-      ],
-      "avoid_if": [
-        "User on a tight budget looking for essentials",
-        "User not interested in beauty products",
-        "Male user shopping only for self with no interest in beauty"
-      ],
-      "priority_scores": {
-        "gift_for_girlfriend": 0.85,
-        "luxury_shopping_plan": 0.70,
-        "anniversary_plan": 0.55,
-        "last_minute_gift": 0.75,
-        "solo_visit_plan": 0.50
-      },
-      "concierge_notes": "Sephora is a top gift destination — the gift sets are curated and ready to go. Beauty advisor can help personalize choices. Currently running Spring Beauty Sale (20% off selected items). Mention the fragrance sampling for undecided gift buyers."
-    },
-    {
-      "entity_id": "t-store-001",
-      "entity_type": "store",
-      "semantic_tags": ["family_friendly", "trending", "practical_shopping", "mid_range"],
-      "audience_fit": ["family_friendly", "teen_friendly", "solo_friendly"],
-      "vibe": ["trendy", "casual", "modern"],
-      "price_band": "mid_range",
-      "outing_fit": ["practical_shopping", "quick_visit", "family_outing", "solo_browsing"],
-      "gift_fit": [],
-      "meal_fit": [],
-      "when_to_recommend": [
-        "User looking for fashion or clothing",
-        "User wants trending or affordable fashion",
-        "Family shopping trip",
-        "User mentions Zara specifically"
-      ],
-      "avoid_if": [
-        "User wants luxury or high-end only",
-        "User not interested in fashion"
-      ],
-      "priority_scores": {
-        "family_visit_plan": 0.55,
-        "budget_family_outing": 0.60,
-        "solo_visit_plan": 0.65,
-        "practical_shopping": 0.80
-      },
-      "concierge_notes": "Zara currently has End of Season Sale (up to 50% off). First store after Main Entrance — easy stop for fashion browsing. New arrivals weekly. Has a kids section for family shoppers."
-    },
-    {
-      "entity_id": "t-store-006",
-      "entity_type": "store",
-      "semantic_tags": ["budget", "family_friendly", "practical_shopping", "kid_friendly"],
-      "audience_fit": ["family_friendly", "teen_friendly", "kid_friendly"],
-      "vibe": ["casual", "trendy"],
-      "price_band": "budget",
-      "outing_fit": ["practical_shopping", "quick_visit", "family_outing"],
-      "gift_fit": [],
-      "meal_fit": [],
-      "when_to_recommend": [
-        "User looking for affordable family fashion",
-        "Budget-conscious shopping",
-        "User wants basic wardrobe staples",
-        "User mentions H&M or budget fashion"
-      ],
-      "avoid_if": [
-        "User wants premium or luxury only"
-      ],
-      "priority_scores": {
-        "budget_family_outing": 0.85,
-        "family_visit_plan": 0.55,
-        "practical_shopping": 0.80
-      },
-      "concierge_notes": "H&M is the best budget-friendly fashion option. Great for stocking up on basics for the whole family. Has a sustainable line for eco-conscious shoppers. Opposite Zara for easy comparison shopping."
-    },
-    {
-      "entity_id": "t-store-004",
-      "entity_type": "store",
-      "semantic_tags": ["gift_friendly", "husband_gift", "corporate_gift", "premium", "self_treat"],
-      "audience_fit": ["solo_friendly", "teen_friendly"],
-      "vibe": ["modern", "upscale"],
-      "price_band": "premium",
-      "outing_fit": ["practical_shopping", "relaxed_visit", "solo_browsing"],
-      "gift_fit": ["husband_gift", "friend_gift", "corporate_gift", "self_treat", "child_gift"],
-      "meal_fit": [],
-      "when_to_recommend": [
-        "User wants to buy electronics or gadgets",
-        "Gift for a tech-savvy person",
-        "User needs Apple product support (Genius Bar)",
-        "User mentions iPhone, iPad, MacBook, or Apple"
-      ],
-      "avoid_if": [
-        "User on a tight budget for non-tech items",
-        "User only looking for fashion or dining"
-      ],
-      "priority_scores": {
-        "gift_for_family": 0.70,
-        "luxury_shopping_plan": 0.60,
-        "solo_visit_plan": 0.55,
-        "last_minute_gift": 0.50
-      },
-      "concierge_notes": "Apple Store offers Genius Bar support — useful for visitors with device issues. Today at Apple workshops are free and engaging. AirPods and accessories make excellent last-minute gifts. Engraving available on select products."
-    },
-    {
-      "entity_id": "t-cinema-001",
-      "entity_type": "cinema",
-      "semantic_tags": ["entertainment_anchor", "family_friendly", "couple_friendly", "date_spot", "kid_friendly", "near_cinema"],
-      "audience_fit": ["family_friendly", "couple_friendly", "kid_friendly", "teen_friendly", "solo_friendly"],
-      "vibe": ["energetic", "modern"],
-      "price_band": "mid_range",
-      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "solo_browsing"],
-      "gift_fit": [],
-      "meal_fit": [],
-      "when_to_recommend": [
-        "User wants to watch a movie",
-        "Family looking for entertainment",
-        "Date night plan",
-        "User mentions cinema, movies, IMAX, or VOX"
-      ],
-      "avoid_if": [
-        "User only looking for shopping or dining",
-        "User has very young infants (no infant screenings)"
-      ],
-      "priority_scores": {
-        "movie_plus_food": 0.95,
-        "kid_friendly_movie_plus_food": 0.90,
-        "date_plan": 0.80,
-        "family_visit_plan": 0.70
-      },
-      "concierge_notes": "VOX Cinemas is the entertainment anchor. Gold screens for romantic date nights — suggest for anniversary plans. Kids screen for families. IMAX for blockbusters. Currently showing Desert Kingdoms (family), Starlight Romance (couples), and Cosmic Explorers (kids). Weekend combo deal available."
-    },
-    {
-      "entity_id": "t-dining-001",
-      "entity_type": "dining",
-      "semantic_tags": ["sit_down_dining", "family_friendly", "kid_friendly", "near_food_court"],
-      "audience_fit": ["family_friendly", "kid_friendly", "group_friendly"],
-      "vibe": ["casual", "cozy"],
-      "price_band": "mid_range",
-      "outing_fit": ["family_outing", "relaxed_visit"],
-      "gift_fit": [],
-      "meal_fit": ["sit_down_dining"],
-      "when_to_recommend": [
-        "Family looking for traditional Saudi food",
-        "Group dining with generous portions",
-        "User wants authentic local cuisine",
-        "User mentions kabsa, mandi, or Saudi food"
-      ],
-      "avoid_if": [
-        "User wants quick service only",
-        "User looking for international/Western cuisine",
-        "User wants a romantic fine dining setting"
-      ],
-      "priority_scores": {
-        "family_visit_plan": 0.80,
         "budget_family_outing": 0.70,
-        "quick_lunch": 0.30
+        "quick_food_before_movie": 0.95,
+        "food_with_child": 0.80,
+        "food_inside_cinema_vs_mall": 0.85
       },
-      "concierge_notes": "Al Romansiah is the local favorite for authentic Saudi dining. Private dining section available for families who prefer privacy. Large portions ideal for sharing. Near the prayer room — convenient for families during prayer times."
-    },
-    {
-      "entity_id": "t-dining-002",
-      "entity_type": "dining",
-      "semantic_tags": ["sit_down_dining", "family_friendly", "dessert_spot", "date_spot", "near_food_court"],
-      "audience_fit": ["family_friendly", "couple_friendly", "group_friendly"],
-      "vibe": ["casual", "upscale"],
-      "price_band": "mid_range",
-      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "celebration"],
-      "gift_fit": [],
-      "meal_fit": ["sit_down_dining", "dessert_spot"],
-      "when_to_recommend": [
-        "User wants a family restaurant with variety",
-        "User specifically craves cheesecake or American food",
-        "Birthday or celebration dinner",
-        "User wants a large menu with many options"
-      ],
-      "avoid_if": [
-        "User wants a very quick meal",
-        "User wants authentic local cuisine only"
-      ],
-      "priority_scores": {
-        "family_visit_plan": 0.75,
-        "date_plan": 0.55,
-        "shopping_plus_dessert_combo": 0.70,
-        "budget_family_outing": 0.50
+      "concierge_notes": "Shake Shack is the ideal pre/post-movie meal — close to the escalators up to VOX Cinemas. 20-minute meal time makes it perfect for tight schedules. Kids love the milkshakes. Suggest the Shack Burger for first-timers.",
+      "concierge_reasons": {
+        "short_reason": "easy quick meal with familiar food for kids — ideal before or after a movie",
+        "kid_reason": "good if the child likes burgers and fries — milkshakes are a hit with kids",
+        "budget_reason": "mid-range pricing — a family meal is reasonable for fast casual quality",
+        "couple_reason": "quick casual option if you're heading to or from the cinema together",
+        "family_reason": "kids menu, fast service, and right next to the cinema escalators",
+        "quick_reason": "20-minute meal — the fastest quality food near the cinema",
+        "movie_reason": "convenient before or after cinema because it is nearby on the same escalator path",
+        "gift_reason": "",
+        "when_best_used": "pre-movie meal for families, quick lunch break, or post-movie casual bite",
+        "avoid_when": "user wants fine dining, romantic atmosphere, or healthy light options",
+        "followup_hint": "ask if they want to eat before or after the movie — timing determines the suggestion"
       },
-      "concierge_notes": "Cheesecake Factory works for almost any group thanks to the huge menu. Perfect for indecisive groups. The cheesecake is a must-try dessert — mention it as a post-shopping reward. Weekend brunch is popular."
+      "response_fit_tags": ["shortlist", "itinerary", "comparison"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "quick_casual_food",
+        "continuity_keywords": ["shake shack", "burger", "fries", "milkshake", "quick food", "fast casual"],
+        "refinement_keywords": ["menu", "kids options", "before movie", "after movie", "halal", "price"],
+        "likely_followups": ["is it halal", "what to order for kids", "how long does it take", "is it close to the cinema"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Burgers 35-55 SAR. Combo meals 50-75 SAR. Family of four: ~200-300 SAR.",
+        "price_question_response_hint": "Shake Shack is mid-range fast casual — burgers typically 35-55 SAR, combo meals 50-75 SAR. For a family of four, expect around 200-300 SAR for a full meal with drinks."
+      }
     },
     {
       "entity_id": "t-dining-005",
@@ -506,7 +988,34 @@
         "solo_visit_plan": 0.75,
         "quick_lunch": 0.40
       },
-      "concierge_notes": "Starbucks is near the Main Entrance — suggest as a starting point or meeting spot. Opens earlier than most stores (7 AM) for early visitors. Good for a caffeine stop before a shopping marathon."
+      "concierge_notes": "Starbucks is near the Main Entrance — suggest as a starting point or meeting spot. Opens earlier than most stores (7 AM) for early visitors. Good for a caffeine stop before a shopping marathon.",
+      "concierge_reasons": {
+        "short_reason": "convenient coffee stop near the entrance — good starting point for any mall visit",
+        "kid_reason": "",
+        "budget_reason": "standard Starbucks pricing — not the cheapest but predictable",
+        "couple_reason": "comfortable spot for a quick coffee break between shopping stops",
+        "family_reason": "",
+        "quick_reason": "fast mobile ordering available — grab a coffee in minutes",
+        "movie_reason": "",
+        "gift_reason": "",
+        "when_best_used": "as a starting point, meeting spot, or quick caffeine stop",
+        "avoid_when": "user wants a full meal or unique local coffee experience",
+        "followup_hint": "mention it opens at 7 AM for early arrivals — earlier than most mall stores"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "coffee_cafe",
+        "continuity_keywords": ["starbucks", "coffee", "cafe", "latte", "wifi", "meeting spot"],
+        "refinement_keywords": ["menu", "seasonal drinks", "wifi", "seating", "mobile order"],
+        "likely_followups": ["do they have wifi", "opening hours", "seasonal drinks available"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Drinks 20-35 SAR. Light food 15-30 SAR. Standard Starbucks pricing.",
+        "price_question_response_hint": "Standard Starbucks pricing — drinks 20-35 SAR, light snacks 15-30 SAR. Pretty much what you'd expect at any Starbucks."
+      }
     },
     {
       "entity_id": "t-dining-006",
@@ -533,113 +1042,261 @@
         "movie_plus_food": 0.65,
         "kid_friendly_movie_plus_food": 0.80,
         "family_visit_plan": 0.50,
-        "budget_family_outing": 0.60
+        "budget_family_outing": 0.60,
+        "food_with_child": 0.60,
+        "quick_food_before_movie": 0.40
       },
-      "concierge_notes": "Baskin-Robbins is the perfect add-on dessert stop. Near the escalators to the Entertainment Zone — suggest after a movie. Birthday cakes available for spontaneous celebrations. Budget-friendly treat for kids."
+      "concierge_notes": "Baskin-Robbins is the perfect add-on dessert stop. Near the escalators to the Entertainment Zone — suggest after a movie. Birthday cakes available for spontaneous celebrations. Budget-friendly treat for kids.",
+      "concierge_reasons": {
+        "short_reason": "budget-friendly ice cream — perfect post-movie or post-shopping treat for kids",
+        "kid_reason": "31 flavors means every kid finds something they love — quick and affordable",
+        "budget_reason": "cheapest dessert option in the mall — great for a family treat on a budget",
+        "couple_reason": "a sweet add-on to end a date on a fun note",
+        "family_reason": "affordable treat for the whole family — kids love choosing from 31 flavors",
+        "quick_reason": "in and out in under 10 minutes — fastest treat in the mall",
+        "movie_reason": "right near the Entertainment Zone escalators — grab ice cream after the credits",
+        "gift_reason": "",
+        "when_best_used": "as an add-on treat after movies, shopping, or any family activity",
+        "avoid_when": "user is looking for a full meal or only healthy options",
+        "followup_hint": "suggest it as a reward at the end of a family plan — 'end the day with ice cream'"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "dining",
+        "topic_subdomain": "dessert_treat",
+        "continuity_keywords": ["baskin robbins", "ice cream", "dessert", "sweet", "treat", "sundae"],
+        "refinement_keywords": ["flavors", "birthday cake", "party packs", "kids favorites"],
+        "likely_followups": ["what flavors", "birthday cakes available", "price per scoop"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "budget",
+        "price_expectation_notes": "Single scoop ~15 SAR. Sundaes 25-40 SAR. Birthday cakes 80-200 SAR.",
+        "price_question_response_hint": "Baskin-Robbins is very budget-friendly — single scoops around 15 SAR, sundaes 25-40 SAR. It's one of the cheapest treat options in the mall."
+      }
     },
     {
-      "entity_id": "t-store-007",
-      "entity_type": "store",
-      "semantic_tags": ["family_friendly", "teen_friendly", "gift_friendly", "trending"],
-      "audience_fit": ["teen_friendly", "solo_friendly", "family_friendly"],
-      "vibe": ["energetic", "modern", "trendy"],
+      "entity_id": "t-cinema-001",
+      "entity_type": "cinema",
+      "semantic_tags": ["entertainment_anchor", "family_friendly", "couple_friendly", "date_spot", "kid_friendly", "near_cinema"],
+      "audience_fit": ["family_friendly", "couple_friendly", "kid_friendly", "teen_friendly", "solo_friendly"],
+      "vibe": ["energetic", "modern"],
       "price_band": "mid_range",
-      "outing_fit": ["practical_shopping", "solo_browsing", "family_outing"],
-      "gift_fit": ["husband_gift", "friend_gift", "self_treat"],
+      "outing_fit": ["family_outing", "date_spot", "relaxed_visit", "solo_browsing"],
+      "gift_fit": [],
       "meal_fit": [],
       "when_to_recommend": [
-        "User looking for sportswear or sneakers",
-        "Gift for a fitness enthusiast",
-        "Teen shopping",
-        "User mentions Nike, sneakers, or athletic wear"
+        "User wants to watch a movie",
+        "Family looking for entertainment",
+        "Date night plan",
+        "User mentions cinema, movies, IMAX, or VOX"
       ],
       "avoid_if": [
-        "User wants formal or luxury fashion"
+        "User only looking for shopping or dining",
+        "User has very young infants (no infant screenings)"
       ],
       "priority_scores": {
-        "gift_for_family": 0.50,
-        "solo_visit_plan": 0.55,
-        "practical_shopping": 0.70
+        "movie_plus_food": 0.95,
+        "kid_friendly_movie_plus_food": 0.90,
+        "date_plan": 0.80,
+        "family_visit_plan": 0.70,
+        "family_movie_recommendation": 0.95,
+        "movie_recommendation_for_child": 0.95,
+        "quick_food_before_movie": 0.70,
+        "food_inside_cinema_vs_mall": 0.90
       },
-      "concierge_notes": "Nike flagship has the latest sneaker drops — teens love it. Shoe customization service available. Good gift option for active/fitness-minded recipients."
+      "concierge_notes": "VOX Cinemas is the entertainment anchor. Gold screens for romantic date nights — suggest for anniversary plans. Kids screen for families. IMAX for blockbusters. Currently showing Desert Kingdoms (family), Starlight Romance (couples), and Cosmic Explorers (kids). Weekend combo deal available.",
+      "concierge_reasons": {
+        "short_reason": "12-screen multiplex with IMAX, 4DX, Gold, VIP, and dedicated Kids screen",
+        "kid_reason": "Kids screen is designed for young children — Cosmic Explorers (G-rated) is showing now",
+        "budget_reason": "weekday combo deal: 2 tickets + popcorn + drinks saves money",
+        "couple_reason": "Gold screens offer luxury seating for a premium date-night cinema experience",
+        "family_reason": "Kids screen + family-friendly movies + snack bar covers the whole family",
+        "quick_reason": "check showtimes and grab tickets at the counter — straightforward process",
+        "movie_reason": "the only cinema in the mall — 6 formats from Standard to IMAX to VIP",
+        "gift_reason": "cinema tickets make a great experience gift — VOX gift cards also available",
+        "when_best_used": "as the entertainment anchor for any movie plan, date night, or family outing",
+        "avoid_when": "user has no interest in movies or has very young infants",
+        "followup_hint": "ask about preferred format (IMAX for spectacle, Gold for comfort, Kids for children)"
+      },
+      "response_fit_tags": ["shortlist", "itinerary", "standalone"],
+      "topic_continuity": {
+        "topic_domain": "entertainment",
+        "topic_subdomain": "cinema_movies",
+        "continuity_keywords": ["vox", "cinema", "movie", "imax", "4dx", "gold", "screen", "film"],
+        "refinement_keywords": ["format", "showtime", "price", "snacks", "kids screen", "vip", "combo deal"],
+        "likely_followups": ["what movies are showing", "showtimes", "ticket prices", "is there a kids screen", "food at the cinema"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Standard ~50 SAR, IMAX ~75 SAR, Gold ~100-120 SAR, VIP ~150 SAR. Weekday combo deal available.",
+        "price_question_response_hint": "VOX ticket prices vary by format — Standard around 50 SAR, IMAX ~75 SAR, Gold ~100-120 SAR, and VIP ~150 SAR. There's a weekday combo deal with 2 Standard tickets including popcorn and drinks."
+      }
     },
     {
-      "entity_id": "t-store-008",
-      "entity_type": "store",
-      "semantic_tags": ["gift_friendly", "girlfriend_gift", "friend_gift", "self_treat", "personalized"],
-      "audience_fit": ["couple_friendly", "teen_friendly", "solo_friendly"],
-      "vibe": ["trendy", "modern"],
+      "entity_id": "t-movie-001",
+      "entity_type": "movie",
+      "semantic_tags": ["family_friendly", "kid_friendly", "new_release", "action", "adventure"],
+      "audience_fit": ["family_friendly", "kid_friendly", "teen_friendly"],
+      "vibe": ["energetic", "modern"],
       "price_band": "mid_range",
-      "outing_fit": ["quick_visit", "practical_shopping", "relaxed_visit"],
-      "gift_fit": ["girlfriend_gift", "friend_gift", "self_treat"],
+      "outing_fit": ["family_outing"],
+      "gift_fit": [],
       "meal_fit": [],
       "when_to_recommend": [
-        "User looking for an affordable jewelry gift",
-        "Charm bracelet customization",
-        "Quick gift pickup",
-        "User mentions Pandora, charms, or bracelet"
+        "Family looking for a movie everyone can enjoy",
+        "Kids want an action-adventure film",
+        "User asks for family movie suggestions"
       ],
       "avoid_if": [
-        "User wants high-end fine jewelry (gold/diamonds)",
-        "User looking for men's items only"
+        "User specifically wants romance or adult drama",
+        "User wants animated films only (this is live-action)"
       ],
       "priority_scores": {
-        "gift_for_girlfriend": 0.75,
-        "last_minute_gift": 0.80,
-        "solo_visit_plan": 0.40
+        "family_movie_recommendation": 0.85,
+        "kid_friendly_movie_plus_food": 0.80,
+        "movie_plus_food": 0.70,
+        "movie_recommendation_for_child": 0.75
       },
-      "concierge_notes": "Pandora is a great mid-range gift alternative to L'azurde. Charm customization makes it personal and meaningful. Quick to shop — great for last-minute gifts. In the same corridor as Sephora and L'azurde for a gift-shopping path."
+      "concierge_notes": "Desert Kingdoms is a PG-rated action-adventure — appeals to both kids and adults. Available in IMAX and 4DX for an immersive experience. New release with multiple showtimes.",
+      "concierge_reasons": {
+        "short_reason": "PG-rated action adventure — appeals to kids and adults alike",
+        "kid_reason": "exciting adventure with Arabian setting — PG rated, safe for kids aged 5+",
+        "budget_reason": "available in Standard format for the most affordable ticket",
+        "couple_reason": "",
+        "family_reason": "perfect family movie — exciting enough for adults, safe for kids, IMAX available",
+        "quick_reason": "",
+        "movie_reason": "new release in IMAX and 4DX — the immersive choice for action fans",
+        "gift_reason": "",
+        "when_best_used": "family movie outing or when kids want action and adventure",
+        "avoid_when": "user wants romance, quiet drama, or animated films specifically",
+        "followup_hint": "suggest IMAX for the best experience; pair with Shake Shack before"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "entertainment",
+        "topic_subdomain": "family_movie",
+        "continuity_keywords": ["desert kingdoms", "action", "adventure", "family movie", "imax", "4dx"],
+        "refinement_keywords": ["showtimes", "format", "rating", "duration", "tickets"],
+        "likely_followups": ["showtimes", "is it good for a 5 year old", "IMAX vs Standard", "food before the movie"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Ticket price depends on format: Standard ~50 SAR, IMAX ~75 SAR, 4DX ~80 SAR.",
+        "price_question_response_hint": "Ticket prices depend on the format — Standard around 50 SAR, IMAX ~75 SAR, 4DX ~80 SAR. The weekday combo deal can save you money."
+      }
     },
     {
-      "entity_id": "t-store-009",
-      "entity_type": "store",
-      "semantic_tags": ["gift_friendly", "friend_gift", "corporate_gift", "self_treat"],
-      "audience_fit": ["solo_friendly", "group_friendly"],
-      "vibe": ["cozy", "casual"],
+      "entity_id": "t-movie-002",
+      "entity_type": "movie",
+      "semantic_tags": ["romantic", "date_spot", "new_release", "couple_friendly"],
+      "audience_fit": ["couple_friendly"],
+      "vibe": ["romantic", "elegant"],
       "price_band": "mid_range",
-      "outing_fit": ["quick_visit", "relaxed_visit"],
-      "gift_fit": ["friend_gift", "corporate_gift", "self_treat"],
+      "outing_fit": ["date_spot", "special_occasion"],
+      "gift_fit": [],
       "meal_fit": [],
       "when_to_recommend": [
-        "User looking for home fragrance or candles",
-        "Gift for a friend or coworker",
-        "User wants body care products",
-        "Last-minute gift that smells great"
+        "Couple looking for a date-night movie",
+        "User wants a romance or drama film",
+        "Anniversary or romantic outing"
       ],
       "avoid_if": [
-        "User wants high-end beauty/skincare (suggest Sephora instead)"
+        "User looking for kids or family movies",
+        "User wants action or animation"
       ],
       "priority_scores": {
-        "last_minute_gift": 0.75,
-        "gift_for_girlfriend": 0.45,
-        "gift_for_family": 0.40
+        "date_plan": 0.90,
+        "anniversary_plan": 0.75,
+        "movie_plus_food": 0.65,
+        "family_movie_recommendation": 0.20,
+        "movie_recommendation_for_child": 0.05
       },
-      "concierge_notes": "Bath & Body Works is an excellent last-minute gift option — gift sets are ready-wrapped. Mix-and-match deals make it budget-friendly. Seasonal collections create urgency. Good fallback when Sephora feels too premium."
+      "concierge_notes": "Starlight Romance is the couples' pick — PG-13, romantic drama set between Riyadh and Paris. Available on Gold screens for the premium experience.",
+      "concierge_reasons": {
+        "short_reason": "romantic drama set between Riyadh and Paris — the couples' movie pick",
+        "kid_reason": "",
+        "budget_reason": "available in Standard for the most affordable option",
+        "couple_reason": "the perfect date movie — pair with Gold screen and dinner at Eataly",
+        "family_reason": "",
+        "quick_reason": "",
+        "movie_reason": "new release with Gold screen availability — ideal for a premium movie date",
+        "gift_reason": "",
+        "when_best_used": "date nights, anniversary outings, or when couples want a movie experience",
+        "avoid_when": "user has kids along or wants action/animation",
+        "followup_hint": "suggest Gold screen for the premium couple experience; pair with Eataly"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "entertainment",
+        "topic_subdomain": "couples_movie",
+        "continuity_keywords": ["starlight romance", "romantic movie", "date movie", "gold screen", "drama"],
+        "refinement_keywords": ["showtimes", "gold screen", "format", "duration"],
+        "likely_followups": ["Gold screen showtimes", "where to eat before", "is it PG-13"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Standard ~50 SAR, Gold ~100-120 SAR per ticket.",
+        "price_question_response_hint": "Standard tickets around 50 SAR, Gold screen ~100-120 SAR per ticket. Gold is worth it for a special date night."
+      }
     },
     {
-      "entity_id": "t-store-010",
-      "entity_type": "store",
-      "semantic_tags": ["premium", "gift_friendly", "special_occasion"],
-      "audience_fit": ["couple_friendly", "solo_friendly"],
-      "vibe": ["elegant", "modern"],
-      "price_band": "premium",
-      "outing_fit": ["relaxed_visit", "special_occasion"],
-      "gift_fit": ["corporate_gift", "self_treat"],
+      "entity_id": "t-movie-003",
+      "entity_type": "movie",
+      "semantic_tags": ["kid_friendly", "family_friendly", "animation", "educational"],
+      "audience_fit": ["kid_friendly", "family_friendly"],
+      "vibe": ["playful", "energetic"],
+      "price_band": "mid_range",
+      "outing_fit": ["family_outing"],
+      "gift_fit": [],
       "meal_fit": [],
       "when_to_recommend": [
-        "User shopping for home decor or furniture",
-        "Wedding or housewarming gift",
-        "User mentions home, interior design, or Pottery Barn"
+        "Family with young children looking for a movie",
+        "User wants animated or kids-only films",
+        "User mentions young children or toddlers at the movie"
       ],
       "avoid_if": [
-        "User on a tight budget",
-        "User looking for personal fashion or beauty"
+        "User wants adult-oriented or action-heavy films",
+        "Teens might find it too young"
       ],
       "priority_scores": {
-        "luxury_shopping_plan": 0.50,
-        "gift_for_family": 0.45
+        "kid_friendly_movie_plus_food": 0.95,
+        "family_movie_recommendation": 0.90,
+        "movie_recommendation_for_child": 0.95,
+        "family_visit_plan": 0.60,
+        "movie_plus_food": 0.50
       },
-      "concierge_notes": "Pottery Barn has an interior design service — useful for serious home shoppers. Gift registry available for weddings. Located near Mothercare in the family/home wing."
+      "concierge_notes": "Cosmic Explorers is the top pick for young children — G-rated animated film. Available on the Kids screen which is designed for families with young kids. Shorter runtime (95 min) is manageable for small children.",
+      "concierge_reasons": {
+        "short_reason": "G-rated animated adventure — perfect for young children",
+        "kid_reason": "animated, short runtime, G-rated, and plays on the dedicated Kids screen",
+        "budget_reason": "Standard or Kids screen for affordable family fun",
+        "couple_reason": "",
+        "family_reason": "the safest movie pick for families with young kids — animated, gentle, 95 minutes",
+        "quick_reason": "shorter than most films at 95 minutes — easier for young kids to sit through",
+        "movie_reason": "available on Kids screen — a friendlier cinema environment for young children",
+        "gift_reason": "",
+        "when_best_used": "when a family with young children (ages 3-8) needs a movie recommendation",
+        "avoid_when": "user has teens who might find it too young, or adults-only outing",
+        "followup_hint": "suggest the Kids screen for youngest kids; pair with Shake Shack before or Baskin-Robbins after"
+      },
+      "response_fit_tags": ["shortlist", "itinerary"],
+      "topic_continuity": {
+        "topic_domain": "entertainment",
+        "topic_subdomain": "kids_movie",
+        "continuity_keywords": ["cosmic explorers", "animated", "kids movie", "animation", "children", "cartoon"],
+        "refinement_keywords": ["kids screen", "showtimes", "age appropriate", "duration", "format"],
+        "likely_followups": ["showtimes", "is it appropriate for a 3 year old", "Kids screen details", "food nearby"]
+      },
+      "price_expectation": {
+        "price_confidence_mode": "range_only",
+        "rough_price_positioning": "mid",
+        "price_expectation_notes": "Standard/Kids screen ~50 SAR, IMAX ~75 SAR.",
+        "price_question_response_hint": "Standard and Kids screen tickets are around 50 SAR. IMAX is about 75 SAR if you want the bigger screen experience."
+      }
     }
   ]
 }

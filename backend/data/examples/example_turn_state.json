@@ -21,10 +21,21 @@
     },
     {
       "role": "assistant",
-      "content": "Here are my top dining picks at Cenomi Mall right now:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Italian market + restaurant, great for browsing and tasting (Ground Floor, North Wing)\n3. **PF Chang's** — Asian fusion with generous portions (Second Floor, East Wing)\n\nWant me to narrow it down? Tell me if you're in the mood for something specific — quick bite, romantic dinner, family-friendly, or a cuisine you love.",
+      "content": "Since you're looking for a good spot to eat, here are my top picks:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Great for browsing and tasting Italian favorites\n3. **PF Chang's** — Generous portions of Asian fusion\n\nAre you in the mood for something specific — quick bite, sit-down dinner, or a particular cuisine?",
       "turn_id": "msg-x1y2z3a4b5c6",
       "metadata": {
-        "strategy": "shortlist_recommendation"
+        "strategy": "shortlist_recommendation",
+        "playbook": "",
+        "response_contract": {
+          "intro_style": "scene_aware",
+          "shortlist_size": 3,
+          "explanation_style": "one_line_reason",
+          "location_visibility": "when_useful",
+          "followup_style": "narrowing_question",
+          "continuity_requirement": false,
+          "brochure_tone_forbidden": true,
+          "exact_price_mode": "range_only"
+        }
       }
     }
   ],
@@ -33,8 +44,10 @@
     "domain": "dining",
     "sub_intent": "general_dining",
     "message_kind": "fresh_request",
-    "confidence": 0.7,
-    "raw_signals": {}
+    "confidence": 0.85,
+    "raw_signals": {},
+    "is_refinement_of_current_topic": false,
+    "detected_refinement_cues": []
   },
 
   "scene": {
@@ -47,9 +60,26 @@
     "current_need": "Where should I eat?",
     "active_topic": "dining",
     "previous_topic": "",
-    "active_shortlist": [],
+    "active_shortlist": ["The Butcher Shop & Grill", "Eataly", "PF Chang's"],
     "rejected_options": [],
     "current_preferences": {}
+  },
+
+  "continuity_anchor": {
+    "domain": "dining",
+    "topic": "general_dining",
+    "subtopic": "",
+    "audience": "",
+    "budget": "",
+    "occasion": "",
+    "last_successful_shortlist": ["The Butcher Shop & Grill", "Eataly", "PF Chang's"],
+    "last_playbook": "",
+    "last_strategy": "shortlist_recommendation"
+  },
+
+  "thread_preservation": {
+    "preserve_current_topic": true,
+    "reason": "default: no switch detected"
   },
 
   "playbook": {
@@ -59,10 +89,102 @@
   },
 
   "context": {
-    "selected_topic_blocks": ["dining", "food_court", "restaurants", "cafes", "events_and_offers"],
-    "selected_entities": [],
-    "selected_semantic_signals": [],
+    "selected_topic_blocks": ["dining"],
+    "selected_entities": [
+      {
+        "entity_id": "dining-001",
+        "name": "The Butcher Shop & Grill",
+        "entity_type": "dining",
+        "score": 0.82,
+        "concierge_notes": "Premium steaks, stylish setting, popular for dates and business dinners",
+        "semantic_tags": ["sit_down_dining", "premium", "upscale"],
+        "audience_fit": ["couple_friendly", "solo_friendly"],
+        "floor": "First Floor",
+        "zone": "South Wing"
+      },
+      {
+        "entity_id": "dining-002",
+        "name": "Eataly",
+        "entity_type": "dining",
+        "score": 0.78,
+        "concierge_notes": "Italian market + restaurant, great for browsing and tasting",
+        "semantic_tags": ["casual_dining", "mid_range", "family_friendly"],
+        "audience_fit": ["family_friendly", "solo_friendly"],
+        "floor": "Ground Floor",
+        "zone": "North Wing"
+      },
+      {
+        "entity_id": "dining-003",
+        "name": "PF Chang's",
+        "entity_type": "dining",
+        "score": 0.74,
+        "concierge_notes": "Asian fusion, generous portions, casual atmosphere",
+        "semantic_tags": ["casual_dining", "mid_range"],
+        "audience_fit": ["family_friendly", "group_friendly"],
+        "floor": "Second Floor",
+        "zone": "East Wing"
+      }
+    ],
+    "selected_semantic_signals": ["dining"],
     "ranking_notes": []
+  },
+
+  "response_policy_profile": {
+    "style_family": "ai_findr",
+    "always_acknowledge_scene": true,
+    "prefer_short_contextual_intro": true,
+    "prefer_curated_shortlist": true,
+    "default_shortlist_size": 3,
+    "max_shortlist_size": 5,
+    "prefer_one_line_reasons": true,
+    "show_location_only_when_useful": true,
+    "deprioritize_floor_zone_details": true,
+    "prefer_followup_narrowing_question": true,
+    "avoid_brochure_tone": true,
+    "avoid_repeating_full_mall_name": true,
+    "prefer_decision_help_over_description": true,
+    "preserve_thread_continuity": true,
+    "preserve_topic_on_short_followups": true,
+    "prefer_contextual_grouping": true,
+    "prefer_price_range_when_exact_price_missing": true
+  },
+
+  "response_contract": {
+    "intro_style": "scene_aware",
+    "shortlist_size": 3,
+    "explanation_style": "one_line_reason",
+    "location_visibility": "when_useful",
+    "followup_style": "narrowing_question",
+    "continuity_requirement": false,
+    "brochure_tone_forbidden": true,
+    "exact_price_mode": "range_only"
+  },
+
+  "candidate_reason_map": [
+    {
+      "entity_name": "The Butcher Shop & Grill",
+      "chosen_reason_type": "general",
+      "one_line_reason": "Premium steaks in a stylish setting",
+      "followup_hint": "ask about private dining"
+    },
+    {
+      "entity_name": "Eataly",
+      "chosen_reason_type": "general",
+      "one_line_reason": "Great for browsing and tasting Italian favorites",
+      "followup_hint": ""
+    },
+    {
+      "entity_name": "PF Chang's",
+      "chosen_reason_type": "general",
+      "one_line_reason": "Generous portions of Asian fusion",
+      "followup_hint": ""
+    }
+  ],
+
+  "narrowing_followup": {
+    "is_useful": true,
+    "suggested_question": "Any cuisine preference — Italian, Asian, Middle Eastern?",
+    "narrowing_dimension": "cuisine"
   },
 
   "retrieval": {
@@ -81,8 +203,8 @@
     "response_constraints": ["answer_first", "ground_in_real_entities"]
   },
 
-  "final_response_text": "Here are my top dining picks at Cenomi Mall right now:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Italian market + restaurant, great for browsing and tasting (Ground Floor, North Wing)\n3. **PF Chang's** — Asian fusion with generous portions (Second Floor, East Wing)\n\nWant me to narrow it down? Tell me if you're in the mood for something specific — quick bite, romantic dinner, family-friendly, or a cuisine you love.",
-  "response_debug_summary": "strategy=shortlist_recommendation | playbook=none | topics=['dining', 'food_court', 'restaurants', 'cafes', 'events_and_offers'] | retrieval=no",
+  "final_response_text": "Since you're looking for a good spot to eat, here are my top picks:\n\n1. **The Butcher Shop & Grill** — Premium steaks in a stylish setting (First Floor, South Wing)\n2. **Eataly** — Great for browsing and tasting Italian favorites\n3. **PF Chang's** — Generous portions of Asian fusion\n\nAre you in the mood for something specific — quick bite, sit-down dinner, or a particular cuisine?",
+  "response_debug_summary": "strategy=shortlist_recommendation | playbook=none | topics=['dining'] | entities=3 | retrieval=no | contract_intro=scene_aware | contract_shortlist=3 | reasons=3 | narrowing=yes",
 
   "node_trace": [
     {
@@ -97,7 +219,7 @@
       "node": "interpret_turn",
       "started_at": "2026-03-13T10:00:00.002Z",
       "latency_ms": 1.5,
-      "summary": "Intent: dining/general_dining (fresh_request)",
+      "summary": "Intent: dining/general_dining (fresh_request) refine=false",
       "output_keys": ["intent"],
       "warnings": []
     },
@@ -105,8 +227,8 @@
       "node": "update_scene_memory",
       "started_at": "2026-03-13T10:00:00.004Z",
       "latency_ms": 0.8,
-      "summary": "Scene: topic → dining",
-      "output_keys": ["scene"],
+      "summary": "Scene: topic → dining | preserve=true",
+      "output_keys": ["scene", "continuity_anchor", "thread_preservation"],
       "warnings": []
     },
     {
@@ -121,16 +243,16 @@
       "node": "choose_strategy",
       "started_at": "2026-03-13T10:00:00.006Z",
       "latency_ms": 0.5,
-      "summary": "Strategy: shortlist_recommendation | shape: numbered_shortlist",
-      "output_keys": ["response_plan"],
+      "summary": "Strategy: shortlist_recommendation | shape: numbered_shortlist | behavior_score: 0.00 | contract: intro=scene_aware, shortlist=3, price=range_only",
+      "output_keys": ["response_plan", "response_policy_profile", "response_contract"],
       "warnings": []
     },
     {
       "node": "compose_context",
       "started_at": "2026-03-13T10:00:00.007Z",
       "latency_ms": 3.2,
-      "summary": "Context: 5 topics, 0 signals, 0 entities",
-      "output_keys": ["context"],
+      "summary": "Context: 1 topics, 1 signals, 3 entities, 3 reasons, narrowing=yes",
+      "output_keys": ["context", "candidate_reason_map", "narrowing_followup"],
       "warnings": []
     },
     {
@@ -145,8 +267,8 @@
       "node": "generate_response",
       "started_at": "2026-03-13T10:00:00.010Z",
       "latency_ms": 850.0,
-      "summary": "Generated 384 chars via shortlist_recommendation",
-      "output_keys": ["final_response_text", "response_debug_summary", "messages"],
+      "summary": "Generated 384 chars via shortlist_recommendation | contract enforced",
+      "output_keys": ["final_response_text", "response_debug_summary", "continuity_anchor", "messages"],
       "warnings": []
     },
     {
@@ -186,15 +308,15 @@
     "mall_id": "cenomi_mall_01",
     "intent_domain": "dining",
     "intent_sub": "general_dining",
-    "intent_confidence": 0.7,
+    "intent_confidence": 0.85,
     "message_kind": "fresh_request",
     "playbook_used": "",
     "playbook_confidence": 0.0,
     "strategy_used": "shortlist_recommendation",
     "retrieval_used": false,
-    "topics_count": 5,
-    "entities_count": 0,
-    "signals_count": 0,
+    "topics_count": 1,
+    "entities_count": 3,
+    "signals_count": 1,
     "response_length": 384,
     "total_latency_ms": 860.2,
     "node_count": 10,

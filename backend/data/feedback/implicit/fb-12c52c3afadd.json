@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-12c52c3afadd",
+  "session_id": "session-c2ac1a274929431a",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-5ef0477aac93",
+  "user_message": "\u201cQuick plan for the evening.\u201d",
+  "previous_assistant_response": "For a quick evening plan, I\u2019d suggest grabbing a fast meal at Shake Shack near the cinema for a hassle-free bite. Then, enjoy a romantic movie like Starlight Romance at VOX Cinemas, which is perfect for winding down the day. If you want to finish with a special touch, a quick stop at L'azurde for some elegant jewelry browsing could be a nice way to wrap up. Do you have a budget range in mind?",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-16 07:03:14.675564"
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-023d308c6add",
+  "session_id": "session-29d0a9d23cdb4d01",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-f8e5cd3686a5",
+  "user_message": "\u201cKid-friendly restaurants here?\u201d",
+  "previous_assistant_response": "With kids in tow, The Cheesecake Factory is a solid choice\u2014it has a huge menu that covers all tastes and plenty of kid-friendly options. Al Romansiah is great if you want to introduce the family to traditional Saudi dishes in a comfortable setting. For a quick, casual meal that kids love, Shake Shack near the cinema is perfect for burgers and shakes without a long wait.\n\nAre you thinking of a sit-down meal or something quicker?",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bkid[\\s-]*friendly\\b",
+      "confidence": 0.9500000000000001
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-16 06:41:23.329223"
+}

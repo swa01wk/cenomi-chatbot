@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-23d0b3c80524",
+  "session_id": "session-2a7f01d4e8be48d1",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-54a25a562d64",
+  "user_message": "\u201cI need a birthday gift for my girlfriend.\u201d",
+  "previous_assistant_response": "Since you\u2019re shopping for your girlfriend\u2019s birthday, L'azurde is a great choice if you want something special and romantic with local craftsmanship, especially for milestone gifts. Sephora offers curated beauty gift sets and fragrance samples, which can be a fun and thoughtful option, especially with their current Spring Beauty Sale. Pandora is perfect if you want a meaningful, customizable charm bracelet that tells a personal story without going too premium. Do you have a price range in mind\u2014say, under 100 SAR?",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-13 14:49:57.297757"
+}

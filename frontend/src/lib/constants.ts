@@ -13,29 +13,29 @@ export const SUGGESTED_QUERIES = [
 ];
 
 export const FEEDBACK_REASONS = [
-  "not_relevant",
+  "wrong_thread",
+  "lost_context",
   "too_generic",
-  "too_long",
-  "wrong_assumption",
-  "wanted_exact_details",
-  "wrong_store_suggestion",
-  "wrong_dining_suggestion",
-  "tone_felt_robotic",
-  "asked_too_many_questions",
-  "should_recommend_something_else",
+  "too_much_detail",
+  "wrong_shortlist",
+  "wrong_playbook",
+  "poor_follow_up",
+  "sounds_like_directory",
+  "not_enough_options",
+  "too_many_options",
 ] as const;
 
 export const FEEDBACK_REASON_LABELS: Record<string, string> = {
-  not_relevant: "Not relevant",
+  wrong_thread: "Wrong thread",
+  lost_context: "Lost context",
   too_generic: "Too generic",
-  too_long: "Too long",
-  wrong_assumption: "Wrong assumption",
-  wanted_exact_details: "Wanted exact details",
-  wrong_store_suggestion: "Wrong store suggestion",
-  wrong_dining_suggestion: "Wrong dining suggestion",
-  tone_felt_robotic: "Tone felt robotic",
-  asked_too_many_questions: "Asked too many questions",
-  should_recommend_something_else: "Should recommend something else",
+  too_much_detail: "Too much detail",
+  wrong_shortlist: "Wrong shortlist",
+  wrong_playbook: "Wrong playbook",
+  poor_follow_up: "Poor follow-up",
+  sounds_like_directory: "Sounds like directory",
+  not_enough_options: "Not enough options",
+  too_many_options: "Too many options",
 };
 
 export const TENANTS = [

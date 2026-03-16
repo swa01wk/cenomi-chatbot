@@ -6,7 +6,7 @@ interface RawDrawerProps {
   debug: DebugPayload;
 }
 
-type Tab = "prompt" | "state" | "trace";
+type Tab = "prompt" | "state" | "trace" | "findr";
 
 export default function RawDrawer({ debug }: RawDrawerProps) {
   const [open, setOpen] = useState(false);
@@ -22,6 +22,15 @@ export default function RawDrawer({ debug }: RawDrawerProps) {
       topic_blocks: debug.selected_topic_blocks,
       entities: debug.selected_entities,
       signals: debug.selected_semantic_signals,
+    },
+    findr: {
+      continuity_anchor: debug.continuity_anchor,
+      thread_preservation_decision: debug.thread_preservation_decision,
+      expected_playbook_candidates: debug.expected_playbook_candidates,
+      shortlisted_entities: debug.shortlisted_entities,
+      response_contract: debug.response_contract,
+      price_expectation_mode: debug.price_expectation_mode,
+      narrowing_followup_opportunity: debug.narrowing_followup_opportunity,
     },
   };
 
@@ -47,7 +56,7 @@ export default function RawDrawer({ debug }: RawDrawerProps) {
         <div className="animate-fade-in px-4 pb-4">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex gap-1">
-              {(["trace", "state", "prompt"] as const).map((t) => (
+              {(["trace", "state", "prompt", "findr"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}

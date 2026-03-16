@@ -85,5 +85,36 @@
     "preserve_active_topic_strongly": 0.75,
     "reinterpret_short_followups_aggressively": 0.80,
     "correction_overrides_previous_scope": 0.90
+  },
+
+  "response_policy": {
+    "style_family": "ai_findr",
+    "always_acknowledge_scene": true,
+    "prefer_short_contextual_intro": true,
+    "prefer_curated_shortlist": true,
+    "default_shortlist_size": 3,
+    "max_shortlist_size": 5,
+    "prefer_one_line_reasons": true,
+    "show_location_only_when_useful": true,
+    "deprioritize_floor_zone_details": true,
+    "prefer_followup_narrowing_question": true,
+    "avoid_brochure_tone": true,
+    "avoid_repeating_full_mall_name": true,
+    "prefer_decision_help_over_description": true,
+    "preserve_thread_continuity": true,
+    "preserve_topic_on_short_followups": true,
+    "prefer_contextual_grouping": true,
+    "prefer_price_range_when_exact_price_missing": true
+  },
+
+  "strategy_behavior_weights": {
+    "continuity_preservation_weight": 0.85,
+    "shortlist_quality_weight": 0.80,
+    "scene_acknowledgment_weight": 0.75,
+    "followup_usefulness_weight": 0.70,
+    "overdescription_penalty": 0.65,
+    "clarification_penalty": 0.60,
+    "wrong_thread_penalty": 0.80,
+    "brochure_tone_penalty": 0.70
   }
 }

@@ -9,7 +9,11 @@ CONTRACT
 ────────
   Purpose:  Analyze the normalized message in conversation context.
             Determine domain, sub_intent, and message_kind.
-  Reads:    normalized_user_message, messages (history), scene
+            Detect whether the message is a refinement of the current topic.
+            Detect short follow-up refinements like "affordable", "price",
+            "for my son" and flag them via is_refinement_of_current_topic.
+  Reads:    normalized_user_message, messages (history), scene,
+            continuity_anchor
   Writes:   intent (InterpretedIntent)
   Failure:  Classification error → domain="general", message_kind="fresh_request"
   Routing:  Always → update_scene_memory
@@ -55,7 +59,9 @@ Return ONLY valid JSON with these fields:
   "domain": one of: dining, shopping, entertainment, services, navigation, exploration, general
   "sub_intent": a specific sub-intent (see list below)
   "message_kind": one of: fresh_request, correction, refinement, topic_switch, followup
-  "confidence": 0.0-1.0
+  "confidence": 0.0-1.0,
+  "is_refinement_of_current_topic": true/false,
+  "detected_refinement_cues": ["cue1", "cue2"]
 }
 
 DOMAINS AND SUB-INTENTS:
@@ -74,6 +80,15 @@ MESSAGE KIND RULES:
 - topic_switch: user changes topic ("instead", "forget that", "something else")
 - followup: short response continuing current topic
 
+REFINEMENT DETECTION (critical for topic continuity):
+- If the user sends a short adjective/noun follow-up (e.g. "affordable", "for my son",
+  "price", "something quieter", "kid-friendly") and there is an active topic, set
+  is_refinement_of_current_topic=true and list the cue words in detected_refinement_cues.
+- Price questions inside an active shopping/dining thread are refinements, not topic switches.
+- Child/family follow-ups inside an active thread are refinements with audience bias.
+- Only classify as topic_switch when there is an *explicit* domain change
+  (e.g. "forget jackets, where can I eat?" or "what movies are showing?").
+
 CRITICAL: If the message is vague, open-ended, or asks broadly what to do/see/explore, classify as exploration/open_exploration. This is the MOST COMMON query type — do NOT default to general_inquiry for these.
 
 Examples:
@@ -84,6 +99,9 @@ Examples:
 - "Hi" / "Hello" → general/general_inquiry
 - "Where can I eat?" → dining/general_dining
 - "I want to buy a gift" → shopping/gift_recommendation
+- "affordable" (active_topic=shopping) → refinement, is_refinement=true, cues=["affordable"]
+- "for my son" (active_topic=shopping) → refinement, is_refinement=true, cues=["for my son"]
+- "how much?" (active_topic=shopping) → followup, is_refinement=true, cues=["price"]
 """
 
 
@@ -97,7 +115,7 @@ def _get_classifier_llm() -> ChatOpenAI:
             model=settings.openai_model,
             temperature=0.0,
             api_key=settings.openai_api_key,
-            max_tokens=200,
+            max_tokens=300,
         )
     return _classifier_llm
 
@@ -113,10 +131,36 @@ async def interpret_turn(state: ConciergeState) -> dict:
         logger.warning("LLM classifier failed, using heuristic: %s", exc)
         intent = _heuristic_classify(msg, history_len, state)
 
+    # Post-classification refinement detection for short follow-ups:
+    # If the continuity anchor is strong and the message is very short,
+    # override a spurious topic_switch to refinement/followup.
+    anchor = state.continuity_anchor
+    if anchor.is_strong and intent.message_kind == "topic_switch":
+        word_count = len(msg.split())
+        if word_count <= 4 and not _has_explicit_switch_cue(msg):
+            intent = intent.model_copy(update={
+                "message_kind": "refinement",
+                "is_refinement_of_current_topic": True,
+            })
+
     return {
         "intent": intent,
-        "_trace_summary": f"Intent: {intent.domain}/{intent.sub_intent} ({intent.message_kind})",
+        "_trace_summary": (
+            f"Intent: {intent.domain}/{intent.sub_intent} "
+            f"({intent.message_kind}) "
+            f"refine={intent.is_refinement_of_current_topic}"
+        ),
     }
+
+
+def _has_explicit_switch_cue(msg: str) -> bool:
+    """Return True only when the message contains an unambiguous topic switch."""
+    lower = msg.lower()
+    explicit_cues = (
+        "instead", "forget that", "something else", "change topic",
+        "never mind", "new question",
+    )
+    return any(cue in lower for cue in explicit_cues)
 
 
 async def _llm_classify(
@@ -138,6 +182,14 @@ async def _llm_classify(
     if state.scene.companions:
         context_parts.append(f"Companions: {', '.join(state.scene.companions)}")
 
+    anchor = state.continuity_anchor
+    if anchor.is_strong:
+        context_parts.append(
+            f"Continuity anchor: domain={anchor.domain}, "
+            f"topic={anchor.topic}, subtopic={anchor.subtopic}, "
+            f"audience={anchor.audience}, budget={anchor.budget}"
+        )
+
     user_text = "\n".join(context_parts)
 
     response = await llm.ainvoke([
@@ -155,6 +207,8 @@ async def _llm_classify(
     sub_intent = parsed.get("sub_intent", "general_inquiry")
     message_kind = parsed.get("message_kind", "fresh_request")
     confidence = float(parsed.get("confidence", 0.8))
+    is_refinement = bool(parsed.get("is_refinement_of_current_topic", False))
+    refinement_cues = parsed.get("detected_refinement_cues", [])
 
     if domain not in VALID_DOMAINS:
         domain = "general"
@@ -166,6 +220,8 @@ async def _llm_classify(
         sub_intent=sub_intent,
         message_kind=message_kind,
         confidence=confidence,
+        is_refinement_of_current_topic=is_refinement,
+        detected_refinement_cues=refinement_cues,
     )
 
 
@@ -198,6 +254,25 @@ _EXPLORATION_CUES = (
     "what's good", "what's popular", "what's trending",
 )
 
+_REFINEMENT_ADJECTIVES = {
+    "affordable", "cheap", "expensive", "luxury", "premium", "budget",
+    "quiet", "quieter", "lively", "romantic", "casual", "cozy",
+    "kid-friendly", "family-friendly", "halal",
+    "quick", "fast", "nearby", "closer",
+}
+
+_REFINEMENT_AUDIENCE_CUES = {
+    "for my son", "for my daughter", "for kids", "for children",
+    "for my wife", "for my husband", "for my girlfriend",
+    "for a couple", "for family", "with kids", "with children",
+    "with my son", "with my daughter",
+}
+
+_REFINEMENT_PRICE_CUES = {
+    "price", "how much", "cost", "pricing", "expensive",
+    "what does it cost", "budget", "affordable",
+}
+
 
 def _heuristic_classify(
     msg: str, history_len: int, state: ConciergeState,
@@ -205,6 +280,10 @@ def _heuristic_classify(
     lower = msg.lower()
 
     message_kind = _detect_message_kind(lower, history_len, state)
+    is_refinement, cues = _detect_refinement_signals(lower, state)
+
+    if is_refinement and message_kind in ("fresh_request", "topic_switch"):
+        message_kind = "refinement"
 
     if any(cue in lower for cue in _EXPLORATION_CUES):
         return InterpretedIntent(
@@ -212,6 +291,8 @@ def _heuristic_classify(
             sub_intent="open_exploration",
             message_kind=message_kind,
             confidence=0.7,
+            is_refinement_of_current_topic=is_refinement,
+            detected_refinement_cues=cues,
         )
 
     domain = "general"
@@ -220,6 +301,12 @@ def _heuristic_classify(
             domain = d
             break
 
+    # When there is a strong continuity anchor and no explicit domain keyword,
+    # inherit the anchored domain rather than defaulting to "general".
+    anchor = state.continuity_anchor
+    if domain == "general" and anchor.is_strong and is_refinement:
+        domain = anchor.domain
+
     sub_intent = _extract_sub_intent(lower, domain)
 
     return InterpretedIntent(
@@ -227,7 +314,41 @@ def _heuristic_classify(
         sub_intent=sub_intent,
         message_kind=message_kind,
         confidence=0.6,
+        is_refinement_of_current_topic=is_refinement,
+        detected_refinement_cues=cues,
     )
+
+
+def _detect_refinement_signals(
+    msg: str, state: ConciergeState,
+) -> tuple[bool, list[str]]:
+    """Detect short adjective/noun follow-ups that refine the active topic."""
+    anchor = state.continuity_anchor
+    if not anchor.is_strong:
+        return False, []
+
+    cues: list[str] = []
+
+    for adj in _REFINEMENT_ADJECTIVES:
+        if adj in msg:
+            cues.append(adj)
+
+    for phrase in _REFINEMENT_AUDIENCE_CUES:
+        if phrase in msg:
+            cues.append(phrase)
+
+    for phrase in _REFINEMENT_PRICE_CUES:
+        if phrase in msg:
+            cues.append(phrase)
+
+    if cues:
+        return True, cues
+
+    word_count = len(msg.split())
+    if word_count <= 3 and state.scene.active_topic:
+        return True, [msg.strip()]
+
+    return False, []
 
 
 def _detect_message_kind(msg: str, history_len: int, state: ConciergeState) -> str:

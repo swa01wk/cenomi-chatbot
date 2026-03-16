@@ -75,6 +75,13 @@ function mockDebug(overrides: Partial<DebugPayload> = {}): DebugPayload {
         summary: "Debug payload emitted",
       },
     ],
+    continuity_anchor: "new_session",
+    thread_preservation_decision: "start_fresh",
+    expected_playbook_candidates: ["pb-001-general-greeting"],
+    shortlisted_entities: [],
+    response_contract: "greeting_with_exploration_prompt",
+    price_expectation_mode: false,
+    narrowing_followup_opportunity: "",
     ...overrides,
   };
 }
@@ -95,7 +102,7 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
   dining: {
     session_id: "mock-session-001",
     message:
-      "Great choice! Here are some top dining picks:\n\n**The Cheesecake Factory** — Second Floor, South Wing. Famous for their extensive menu and amazing cheesecakes. Perfect for groups.\n\n**Shake Shack** — Ground Floor, near Gate 3. Quick burgers, fries, and shakes.\n\n**PF Chang's** — First Floor, East Wing. Asian-inspired dishes in a stylish setting.\n\nWould you like more details about any of these, or should I suggest based on a specific craving?",
+      "Great choice! Here are some top dining picks:\n\n**The Cheesecake Factory** — Second Floor, South Wing. Famous for their extensive menu and amazing cheesecakes. Perfect for groups.\n\n**Shake Shack** — Ground Floor, near Gate 3. Quick burgers, fries, and shakes.\n\n**PF Chang's** — First Floor, East Wing. Asian-inspired dishes in a stylish setting.\n\nAll three have plenty of seating right now — weekday lunch is usually relaxed.\n\nWould you like more details about any of these, or should I suggest based on a specific craving?",
     sources: [
       { source: "tenant_directory", content: "dining options catalog" },
       { source: "mall_map", content: "floor plans" },
@@ -169,6 +176,21 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
         emit_debug_payload: 6,
       },
       node_count: 9,
+      continuity_anchor: "dining_exploration",
+      thread_preservation_decision: "continue_thread",
+      expected_playbook_candidates: [
+        "pb-010-dining-recommendation",
+        "pb-011-quick-food",
+        "pb-012-cafe-recommendation",
+      ],
+      shortlisted_entities: [
+        { name: "The Cheesecake Factory", reason: "Top-rated full-service restaurant, broad menu appeal" },
+        { name: "Shake Shack", reason: "Popular quick-service, high visitor rating" },
+        { name: "PF Chang's", reason: "Variety play — Asian cuisine balances the shortlist" },
+      ],
+      response_contract: "shortlist_3_with_location_and_followup",
+      price_expectation_mode: false,
+      narrowing_followup_opportunity: "cuisine_type_or_budget",
     }),
   },
   gift: {
@@ -222,12 +244,26 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
       retrieval_targets: ["retail_directory", "gift_guides"],
       retrieval_results_count: 12,
       total_latency_ms: 580,
+      continuity_anchor: "gift_shopping_thread",
+      thread_preservation_decision: "continue_thread",
+      expected_playbook_candidates: [
+        "pb-020-gift-formula",
+        "pb-021-shopping-general",
+      ],
+      shortlisted_entities: [
+        { name: "Swarovski", reason: "Luxury tier — high gifting intent match" },
+        { name: "Bath & Body Works", reason: "Mid-range fallback — safe crowd-pleaser" },
+        { name: "Pandora", reason: "Personal/sentimental angle — repeatable gifting" },
+      ],
+      response_contract: "gift_formula_curated_3",
+      price_expectation_mode: true,
+      narrowing_followup_opportunity: "budget_or_style_preference",
     }),
   },
   movie: {
     session_id: "mock-session-001",
     message:
-      "Movie time! Here's a quick plan:\n\n**VOX Cinema** is on the Third Floor, East Wing. Current showtimes start every 30 minutes.\n\nFor a quick bite before:\n- **Cinnabon** — right next to the cinema entrance\n- **Subway** — 2-minute walk, Ground Floor East\n\nShall I check what's showing right now?",
+      "Movie time! Here's a quick plan:\n\n**VOX Cinema** — Third Floor, East Wing. Current showtimes start every 30 minutes.\n\n**Cinnabon** — right next to the cinema entrance, perfect for a quick snack.\n\n**Subway** — 2-minute walk, Ground Floor East for something more filling.\n\nShall I check what's showing right now?",
     sources: [
       { source: "entertainment_directory" },
       { source: "dining_near_cinema" },
@@ -253,12 +289,26 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
       retrieval_reason: "Cinema + nearby food query",
       retrieval_results_count: 5,
       total_latency_ms: 510,
+      continuity_anchor: "movie_planning_thread",
+      thread_preservation_decision: "start_fresh",
+      expected_playbook_candidates: [
+        "pb-030-movie-plus-food",
+        "pb-031-entertainment-general",
+      ],
+      shortlisted_entities: [
+        { name: "VOX Cinema", reason: "Only cinema in mall — direct match" },
+        { name: "Cinnabon", reason: "Proximity to cinema entrance, quick service" },
+        { name: "Subway", reason: "Fast casual fallback near cinema wing" },
+      ],
+      response_contract: "plan_with_shortlist_and_followup",
+      price_expectation_mode: false,
+      narrowing_followup_opportunity: "showtime_or_genre",
     }),
   },
   family: {
     session_id: "mock-session-001",
     message:
-      "A family day out — here's a plan everyone will love:\n\n**Morning:** Start at **Kidzania** (2nd Floor) — immersive role-play for kids aged 4–14.\n\n**Lunch:** **The Cheesecake Factory** has a great kids' menu and plenty of space.\n\n**Afternoon:** Hit the **Arcade Zone** (3rd Floor) for games, or catch a family movie at **VOX Cinema**.\n\nWant me to adjust this for specific ages or interests?",
+      "A family day out — here's a plan everyone will love:\n\n**Kidzania** — 2nd Floor. Immersive role-play for kids aged 4–14.\n\n**The Cheesecake Factory** — Great kids' menu and plenty of space for family lunch.\n\n**Arcade Zone** — 3rd Floor. Games for all ages, or catch a family movie at VOX Cinema.\n\nEach spot is within a short walk of the next — easy circuit for families.\n\nWant me to adjust this for specific ages or interests?",
     sources: [
       { source: "entertainment_directory" },
       { source: "family_guide" },
@@ -282,12 +332,26 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
       },
       total_latency_ms: 650,
       warnings: ["Kids' age not specified — using general family plan"],
+      continuity_anchor: "family_outing_thread",
+      thread_preservation_decision: "start_fresh",
+      expected_playbook_candidates: [
+        "pb-040-family-plan",
+        "pb-041-kids-activities",
+      ],
+      shortlisted_entities: [
+        { name: "Kidzania", reason: "Top family attraction — wide age range" },
+        { name: "The Cheesecake Factory", reason: "Family-friendly dining with kids' menu" },
+        { name: "Arcade Zone", reason: "Afternoon entertainment — complements Kidzania" },
+      ],
+      response_contract: "day_plan_with_shortlist",
+      price_expectation_mode: false,
+      narrowing_followup_opportunity: "age_range_or_budget",
     }),
   },
   coffee: {
     session_id: "mock-session-001",
     message:
-      "Craving coffee and dessert? You're in luck:\n\n**% Arabica** — Ground Floor, Main Atrium. Minimalist vibes, exceptional pour-over.\n\n**Magnolia Bakery** — 1st Floor, West Wing. Famous banana pudding + great lattes.\n\n**Le Pain Quotidien** — Ground Floor, South. Organic pastries and specialty coffee.\n\nAll three have comfortable seating if you want to linger. Which sounds good?",
+      "Craving coffee and dessert? You're in luck:\n\n**% Arabica** — Ground Floor, Main Atrium. Minimalist vibes, exceptional pour-over.\n\n**Magnolia Bakery** — 1st Floor, West Wing. Famous banana pudding + great lattes.\n\n**Le Pain Quotidien** — Ground Floor, South. Organic pastries and specialty coffee.\n\nAll three have comfortable seating if you want to linger.\n\nWhich sounds good?",
     sources: [{ source: "dining_directory", content: "cafe options" }],
     suggestions: [
       "Best dessert in the mall",
@@ -304,6 +368,20 @@ const MOCK_RESPONSES: Record<string, ChatResponse> = {
       retrieval_reason: "Cafe-specific directory lookup",
       retrieval_results_count: 6,
       total_latency_ms: 495,
+      continuity_anchor: "coffee_dessert_thread",
+      thread_preservation_decision: "start_fresh",
+      expected_playbook_candidates: [
+        "pb-012-cafe-recommendation",
+        "pb-010-dining-recommendation",
+      ],
+      shortlisted_entities: [
+        { name: "% Arabica", reason: "Specialty coffee leader — high visitor rating" },
+        { name: "Magnolia Bakery", reason: "Best dessert pairing with coffee" },
+        { name: "Le Pain Quotidien", reason: "Organic angle — appeals to health-conscious" },
+      ],
+      response_contract: "shortlist_3_with_vibe_and_followup",
+      price_expectation_mode: false,
+      narrowing_followup_opportunity: "seating_preference_or_dessert_type",
     }),
   },
 };

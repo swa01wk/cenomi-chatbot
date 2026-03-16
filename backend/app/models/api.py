@@ -40,20 +40,56 @@ class DebugPayload(BaseModel):
     intent_sub: str = ""
     intent_confidence: float = 0.0
     message_kind: str = ""
+    is_refinement_of_current_topic: bool = False
+    detected_refinement_cues: list[str] = Field(default_factory=list)
 
     scene_summary: dict[str, Any] = Field(default_factory=dict)
+    continuity_anchor: dict[str, Any] = Field(default_factory=dict)
+    thread_preservation: dict[str, Any] = Field(default_factory=dict)
+
+    # Continuity resolution (Part 1)
+    continuity_resolution: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Formal continuity resolver output: type, action, confidence, reason.",
+    )
+    thread_preservation_decision: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Thread preservation verdict with reason.",
+    )
 
     selected_playbook: str = ""
     playbook_confidence: float = 0.0
     matched_playbooks: list[str] = Field(default_factory=list)
 
+    # Playbook precedence candidates (Part 2)
+    expected_playbook_candidates: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="All scored playbook candidates with precedence scores.",
+    )
+
     chosen_strategy: str = ""
     response_shape: str = ""
+    response_contract: dict[str, Any] = Field(default_factory=dict)
+
+    # Response contract name (Part 4)
+    response_contract_used: str = Field(
+        default="ai_findr",
+        description="The response formatter contract applied to this turn.",
+    )
 
     selected_topic_blocks: list[str] = Field(default_factory=list)
     selected_entities: list[dict[str, Any]] = Field(default_factory=list)
     selected_semantic_signals: list[str] = Field(default_factory=list)
     ranking_notes: list[str] = Field(default_factory=list)
+
+    candidate_reason_map: list[dict[str, Any]] = Field(default_factory=list)
+    narrowing_followup: dict[str, Any] = Field(default_factory=dict)
+
+    # Shortlist reason map (Part 3)
+    shortlist_reason_map: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Per-entity reason entries from the shortlist ranker.",
+    )
 
     retrieval_needed: bool = False
     retrieval_reason: str = ""

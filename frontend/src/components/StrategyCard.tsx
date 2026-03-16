@@ -6,6 +6,7 @@ interface StrategyCardProps {
   matchedPlaybooks: string[];
   chosenStrategy: string;
   responseShape: string;
+  expectedCandidates?: string[];
 }
 
 export default function StrategyCard({
@@ -14,6 +15,7 @@ export default function StrategyCard({
   matchedPlaybooks,
   chosenStrategy,
   responseShape,
+  expectedCandidates,
 }: StrategyCardProps) {
   return (
     <div className="space-y-3">
@@ -40,6 +42,21 @@ export default function StrategyCard({
                     {p}
                   </span>
                 ))}
+            </div>
+          )}
+          {expectedCandidates && expectedCandidates.length > 0 && (
+            <div className="mt-1">
+              <span className="text-[10px] text-slate-500">Expected candidates: </span>
+              <div className="mt-0.5 flex flex-wrap gap-1">
+                {expectedCandidates.map((c) => (
+                  <span
+                    key={c}
+                    className="rounded bg-indigo-900/30 px-1.5 py-0.5 text-[10px] text-indigo-300"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>

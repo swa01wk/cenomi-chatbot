@@ -3,6 +3,11 @@ import {
   Compass,
   Clock,
   AlertTriangle,
+  Link2,
+  ListChecks,
+  FileText,
+  DollarSign,
+  ArrowDownNarrowWide,
 } from "lucide-react";
 import SceneSnapshotCard from "./SceneSnapshotCard";
 import StrategyCard from "./StrategyCard";
@@ -17,6 +22,26 @@ interface TurnInspectorProps {
 export default function TurnInspector({ debug }: TurnInspectorProps) {
   return (
     <div className="space-y-1">
+      {/* Thread Continuity */}
+      {(debug.continuity_anchor || debug.thread_preservation_decision) && (
+        <Section
+          title="Thread Continuity"
+          icon={<Link2 size={13} className="text-sky-400" />}
+        >
+          <div className="space-y-1.5 text-xs">
+            {debug.continuity_anchor && (
+              <Field label="Anchor" value={debug.continuity_anchor} />
+            )}
+            {debug.thread_preservation_decision && (
+              <Field
+                label="Decision"
+                value={debug.thread_preservation_decision}
+              />
+            )}
+          </div>
+        </Section>
+      )}
+
       {/* Intent */}
       <Section title="Intent" icon={<Brain size={13} className="text-amber-400" />}>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
@@ -46,8 +71,74 @@ export default function TurnInspector({ debug }: TurnInspectorProps) {
           matchedPlaybooks={debug.matched_playbooks}
           chosenStrategy={debug.chosen_strategy}
           responseShape={debug.response_shape}
+          expectedCandidates={debug.expected_playbook_candidates}
         />
       </Section>
+
+      {/* Shortlisted Entities */}
+      {debug.shortlisted_entities && debug.shortlisted_entities.length > 0 && (
+        <Section
+          title="Shortlisted Entities"
+          icon={<ListChecks size={13} className="text-emerald-400" />}
+        >
+          <div className="space-y-1.5">
+            {debug.shortlisted_entities.map((entity, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-2 rounded bg-slate-800/50 px-2 py-1.5"
+              >
+                <span className="shrink-0 text-xs font-medium text-slate-200">
+                  {entity.name}
+                </span>
+                <span className="text-[11px] leading-snug text-slate-500">
+                  {entity.reason}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Response Contract & Flags */}
+      {(debug.response_contract ||
+        debug.price_expectation_mode !== undefined ||
+        debug.narrowing_followup_opportunity) && (
+        <Section
+          title="Response Contract"
+          icon={<FileText size={13} className="text-indigo-400" />}
+        >
+          <div className="space-y-2 text-xs">
+            {debug.response_contract && (
+              <Field label="Contract" value={debug.response_contract} />
+            )}
+            {debug.price_expectation_mode !== undefined && (
+              <div className="flex items-center gap-2">
+                <DollarSign size={11} className="text-slate-500" />
+                <span className="text-slate-400">Price expectation mode</span>
+                <span
+                  className={`debug-pill ${debug.price_expectation_mode ? "debug-pill-on" : "debug-pill-off"}`}
+                >
+                  {debug.price_expectation_mode ? "ON" : "OFF"}
+                </span>
+              </div>
+            )}
+            {debug.narrowing_followup_opportunity && (
+              <div className="flex items-start gap-2">
+                <ArrowDownNarrowWide
+                  size={11}
+                  className="mt-0.5 shrink-0 text-slate-500"
+                />
+                <div>
+                  <span className="text-slate-400">Narrowing opportunity: </span>
+                  <span className="font-medium text-slate-200">
+                    {debug.narrowing_followup_opportunity}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
       {/* Context Composition */}
       <Section title="Context">

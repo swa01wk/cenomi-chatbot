@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-49a868eddfbb",
+  "session_id": "session-d6f28ed596ef491f",
+  "tenant_id": "cenomi_mall_01",
+  "mall_id": "cenomi_mall_01",
+  "turn_id": "msg-ad3b5502b33d",
+  "user_message": "\u201cQuick gift for my mom.\u201d",
+  "previous_assistant_response": "For a quick gift for your mom, Sephora is a great choice with ready-to-go beauty gift sets and helpful advisors to speed up your pick. Pandora offers customizable charm bracelets that feel personal but are easy to grab on the spot. L'azurde also works if you want something premium and meaningful, especially with their local craftsmanship, though it might take a bit longer to decide. All three are conveniently located on the Ground floor, East Wing. Do you have a price range in mind\u2014say, under 100 SAR?",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-16 06:56:22.593841"
+}

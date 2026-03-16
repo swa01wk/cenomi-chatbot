@@ -53,6 +53,33 @@
     "reinterpret_short_followups_aggressively": 0.85
   },
 
+  "response_policy": {
+    "style_family": "ai_findr",
+    "always_acknowledge_scene": true,
+    "prefer_curated_shortlist": true,
+    "default_shortlist_size": 3,
+    "max_shortlist_size": 5,
+    "prefer_one_line_reasons": true,
+    "show_location_only_when_useful": true,
+    "prefer_followup_narrowing_question": true,
+    "avoid_brochure_tone": true,
+    "avoid_repeating_full_mall_name": true,
+    "prefer_decision_help_over_description": true,
+    "preserve_topic_on_short_followups": true,
+    "prefer_price_range_when_exact_price_missing": true
+  },
+
+  "strategy_behavior_weights": {
+    "continuity_preservation_weight": 0.90,
+    "shortlist_quality_weight": 0.85,
+    "scene_acknowledgment_weight": 0.80,
+    "followup_usefulness_weight": 0.75,
+    "overdescription_penalty": 0.70,
+    "clarification_penalty": 0.55,
+    "wrong_thread_penalty": 0.85,
+    "brochure_tone_penalty": 0.75
+  },
+
   "entity_params": {
     "t-003": {
       "tenant_id": "t-003",
