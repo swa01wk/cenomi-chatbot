@@ -4,7 +4,7 @@ Tenant parameter service — load, merge, apply, and update tenant config.
 Merge order (later wins):
   1. Global defaults  (baked into TenantConfig Pydantic defaults)
   2. Tenant defaults   (from config file: tenant_defaults.json)
-  3. Mall overrides    (from config file: cenomi_mall_01.json)
+  3. Mall overrides    (from config file: al_nakheel_plaza_28.json)
   4. Session overrides (runtime, per-session, validated against mutability)
 
 This module is the single gateway between config files and the runtime
@@ -35,7 +35,7 @@ _CONFIG_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "tenant_c
 
 
 def load_tenant_config(
-    mall_id: str = "cenomi_mall_01",
+    mall_id: str = "al_nakheel_plaza_28",
     config_dir: Path | None = None,
 ) -> TenantConfig:
     """

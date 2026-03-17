@@ -29,6 +29,7 @@ from app.runtime import (
     get_implicit_detector,
     get_session_tuning_engine,
 )
+from app.services.clean_context import clean_context_builder
 from app.services.tenant_params import apply_session_overrides, load_tenant_config
 from app.utils.ids import generate_session_id
 
@@ -80,15 +81,19 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         else base_config
     )
 
-    initial_state: dict = {
-        "session_id": session_id,
-        "tenant_id": request.tenant_id,
-        "mall_id": request.mall_id,
-        "raw_user_message": request.message,
-        "active_tenant_parameters": config,
-        "scene": session.scene,
-        "messages": list(session.messages),
-    }
+    initial_state = clean_context_builder(
+        session_state={
+            "session_id": session_id,
+            "tenant_id": request.tenant_id,
+            "mall_id": request.mall_id,
+            "raw_user_message": request.message,
+            "active_tenant_parameters": config,
+            "scene": session.scene,
+            "last_intent": session.last_intent,
+            "conversation_mode": session.conversation_mode,
+        },
+        mall_context=mall_ctx.get_context_pack(),
+    )
 
     graph = _get_graph()
     raw_result = await graph.ainvoke(initial_state)
@@ -98,21 +103,15 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     store.save_turn(
         session_id=session_id,
         scene=result.scene,
-        messages=result.messages,
+        last_intent=result.intent.domain,
+        conversation_mode=result.intent.message_kind,
     )
 
     # ── implicit feedback detection (non-blocking) ────────────────
     try:
-        prev_assistant = ""
-        for m in reversed(session.messages):
-            if m.role == "assistant":
-                prev_assistant = m.content
-                break
-
         detector = get_implicit_detector()
         implicit_event = detector.detect(
             user_message=request.message,
-            previous_assistant_response=prev_assistant,
             session_id=session_id,
             tenant_id=request.tenant_id,
             mall_id=request.mall_id,
@@ -140,6 +139,9 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         occasion=result.scene.occasion,
         budget=result.scene.budget,
         active_shortlist=result.scene.active_shortlist,
+        target_person=result.scene.target_person,
+        visit_type=result.scene.visit_type,
+        goal=result.scene.goal,
     )
 
     debug_payload = None

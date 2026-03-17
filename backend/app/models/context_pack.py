@@ -64,6 +64,33 @@ class TopicBlock(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Mall profile block — trusted, structured overview for high-level questions
+# ---------------------------------------------------------------------------
+
+
+class MallProfileBlock(BaseModel):
+    """
+    Structured mall-level profile built exclusively from trusted canonical data.
+
+    Every field is populated from verified source data. The LLM must NOT
+    infer hours, addresses, parking details, stroller services, or prayer
+    room availability if they are absent here.
+    """
+
+    mall_id: str
+    name: str
+    city: str = ""
+    positioning: str = ""
+    summary: str = ""
+    address: str = ""
+    opening_hours: dict[str, str] = Field(default_factory=dict)
+    highlights: list[str] = Field(default_factory=list)
+    services_and_facilities: list[str] = Field(default_factory=list)
+    family_friendly_notes: list[str] = Field(default_factory=list)
+    concierge_overview_lines: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
 # Concierge guidelines
 # ---------------------------------------------------------------------------
 
@@ -96,7 +123,8 @@ class GlobalContextPack(BaseModel):
     mall_id: str
     version: str = "1.0"
 
-    # 1. Mall identity
+    # 1. Mall identity (structured profile for overview questions)
+    mall_profile: MallProfileBlock | None = None
     mall_profile_summary: dict = Field(default_factory=dict)
 
     # 2. Operational context (hours, parking, accessibility)

@@ -100,8 +100,8 @@ async def get_session_feedback(session_id: str):
 
 @router.get("/feedback/tenant-summary", response_model=TenantSummaryResponse)
 async def get_tenant_summary(
-    tenant_id: str = "cenomi_mall_01",
-    mall_id: str = "cenomi_mall_01",
+    tenant_id: str = "al_nakheel_plaza_28",
+    mall_id: str = "al_nakheel_plaza_28",
 ):
     """Return aggregated feedback metrics and recommended adjustments."""
     from app.services.tenant_parameter_tuner import TenantParameterTuner
@@ -127,8 +127,8 @@ async def get_tenant_summary(
 
 @router.get("/feedback/playbook-performance", response_model=PlaybookPerformanceResponse)
 async def get_playbook_performance(
-    tenant_id: str = "cenomi_mall_01",
-    mall_id: str = "cenomi_mall_01",
+    tenant_id: str = "al_nakheel_plaza_28",
+    mall_id: str = "al_nakheel_plaza_28",
 ):
     """Return playbook-level performance breakdown and knowledge gaps."""
     from app.services.knowledge_gap_analyzer import KnowledgeGapAnalyzer

@@ -105,7 +105,7 @@ class PlaybookEngine:
 
         scored.sort(key=lambda x: x["score"], reverse=True)
 
-        limit = playbook.shortlist_size_hint or 5
+        limit = playbook.shortlist_size_hint or 10
         shortlist = scored[:limit]
 
         logger.info(

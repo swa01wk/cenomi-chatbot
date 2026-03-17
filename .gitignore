@@ -50,3 +50,5 @@ backend/data/raw/*.json
 # Misc
 *.bak
 *.tmp
+
+.ruff_cache/

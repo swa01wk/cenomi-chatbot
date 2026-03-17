@@ -5,7 +5,7 @@ function mockDebug(overrides: Partial<DebugPayload> = {}): DebugPayload {
   return {
     turn_id: `turn-${Date.now()}`,
     session_id: "mock-session-001",
-    mall_id: "cenomi_mall_01",
+    mall_id: "al_nakheel_plaza_28",
     intent_domain: "general",
     intent_sub: "greeting",
     intent_confidence: 0.92,

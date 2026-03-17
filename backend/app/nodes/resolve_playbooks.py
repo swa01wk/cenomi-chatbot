@@ -21,6 +21,31 @@ from app.runtime import get_mall_context
 _CONFIDENCE_THRESHOLD = 0.25
 
 
+# Playbooks that only make sense when the user explicitly asks for a gift/present.
+# They must NOT be selected for general activity, date-idea, or exploration queries.
+_GIFT_ONLY_PLAYBOOKS: frozenset[str] = frozenset({
+    "pb-gift-girlfriend",
+    "pb-gift-family",
+    "pb-last-minute-gift",
+    "pb-gift-recommendation",
+})
+
+# Domains / sub-intents where gift playbooks should NOT be selected
+_ACTIVITY_DOMAINS: frozenset[str] = frozenset({
+    "exploration", "entertainment", "dining",
+})
+_ACTIVITY_SUB_INTENTS: frozenset[str] = frozenset({
+    "activity_suggestion", "open_exploration", "first_visit_guide",
+    "general_entertainment", "general_dining", "romantic_dining",
+})
+
+# Explicit gift signals in the user message — only if these are present should
+# gift playbooks be allowed to win on non-shopping queries.
+_EXPLICIT_GIFT_SIGNALS: frozenset[str] = frozenset({
+    "gift", "present", "buy", "purchase", "shop for",
+})
+
+
 @traced_node("resolve_playbooks")
 async def resolve_playbooks(state: ConciergeState) -> dict:
     intent = state.intent
@@ -34,6 +59,20 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
         intent=f"{intent.domain}/{intent.sub_intent}",
         context_signals=scene_signals,
     )
+
+    # ── Guard: prevent gift playbooks from hijacking activity/date queries ──
+    if matched_pb and matched_pb.playbook_id in _GIFT_ONLY_PLAYBOOKS:
+        msg_lower = state.normalized_user_message.lower()
+        has_explicit_gift = any(sig in msg_lower for sig in _EXPLICIT_GIFT_SIGNALS)
+        is_activity_query = (
+            intent.domain in _ACTIVITY_DOMAINS
+            or intent.sub_intent in _ACTIVITY_SUB_INTENTS
+        )
+        if is_activity_query and not has_explicit_gift:
+            # Swap to the date-plan or exploration playbook instead
+            override = _find_activity_playbook(intent, scene, mall_ctx, scene_signals)
+            if override:
+                matched_pb = override
 
     if matched_pb:
         ranked_entities = mall_ctx.rank_for_playbook(matched_pb)
@@ -68,6 +107,26 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
     }
 
 
+def _find_activity_playbook(intent, scene, mall_ctx, scene_signals: list[str]):
+    """
+    Find a better playbook for activity/date-idea queries when a gift
+    playbook incorrectly fired.
+    """
+    # Couple context → date plan
+    couple_companions = {"girlfriend", "boyfriend", "wife", "husband"}
+    if couple_companions & set(scene.companions) or scene.visit_type == "couple":
+        pb = mall_ctx.match_playbook("pb-date-plan", scene_signals)
+        if pb:
+            return pb
+    # Family context → family visit
+    family_companions = {"family", "kids", "son", "daughter"}
+    if family_companions & set(scene.companions) or scene.visit_type == "family":
+        pb = mall_ctx.match_playbook("pb-family-visit", scene_signals)
+        if pb:
+            return pb
+    return None
+
+
 def _collect_scene_signals(scene, intent) -> list[str]:
     signals: list[str] = []
     signals.extend(scene.companions)
@@ -87,34 +146,36 @@ def _collect_scene_signals(scene, intent) -> list[str]:
 
 # Lightweight fallback for when the PlaybookEngine doesn't match
 _FALLBACK_TRIGGERS: dict[str, dict] = {
-    "pb-romantic-dinner": {
-        "domains": {"dining"},
+    "pb-date-plan": {
+        # Fires for couple context on ANY domain — activity, dining, entertainment
+        "domains": {"exploration", "dining", "entertainment", "shopping"},
         "scene_signals": {
             "girlfriend", "boyfriend", "wife", "husband",
-            "date", "romantic", "anniversary",
+            "date", "romantic", "couple", "couple_friendly",
         },
     },
     "pb-family-visit": {
-        "domains": {"dining", "entertainment", "shopping"},
-        "scene_signals": {"family", "kids", "children", "kid_friendly", "family_friendly"},
+        "domains": {"dining", "entertainment", "shopping", "exploration"},
+        "scene_signals": {"family", "kids", "children", "son", "daughter", "kid_friendly", "family_friendly"},
     },
     "pb-gift-recommendation": {
+        # Requires explicit shopping domain — does NOT fire on activity/exploration
         "domains": {"shopping"},
         "scene_signals": {
             "girlfriend", "boyfriend", "wife", "husband",
-            "birthday", "anniversary",
+            "birthday", "anniversary", "gift", "present",
         },
     },
     "pb-quick-bite": {
         "domains": {"dining"},
-        "scene_signals": {"quick_visit", "before_movie"},
+        "scene_signals": {"quick_visit", "before_movie", "quick"},
     },
     "pb-movie-night": {
         "domains": {"entertainment", "dining"},
-        "scene_signals": {"before_movie", "after_movie"},
+        "scene_signals": {"before_movie", "after_movie", "movie"},
     },
     "pb-solo-visit": {
-        "domains": {"dining", "shopping", "entertainment"},
+        "domains": {"dining", "shopping", "entertainment", "exploration"},
         "scene_signals": {"solo", "solo_friendly"},
     },
     "pb-budget-plan": {

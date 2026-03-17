@@ -46,8 +46,8 @@ class KnowledgeGapAnalyzer:
         self,
         events: list[FeedbackEvent],
         signals: list[NormalizedFeedbackSignal],
-        tenant_id: str = "cenomi_mall_01",
-        mall_id: str = "cenomi_mall_01",
+        tenant_id: str = "al_nakheel_plaza_28",
+        mall_id: str = "al_nakheel_plaza_28",
     ) -> KnowledgeGapReport:
         gaps: list[KnowledgeGap] = []
 

@@ -1,0 +1,545 @@
+{
+    "success": true,
+    "data": {
+        "property_group_id": 28,
+        "services": [
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": [
+                            "Gate 1&2 front of Polo store",
+                            "Gate 2",
+                            "Gate 1&2 food court"
+                        ],
+                        "content_ar": [
+                            "بوابة 1&2 مقابل معرض بولو",
+                            "بوابة 2",
+                            "بوابة 1&2 في ساحة المطاعم"
+                        ],
+                        "type": "bullet"
+                    }
+                ],
+                "id": 1,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "ATM",
+                            "content_ar": "صراف",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/ATM_xsgdp2.png",
+                    "mappedin_location": "ATM",
+                    "mappedin_location_ar": "صراف",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Ground Floor: Customer Service Desk, Gate 2",
+                        "content_ar": "الدور الأرضي:  كاونتر خدمة العملاء، بوابة 2",
+                        "type": "paragraph"
+                    },
+                    {
+                        "content": "Contact Information",
+                        "content_ar": "معلومات الاتصال",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "info.centers@cenomi.com",
+                        "content_ar": "info.centers@cenomi.com",
+                        "type": "mail"
+                    },
+                    {
+                        "button_icon_type": "request",
+                        "content": "Request Wheel Chair",
+                        "content_ar": "طلب كرسي متحرك\"",
+                        "type": "button"
+                    }
+                ],
+                "id": 4,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Wheelchair",
+                            "content_ar": "كرسي متحرك",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Wheelchair.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696866/unnamed-3_wajdqk.png",
+                    "mappedin_location": "Wheelchair",
+                    "mappedin_location_ar": "كرسي متحرك",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Description",
+                        "content_ar": "الوصف",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Lost something during your visit? Our Lost & Found service helps reunite you with your belongings",
+                        "content_ar": "فقدت شيئا أثناء زيارتك؟ خدمة المفقودات تساعدك على إيجاد أصل المفقود",
+                        "type": "paragraph"
+                    },
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Ground Floor: Customer Service Desk, Gate 2",
+                        "content_ar": "الدور الأرضي: كاونتر خدمة العملاء، بوابة 2",
+                        "type": "paragraph"
+                    },
+                    {
+                        "content": "Contact Information",
+                        "content_ar": "معلومات الاتصال",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "info.centers@cenomi.com",
+                        "content_ar": "info.centers@cenomi.com",
+                        "type": "mail"
+                    }
+                ],
+                "id": 5,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Lost & Found",
+                            "content_ar": "المفقودات",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Lost%20Found.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/Lost_Found_ig6cof.png",
+                    "mappedin_location": "Lost & Found",
+                    "mappedin_location_ar": "المفقودات\"",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Ground Floor: Customer Service Desk, Gate 2",
+                        "content_ar": "الدور الأرضي:  كاونتر خدمة العملاء، بوابة 2",
+                        "type": "paragraph"
+                    }
+                ],
+                "id": 6,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Information Desk",
+                            "content_ar": "مكتب المعلومات",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Help%20desk.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696864/Gemini_Generated_Image_6p6j66p6j66p6j66_copy_pgljqh.png",
+                    "mappedin_location": "Information Desk",
+                    "mappedin_location_ar": "مكتب المعلومات",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": [
+                            "Ground Floor: Gate 2, near Doknah Kiosk",
+                            "Ground Floor: Gates 2 & 3, beside Rina Store"
+                        ],
+                        "content_ar": [
+                            "الدور الأرضي: بوابة 2، بجوار كشك دكنه",
+                            "الدور الأرضي: بوابة 2 و3، بعد معرض رينا"
+                        ],
+                        "type": "bullet"
+                    },
+                    {
+                        "button_icon_type": "request",
+                        "content": "Request Baby Stroller",
+                        "content_ar": "طلب عربة اطفال",
+                        "type": "button"
+                    }
+                ],
+                "id": 7,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Baby Stroller",
+                            "content_ar": "عربة اطفال",
+                            "type": "title"
+                        },
+                        {
+                            "content": "4:00 PM to 11:00 PM",
+                            "content_ar": "4:00 PM to 11:00 PM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Baby%20Stroller.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696864/Gemini_Generated_Image_4yndf14yndf14ynd_nzer7v.png",
+                    "mappedin_location": "Information Desk",
+                    "mappedin_location_ar": "مكتب المعلومات",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Located on the ground floor, in front of each gate.",
+                        "content_ar": "في الدور الأرضي أمام جميع البوابات.",
+                        "type": "paragraph"
+                    }
+                ],
+                "id": 8,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Parking",
+                            "content_ar": "موقف سيارات",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Car%20park.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902954/Parking_owbayi.png",
+                    "mappedin_location": "Adidas",
+                    "mappedin_location_ar": "أديداس",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": "Ground Floor: Near Lavalle Store, Gate 1",
+                        "content_ar": "الدور الأرضي: بجانب معرض لافالي، بوابة 1",
+                        "type": "paragraph"
+                    },
+                    {
+                        "content": "1247 kms",
+                        "content_ar": "1247 kms",
+                        "type": "compass"
+                    }
+                ],
+                "id": 9,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Men's Prayer Room",
+                            "content_ar": "مصلى رجال",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Men's%20Prayer%20Room.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Prayer_Room_jm9qmf.png",
+                    "mappedin_location": "Men's Prayer Room",
+                    "mappedin_location_ar": "مصلى رجال",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": [
+                            "Ground Floor: Gates 1 & 2 (Food Court)",
+                            "Ground Floor: Gates 2 & 3, near Max Store"
+                        ],
+                        "content_ar": [
+                            "الدور الأرضي – المواقع: بوابتان 1 و2 في ساحة المطاعم",
+                            "الدور الأرضي – بوابة 2 و3 بجانب معرض ماكس"
+                        ],
+                        "type": "bullet"
+                    },
+                    {
+                        "content": "1247 kms",
+                        "content_ar": "1247 kms",
+                        "type": "compass"
+                    }
+                ],
+                "id": 10,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Women's Prayer Room",
+                            "content_ar": "مصلى نساء",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Women's%20Prayer%20Room.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Prayer_Room_jm9qmf.png",
+                    "mappedin_location": "Women's Prayer Room",
+                    "mappedin_location_ar": "مصلى نساء",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": [
+                            "Ground Floor: Gate 1, near Lavalle Store",
+                            "Ground Floor: Gates 1 & 2 (Food Court)",
+                            "Ground Floor: Gates 2 & 3, near Max Store"
+                        ],
+                        "content_ar": [
+                            "الدور الأرضي: بوابة 1، بجانب معرض لافالي",
+                            "الدور الأرضي: بوابة 1 و2، ساحة المطاعم",
+                            "الدور الأرضي: بوابة 2 و3، بجانب معرض ماكس"
+                        ],
+                        "type": "bullet"
+                    }
+                ],
+                "id": 11,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Men's Washroom",
+                            "content_ar": "دورة مياه رجال",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Men's%20washroom.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/Mens_Washrom_bmttuk.png",
+                    "mappedin_location": "Men's Washroom",
+                    "mappedin_location_ar": "دورة مياه رجال",
+                    "navigation_enable": false
+                }
+            },
+            {
+                "details": [
+                    {
+                        "content": "Directions",
+                        "content_ar": "الاتجاهات",
+                        "type": "heading"
+                    },
+                    {
+                        "content": [
+                            "Ground Floor: Gates 1 & 2 (Food Court)",
+                            "Ground Floor: Gates 2 & 3, near Max Store"
+                        ],
+                        "content_ar": [
+                            "الدور الأرضي: بوابة 1 و2، ساحة المطاعم",
+                            "الدور الأرضي: بوابة 2 و3، بجانب معرض ماكس"
+                        ],
+                        "type": "bullet"
+                    }
+                ],
+                "id": 12,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Women's Washroom",
+                            "content_ar": "دورة مياه نساء",
+                            "type": "title"
+                        },
+                        {
+                            "content": "9:00 AM - 12:00 AM",
+                            "content_ar": "9:00 AM - 12:00 AM",
+                            "type": "time"
+                        },
+                        {
+                            "content": "Ground Floor",
+                            "content_ar": "الدور الأرضي",
+                            "type": "location"
+                        },
+                        {
+                            "content": "920000262",
+                            "content_ar": "920000262",
+                            "type": "phone"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Women's%20washroom.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Womens_Washrrom_nzq6ym.png",
+                    "mappedin_location": "Women's Washroom",
+                    "mappedin_location_ar": "دورة مياه نساء",
+                    "navigation_enable": false
+                }
+            }
+        ],
+        "unique_property_id": 1987
+    }
+}

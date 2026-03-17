@@ -1,0 +1,651 @@
+{
+  "mall_id": "al_nakheel_plaza_28",
+  "version": "1.0",
+  "mall_profile_summary": {
+    "name": "Al Nakheel Plaza",
+    "city": "Buraidah, Saudi Arabia",
+    "tagline": "Transforming Your Shopping Experience, One Mall At A Time",
+    "floors": [
+      "Ground",
+      "Cinema Level"
+    ],
+    "key_zones": {
+      "Main Gallery": "Ground floor — fashion, cosmetics, jewelry, accessories, watches. Includes Zara, Swarovski, L'Occitane, Stradivarius, The Body Shop.",
+      "Kiosk Row": "Ground floor — inline kiosks for perfumes, cafes, accessories. Includes Baskin Robbins, Doknah, Lord, Bloom.",
+      "Food Court": "Ground floor — fast food and dessert. McDonald's, Herfy, Kudu, Popeyes, Cinnabon.",
+      "Entertainment Wing": "Ground floor — large-format retail and kids' entertainment. Adidas SP, Brands For Less, Home Box, Centrepoint, Fun Time.",
+      "Hypermarket Area": "Ground floor — Danube HyperMarket for groceries and essentials.",
+      "Cinema Zone": "Cinema Level — Muvi Cinemas, the entertainment anchor."
+    },
+    "highlights": [
+      "100+ stores and kiosks across 2 levels",
+      "Muvi Cinemas with latest movie releases",
+      "Danube HyperMarket for groceries and essentials",
+      "Family entertainment at Fun Time",
+      "Food Court with major fast food brands",
+      "Free parking at all gates",
+      "Prayer rooms, baby stroller and wheelchair loans, accessible washrooms"
+    ]
+  },
+  "operational_context": {
+    "hours": {
+      "sunday": "09:00 AM–11:00 PM",
+      "monday": "09:00 AM–11:00 PM",
+      "tuesday": "09:00 AM–11:00 PM",
+      "wednesday": "09:00 AM–11:00 PM",
+      "thursday": "09:00 AM–11:00 PM",
+      "friday": "01:00 PM–11:00 PM",
+      "saturday": "09:00 AM–11:00 PM"
+    },
+    "parking": {
+      "capacity": "Ample ground floor parking in front of each gate",
+      "rate": "Free",
+      "valet": "Not available",
+      "ev_charging": "Not available"
+    },
+    "accessibility": [
+      "Wheelchair ramps at all entrances",
+      "Accessible washrooms",
+      "Complimentary wheelchair loans from Information Desk (Gate 2, Main Gallery)",
+      "Baby stroller loans available at Gate 2 and near Doknah Kiosk"
+    ],
+    "essential_services": {
+      "information_desk": "Ground floor, Main Gallery, near Gate 2 — directions, lost & found, wheelchair/stroller loans",
+      "prayer_rooms": "Men's and Women's Prayer Rooms on Ground floor, Main Gallery (near Gate 1 and near Max Store)",
+      "atms": "Multiple locations, Main Gallery (near Polo store, Gates 1 & 2, Food Court)",
+      "washrooms": "Ground floor, near Gates 1, 2, and 3",
+      "lost_and_found": "Customer Service Desk, Gate 2"
+    },
+    "current_season": "Spring 2026",
+    "active_promotions": [
+      "Osma Perfumes: 150ml or 75ml bottle for 99 SAR (until Nov 30, 2025)"
+    ],
+    "upcoming_events": []
+  },
+  "topic_blocks": {
+    "dining": {
+      "topic": "dining",
+      "summary": "Al Nakheel Plaza's Food Court on the Ground floor features popular fast food and dessert brands. Cafes and dessert kiosks are found in Kiosk Row and Main Gallery. All dining is halal.",
+      "entities": [
+        {
+          "name": "McDonald's",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC005)",
+          "best_for": "quick meals, families, kids",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Global fast food leader, halal, kids' favorites"
+        },
+        {
+          "name": "Herfy",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC003)",
+          "best_for": "quick Saudi fast food, families",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Popular Saudi fast food, halal"
+        },
+        {
+          "name": "Kudu Restaurant",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC006)",
+          "best_for": "quick meals, local flavors",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Meals prepared in front of customer"
+        },
+        {
+          "name": "Popeyes Restaurant",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC004)",
+          "best_for": "fried chicken, families, groups",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Louisiana-style fried chicken, halal"
+        },
+        {
+          "name": "Cinnabon",
+          "type": "cafe",
+          "cuisine": "Coffee & Light Dining",
+          "price": "mid_range",
+          "location": "Ground floor, Food Court (FCW04)",
+          "best_for": "dessert, coffee, sweet treats",
+          "meal_time": "30 min",
+          "kids_menu": false,
+          "key_note": "Signature cinnamon rolls"
+        },
+        {
+          "name": "FanJan Caffé",
+          "type": "cafe",
+          "cuisine": "Coffee & Light Dining",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF058)",
+          "best_for": "coffee breaks, pastries, meetings",
+          "meal_time": "30 min",
+          "kids_menu": false,
+          "key_note": "Specialty coffee, fresh pastries"
+        },
+        {
+          "name": "Starbucks",
+          "type": "cafe",
+          "cuisine": "Coffee & Light Dining",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF134/GF135)",
+          "best_for": "coffee, snacks, relaxing",
+          "meal_time": "30 min",
+          "kids_menu": false,
+          "key_note": "International coffeehouse, WiFi available"
+        },
+        {
+          "name": "Baskin Robbins",
+          "type": "dessert",
+          "cuisine": "Ice Cream",
+          "price": "mid_range",
+          "location": "Ground floor, Kiosk Row (GFK17)",
+          "best_for": "ice cream treats, families, kids",
+          "meal_time": "10 min",
+          "kids_menu": false,
+          "key_note": "Wide range of ice cream flavors"
+        },
+        {
+          "name": "MammaBunz",
+          "type": "cafe",
+          "cuisine": "Coffee & Light Dining",
+          "price": "mid_range",
+          "location": "Ground floor, Kiosk Row (GFK58)",
+          "best_for": "sweet buns, coffee, snacks",
+          "meal_time": "30 min",
+          "kids_menu": false,
+          "key_note": "Signature buns and drinks"
+        },
+        {
+          "name": "Corn World",
+          "type": "fast_food",
+          "cuisine": "Corn Snacks",
+          "price": "budget",
+          "location": "Ground floor, Kiosk Row (GFK28)",
+          "best_for": "snacks, kids, quick bites",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Corn-based snacks, fun for all ages"
+        }
+      ],
+      "semantic_highlights": [
+        "Quick lunch: McDonald's, Herfy, Kudu, Popeyes (all in Food Court, ~20 min)",
+        "Coffee break: Starbucks (Main Gallery), FanJan Caffé (Main Gallery), Cinnabon (Food Court)",
+        "Dessert treat: Baskin Robbins (Kiosk Row), Cinnabon (Food Court), MammaBunz (Kiosk Row)",
+        "All dining options are halal"
+      ],
+      "concierge_tips": [
+        "For a quick meal before a movie, choose any Food Court option — all are fast and halal.",
+        "For a sweet treat after shopping, recommend Baskin Robbins or Cinnabon.",
+        "Starbucks and FanJan Caffé are ideal for meetings or relaxing with WiFi."
+      ]
+    },
+    "gift": {
+      "topic": "gift",
+      "summary": "Al Nakheel Plaza offers a wide selection of gift-friendly stores, from premium beauty and jewelry to perfumes and accessories. Quick gifts are available at kiosks and major anchors.",
+      "entities": [
+        {
+          "name": "L'Occitane",
+          "type": "beauty",
+          "category": "Cosmetics & Skincare",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF044)",
+          "gift_type": "premium skincare, fragrances",
+          "key_note": "Elegant, upscale, perfect for anniversaries"
+        },
+        {
+          "name": "Swarovski",
+          "type": "jewelry",
+          "category": "Fine Jewelry",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF040)",
+          "gift_type": "crystal jewelry, accessories",
+          "key_note": "Luxury crystal gifts for special occasions"
+        },
+        {
+          "name": "Ajmal Perfumes",
+          "type": "beauty",
+          "category": "Perfume",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF126)",
+          "gift_type": "Arabic fragrances",
+          "key_note": "Classic perfumes, suitable for all ages"
+        },
+        {
+          "name": "Osma",
+          "type": "beauty",
+          "category": "Perfume",
+          "price": "mid_range",
+          "location": "Ground floor, Kiosk Row (GFK49)",
+          "gift_type": "perfume bottles (promotion: 99 SAR)",
+          "key_note": "Great value, current offer on 150ml/75ml bottles"
+        },
+        {
+          "name": "Season Accessorize",
+          "type": "accessories",
+          "category": "Watches & Timepieces",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF033/GF034) and Kiosk Row (GFK40, GFK59)",
+          "gift_type": "stylish watches, accessories",
+          "key_note": "Quick, elegant gifts"
+        },
+        {
+          "name": "Tous",
+          "type": "jewelry",
+          "category": "Fine Jewelry",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF038)",
+          "gift_type": "jewelry, watches, elegant gifts",
+          "key_note": "Unique collections for special moments"
+        },
+        {
+          "name": "The Body Shop",
+          "type": "beauty",
+          "category": "Cosmetics & Skincare",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF010/GF011)",
+          "gift_type": "body care sets",
+          "key_note": "Popular for self-care and gifting"
+        }
+      ],
+      "semantic_highlights": [
+        "Premium gifts: Swarovski, Tous (Main Gallery)",
+        "Quick gifts: Season Accessorize (Kiosk Row/Main Gallery), Ajmal Perfumes, Osma (Kiosk Row, with offer)",
+        "Beauty and self-care: L'Occitane, The Body Shop"
+      ],
+      "concierge_tips": [
+        "For last-minute gifts, recommend kiosks like Osma or Season Accessorize for quick checkout.",
+        "For anniversaries or romantic gifts, suggest Swarovski, Tous, or L'Occitane.",
+        "Mention current Osma promotion for value-seeking shoppers."
+      ]
+    },
+    "family": {
+      "topic": "family",
+      "summary": "Al Nakheel Plaza is family-friendly, with entertainment, stroller loans, kids' dining options, and essential services for parents and children.",
+      "entities": [
+        {
+          "name": "Fun Time",
+          "type": "kids_entertainment",
+          "category": "Kids Entertainment",
+          "location": "Ground floor, Entertainment Wing (GFENT01)",
+          "best_for": "children's play, family fun",
+          "key_note": "Large indoor play center for kids"
+        },
+        {
+          "name": "Centrepoint",
+          "type": "value_fashion",
+          "category": "Fashion",
+          "location": "Ground floor, Entertainment Wing (GFENT04/GFHYPM02)",
+          "best_for": "family shopping, affordable fashion",
+          "key_note": "One-stop shop for the whole family"
+        },
+        {
+          "name": "Danube HyperMarket",
+          "type": "hypermarket",
+          "category": "Grocery",
+          "location": "Ground floor, Hypermarket Area (GFHYPM01/MEZ1)",
+          "best_for": "grocery shopping, essentials",
+          "key_note": "Wide range of groceries and household items"
+        },
+        {
+          "name": "Baby Stroller Service",
+          "type": "service",
+          "category": "family",
+          "location": "Ground floor, Gate 2 near Doknah Kiosk and near Rina Store",
+          "best_for": "families with infants",
+          "key_note": "Complimentary stroller loans"
+        },
+        {
+          "name": "Men's & Women's Prayer Rooms",
+          "type": "service",
+          "category": "prayer_room",
+          "location": "Ground floor, Main Gallery (near Gate 1 and near Max Store)",
+          "best_for": "family prayer needs",
+          "key_note": "Separate facilities for men and women"
+        }
+      ],
+      "semantic_highlights": [
+        "Fun Time is the main kids' entertainment anchor",
+        "Family dining options in Food Court (McDonald's, Herfy, Kudu, Popeyes)",
+        "Stroller loans and accessible washrooms available",
+        "Prayer rooms for both men and women"
+      ],
+      "concierge_tips": [
+        "Suggest Fun Time for kids while parents shop at Centrepoint or Danube.",
+        "Remind families about stroller and wheelchair loans at Information Desk.",
+        "For family meals, recommend Food Court brands with kids' menus."
+      ]
+    },
+    "movie": {
+      "topic": "movie",
+      "summary": "Muvi Cinema on the Cinema Level offers the latest movies, including Arabic and international releases. Family and action genres are available.",
+      "entities": [
+        {
+          "name": "Muvi Cinema",
+          "type": "cinema",
+          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "formats": [
+            "Standard"
+          ],
+          "booking_url": "https://www.muvicinemas.com/ar",
+          "contact": "+966535491018",
+          "key_note": "Latest movies, online booking available"
+        }
+      ],
+      "semantic_highlights": [
+        "Current movies include action, thriller, and sports (Saudi Pro League screenings)",
+        "Cinema is accessible via dedicated Cinema Level",
+        "Online booking recommended for popular showtimes"
+      ],
+      "concierge_tips": [
+        "For movie and meal combos, suggest quick dining in Food Court before or after the show.",
+        "Highlight upcoming Saudi Pro League matches for sports fans.",
+        "For families, check for kid-friendly movies or matinee times."
+      ]
+    },
+    "quick_visit": {
+      "topic": "quick_visit",
+      "summary": "Al Nakheel Plaza is ideal for quick errands, fast meals, and last-minute gifts. Essential services and fast checkout kiosks help visitors save time.",
+      "entities": [
+        {
+          "name": "McDonald's",
+          "type": "fast_food",
+          "location": "Ground floor, Food Court (FC005)",
+          "avg_time": "20 min"
+        },
+        {
+          "name": "Season Accessorize",
+          "type": "accessories",
+          "location": "Kiosk Row (GFK40, GFK59) and Main Gallery (GF033/GF034)",
+          "avg_time": "10 min"
+        },
+        {
+          "name": "Osma",
+          "type": "perfume",
+          "location": "Kiosk Row (GFK49)",
+          "avg_time": "10 min"
+        },
+        {
+          "name": "ATM",
+          "type": "service",
+          "location": "Main Gallery, near Polo store, Gates 1 & 2, Food Court",
+          "avg_time": "5 min"
+        }
+      ],
+      "semantic_highlights": [
+        "Food Court and Kiosk Row are best for fast meals and gifts",
+        "ATMs and Information Desk are near main entrances for quick access",
+        "Stroller and wheelchair loans are available for convenience"
+      ],
+      "concierge_tips": [
+        "For urgent gifts, direct to Season Accessorize or Osma in Kiosk Row.",
+        "For a quick meal, recommend McDonald's, Herfy, or Kudu.",
+        "Mention ATM locations for fast cash withdrawals."
+      ]
+    },
+    "services": {
+      "topic": "services",
+      "summary": "Essential guest services include Information Desk, lost & found, prayer rooms, ATMs, stroller and wheelchair loans, and accessible washrooms.",
+      "entities": [
+        {
+          "name": "Information Desk",
+          "type": "information",
+          "location": "Ground floor, Main Gallery, near Gate 2",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Directions, lost & found, service loans"
+        },
+        {
+          "name": "Lost & Found",
+          "type": "lost_found",
+          "location": "Ground floor, Main Gallery, near Gate 2",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Report or retrieve lost items"
+        },
+        {
+          "name": "ATM",
+          "type": "atm",
+          "location": "Main Gallery, near Polo store, Gates 1 & 2, Food Court",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Multiple machines, all major banks"
+        },
+        {
+          "name": "Wheelchair Service",
+          "type": "accessibility",
+          "location": "Ground floor, Main Gallery, near Gate 2",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Complimentary loans"
+        },
+        {
+          "name": "Baby Stroller Service",
+          "type": "family",
+          "location": "Ground floor, Gate 2 near Doknah Kiosk and near Rina Store",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Complimentary stroller loans"
+        },
+        {
+          "name": "Men's Prayer Room",
+          "type": "prayer_room",
+          "location": "Ground floor, Main Gallery, near Gate 1 (Lavalle Store)",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Ablution facilities available"
+        },
+        {
+          "name": "Women's Prayer Room",
+          "type": "prayer_room",
+          "location": "Ground floor, Main Gallery, near Max Store and Food Court",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Ablution facilities available"
+        },
+        {
+          "name": "Men's & Women's Washrooms",
+          "type": "restroom",
+          "location": "Ground floor, near Gates 1, 2, and 3",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Accessible facilities"
+        },
+        {
+          "name": "Parking",
+          "type": "parking",
+          "location": "Ground floor, in front of each gate",
+          "hours": "09:00 AM–11:00 PM",
+          "key_note": "Free parking"
+        }
+      ],
+      "semantic_highlights": [
+        "Information Desk and Lost & Found at Gate 2",
+        "Prayer rooms and accessible washrooms on Ground floor",
+        "Wheelchair and stroller loans for families and guests with mobility needs"
+      ],
+      "concierge_tips": [
+        "Proactively mention accessibility services for guests with special needs.",
+        "For lost items, direct to Lost & Found at the Information Desk.",
+        "Remind visitors of free parking and ATM locations."
+      ]
+    }
+  },
+  "events_and_offers": [
+    {
+      "type": "offer",
+      "title": "Osma - Offer",
+      "dates": "Nov 10–30, 2025",
+      "location": "Ground floor, Kiosk Row (GFK49)",
+      "description": "One 150ml bottle 99 SAR, One 75ml bottle 99 SAR. No conditions — any bottle 99 SAR.",
+      "audience": "shoppers, gift seekers, perfume lovers",
+      "free": false
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "pb-family-visit",
+      "scenario": "family_visit_plan",
+      "trigger": [
+        "User mentions family, kids, or children",
+        "User asks for things to do as a family"
+      ],
+      "approach": "Start at Centrepoint for family shopping → Kids play at Fun Time → Family meal at Food Court (McDonald's, Herfy, Kudu, Popeyes) → Dessert at Baskin Robbins → Prayer break in Main Gallery prayer rooms"
+    },
+    {
+      "id": "pb-solo-visit",
+      "scenario": "solo_visit_plan",
+      "trigger": [
+        "User visiting alone",
+        "No mention of companions or family"
+      ],
+      "approach": "Quick shopping at Zara or L'Occitane → Coffee at Starbucks or FanJan Caffé → Movie at Muvi Cinema → Essential errands (ATM, Danube HyperMarket)"
+    },
+    {
+      "id": "pb-anniversary",
+      "scenario": "anniversary_plan",
+      "trigger": [
+        "User mentions anniversary, wedding anniversary",
+        "User planning a special couples outing"
+      ],
+      "approach": "Gift shopping at Swarovski or Tous → Coffee break at FanJan Caffé → Movie at Muvi Cinema → Relaxing stroll through Main Gallery"
+    },
+    {
+      "id": "pb-gift-girlfriend",
+      "scenario": "gift_for_girlfriend",
+      "trigger": [
+        "User mentions girlfriend, partner, or significant other",
+        "User asks for gift ideas for her"
+      ],
+      "approach": "L'Occitane (premium beauty) → Swarovski or Tous (jewelry) → Osma (perfume, special offer) → Quick wrap at Season Accessorize"
+    },
+    {
+      "id": "pb-gift-family",
+      "scenario": "gift_for_family",
+      "trigger": [
+        "User mentions buying gifts for family, parents, siblings, or children",
+        "Detected intent: gift_family, family_present"
+      ],
+      "approach": "Ajmal Perfumes (classic) → The Body Shop (self-care sets) → Centrepoint (value gifts for all ages)"
+    },
+    {
+      "id": "pb-movie-food",
+      "scenario": "movie_plus_food",
+      "trigger": [
+        "User mentions movie and food together",
+        "User wants to watch a movie and eat"
+      ],
+      "approach": "Quick meal at Food Court (McDonald's, Herfy, Kudu, Popeyes) → Movie at Muvi Cinema → Dessert at Cinnabon or Baskin Robbins"
+    },
+    {
+      "id": "pb-kid-movie-food",
+      "scenario": "kid_friendly_movie_plus_food",
+      "trigger": [
+        "User mentions movie for kids and food",
+        "User asks for family movie and dining"
+      ],
+      "approach": "Family meal at Food Court → Check for kid-friendly movies at Muvi Cinema → Fun Time play area after movie"
+    },
+    {
+      "id": "pb-quick-lunch",
+      "scenario": "quick_lunch",
+      "trigger": [
+        "User mentions quick lunch, short break, or fast meal",
+        "Detected intent: quick_lunch, lunch_in_a_rush"
+      ],
+      "approach": "Choose McDonald's, Herfy, Kudu, or Popeyes in Food Court for a 20-minute meal → Coffee at Starbucks or FanJan Caffé if time allows"
+    },
+    {
+      "id": "pb-shop-dessert",
+      "scenario": "shopping_plus_dessert_combo",
+      "trigger": [
+        "User mentions shopping and dessert",
+        "User wants to shop and then have a treat"
+      ],
+      "approach": "Shop at Zara, Stradivarius, or MINISO → Dessert at Baskin Robbins, Cinnabon, or MammaBunz"
+    },
+    {
+      "id": "pb-date-plan",
+      "scenario": "date_plan",
+      "trigger": [
+        "User mentions date, outing with partner, or romantic plan",
+        "Detected intent: date_plan, romantic_outing"
+      ],
+      "approach": "Gift shopping at Swarovski or Tous → Coffee at FanJan Caffé → Movie at Muvi Cinema"
+    },
+    {
+      "id": "pb-budget-family",
+      "scenario": "budget_family_outing",
+      "trigger": [
+        "User mentions budget, affordable, or value family outing",
+        "Detected intent: budget_family, value_outing"
+      ],
+      "approach": "Shop at Centrepoint or Brands For Less → Family meal at Herfy or Kudu → Kids play at Fun Time"
+    },
+    {
+      "id": "pb-luxury-shop",
+      "scenario": "luxury_shopping_plan",
+      "trigger": [
+        "User mentions luxury, premium, or high-end shopping",
+        "Detected intent: luxury_shopping, premium_brands"
+      ],
+      "approach": "Visit L'Occitane, Swarovski, Tous, and Season Accessorize for premium gifts and accessories"
+    },
+    {
+      "id": "pb-last-minute-gift",
+      "scenario": "last_minute_gift",
+      "trigger": [
+        "User mentions last-minute, urgent, or quick gift",
+        "Detected intent: last_minute_gift, urgent_gift"
+      ],
+      "approach": "Head to Osma (Kiosk Row, with offer), Season Accessorize (Kiosk Row/Main Gallery), or Ajmal Perfumes for fast checkout"
+    },
+    {
+      "id": "pb-child-activity-parents-shop",
+      "scenario": "child_activity_while_parents_shop",
+      "trigger": [
+        "User asks about activities for kids while they shop",
+        "User mentions dropping off kids"
+      ],
+      "approach": "Kids play at Fun Time (Entertainment Wing) while parents shop at Centrepoint, Zara, or Danube HyperMarket"
+    }
+  ],
+  "contextual_reasoning_hints": [
+    "Prioritize stores and services on the Ground floor, as most destinations are there.",
+    "If user mentions prayer or prayer time, proactively mention nearest prayer rooms and their locations.",
+    "For family or kids, highlight Fun Time, stroller loans, and Food Court options with kids' menus.",
+    "When recommending gifts, clarify recipient (age, gender, occasion) and suggest both premium and value options.",
+    "For quick visits, focus on Food Court, Kiosk Row, and essential services near main entrances.",
+    "If user is a tourist or first-time visitor, mention Information Desk, free parking, and WiFi.",
+    "Always mention if a dining option is halal (all are), and clarify Friday opening hours if asked."
+  ],
+  "concierge_guidelines": {
+    "persona_name": "Nakheel Concierge",
+    "tone": "friendly, knowledgeable, helpful, professional",
+    "language": "English (with Arabic cultural awareness)",
+    "response_style": "Answer first, then elaborate. Be concise but thorough. Use a warm, conversational tone like a knowledgeable friend.",
+    "grounding_rules": [
+      "Base answers strictly on verified mall information from this context pack",
+      "Never invent store names, locations, hours, or prices",
+      "If unsure, say so honestly and suggest the Information Desk",
+      "Respect cultural context and local customs (prayer times, Friday hours, halal dining)",
+      "Mention specific locations (floor, zone, unit) to help visitors navigate"
+    ],
+    "cultural_notes": [
+      "Saudi Arabia observes prayer times — be sensitive about timing recommendations",
+      "All dining is halal — mention for international visitors",
+      "Friday opening times are later due to Friday prayer — clarify for Friday plans",
+      "Gender-separated prayer rooms are standard — mention proactively",
+      "Ramadan hours may differ — clarify if asked during Ramadan"
+    ],
+    "do_not": [
+      "Do not recommend alcohol or non-halal dining",
+      "Do not make assumptions about visitor gender or family structure",
+      "Do not share personal opinions about brands — present options objectively",
+      "Do not provide outdated prices or hours — qualify with 'as of our latest information'",
+      "Do not ignore accessibility needs — mention wheelchair and stroller services proactively"
+    ]
+  }
+}

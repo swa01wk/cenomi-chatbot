@@ -50,8 +50,8 @@ export async function getSessionFeedback(
 }
 
 export async function getTenantSummary(
-  tenantId = "cenomi_mall_01",
-  mallId = "cenomi_mall_01",
+  tenantId = "al_nakheel_plaza_28",
+  mallId = "al_nakheel_plaza_28",
 ): Promise<TenantSummaryResponse> {
   return request<TenantSummaryResponse>(
     `/api/feedback/tenant-summary?tenant_id=${encodeURIComponent(tenantId)}&mall_id=${encodeURIComponent(mallId)}`,
@@ -59,8 +59,8 @@ export async function getTenantSummary(
 }
 
 export async function getPlaybookPerformance(
-  tenantId = "cenomi_mall_01",
-  mallId = "cenomi_mall_01",
+  tenantId = "al_nakheel_plaza_28",
+  mallId = "al_nakheel_plaza_28",
 ): Promise<PlaybookPerformanceResponse> {
   return request<PlaybookPerformanceResponse>(
     `/api/feedback/playbook-performance?tenant_id=${encodeURIComponent(tenantId)}&mall_id=${encodeURIComponent(mallId)}`,

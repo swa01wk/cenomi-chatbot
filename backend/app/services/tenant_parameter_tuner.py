@@ -90,8 +90,8 @@ class TenantParameterTuner:
         self,
         events: list[FeedbackEvent],
         signals: list[NormalizedFeedbackSignal],
-        tenant_id: str = "cenomi_mall_01",
-        mall_id: str = "cenomi_mall_01",
+        tenant_id: str = "al_nakheel_plaza_28",
+        mall_id: str = "al_nakheel_plaza_28",
     ) -> TenantFeedbackAggregate:
         """
         Build a TenantFeedbackAggregate from raw events and normalized signals.

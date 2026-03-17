@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     openai_temperature: float = 0.3
 
     # --- Mall ---
-    mall_id: str = "cenomi_mall_01"
-    mall_name: str = "Cenomi Mall"
+    mall_id: str = "al_nakheel_plaza_28"
+    mall_name: str = "Al Nakheel Plaza"
 
     # --- Retrieval ---
     vector_store_type: str = "chroma"

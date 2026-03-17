@@ -1,0 +1,246 @@
+
+{
+    "property_group_id": 28,
+    "marketing_name": "Nakheel Plaza",
+    "city": "Buraidah",
+    "country": "Saudi Arabia",
+    "mall_information": {
+        "Social": {
+            "X": "https://x.com/cenomicenters/",
+            "Threads": "",
+            "Youtube": "https://www.youtube.com/@cenomi",
+            "Facebook": "",
+            "LinkedIn": "https://www.linkedin.com/company/cenomicenters",
+            "Instagram": "https://www.instagram.com/AlNakheelPlazaQassim/ "
+        },
+        "region": "Central",
+        "MallMapEn": "https://demos.mappedin.com/web/mappedin-web/arabian-centres/arabian-centres-nakheel-plaza.html#/",
+        "mallmapid": "arabian-centres-nakheel-plaza",
+        "MallLogoEn": "https://images.ctfassets.net/7yr2jq50qisr/2P40PAq17i1m9bEAO8xbxi/b652487bd74ed51824b3f6e44c450f8e/Group_10.png",
+        "MallNameEn": "Al Nakheel Plaza",
+        "MallTiming": [
+            {
+                "dayen": "Sunday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            },
+            {
+                "dayen": "Monday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            },
+            {
+                "dayen": "Tuesday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            },
+            {
+                "dayen": "Wednesday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            },
+            {
+                "dayen": "Thursday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            },
+            {
+                "dayen": "Friday",
+                "end_time": "11:00 PM",
+                "start_time": "01:00 PM"
+            },
+            {
+                "dayen": "Saturday",
+                "end_time": "11:00 PM",
+                "start_time": "09:00 AM"
+            }
+        ],
+        "MallContact": {
+            "Email": "info.centers@cenomi.com",
+            "Phone": "+966 920000262",
+            "Address1En": "King Abdullah Road",
+            "Address2En": "Al Muntazah, Buraydah 52381"
+        },
+        "TimingMsgEn": "",
+        "sr_mallname": "Al Nakheel Plaza - Qassim",
+        "GoogleMapURL": "https://maps.app.goo.gl/83uUvGeEcBC28Qdm6",
+        "MallImagesEn": {
+            "Image1": "https://images.ctfassets.net/7yr2jq50qisr/2uZ48Mw5PZpA9uGMR2NxZC/c2f502e12b5070c4b11ef27724b42d95/Nakheel_Plaza-6.jpg",
+            "Image2": "",
+            "Image3": ""
+        },
+        "MallDescriptionEn": "Transforming Your Shopping Experience, One Mall At A Time",
+        "GravtyMappingAttribute": "Al Nakheel Plaza"
+    },
+    "image": "",
+    "gps_coordinates": "21.556682034755465, 39.18516633867169",
+    "muvilist": {
+        "ar": [
+                {
+                    "id": 3639,
+                    "type": "COMING_SOON",
+                    "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345754-c2a470a7-5053-4861-baa5-e6c4100e512f.webp",
+                    "title": "الدوري السعودي للمحترفين ( القادسية vs الأهلي)",
+                    "genres": [
+                        {
+                            "id": 17,
+                            "name": "رياضة"
+                        }
+                    ],
+                    "runtime": 180,
+                    "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345912-d449be0e-528b-4fd6-90ee-1dcc444da21f.webp",
+                    "subtitle": "",
+                    "synopsis": "الدوري السعودي للمحترفين: القادسية  vs الأهلي .. عِش تفاصيل المباراة على شاشات السينما!",
+                    "titleTag": "الدوري السعودي للمحترفين ( القادسية vs الأهلي)",
+                    "movieLang": "العربية",
+                    "shareLink": "",
+                    "bookingUrl": "https://www.muvicinemas.com/AR/movies/saudi-pro-league-al-qadsiah-vs-al-ahli-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+                    "trailerUrl": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
+                    "releaseDate": "2026-03-13T00:00:00.000Z",
+                    "descriptionTag": "الدوري السعودي للمحترفين: القادسية  vs الأهلي .. عِش تفاصيل المباراة على شاشات السينما!",
+                    "isAdvancedBooking": true
+                }
+        ],
+        "en": [
+            {
+                "id": 3639,
+                "type": "COMING_SOON",
+                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345754-c2a470a7-5053-4861-baa5-e6c4100e512f.webp",
+                "title": "SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)",
+                "genres": [
+                    {
+                        "id": 17,
+                        "name": "Sport"
+                    }
+                ],
+                "runtime": 180,
+                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345912-d449be0e-528b-4fd6-90ee-1dcc444da21f.webp",
+                "subtitle": "",
+                "synopsis": "Watch the Saudi Pro League match between AL QADSIAH and AL AHLI. Experience every moment of the match on cinema screens!",
+                "titleTag": "SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)",
+                "movieLang": "Arabic",
+                "shareLink": "",
+                "bookingUrl": "https://www.muvicinemas.com/EN/movies/saudi-pro-league-al-qadsiah-vs-al-ahli-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+                "trailerUrl": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
+                "releaseDate": "2026-03-13T00:00:00.000Z",
+                "descriptionTag": "Watch the Saudi Pro League match between AL QADSIAH and AL AHLI. Experience every moment of the match on cinema screens!",
+                "isAdvancedBooking": true
+            }
+        ]
+    },
+    "services": [
+        {
+            "details": [
+                {
+                    "content": "Directions",
+                    "type": "heading"
+                },
+                {
+                    "content": [
+                        "Gate 1&2 front of Polo store",
+                        "Gate 2",
+                        "Gate 1&2 food court"
+                    ]
+                }
+            ],
+            "id": 1,
+            "service_details": {
+                "content": [
+                    {
+                        "content": "ATM",
+                        "type": "title"
+                    },
+                    {
+                        "content": "9:00 AM - 12:00 AM",
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
+                    },
+                    {
+                        "content": "Ground Floor",
+                        "type": "location"
+                    },
+                    {
+                        "content": "920000262",
+                        "type": "phone"
+                    }
+                ],
+                "floor": "groundFloor",
+                "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/ATM_xsgdp2.png",
+                "mappedin_location": "ATM",
+                "navigation_enable": false
+            }
+        }
+    ],
+    "brands":[
+        {
+            "brand_id": 255426,
+            "anchor_brand": 0,
+            "tenant_profile_id": 1301,
+            "brand_name_en": "Osma",
+            "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ad0e03bfbd6ad4e883f968ecd1bcd775.jpeg",
+            "company_name_en": "Angham My Perfume CO",
+            "category_name": "Cosmetics",
+            "group_name": "Shop",
+            "brand_profile_id": 160,
+            "store_phone_code": "+966",
+            "store_phone_number": "920034155",
+            "store_email": "Info@osma.sa",
+            "store_website": "https://osmaperfumes.com/en",
+            "publish_date": "2025-02-12T00:00:00+03:00",
+            "is_published": true,
+            "social_tiktok": "https://www.tiktok.com/@osmaperfumes",
+            "social_instagram": "https://www.instagram.com/osmaperfumes/?igshid=Zjc2ZTc4Nzk%3D",
+            "social_facebook": "",
+            "social_threads": "",
+            "social_twitter": "https://x.com/osmaperfumes?s=11&t=WKEKuw9EiQYiXIdHK_tEdQ&mx=2",
+            "social_snapchat": "https://www.snapchat.com/add/osmaperfumes",
+            "social_youtube": "",
+            "description_en": "<p>OSMA Perfumes is a luxury fragrance brand known for its high-quality, unique, and long-lasting scents. The brand blends tradition and innovation, offering a diverse collection of perfumes crafted with premium ingredients. OSMA Perfumes caters to those seeking elegance and exclusivity in their fragrances.</p>",
+            "banner_en": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ec36f6d4c0a6bdeca1833857d8e5bdf4.png",
+            "images_en": [
+                {
+                    "url": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8c25f78cdcd29472cbacec32b8c018c6.png",
+                    "is_primary": true
+                },
+                {
+                    "url": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/2ce9f4d97fb5500e822d274914a154ed.png",
+                    "is_primary": false
+                },
+                {
+                    "url": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/fdf6146065bcdacebb2f0342b1ac034c.png",
+                    "is_primary": false
+                }
+            ],
+            "tags_en": [
+                {
+                    "tag_id": "1141",
+                    "tag_text": "Aziz Mall"
+                },
+                {
+                    "tag_id": "1447",
+                    "tag_text": "osma"
+                },
+                {
+                    "tag_id": "1714",
+                    "tag_text": "perfume"
+                }
+            ],
+            "google_rating": null,
+            "reviews": null,
+            "available_in_malls": [
+                {
+                    "mall_id": 1987,
+                    "property_group_id": 28,
+                    "brand_id": 255426,
+                    "pms_unit_code": [
+                        "GFK49"
+                    ]
+                }
+            ],
+            "pms_unit_codes": [
+                "GFK49"
+            ]
+        }
+    ]
+}

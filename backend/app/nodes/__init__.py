@@ -22,6 +22,7 @@ from app.nodes.generate_response import generate_response
 from app.nodes.interpret_turn import interpret_turn
 from app.nodes.load_session import load_session
 from app.nodes.resolve_playbooks import resolve_playbooks
+from app.nodes.smalltalk import is_smalltalk, smalltalk
 from app.nodes.update_memory import update_memory
 from app.nodes.update_scene_memory import update_scene_memory
 
@@ -37,4 +38,6 @@ __all__ = [
     "generate_response",
     "update_memory",
     "emit_debug_payload",
+    "smalltalk",
+    "is_smalltalk",
 ]

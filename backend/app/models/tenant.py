@@ -62,10 +62,12 @@ class DiningOutlet(BaseModel):
     dining_style: Literal[
         "quick_service",
         "fast_casual",
+        "fast_food",
         "casual_dining",
         "fine_dining",
         "cafe",
         "dessert",
+        "dessert_cafe",
         "food_court_counter",
     ] = "casual_dining"
     description: str = ""
@@ -384,7 +386,7 @@ class ResponseShapeDefaults(BaseModel):
     """
 
     default_response_length: Literal["brief", "moderate", "detailed"] = "moderate"
-    default_shortlist_size: int = Field(default=3, ge=1, le=10)
+    default_shortlist_size: int = Field(default=8, ge=1, le=20)
     default_itinerary_steps: int = Field(default=3, ge=2, le=8)
     location_detail_level: Literal["floor_only", "floor_zone", "full_directions"] = "floor_zone"
     suggest_next_step: bool = True
@@ -564,7 +566,7 @@ class TenantConfig(BaseModel):
     zero overrides and still behave like AI Findr.
     """
 
-    mall_id: str = "cenomi_mall_01"
+    mall_id: str = "al_nakheel_plaza_28"
     config_version: str = "1.0.0"
     description: str = ""
 

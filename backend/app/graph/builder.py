@@ -1,7 +1,7 @@
 """
 LangGraph concierge pipeline builder.
 
-Constructs the 11-node graph with conditional routing for single-mall
+Constructs the graph with conditional routing for single-mall
 AI Findr-style concierge behavior.
 
 Graph topology:
@@ -14,29 +14,32 @@ Graph topology:
       ▼
     interpret_turn
       │
-      ▼
-    update_scene_memory
-      │
-      ▼
-    resolve_playbooks
-      │
-      ▼
-    choose_strategy
-      │
-      ▼
-    compose_context
-      │
-      ▼
-    decide_retrieval ──┐
-      │                │
-      │ (needed)       │ (not needed)
-      ▼                │
-    fetch_exact_facts  │
-      │                │
-      ├────────────────┘
-      ▼
-    generate_response
-      │
+      ├─── (small talk) ───► smalltalk ──┐
+      │                                   │
+      ▼ (normal)                          │
+    update_scene_memory                   │
+      │                                   │
+      ▼                                   │
+    resolve_playbooks                     │
+      │                                   │
+      ▼                                   │
+    choose_strategy                       │
+      │                                   │
+      ▼                                   │
+    compose_context                       │
+      │                                   │
+      ▼                                   │
+    decide_retrieval ──┐                  │
+      │                │                  │
+      │ (needed)       │ (not needed)     │
+      ▼                │                  │
+    fetch_exact_facts  │                  │
+      │                │                  │
+      ├────────────────┘                  │
+      ▼                                   │
+    generate_response                     │
+      │                                   │
+      ├───────────────────────────────────┘
       ▼
     update_memory
       │
@@ -47,8 +50,10 @@ Graph topology:
      END
 
 Conditional edges:
-  - decide_retrieval → fetch_exact_facts  (if retrieval_needed)
-  - decide_retrieval → generate_response  (if not retrieval_needed)
+  - interpret_turn → smalltalk           (if greeting / casual chat)
+  - interpret_turn → update_scene_memory (otherwise)
+  - decide_retrieval → fetch_exact_facts (if retrieval_needed)
+  - decide_retrieval → generate_response (if not retrieval_needed)
 """
 
 from __future__ import annotations
@@ -64,11 +69,20 @@ from app.nodes import (
     fetch_exact_facts,
     generate_response,
     interpret_turn,
+    is_smalltalk,
     load_session,
     resolve_playbooks,
+    smalltalk,
     update_memory,
     update_scene_memory,
 )
+
+
+def _route_after_interpret(state: ConciergeState) -> str:
+    """Conditional edge after interpret_turn: fast-track small talk."""
+    if is_smalltalk(state):
+        return "smalltalk"
+    return "update_scene_memory"
 
 
 def _route_after_retrieval_decision(state: ConciergeState) -> str:
@@ -89,15 +103,16 @@ def build_concierge_graph():
         graph = build_concierge_graph()
         result = await graph.ainvoke({
             "session_id": "...",
-            "mall_id": "cenomi_mall_01",
+            "mall_id": "al_nakheel_plaza_28",
             "raw_user_message": "Where should I eat?",
         })
     """
     graph = StateGraph(ConciergeState)
 
-    # ── Register all 11 nodes ─────────────────────────────────────────
+    # ── Register all nodes ────────────────────────────────────────────
     graph.add_node("load_session", load_session)
     graph.add_node("interpret_turn", interpret_turn)
+    graph.add_node("smalltalk", smalltalk)
     graph.add_node("update_scene_memory", update_scene_memory)
     graph.add_node("resolve_playbooks", resolve_playbooks)
     graph.add_node("choose_strategy", choose_strategy)
@@ -108,10 +123,22 @@ def build_concierge_graph():
     graph.add_node("update_memory", update_memory)
     graph.add_node("emit_debug_payload", emit_debug_payload)
 
-    # ── Linear edges ──────────────────────────────────────────────────
+    # ── Entry ─────────────────────────────────────────────────────────
     graph.set_entry_point("load_session")
     graph.add_edge("load_session", "interpret_turn")
-    graph.add_edge("interpret_turn", "update_scene_memory")
+
+    # ── Small talk branch (skips heavy pipeline) ──────────────────────
+    graph.add_conditional_edges(
+        "interpret_turn",
+        _route_after_interpret,
+        {
+            "smalltalk": "smalltalk",
+            "update_scene_memory": "update_scene_memory",
+        },
+    )
+    graph.add_edge("smalltalk", "update_memory")
+
+    # ── Normal pipeline ───────────────────────────────────────────────
     graph.add_edge("update_scene_memory", "resolve_playbooks")
     graph.add_edge("resolve_playbooks", "choose_strategy")
     graph.add_edge("choose_strategy", "compose_context")

@@ -25,14 +25,24 @@ from app.services.tenant_runtime import TenantRuntime
 class PromptBuilder:
     """Builds the complete prompt payload for the concierge LLM calls."""
 
-    MAX_HISTORY_TURNS = 10
-
     # ──────────────────────────────────────────────────────────────────
     # Public API
     # ──────────────────────────────────────────────────────────────────
 
     def build_messages(self, state: ConciergeState) -> list[dict[str, str]]:
-        """Assemble the full message list for the LLM call."""
+        """
+        Assemble the full message list for the LLM call.
+
+        Only includes:
+          1. System prompt (identity, rules, tone, strategy)
+          2. Mall context (operational, topics, entities, retrieval, events)
+          3. Scene + playbook instructions
+          4. Current user message
+
+        Previous LLM responses are never injected.  Continuity is
+        provided by structured scene memory and session metadata
+        (last_intent, conversation_mode) embedded in the scene block.
+        """
         messages: list[dict[str, str]] = []
 
         messages.append({
@@ -48,11 +58,6 @@ class PromptBuilder:
         if scene_block:
             messages.append({"role": "system", "content": scene_block})
 
-        history = state.messages[:-1] if state.messages else []
-        for msg in history[-self.MAX_HISTORY_TURNS:]:
-            if msg.role in ("user", "assistant"):
-                messages.append({"role": msg.role, "content": msg.content})
-
         user_turn = self._build_current_turn(state)
         messages.append({"role": "user", "content": user_turn})
 
@@ -67,6 +72,7 @@ class PromptBuilder:
 
         parts.append(self._identity_block(state))
         parts.append(self._behavioral_rules())
+        parts.append(self._hallucination_constraints())
         parts.append(self._tone_block(state))
         parts.append(self._strategy_block(state))
 
@@ -97,13 +103,51 @@ class PromptBuilder:
             "1. ANSWER FIRST — always provide a useful answer before asking follow-up questions.\n"
             "2. LOW CLARIFICATION — infer intent boldly from context. Only ask if truly ambiguous.\n"
             "3. CONCIERGE TONE — speak as if you're standing in the mall, guiding someone in person.\n"
-            "4. CONTEXTUAL CONTINUITY — remember what the visitor said earlier in this conversation.\n"
+            "4. CONTEXTUAL CONTINUITY — remember what the visitor said earlier in this conversation. "
+            "If this is a follow-up, interpret the query in the context of the previous question. "
+            "For example, if they asked about kids' gifts and then say 'food?', answer about "
+            "kid-friendly food — not generic food options.\n"
             "5. PRACTICAL — give floor locations, zone names, walking directions when relevant.\n"
             "6. REAL ENTITIES ONLY — use actual store/restaurant names from provided context. Never invent.\n"
             "7. CONCISE — be helpful but brief. No walls of text. Use short paragraphs or bullets.\n"
-            "8. INTERACTIVE — end with a natural next-step suggestion or question when appropriate.\n"
-            "9. GROUNDED — if you don't have the information, say so and suggest the Information Desk.\n"
-            "10. NO BROCHURE LANGUAGE — avoid 'wide array of', 'plethora of', 'boasts'. Speak naturally."
+            "8. STRUCTURED RECOMMENDATIONS — when recommending stores or restaurants, group them into "
+            "meaningful subcategories (e.g. Jewelry, Beauty & Perfume, Fashion Accessories) rather than "
+            "a flat list.\n"
+            "9. INTERACTIVE — end with a natural next-step suggestion or question when appropriate.\n"
+            "10. GROUNDED — if you don't have the information, say so and suggest the Information Desk.\n"
+            "11. NO BROCHURE LANGUAGE — avoid 'wide array of', 'plethora of', 'boasts'. Speak naturally.\n"
+            "12. STRICT CATEGORY BOUNDARIES — when listing stores for a specific category, ONLY include "
+            "stores that genuinely belong to that category. Do NOT mix categories. For example: "
+            "jewelry stores are NOT beauty stores; sportswear is NOT clothing/fashion; "
+            "beauty stores are NOT perfume specialists unless they specialize in perfume.\n"
+            "13. NO PADDING — do NOT add unrequested suggestions from other categories. If the visitor "
+            "asks about cafes, list cafes — do NOT append restaurant suggestions. If they ask about "
+            "perfume stores, list perfume stores — do NOT suggest beauty stores instead. "
+            "Only suggest related options if the visitor's category has very few results (1 or fewer).\n"
+            "14. COMPLETE LISTS — when the visitor asks about a category, list ALL matching entities "
+            "from the provided context, not just 1-2 examples. Include a brief description and "
+            "location for each. Aim for 4-6 curated suggestions per recommendation. If the "
+            "direct category has few matches, naturally supplement with related options.\n"
+            "15. EXPERIENCE-BASED RECOMMENDATIONS — when the visitor shares context about who they're "
+            "with or what they're doing (family, date, kids, friends), frame suggestions as a guided "
+            "experience flow rather than a flat list. Example: 'Start at X for shopping → grab lunch "
+            "at Y → finish with dessert at Z'. Think like a friend showing them around.\n"
+            "16. FOCUSED PICKS — for recommendation queries, lead with your TOP 5-6 picks and briefly "
+            "explain why each one fits. Present your best 3 first, then naturally mention the remaining "
+            "as further options. Give the visitor enough choice to decide confidently."
+        )
+
+    def _hallucination_constraints(self) -> str:
+        return (
+            "CRITICAL RULES:\n"
+            "1. You must never invent information.\n"
+            "2. Only use tenants and facilities provided in the context.\n"
+            "3. If you are unsure about a promotion or event, respond generically.\n"
+            "   Allowed:  \"You may want to check the store for current offers.\"\n"
+            "   Forbidden: \"Sephora currently has a 20% discount.\"\n"
+            "4. Only state facts about tenants that are present in the context.\n"
+            "   Allowed:  \"VOX Cinemas is located in the mall.\"\n"
+            "   Forbidden: \"Avengers is currently playing at VOX.\""
         )
 
     def _tone_block(self, state: ConciergeState) -> str:
@@ -125,32 +169,54 @@ class PromptBuilder:
 
         shape_instructions: dict[str, str] = {
             "brief_answer": "Give a direct, factual answer in 1-3 sentences.",
-            "numbered_shortlist": "Present 2-4 options as a numbered list with name, one-line description, and floor/zone.",
+            "numbered_shortlist": (
+                "Present your TOP 5-6 picks with a brief reason why each fits. "
+                "Lead with the best 3, then mention 2-3 more as further options. "
+                "Include floor/zone. If the visitor has companions or an occasion, "
+                "explain why each pick suits their situation."
+            ),
             "step_by_step": "Lay out a mini-itinerary as numbered steps the visitor can follow.",
-            "curated_picks": "Present gift picks with the recipient in mind — name, why it fits, price range, location.",
-            "combo_suggestion": "Suggest a combined plan (e.g. movie + dinner) as a natural flow.",
+            "curated_picks": (
+                "Present your TOP 5-6 gift picks with the recipient in mind — "
+                "name, why it fits, and location. Frame your best 3 as: "
+                "'For [recipient], I'd suggest X because... → then Y → and Z', "
+                "then list 2-3 more as alternatives. "
+                "Optionally suggest a coffee or dessert spot to complete the outing."
+            ),
+            "combo_suggestion": (
+                "Suggest a combined plan as a natural flow: "
+                "'Start with X → then Y → finish with Z'. "
+                "Make it feel like a planned experience, not a list."
+            ),
             "structured_itinerary": "Build a structured visit plan with activities, times, and locations.",
-            "casual_shortlist": "Suggest a relaxed set of options with laid-back tone.",
+            "casual_shortlist": "Suggest a relaxed set of 3 options with laid-back tone and brief reasoning.",
             "value_focused_list": "Emphasize value and savings — mention prices, deals, budget-friendly options.",
             "conversational": "Respond naturally in conversational style.",
             "mini_itinerary": (
                 "Offer a mini mall itinerary — a natural conversational flow of 2-4 things "
                 "the visitor could do, covering different categories (shopping, dining, entertainment). "
-                "Use specific store/restaurant names. Keep it casual and personal, like a friend "
-                "showing them around. Use short paragraphs separated by line breaks — NOT bullet "
-                "points or numbered lists. Example tone:\n"
-                "  'You can start with some shopping — fashion brands like Zara and Mango are popular.\n"
-                "  If you're in the mood for entertainment, the cinema is a good option.\n"
-                "  Or you can relax with coffee or dessert — cafés like %Arabica and Paul are great for that.'"
+                "Use specific store/restaurant names. Frame it as a journey: "
+                "'Start at X → grab lunch at Y → finish with Z'. "
+                "Keep it casual and personal, like a friend showing them around. "
+                "Use short paragraphs separated by line breaks — NOT bullet points or numbered lists."
             ),
         }
 
         if plan.chosen_strategy == "exploration_overview":
+            companion_hint = ""
+            if state.scene.companions:
+                companion_hint = (
+                    f" The visitor is with {', '.join(state.scene.companions)}, "
+                    "so tailor your itinerary to their group."
+                )
             parts.append(
                 "This is a vague/open exploration query. The visitor wants to know what's available. "
-                "DO NOT ask clarifying questions. Instead, proactively offer a mini itinerary "
-                "covering different categories. Mention specific store/restaurant/entertainment names "
-                "from the context. Sound like a friend who knows the mall, not like a search engine."
+                "DO NOT ask clarifying questions. Instead, proactively offer a guided experience — "
+                "a natural flow of 2-3 things they could do: "
+                "'Start at X → grab a bite at Y → finish with Z'. "
+                "Mention specific store/restaurant/entertainment names from the context. "
+                "Sound like a friend who knows the mall, not like a search engine."
+                + companion_hint
             )
 
         shape = plan.response_shape_hint
@@ -235,10 +301,55 @@ class PromptBuilder:
         if not entities:
             return ""
 
-        lines = ["[Selected Entities for This Turn]"]
-        for e in entities[:8]:
+        is_category = any(
+            e.get("source", "").startswith("category/") for e in entities
+        )
+        is_discovery = any(
+            e.get("source", "").startswith("related/") for e in entities
+        ) or any(
+            e.get("source", "") == "category/all_stores" for e in entities
+        )
+        is_offer = any(
+            e.get("entity_type") in ("offer", "event") for e in entities
+        )
+        # Category lookups and offers: show all. Recommendations: cap at 10.
+        if is_category or is_discovery or is_offer:
+            display_limit = len(entities)
+        else:
+            display_limit = 10
+
+        ranking_notes = state.context.ranking_notes
+        has_category_note = any("CATEGORY RETRIEVAL" in n for n in ranking_notes)
+        has_broad_note = any("BROAD SHOPPING DISCOVERY" in n for n in ranking_notes)
+        has_expanded_note = any("EXPANDED DISCOVERY" in n for n in ranking_notes)
+
+        header = (
+            "[Curated Options — present your TOP 5-6 with reasoning, "
+            "leading with your best 3, then mentioning the rest as further options.]"
+        )
+        if has_broad_note:
+            header = (
+                "[Stores Across Categories — present 5-6 curated suggestions "
+                "grouped by category, with brief reasoning for each.]"
+            )
+        elif has_expanded_note:
+            header = (
+                "[Primary Matches + Related Suggestions — present your best "
+                "direct matches first, then related options. Aim for 5-6 total.]"
+            )
+        elif has_category_note:
+            header = (
+                "[Category-Matched Entities — these are ALL the matching "
+                "tenants in this category. List ALL of them in your response.]"
+            )
+
+        lines = [header]
+        for e in entities[:display_limit]:
             name = e.get("name", "Unknown")
             etype = e.get("entity_type", "")
+            category = e.get("category", "")
+            subcategory = e.get("subcategory", "")
+            description = e.get("description", "")
             floor = e.get("floor", "")
             zone = e.get("zone", "")
             notes = e.get("concierge_notes", "")
@@ -250,12 +361,20 @@ class PromptBuilder:
                 if zone:
                     loc_str += f", {zone}"
 
-            line = f"  • {name} ({etype}){loc_str}"
+            cat_str = ""
+            if category:
+                cat_str = f" | {category}"
+                if subcategory:
+                    cat_str += f" > {subcategory}"
+
+            line = f"  • {name} ({etype}{cat_str}){loc_str}"
             if tags:
                 line += f" [{', '.join(tags[:4])}]"
             lines.append(line)
 
-            if notes:
+            if description:
+                lines.append(f"    {description[:150]}")
+            elif notes:
                 lines.append(f"    Note: {notes[:150]}")
 
         return "\n".join(lines)
@@ -339,15 +458,30 @@ class PromptBuilder:
         if scene.rejected_options:
             lines.append(f"  Rejected: {', '.join(scene.rejected_options)} — DO NOT suggest these again")
 
+        if state.last_intent:
+            lines.append(f"  Previous intent: {state.last_intent}")
+
         msg_kind = state.intent.message_kind
         if msg_kind == "correction":
             lines.append("  ⚠ The visitor is CORRECTING a previous answer — acknowledge and adjust.")
         elif msg_kind == "refinement":
             lines.append("  The visitor is refining their request — build on your previous answer.")
+            if scene.previous_need:
+                lines.append(f"  Previous question was: {scene.previous_need}")
         elif msg_kind == "topic_switch":
             lines.append("  The visitor has switched topics — start fresh for this domain.")
         elif msg_kind == "followup":
-            lines.append("  This is a follow-up — continue the current thread naturally.")
+            lines.append(
+                "  ⚠ This is a FOLLOW-UP — interpret the current message in the context "
+                "of what the visitor previously asked. Do NOT treat it as a standalone query."
+            )
+            if scene.previous_need:
+                lines.append(f"  Previous question was: {scene.previous_need}")
+            if scene.companions:
+                lines.append(
+                    f"  Remember: they are with {', '.join(scene.companions)} — "
+                    "tailor your answer accordingly."
+                )
 
         return "\n".join(lines) if len(lines) > 1 else ""
 
@@ -396,4 +530,15 @@ class PromptBuilder:
     # ──────────────────────────────────────────────────────────────────
 
     def _build_current_turn(self, state: ConciergeState) -> str:
-        return state.normalized_user_message
+        msg = state.normalized_user_message
+
+        if state.intent.message_kind in ("followup", "refinement") and state.scene.previous_need:
+            context_parts = [f"[Previous question: {state.scene.previous_need}]"]
+            if state.scene.audience:
+                context_parts.append(f"[Audience: {', '.join(state.scene.audience)}]")
+            if state.scene.companions:
+                context_parts.append(f"[With: {', '.join(state.scene.companions)}]")
+            context = "\n".join(context_parts)
+            return f"{context}\n\nCurrent follow-up: {msg}"
+
+        return msg

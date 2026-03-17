@@ -154,8 +154,8 @@ class ImplicitFeedbackDetector:
         user_message: str,
         previous_assistant_response: str = "",
         session_id: str,
-        tenant_id: str = "cenomi_mall_01",
-        mall_id: str = "cenomi_mall_01",
+        tenant_id: str = "al_nakheel_plaza_28",
+        mall_id: str = "al_nakheel_plaza_28",
         turn_id: str = "",
         message_kind: str = "",
     ) -> ImplicitFeedbackEvent | None:

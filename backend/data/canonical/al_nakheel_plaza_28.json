@@ -1,0 +1,4541 @@
+{
+  "mall_profile": {
+    "mall_id": "al_nakheel_plaza_28",
+    "name": "Al Nakheel Plaza",
+    "marketing_name": "Nakheel Plaza",
+    "city": "Buraidah",
+    "country": "Saudi Arabia",
+    "address": "King Abdullah Road Al Muntazah, Buraydah 52381",
+    "coordinates": {
+      "lat": 21.556682034755465,
+      "lng": 39.18516633867169
+    },
+    "floors": [
+      "Ground",
+      "Cinema Level"
+    ],
+    "zones": [
+      {
+        "zone_id": "z-main",
+        "name": "Main Gallery",
+        "floor": "Ground",
+        "description": "Primary shopping corridor with fashion, cosmetics, jewelry, accessories, and watches.",
+        "category_focus": [
+          "Fashion",
+          "Cosmetics",
+          "Jewelry",
+          "Accessories",
+          "Watches"
+        ]
+      },
+      {
+        "zone_id": "z-kiosk",
+        "name": "Kiosk Row",
+        "floor": "Ground",
+        "description": "Inline kiosks and small-format stores — perfumes, cafes, accessories.",
+        "category_focus": [
+          "Perfumes",
+          "Cafe",
+          "Accessories"
+        ]
+      },
+      {
+        "zone_id": "z-foodcourt",
+        "name": "Food Court",
+        "floor": "Ground",
+        "description": "Quick-service and fast-casual dining — McDonald's, Herfy, Kudu, Popeyes, Cinnabon.",
+        "category_focus": [
+          "Fast Food",
+          "Cafe",
+          "Dessert"
+        ]
+      },
+      {
+        "zone_id": "z-entertainment",
+        "name": "Entertainment Wing",
+        "floor": "Ground",
+        "description": "Large-format retail and entertainment — Adidas, Brands For Less, Home Box, Centrepoint, Fun Time.",
+        "category_focus": [
+          "Sportswear",
+          "Value Fashion",
+          "Home",
+          "Kids Entertainment"
+        ]
+      },
+      {
+        "zone_id": "z-hypermarket",
+        "name": "Hypermarket Area",
+        "floor": "Ground",
+        "description": "Danube HyperMarket — groceries, fresh produce, and household essentials.",
+        "category_focus": [
+          "Grocery",
+          "Hypermarket"
+        ]
+      },
+      {
+        "zone_id": "z-cinema",
+        "name": "Cinema Zone",
+        "floor": "Cinema Level",
+        "description": "Muvi Cinemas — the entertainment anchor with multiple screens.",
+        "category_focus": [
+          "Cinema",
+          "Entertainment"
+        ]
+      }
+    ],
+    "landmarks": [
+      {
+        "landmark_id": "lm-gate1",
+        "name": "Main Entrance (Gate 1)",
+        "landmark_type": "entrance",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery"
+        },
+        "description": "Primary mall entrance."
+      },
+      {
+        "landmark_id": "lm-gate2",
+        "name": "Gate 2",
+        "landmark_type": "entrance",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery",
+          "directions_hint": "Near Information Desk"
+        },
+        "description": "Secondary entrance — Information Desk and Customer Service nearby."
+      },
+      {
+        "landmark_id": "lm-infodesks",
+        "name": "Information Desk",
+        "landmark_type": "information_desk",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery",
+          "directions_hint": "Gate 2, Customer Service area"
+        },
+        "description": "Guest services, lost & found, wheelchair and stroller loans."
+      }
+    ],
+    "facilities": [
+      {
+        "facility_id": "fac-prayer-men",
+        "name": "Men's Prayer Room",
+        "facility_type": "prayer_room",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery",
+          "directions_hint": "Near Gate 1, Lavalle Store"
+        },
+        "description": "Men's prayer room with ablution facilities.",
+        "tags": [
+          "prayer",
+          "essential"
+        ]
+      },
+      {
+        "facility_id": "fac-prayer-women",
+        "name": "Women's Prayer Room",
+        "facility_type": "prayer_room",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery"
+        },
+        "description": "Women's prayer room with ablution facilities.",
+        "tags": [
+          "prayer",
+          "essential"
+        ]
+      },
+      {
+        "facility_id": "fac-wheelchair",
+        "name": "Wheelchair Service",
+        "facility_type": "accessibility",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery"
+        },
+        "description": "Complimentary wheelchair loans available.",
+        "tags": [
+          "accessibility",
+          "wheelchair"
+        ]
+      },
+      {
+        "facility_id": "fac-stroller",
+        "name": "Baby Stroller Service",
+        "facility_type": "family",
+        "location": {
+          "floor": "Ground",
+          "zone": "Main Gallery",
+          "directions_hint": "Gate 2, near Doknah Kiosk"
+        },
+        "description": "Baby stroller loans available 4:00 PM – 11:00 PM.",
+        "tags": [
+          "family",
+          "baby"
+        ]
+      }
+    ],
+    "parking": {
+      "notes": "Parking available at multiple gates — in front of each gate.",
+      "details": "Ground floor parking. Located in front of each gate."
+    },
+    "operating_hours": {
+      "sunday": "09:00 AM–11:00 PM",
+      "weekday": "09:00 AM–11:00 PM",
+      "friday": "01:00 PM–11:00 PM",
+      "saturday": "09:00 AM–11:00 PM"
+    },
+    "contact": {
+      "phone": "+966 920000262",
+      "email": "info.centers@cenomi.com",
+      "address": "King Abdullah Road Al Muntazah, Buraydah 52381",
+      "google_map": "https://maps.app.goo.gl/83uUvGeEcBC28Qdm6",
+      "social_media": {
+        "instagram": "https://www.instagram.com/AlNakheelPlazaQassim/",
+        "x": "https://x.com/cenomicenters/",
+        "youtube": "https://www.youtube.com/@cenomi",
+        "linkedin": "https://www.linkedin.com/company/cenomicenters"
+      }
+    },
+    "amenities": [
+      "Free Parking",
+      "Prayer Rooms (Ground Floor)",
+      "Baby Stroller Loans",
+      "Wheelchair Loans",
+      "ATM Machines",
+      "Information Desk",
+      "Lost & Found",
+      "WiFi (Mobily)",
+      "Washrooms"
+    ],
+    "accessibility_features": [
+      "Wheelchair ramps at entrances",
+      "Accessible washrooms",
+      "Complimentary wheelchair loans"
+    ],
+    "loyalty": {
+      "program_name": "Cenomi Rewards",
+      "description": "Earn points on purchases at participating stores.",
+      "app_available": true,
+      "signup_locations": [
+        "Information Desk",
+        "Cenomi Rewards app"
+      ]
+    },
+    "map_url": "https://demos.mappedin.com/web/mappedin-web/arabian-centres/arabian-centres-nakheel-plaza.html#/",
+    "logo": "https://images.ctfassets.net/7yr2jq50qisr/2P40PAq17i1m9bEAO8xbxi/b652487bd74ed51824b3f6e44c450f8e/Group_10.png",
+    "images": [
+      "https://images.ctfassets.net/7yr2jq50qisr/2uZ48Mw5PZpA9uGMR2NxZC/c2f502e12b5070c4b11ef27724b42d95/Nakheel_Plaza-6.jpg"
+    ],
+    "property_group_id": 28,
+    "description": "Transforming Your Shopping Experience, One Mall At A Time",
+    "sr_mallname": "Al Nakheel Plaza - Qassim"
+  },
+  "stores": [
+    {
+      "entity_id": "t-store-001",
+      "entity_type": "store",
+      "name": "L'Occitane",
+      "brand": "L'Occitane Arabia Trading LTD CO",
+      "brand_id": 111,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "L'Occitane brand is distinguished by its skin care, body care and perfume products.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF044",
+        "directions_hint": "First floor- near Gate 6 , next to L'Occitane"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966560809775",
+        "email": "loccitane.mallofarabia@chalhoub.com",
+        "website": "https://sa.loccitane.com"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/393240d1a8e60e3e2e47cc68ae6d5703.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4e9c6616eefed6a306857d183cf44e3c.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ]
+    },
+    {
+      "entity_id": "t-store-002",
+      "entity_type": "store",
+      "name": "Season Accessorize",
+      "brand": "Light Season CO",
+      "brand_id": 218,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers' needs for every occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK40"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966559255339",
+        "email": "nizar@season.sa",
+        "website": "https://season.sa/"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/79dcd57e35e7bdee0aaa5ab2f7b7ac99.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8aee4d33dc5d283bd38a396fc7e18d9b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/season.online/profilecard/?igsh=MThhYmpuN2ppZG0xZA==",
+        "tiktok": "https://www.tiktok.com/@season.online?_t=ZS-8sGDifxulKm&_r=1",
+        "facebook": "https://www.facebook.com/profile.php?id=100073184401927",
+        "twitter": "https://x.com/seasononline",
+        "snapchat": "https://snapchat.com/t/FUdl5QTM",
+        "youtube": "https://www.youtube.com/@season.online"
+      }
+    },
+    {
+      "entity_id": "t-store-003",
+      "entity_type": "store",
+      "name": "Season Accessorize",
+      "brand": "Light Season CO",
+      "brand_id": 218,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers' needs for every occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK59"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966533009596",
+        "email": "nizar@season.sa",
+        "website": "https://season.sa/"
+      },
+      "price_range": "premium",
+      "brand_logo": "",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/899b40b7978185803504c98d7f3697c8.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/season.online/profilecard/?igsh=MThhYmpuN2ppZG0xZA==",
+        "tiktok": "https://www.tiktok.com/@season.online?_t=ZS-8sGDifxulKm&_r=1",
+        "facebook": "https://www.facebook.com/profile.php?id=100073184401927",
+        "twitter": "https://x.com/seasononline",
+        "snapchat": "https://snapchat.com/t/FUdl5QTM",
+        "youtube": "https://www.youtube.com/@season.online"
+      }
+    },
+    {
+      "entity_id": "t-store-004",
+      "entity_type": "store",
+      "name": "Season Accessorize",
+      "brand": "Light Season CO",
+      "brand_id": 218,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers' needs for every occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF033",
+        "additional_units": [
+          "GF034"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966559255339",
+        "email": "nizar@season.sa",
+        "website": "https://season.sa/"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ee48fc924eb250a8f682ef807d8a7793.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8aee4d33dc5d283bd38a396fc7e18d9b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/season.online/profilecard/?igsh=MThhYmpuN2ppZG0xZA==",
+        "tiktok": "https://www.tiktok.com/@season.online?_t=ZS-8sGDifxulKm&_r=1",
+        "facebook": "https://www.facebook.com/profile.php?id=100073184401927",
+        "twitter": "https://x.com/seasononline",
+        "snapchat": "https://snapchat.com/t/FUdl5QTM",
+        "youtube": "https://www.youtube.com/@season.online"
+      }
+    },
+    {
+      "entity_id": "t-store-005",
+      "entity_type": "store",
+      "name": "Ajmal Perfumes",
+      "brand": "Ajmal Trading CO",
+      "brand_id": 248,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Ajmal is a prestigious brand renowned for its exquisite perfumes, offering a diverse selection of luxurious fragrances. The website features their extensive collection of Arabic and oriental scents, designed for both men and women. With a legacy of craftsmanship and a commitment to unparalleled quality, Ajmal focuses on creating timeless fragrances with innovative compositions. Crafting unforgettable memories since 1951.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF126"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966555630817",
+        "email": "queries@ajmalksa.com",
+        "website": "https://ar-sa.ajmal.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8a35781b5bd9831d4215c9658191136e.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/35770e869c10c13bd06d4095dd27c575.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://instagram.com/ajmalsaudi?igshid=YmMyMTA2M2Y",
+        "tiktok": "https://www.tiktok.com/@ajmal_saudi?_t=8fTzPdbyN1N&_r=1",
+        "facebook": "https://www.facebook.com/AjmalSaudiPerfumes",
+        "twitter": "https://x.com/Ajmalsaudi?s=20",
+        "snapchat": "https://t.snapchat.com/YKsjTyVv"
+      }
+    },
+    {
+      "entity_id": "t-store-006",
+      "entity_type": "store",
+      "name": "Lord",
+      "brand": "Perfume Store Trading CO",
+      "brand_id": 507,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "LORD Milano offers a comprehensive range of luxury products, meticulously designed to cater to those who appreciate quality and distinction. The brand’s offerings include:1. Luxury Perfumes • Crafted from rare and premium ingredients, such as natural flowers, oriental spices, and aromatic woods. • Known for their long-lasting performance, providing a timeless olfactory experience. • A harmonious blend of classic and modern scents to suit diverse preferences.2. Cosmetics • High-quality beauty products designed to enhance natural beauty with exceptional performance. • Formulated with advanced compositions that ensure perfect coverage and a luxurious finish.3. Skincare Products • A complete range of skincare solutions enriched with nourishing and natural ingredients. • Focused on enhancing skin’s health and radiance while combining effectiveness with indulgence.4. Home Fragrances • An elegant collection of home fragrances that fill spaces with soothing and luxurious scents. • Designed to create relaxing, sophisticated, and warm atmospheres.5. Premium Essential Oils • Pure, high-quality oils ideal for personal care or for adding a luxurious touch to the home. • Known for their calming and relaxing properties.The MessageLORD Milano products embody Italian elegance and royal luxury, combining sophistication, superior quality, and distinctive design. They cater to discerning customers who seek uniqueness and excellence in every product.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK01"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920033656",
+        "email": "info@lordmilano.com",
+        "website": "https://lordmilanome.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ce92e143852dcf8a71cbde8320d79a96.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/75b3f25e8ee89bac6b214289eae6411b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/lordmilanome/",
+        "facebook": "https://www.facebook.com/LordMilanoME/",
+        "twitter": "https://x.com/LordMilanoME",
+        "snapchat": "https://www.snapchat.com/add/https://www.snapchat.com/add/lordmilanome"
+      }
+    },
+    {
+      "entity_id": "t-store-007",
+      "entity_type": "store",
+      "name": "Zohoor Al Reef",
+      "brand": "Baqat Trading CO",
+      "brand_id": 545,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Zohoor Alreef is a renowned beauty and fragrance brand inspired by the essence of nature. Specializing in premium perfumes, skincare, and body care products, Zohoor Alreef combines elegance and quality to create captivating scents and luxurious self-care experiences.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF060"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966569888507",
+        "email": "e.dighriri@zohooralreef.com",
+        "website": "https://zohooralreef.com/ksa_ar/ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/cf50dc964f8a2d0b77fc3eb45f215060.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/379f508aa4a7cf3f0165104f2fddf1bb.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/zohoor.ksa/",
+        "facebook": "https://www.facebook.com/ZohoorAlreefStores?fref=ts",
+        "twitter": "https://x.com/ZARStores"
+      }
+    },
+    {
+      "entity_id": "t-store-008",
+      "entity_type": "store",
+      "name": "Blooming",
+      "brand": "Nama Arabia Garments LTD CO",
+      "brand_id": 751,
+      "category": "Fashion",
+      "subcategory": "Lingerie & Intimate",
+      "description": "A Saudi brand proud of its roots, that celebrates women and supporting them in every moment, including and accessories that combine comfort with style",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF014",
+        "additional_units": [
+          "GF015"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966541674141",
+        "email": "Amani.Alghamdi@bloomingwear.com",
+        "website": "https://bloomingwear.com/sa_ar/last-chance-offers.html?gad_source=1&gclid=EAIaIQobChMIxPjVh8S7iwMVfRmDAx1EuhQEEAAYASAAEgL6WPD_BwE"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/577212d7af678083dd7f59182baa7f1b.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/50022acde73043cbc0efe7d32de8a800.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "lingerie_intimate",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/blooming.wear/profilecard/?igsh=MWx1aXJycXlhcWVhMw==",
+        "tiktok": "https://www.tiktok.com/",
+        "twitter": "https://x.com/blooming_wear?s=11",
+        "snapchat": "https://snapchat.com/t/oZLFgJAz"
+      }
+    },
+    {
+      "entity_id": "t-store-009",
+      "entity_type": "store",
+      "name": "Dkhoon Emirates",
+      "brand": "Dkhoon Alemaratih Trading CO",
+      "brand_id": 969,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Dkhoon Emirates is a luxury fragrance brand known for its exquisite perfumes, oud, and bukhoor. Embodying elegance and heritage, the brand offers rich, long-lasting scents that make a statement of sophistication and luxury.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF081"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966966563662941",
+        "email": "abukhas.mahmoud@dkhoonemirates.com",
+        "website": "https://dkhoonemirates.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c16fda98fddf15bfb8647035b4db2b7e.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/212546cf0f739b18eeb112a1dce60fe6.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/dkhoonemirates?igsh=ODZzY25naDFxNDgz",
+        "tiktok": "https://www.tiktok.com/@dkhoonemirates?_t=8sLc0VYsbG3&_r=1",
+        "facebook": "https://www.facebook.com/share/19zV1EiARi/?mibextid=wwXIfr",
+        "twitter": "https://x.com/dkhoonemirates?s=21",
+        "snapchat": "https://www.snapchat.com/add/dkhoonemirates1",
+        "youtube": "https://youtube.com/@dkhoon.emirates?si=toN7yyUAcOMKoGr0"
+      }
+    },
+    {
+      "entity_id": "t-store-010",
+      "entity_type": "store",
+      "name": "Season",
+      "brand": "Light Season CO",
+      "brand_id": 1059,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers&#x27; needs for every occasion",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF070"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966559255339",
+        "email": "nizar@season.sa",
+        "website": "https://season.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/df224872d4acdafb9145622c3b9507a1.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/42bbcb882c36f608e2357b92e460834a.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/season.online/profilecard/?igsh=MThhYmpuN2ppZG0xZA==",
+        "tiktok": "https://www.tiktok.com/@season.online?_t=ZS-8sGDifxulKm&_r=1",
+        "facebook": "https://www.facebook.com/profile.php?id=100073184401927",
+        "twitter": "https://x.com/seasononline",
+        "snapchat": "https://snapchat.com/t/FUdl5QTM",
+        "youtube": "https://www.youtube.com/@season.online"
+      }
+    },
+    {
+      "entity_id": "t-store-011",
+      "entity_type": "store",
+      "name": "Al Daham Watches",
+      "brand": "Al Daham Trading CO",
+      "brand_id": 1127,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "l Dhaham Company was established in 1959 by its founder Mr. Abdul Rahman Al Dhaham, where the first branch was opened in Riyadh and soon more branches were opened in different cities and then joined the entire Kingdom. Al Dhaham Company witnessed rapid and remarkable growth millions of years to become one of the largest experts in luxury watches in the Arabian Gulf region",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF001A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966507356411",
+        "email": "kromkrom1991@gmail.com",
+        "website": "https://www.aldaham.com"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0ec614c0fcfde7cede9a284620cd308c.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4c4a9aedbd0cae03000bc1356802cfc7.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ]
+    },
+    {
+      "entity_id": "t-store-012",
+      "entity_type": "store",
+      "name": "NINE WEST",
+      "brand": "Apparel Trading Company Limited",
+      "brand_id": 1281,
+      "category": "Fashion",
+      "subcategory": "Footwear",
+      "description": "Nine West is a fashion retailer specializing in women&#x27;s shoes, handbags, and accessories.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF002",
+        "additional_units": [
+          "GF003"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920001578",
+        "email": "ninewest@arch-support.zendesk.com",
+        "website": "https://ninewest.com/?srsltid=AfmBOopwuIt3o8ywQfCVTVnVxaK0wjRKUL-WBLB1e6SrW6ZVy1cO5ppw"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/853a22ea22830c9af1ac7661be2c3532.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ba38293903d1a4fc200face3aa12ded4.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "footwear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/ninewest/",
+        "tiktok": "https://www.tiktok.com/@ninewest",
+        "facebook": "https://www.facebook.com/ninewest/"
+      }
+    },
+    {
+      "entity_id": "t-store-013",
+      "entity_type": "store",
+      "name": "Swiss Corner",
+      "brand": "Swiss Corner Trading Company",
+      "brand_id": 2550,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "Al Rukun Al Swissari Watches is a company with strong principles in the watch retail sector in Saudi Arabia and the Gulf countries. We are authorized dealers of the world&#x27;s finest watches, aligning with our customers&#x27; aspirations. A prestigious brand with nearly 150 branches.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF012"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920017991",
+        "email": "info@swisscorner.com",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ee8cf42d9aa50337dbe4eb7f7f93a126.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f18b7170c8bfb7fcb6f4a73f94046fa3.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/swisscorner_co/#",
+        "tiktok": "https://www.tiktok.com/@swisscornerr_co",
+        "facebook": "https://www.facebook.com/swisscornerksa/",
+        "twitter": "https://x.com/Swisscorner_co?mx=2",
+        "snapchat": "https://www.snapchat.com/add/swisscorner.co"
+      }
+    },
+    {
+      "entity_id": "t-store-014",
+      "entity_type": "store",
+      "name": "Wave Media digital",
+      "brand": "Wave Media CO",
+      "brand_id": 3007,
+      "category": "Electronics",
+      "subcategory": "Digital Media",
+      "description": "Wave Media is an advertising and digital media company that offers innovative indoor digital platforms and out‑of‑home media networks to captivate audiences and empower brands with visually engaging content, analytics, and measurable advertising impact.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Digital Media Area",
+        "unit_number": "DM01"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+920005111966",
+        "email": "info@wavemediasa.com",
+        "website": "https://wavemediasa.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c9a9185afb760afad3007ef99ebd1b58.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0d81ae31a17463e63c0cafd2df87730c.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "electronics",
+        "digital_media"
+      ]
+    },
+    {
+      "entity_id": "t-store-015",
+      "entity_type": "store",
+      "name": "The Body Shop",
+      "brand": "Al Thomad Trading CO",
+      "brand_id": 3277,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Our story started in Brighton, England in 1976. It began with our founder, Dame Anita Roddick, and her belief in something revolutionary: that business could be a force for good. Following her vision, we’ve been rule breaking, never faking and change making for over 40 years.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF010",
+        "additional_units": [
+          "GF011"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966509813448",
+        "email": "Elazab@althomad.com",
+        "website": "https://www.thebodyshop.com.sa/east/en"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/20fed15217ccb45417b9797136339b93.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c39a79f38f41f8f32745b459a43f85a8.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/thebodyshopsaudieast/",
+        "facebook": "https://www.facebook.com/thebodyshopSaudiEast/",
+        "twitter": "https://x.com/TheBodyShopSE",
+        "snapchat": "https://www.snapchat.com/add/thebodyshopruh",
+        "youtube": "https://www.youtube.com/@thebodyshopsaudieast"
+      }
+    },
+    {
+      "entity_id": "t-store-016",
+      "entity_type": "store",
+      "name": "The Optical Club",
+      "brand": "Innovative Optics LLC",
+      "brand_id": 4426,
+      "category": "Health",
+      "subcategory": "Optical",
+      "description": "The Optical Club is an optical store that provide a wide options of eyeglasses, sunglasses and contact lenses in a reasonable prices and good quality. also providing a free eye test for all",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF129",
+        "additional_units": [
+          "GF130"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966590227422",
+        "email": "oc.nakheelplaza@theopticalclub.com",
+        "website": "https://theopticalclub.com/saopcl-ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1b96b0a7cc97fb4dd210620da9fe8d67.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3c1f4a10ece3442889f2f6893a318f9f.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "health",
+        "optical"
+      ]
+    },
+    {
+      "entity_id": "t-store-017",
+      "entity_type": "store",
+      "name": "Al Homaidhi Watches",
+      "brand": "Abdulaziz Rashed Al Homaidi Trading Est",
+      "brand_id": 5504,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "Al Homaidhi Group, renowned for luxury watches in Saudi Arabia, features 98 top-notch outlets and over 700 specialists committed to unmatched ethical standards.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF137"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966504477779",
+        "email": "aziz@alhomaidhi.com",
+        "website": "https://alhomaidhigroup.com/"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/297fef7d575216697a760d22c3445dc2.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3ac94d0b9dfb41af95e2024b5089e1ef.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/alhomaidhigroup/?hl=en",
+        "facebook": "https://www.facebook.com/alhomaidhigroup/",
+        "twitter": "https://x.com/alhomaidhigroup",
+        "snapchat": "https://www.snapchat.com/add/alhomaidhigroup",
+        "youtube": "https://www.youtube.com/channel/UCt-dGPxkwcL8q0VaOUhQE5g/videos"
+      }
+    },
+    {
+      "entity_id": "t-store-018",
+      "entity_type": "store",
+      "name": "MINISO",
+      "brand": "Ali Ahmed Alqabas Trading EST",
+      "brand_id": 215352,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Ali Algabas Trading EST",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF101",
+        "additional_units": [
+          "GF102",
+          "GF103",
+          "GF104"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966581739032",
+        "email": "j.aziz@miniso.sa",
+        "website": "https://miniso.sa/"
+      },
+      "price_range": "budget",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8146ad17fe3306cf917fd4db0b6019df.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e5a6d125f36cc7f7b0d7170302438b18.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://instagram.com/miniso_sa",
+        "tiktok": "https://tiktok.com/@miniso_sa",
+        "facebook": "https://www.facebook.com/miniso.ksa",
+        "twitter": "https://x.com/miniso_sa",
+        "snapchat": "https://www.snapchat.com/add/miniso_sa?",
+        "youtube": "https://www.youtube.com/@miniso_sa"
+      }
+    },
+    {
+      "entity_id": "t-store-019",
+      "entity_type": "store",
+      "name": "Orange Bed & Bath",
+      "brand": "Orange Blossom Trading Closed Joint Stock CO",
+      "brand_id": 224815,
+      "category": "Home",
+      "subcategory": "Home Decor & Furniture",
+      "description": "ORANGE BED & BATH specializes in premium bedroom essentials and stylish home accessories. From luxurious bed linens, mattress toppers, and sheets to cozy sleeping pillows and more, we provide everything your home needs, crafted from the finest, high-quality materials. Explore our extensive collection of bathroom necessities and elegant accessories designed to elevate your living space.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GFA4"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966501653333",
+        "email": "cs@orangebedbath.com",
+        "website": "https://www.orangebedbath.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/7ffa39f3106172b0565ae576a0e845c1.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/cc27c60b91032eadd3e5ba286721fcf9.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "home",
+        "home_decor_furniture"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/orangebedbath/",
+        "tiktok": "https://www.tiktok.com/@orange_bedbath?is_from_webapp=1&sender_device=pc",
+        "facebook": "https://www.facebook.com/people/ORANGE-BED-BATH/100064372976415/",
+        "twitter": "https://x.com/orangebedbath",
+        "snapchat": "https://snapchat.com/t/VDgxx6lX"
+      }
+    },
+    {
+      "entity_id": "t-store-020",
+      "entity_type": "store",
+      "name": "Bloom",
+      "brand": "Dar Bloom Trading CO",
+      "brand_id": 231900,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Bloom Perfumes is a Saudi Arabian fragrance brand offering a range of unique and high-quality scents. It focuses on elegant and long-lasting perfumes that cater to diverse preferences.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK48"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966596614413",
+        "email": "bloom.bloomksa@gmail.com",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/2e6a2c57c2064255d8d82eb08637bbd8.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/530ef546f17bb0efb66c078c4950f75f.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ]
+    },
+    {
+      "entity_id": "t-store-021",
+      "entity_type": "store",
+      "name": "Stradivarius",
+      "brand": "Nesk Trading CO",
+      "brand_id": 246093,
+      "category": "Fashion",
+      "subcategory": "Bags & Accessories",
+      "description": "Modern designs reflecting the latest fashion trends, blending elegance with simplicity to inspire your unique style.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF064",
+        "additional_units": [
+          "GF065",
+          "GF066",
+          "GF067"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668003014000",
+        "email": "customer.care@cenomi.com",
+        "website": "https://www.stradivarius.com/sa/women/sale/clothing/all-n3267"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/27ee869b705cdc1f1fbe13a617c5ae33.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/90abdc6a3ce53b192bb7586733d6a5a7.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "bags_accessories"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/stradivarius/?hl=ar",
+        "tiktok": "https://www.tiktok.com/@stradivarius?lang=es",
+        "facebook": "https://www.facebook.com/stradivas/",
+        "twitter": "https://x.com/stradivarius",
+        "youtube": "https://www.youtube.com/user/stradivas?sub_confirmation=1"
+      }
+    },
+    {
+      "entity_id": "t-store-022",
+      "entity_type": "store",
+      "name": "Bershka",
+      "brand": "Fawaz Abdulaziz Al Hokair and Partners CO",
+      "brand_id": 246181,
+      "category": "Fashion",
+      "subcategory": "Bags & Accessories",
+      "description": "A contemporary brand offering innovative fashion that blends boldness and comfort, targeting young individuals seeking a lifestyle aligned with the latest trends. With its daring and fresh designs, Bershka is the ideal choice for those who love uniqueness and creativity in their everyday looks.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF035"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668003014000",
+        "email": "customer.care@cenomi.com",
+        "website": "https://www.bershka.com/sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9ea6495d94cb6fa8852dd766608403a4.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/140a5b7038a7913a70ed46c35696237a.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "bags_accessories",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/bershka/",
+        "tiktok": "https://www.tiktok.com/@bershka",
+        "facebook": "https://www.facebook.com/bershka",
+        "twitter": "https://x.com/bershka",
+        "snapchat": "https://www.snapchat.com/add/bershkaofficial",
+        "youtube": "https://www.youtube.com/@bershka"
+      }
+    },
+    {
+      "entity_id": "t-store-023",
+      "entity_type": "store",
+      "name": "Call It Spring",
+      "brand": "Fixed Feet Trading CO",
+      "brand_id": 246232,
+      "category": "Fashion",
+      "subcategory": "Footwear",
+      "description": "The ultimate destination for vegan shoes, handbags and accessories, Call It Spring is your go-to for coveted trends with accessible price-tags.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF004"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920006333",
+        "email": "cs@othaim.com",
+        "website": "https://www.callitspring.com/us/en_US"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/32aa64725570a5bd2f5d42ab440ca7b2.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/7ff7cb9326b229de1113752a594d577b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "footwear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/callitspring/#",
+        "tiktok": "https://www.tiktok.com/@callitspring",
+        "facebook": "https://www.facebook.com/CallItSpring/",
+        "twitter": "https://x.com/callitspring",
+        "youtube": "https://www.youtube.com/channel/UCivbOrJPyzY5He60MFOxLvg"
+      }
+    },
+    {
+      "entity_id": "t-store-024",
+      "entity_type": "store",
+      "name": "Doknah",
+      "brand": "Doknah Trading EST",
+      "brand_id": 248123,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Doknah Perfumes is a registered trademark specializing in the production of fragrance products, associated with quality and luxury.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK69"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966503104593",
+        "email": "info@doknah.com.sa",
+        "website": "https://www.doknah.com.sa"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9321439b42ea7395641d35aded65da4b.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/87abf1653da83332299b0dd1bb7928ff.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/doknah1",
+        "tiktok": "https://www.tiktok.com/@doknah1",
+        "facebook": "https://www.facebook.com/doknah1",
+        "twitter": "https://x.com/doknah1",
+        "snapchat": "https://www.snapchat.com/add/doknah1",
+        "youtube": "https://www.youtube.com/@doknah1"
+      }
+    },
+    {
+      "entity_id": "t-store-025",
+      "entity_type": "store",
+      "name": "Harayer",
+      "brand": "Dar Alharayer EST",
+      "brand_id": 248362,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "Harayer Factory is a Saudi factory and one of the largest factories in the Kingdom of Saudi Arabia and the first in Madinah. It is also one of the top ten brands in the field of manufacturing and weaving fabrics and silk. We specialize in manufacturing and tailoring abayas in addition to dresses for occasions and weddings. Our team has more than 35 years of experience in the field, as we started with a single tailor and reached 300 tailors. It was established in 1991 and is headquartered in Madinah. Harayer provides high-quality tailoring and detailing services and designs according to every taste and desire, in addition to choosing the finest and finest fabrics from around the world.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF075"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966591480224",
+        "email": "harayer20@gmail.com",
+        "website": "https://harayer.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4764a8f41bfc472470197a0bb6d8b0dc.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/50adbee055c112700e0758c47c994f0d.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/harayer_sa/?locale=es_us&hl=en",
+        "tiktok": "https://www.tiktok.com/@harayer_sa",
+        "facebook": "https://www.facebook.com/p/%D8%AD%D8%B1%D8%A7%D9%8A%D8%B1-%D9%84%D9%84%D8%B9%D8%A8%D8%A7%D9%8A%D8%A7%D8%AA-100065189054005/?locale=ar_AR&_rdr",
+        "twitter": "https://www.instagram.com/harayer_sa/?locale=es_us&hl=en",
+        "snapchat": "https://www.snapchat.com/harayer_sa",
+        "youtube": "https://www.facebook.com/p/%D8%AD%D8%B1%D8%A7%D9%8A%D8%B1-%D9%84%D9%84%D8%B9%D8%A8%D8%A7%D9%8A%D8%A7%D8%AA-100065189054005/?locale=ar_AR&_rdr"
+      }
+    },
+    {
+      "entity_id": "t-store-026",
+      "entity_type": "store",
+      "name": "It's Mine",
+      "brand": "Jood Al-masya LTD CO",
+      "brand_id": 252520,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "It&#x27;s Mine, established in 2000, is a fashion brand known for offering the best dresses and skirts. With a focus on style, quality, and elegance, the brand caters to fashion-forward individuals seeking trendy and timeless pieces.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF036"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966508216109",
+        "email": "nakheelmall@itsminesa.com",
+        "website": "https://itsminesa.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5782b886bd9658904c07da9fa9706ec8.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5c60a6131d4f82f83a38f6f576135c6e.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ]
+    },
+    {
+      "entity_id": "t-store-027",
+      "entity_type": "store",
+      "name": "Swarovski",
+      "brand": "Arabian Luxury Gifts CO",
+      "brand_id": 252598,
+      "category": "Jewelry",
+      "subcategory": "Fine Jewelry",
+      "description": "Swarovski is a brand specialized in selling luxury crystal, jewelry, and elegant accessories , including necklaces, earrings, watches, and unique gift items.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF040"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966506675607",
+        "email": "swarovski.azizmall@chalhoub.com",
+        "website": "https://www.googleadservices.com/pagead/aclk?sa=L&ai=DChcSEwib3vL_nISLAxWrlYMHHW-CJpEYABBMGgJlZg&co=1&gclid=EAIaIQobChMIm97y_5yEiwMVq5WDBx1vgiaREAAYASAAEgIJ1vD_BwE&sph&ohost=www.google.com&cid=CAASJeRofa0AQCeuRFb-qg_raRpfc7lp4EzGeaxSizN7y8EwaMzKVFI&sig=AOD64_1ywnw9pxcb3E8frkSoNeIibetbyw&q&adurl&ved=2ahUKEwi6ou3_nISLAxVEhv0HHa5kAqsQ0Qx6BAgMEAE"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/472f4394204d7602348aade336ff7a41.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9f56d3c29e61fb4d9fd5b6e9f4c64bcb.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "jewelry",
+        "fine_jewelry"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/swarovski?igsh=cm1uZjV6bmxpeDZw"
+      }
+    },
+    {
+      "entity_id": "t-store-028",
+      "entity_type": "store",
+      "name": "Red Tag",
+      "brand": "Jazirat Sama for Fashion LTD CO",
+      "brand_id": 252615,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "A refreshing concept launched in 2006, REDTAG currently has 225+ fashion & lifestyle stores across the Middle East and Asia and has been growing at a rate of 20 percent annually. As a chain of value fashion and home stores, REDTAG offers a pleasant shopping experience with great variety at unbeatable prices. With 365 days of value, REDTAG is a big hit with families that look forward to the latest in fashion and home trends. The product prices, stringent quality, and availability of a wide range of sizes, shapes and colors make REDTAG the first choice for value-conscious customers. REDTAG is a part of BMA International Group, which has achieved important milestones in retail, fashion, and lifestyle over the last three decades. REDTAG has ambitious plans to open a lot of new stores in the MENA region across malls as well as high streets, with intentions to be a leader in the value fashion and lifestyle market.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF084",
+        "additional_units": [
+          "GF085",
+          "GF086",
+          "GF087",
+          "GF088"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966567388387",
+        "email": "mohammed.irfan@redtag.ae",
+        "website": "https://sa.redtagfashion.com/"
+      },
+      "price_range": "budget",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/65bb2101cab090a09f404b2c4e006a50.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/cec7cad288457e3bce8442b4fac3a002.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/RedtagFashion/",
+        "tiktok": "https://www.tiktok.com/@redtag.fashion",
+        "facebook": "https://www.facebook.com/RedtagFashion/",
+        "twitter": "https://x.com/RedtagFashion",
+        "snapchat": "https://sa.redtagfashion.com/",
+        "youtube": "https://www.youtube.com/RedtagFashion"
+      }
+    },
+    {
+      "entity_id": "t-store-029",
+      "entity_type": "store",
+      "name": "AbdulSammad AlQurashi",
+      "brand": "AbdulSammad AlQurashi CO",
+      "brand_id": 252617,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "By bottles bearing the Abdul Samad Al-Qurashi brand is that the use of perfumes alters the mood and increases the vital energies in the body for those who seek it. Its effect also goes beyond spreading to those around him as well. Therefore, the goal of the first martyr of the Mihrab was to give life a special flavor and increase its beauty and vitality, so it sought His studies aimed to satisfy people's desires, meet their needs, and spread joy and satisfaction in people Their souls, through many products that respond to different tastes.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF078"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966591685390",
+        "email": "r.alrashed@asaalqurashi.com",
+        "website": "https://gl.abdulsamadalqurashi.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/77c764adc096a159812d70aae3a0f384.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f503d7dc5739fc7a50c0b7bce0aacc82.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/asq_group/",
+        "facebook": "https://www.facebook.com/ASQ.Group",
+        "twitter": "https://x.com/asq_group?mx=2"
+      }
+    },
+    {
+      "entity_id": "t-store-030",
+      "entity_type": "store",
+      "name": "Whites Pharmacy",
+      "brand": "Pharmacies International CO",
+      "brand_id": 252618,
+      "category": "Health",
+      "subcategory": "Pharmacy",
+      "description": "Your destination for health and beauty.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF137A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920006648",
+        "email": "Guestcare@whites.net",
+        "website": "https://www.whites.net/ar/page/instagram"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e2873db1a6281e701c1f81a885700d5f.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f71a3e7f42ae5077d8fb7fb03eb2318b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "health",
+        "pharmacy"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/whites_me?igsh=czV6Z2tsZ2ZrNmZz",
+        "twitter": "https://x.com/whites_me?s=11"
+      }
+    },
+    {
+      "entity_id": "t-store-031",
+      "entity_type": "store",
+      "name": "Charles & Keith",
+      "brand": "Apparel Trading Company Limited",
+      "brand_id": 252632,
+      "category": "Fashion",
+      "subcategory": "Footwear",
+      "description": "Charles & Keith is a fashion and accessories brand that offers contemporary designs blending style and comfort. The brand focuses on catering to the needs of the modern woman at affordable prices.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF131"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966565932632",
+        "email": "customercare@charleskeith.com",
+        "website": "https://www.charleskeith.sa/sa-en"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/45ce52d03ad48393169c108420ee2f70.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9344a753b11fac548f2c940e7522e54b.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "footwear"
+      ],
+      "social": {
+        "instagram": "http://instagram.com/valiram",
+        "facebook": "https://www.facebook.com/Valiram",
+        "twitter": "https://twitter.com/valiramgroup",
+        "youtube": "http://www.youtube.com/channel/UC0SdmRaRe9aRu5bxo99xbDw"
+      }
+    },
+    {
+      "entity_id": "t-store-032",
+      "entity_type": "store",
+      "name": "Zara",
+      "brand": "Al Waheeda Equipment LTD CO",
+      "brand_id": 252634,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Zara is a global fashion brand known for its trendy, high-quality, and affordable clothing. It offers a wide range of stylish apparel, footwear, and accessories, combining fast fashion with elegant designs to cater to diverse fashion tastes.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF020",
+        "additional_units": [
+          "GF021",
+          "GF022",
+          "GF023",
+          "GF024",
+          "GF025",
+          "GF026",
+          "GF027",
+          "GF028",
+          "GF029",
+          "GF030",
+          "GF031",
+          "GF032"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668003014000",
+        "email": "customer.care@cenomi.com",
+        "website": "https://www.zara.com/sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/b08a5198e778184ebc6acd95347a7045.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/6d8aa971e151611f1bad0cf6282397f0.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/zara/?_sp=30fa04e3-b453-4aaf-b88d-69cb6581bf5b.1735588843005",
+        "tiktok": "https://www.tiktok.com/@zara?_sp=30fa04e3-b453-4aaf-b88d-69cb6581bf5b.1735588893559",
+        "facebook": "https://www.facebook.com/Zara?_sp=30fa04e3-b453-4aaf-b88d-69cb6581bf5b.1735588212757",
+        "twitter": "https://x.com/ZARA?_sp=30fa04e3-b453-4aaf-b88d-69cb6581bf5b.1735588874417",
+        "youtube": "https://www.youtube.com/user/zara"
+      }
+    },
+    {
+      "entity_id": "t-store-033",
+      "entity_type": "store",
+      "name": "Nawaem",
+      "brand": "Nawem unaizah EST",
+      "brand_id": 252647,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "Nawaim Foundation It was established in 1436 AH and continues Its growth and development until it became... One of the best competing institutions In its field, we are still expanding Until we achieve our goals and be One of the strongest facilities in the field Women&#x27;s supplies, and by achieving small goals, we will achieve the vision, God willing.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK01A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966543796212",
+        "email": "nawaim212@hotmail.com",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9744ae2c8b0acd3c846e26c3068e5e16.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/322fe6f03e458d098383728a9ac6b86a.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ],
+      "social": {
+        "snapchat": "https://www.snapchat.com/add/nawaim212?share_id=eZf4Rixmapc&locale=ar-EG"
+      }
+    },
+    {
+      "entity_id": "t-store-034",
+      "entity_type": "store",
+      "name": "Prando",
+      "brand": "Rwafid Al Amal For Trading CO",
+      "brand_id": 252654,
+      "category": "Fashion",
+      "subcategory": "Bags & Accessories",
+      "description": "\"Prando,\" we are a leading global brand in women's fashion, established in 2005 in Saudi Arabia. With a clear strategic vision and a dedicated team, we have achieved continuous success. Today, we operate over 27 branches across the Kingdom. We are committed to offering the latest fashion trends with high quality, meeting the needs of the modern woman who seeks both elegance and comfort. At \"Prando,\" every detail reflects our dedication to providing an exceptional shopping experience and strengthening our relationship with customers.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF062"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966509955500",
+        "email": "mk@prandosa.com",
+        "website": "https://prandosa.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e43822bb7ac03aad14465088547cf4ea.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/db723cfee9936b60c1f592054401e9f1.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "bags_accessories"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/prando_sa",
+        "tiktok": "https://www.tiktok.com/@prando_ksa",
+        "twitter": "https://x.com/prando_ksa?s=21&t=tIxaQHrevBXb71cMzugZAA",
+        "snapchat": "https://www.snapchat.com/add/prando_ksa",
+        "youtube": "https://youtube.com/@prando-or3gl?si=o65IZjoAwnjsXfN8"
+      }
+    },
+    {
+      "entity_id": "t-store-035",
+      "entity_type": "store",
+      "name": "Nayomi",
+      "brand": "Jamjoum Fashion CO",
+      "brand_id": 252655,
+      "category": "Fashion",
+      "subcategory": "Lingerie & Intimate",
+      "description": "Miyhar is your top choice for high-quality Saudi clothing, offering stylish and authentic designs that reflect the rich cultural heritage of Saudi Arabia",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF112"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966500410456",
+        "email": "amjad.faqeeh@jamjoomfashion.com",
+        "website": "https://nayomi.com/ksa-ar/nayomi/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/a8c355df8ce998f5dcf82e5f5f642d56.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/547bb59c6ee72c5b2e97eb75cded65d9.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "lingerie_intimate"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/nayomimena/",
+        "tiktok": "https://www.tiktok.com/@nayomi",
+        "facebook": "https://www.facebook.com/nayomi/photos_by",
+        "snapchat": "https://t.snapchat.com/3LfKCPFU",
+        "youtube": "https://www.youtube.com/@NayomiMENA"
+      }
+    },
+    {
+      "entity_id": "t-store-036",
+      "entity_type": "store",
+      "name": "Aldo Accessories",
+      "brand": "Fixed Feet Trading CO",
+      "brand_id": 252684,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Aldo designs trendy, sophisticated, and beautiful accessories that make people look and feel great. Inspired by the latest runway trends from London, Paris, Milan, and New York, Aldo makes high fashion affordable for the style-conscious.Established in 1972 in Montréal, one of Canada’s most vibrant and diverse cities, Aldo expanded into the US market in 1993. Today, it is a truly global brand, offering a wide range of stunning handbags, jewelry, sunglasses, and other accessories.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF013"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920006333",
+        "email": "cs@othaim.com",
+        "website": "https://aldo.com.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1187e22ecff6c135183e9b1ab89dc8e7.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/95be96d7efd2a3b14fd25178ed56dc45.jpeg",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/aldo_shoes/",
+        "facebook": "https://www.facebook.com/AldoSaudiArabia/?brand_redir=70926594298",
+        "twitter": "https://x.com/ALDO_Shoes"
+      }
+    },
+    {
+      "entity_id": "t-store-037",
+      "entity_type": "store",
+      "name": "YVES ROCHER",
+      "brand": "Al Batool Int'l Trading Co. Ltd (Safola Group)",
+      "brand_id": 252686,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Since 1959 Yves Rocher has created a special relationship between plants and female beauty, formulating a cutting-edge cosmetics: the Cosmétique Végétale®. Today the Rocher Group has 10 brands, over 18,000 employees worldwide and over 50 million customers. True to its roots, theRocher Group maintains its beating heart in Brittany, where the entire production is located.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF128"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966555658446",
+        "email": "yvesrocher@albatool.com.sa",
+        "website": "https://www.yves-rocher.com.sa/ar/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ea31137db061dc7ecd36d2d4fd79bf48.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/47d8b3ea4ad020fbb29b40741672e11d.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/yvesrocher_ksa/?hl=en",
+        "tiktok": "https://www.tiktok.com/@yvesrocher.ksa?_t=8sU0lUQCDNE&_r=1",
+        "facebook": "https://www.facebook.com/YvesRocherSaudiArabia/",
+        "youtube": "https://www.youtube.com/channel/UC25Wt87t6dnbQR8AJRtUtGw"
+      }
+    },
+    {
+      "entity_id": "t-store-038",
+      "entity_type": "store",
+      "name": "Tous",
+      "brand": "Izdiad Arabian Trading Company",
+      "brand_id": 252701,
+      "category": "Jewelry",
+      "subcategory": "Fine Jewelry",
+      "description": "Tous is a luxury brand offering a wide range of jewelry, watches, gifts, and elegant accessories. Known for its unique collections, Tous combines craftsmanship with contemporary design, creating timeless pieces that exude style, sophistication, and charm for any occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF038",
+        "directions_hint": "Main Floor, between Gate 1 and 6"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966535705869",
+        "email": "Tousarabia@izdiad.com",
+        "website": "https://www.tous.com/sa-en"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/14c5717fac388ec319c923231dd4f7e8.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8cc1f1242831e9d112aa518113808cbe.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "jewelry",
+        "fine_jewelry"
+      ]
+    },
+    {
+      "entity_id": "t-store-039",
+      "entity_type": "store",
+      "name": "Faces",
+      "brand": "Chalhoub Group Saudi Limited CO",
+      "brand_id": 252705,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "FACES stores are the leading partner of the most prestigious international brands in the field of beauty.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF071",
+        "additional_units": [
+          "GF072",
+          "GF073",
+          "GF074"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966583889772",
+        "email": "Wojooh.azizmall@chalhoub.com",
+        "website": "https://www.faces.sa/ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/6dfcdc938fce10e0670a80c3967c4a80.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/99f94a8098ed47d2a5fde54b4ff0dbcd.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/facesbeautymiddleeast/",
+        "tiktok": "https://www.tiktok.com/@facesbeautymiddleeast?_t=ZS-8shUXjxL7Q2&_r=1",
+        "facebook": "https://www.facebook.com/FacesBeautyMiddleEast/",
+        "twitter": "https://twitter.com/FacesBeautyME",
+        "snapchat": "https://snapchat.com/t/ORD2iSm5",
+        "youtube": "https://www.youtube.com/user/FacesWojooh"
+      }
+    },
+    {
+      "entity_id": "t-store-040",
+      "entity_type": "store",
+      "name": "La Vie en Rose",
+      "brand": "Third Dress Trading CO",
+      "brand_id": 252721,
+      "category": "Fashion",
+      "subcategory": "Lingerie & Intimate",
+      "description": "La Vie en Rose is a leading speciality lingerie retailer based in Montreal, Canada. With the aim of producing underwear that is feminine, sophisticated and sensual, the brand’s designs are extensively researched and painstakingly put together.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF017",
+        "additional_units": [
+          "GF018"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920006333",
+        "email": "cs@othaim.com",
+        "website": "https://www.lavieenrose.com.sa/ar/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1844b0b73f44b3f5a7fe0067d5cb5fbc.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1b9bec2a9c75fe9a5efd3af55ef2d216.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "lingerie_intimate"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/lavieenrose.saudi/#",
+        "facebook": "https://www.facebook.com/lavieenrose.saudi/"
+      }
+    },
+    {
+      "entity_id": "t-store-041",
+      "entity_type": "store",
+      "name": "Cardial",
+      "brand": "Drama Trading LTD CO",
+      "brand_id": 252727,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "For over 40 years, we have been creating a new concept for every moment, using a local touch that offers you luxury and indulgence.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF001"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920000244",
+        "email": "Hr.gov@drama.com.sa",
+        "website": "https://cardial.sa"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5892f584a781b1a9d6f6e5fa7054e841.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1d97e685221f1193b9fd79a824de2253.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/cardial_sa/profilecard/?igsh=MTRxczhmNmZiZm5hYg==",
+        "tiktok": "https://www.tiktok.com/@cardial_sa?_t=8sU78sLjOT4&_r=1",
+        "twitter": "https://x.com/cardial_sa?s=21&t=xwcwBFJcD9ooFGVbRrHBQw",
+        "snapchat": "https://snapchat.com/t/KE3KKx5T"
+      }
+    },
+    {
+      "entity_id": "t-store-042",
+      "entity_type": "store",
+      "name": "Natural Touch",
+      "brand": "Alsafa Drugstore LTD CO",
+      "brand_id": 252740,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Natural Touch We see beauty in the simplest things in life, so we have developed a deep relationship with nature because we believe that nature has the ability to change the way we live. Today we sell our products in more than 100 stores, and all our products contain natural ingredients.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF123"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966557557394",
+        "email": "f.fares@alswayeh.com",
+        "website": "https://naturaltouchshop.com/?srsltid=AfmBOopGLQbXAFEkyJUAqVp6UGS8zPHMLd2BlsDZjkUDhI-BtCQAx8Lp"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0d4175be7c9c56f598a92982d522ca22.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/eaef80939ade7326ec2c9c01d740ab5e.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/naturaltouchme/",
+        "tiktok": "https://www.tiktok.com/@naturaltouchme",
+        "facebook": "https://www.facebook.com/NaturalTouchme",
+        "twitter": "https://x.com/naturaltouchme",
+        "snapchat": "https://www.snapchat.com/add/naturaltouchsa"
+      }
+    },
+    {
+      "entity_id": "t-store-043",
+      "entity_type": "store",
+      "name": "Actan",
+      "brand": "Actan Trading CO",
+      "brand_id": 252755,
+      "category": "Fashion",
+      "subcategory": "Bags & Accessories",
+      "description": "Actan strives to be the top destination for women&#x27;s elegance, offering designs inspired by Gulf culture, blending tradition with modern sophistication.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF005",
+        "additional_units": [
+          "GF006"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966568887071",
+        "email": "MALESAYI@ACTAN.COM",
+        "website": "https://actan.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5a6f9e7f6cbcd6cce7d7b00ec934f856.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f15bde3e33c007536b1234e53321723c.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "bags_accessories"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/actan.sa/",
+        "tiktok": "https://tiktok.com/@actan_sa",
+        "facebook": "https://www.facebook.com/ACTAN.FASHION/",
+        "twitter": "https://www.pinterest.com/actanfashion/",
+        "snapchat": "https://www.snapchat.com/add/actan.sa",
+        "youtube": "https://www.youtube.com/channel/UC_NW7G_aU5D8g-0f3wKTodQ"
+      }
+    },
+    {
+      "entity_id": "t-store-044",
+      "entity_type": "store",
+      "name": "Nichii",
+      "brand": "Imtiaz Al Arabia CO",
+      "brand_id": 252762,
+      "category": "Fashion",
+      "subcategory": "Bags & Accessories",
+      "description": "One of the prolific and Largest Malaysian Fashion Retail Brand Targeting Ladies 25+ age with 29 Stores Around KSA.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GFA2C",
+        "directions_hint": "Main Floor, between Gate 1 and 6"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966565630508",
+        "email": "MOUATH@IMTIAZ.COM.SA",
+        "website": "https://www.imtiaz.com.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/fb4d12271af84e800b6dabd043184d77.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c1d142d76953b3740ba82b27affc09b4.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "bags_accessories"
+      ]
+    },
+    {
+      "entity_id": "t-store-045",
+      "entity_type": "store",
+      "name": "COLE HAAN",
+      "brand": "Al Moallim United CO",
+      "brand_id": 252769,
+      "category": "Fashion",
+      "subcategory": "Footwear",
+      "description": "Cole Haan is a renowned brand offering stylish, high-quality footwear, apparel, and accessories for both men and women. Known for combining craftsmanship with innovation, the brand&#x27;s collections emphasize comfort and design, including notable lines like ZERØGRAND and ØriginalGrand. They offer a variety of products such as shoes, bags, and outerwear, with a focus on modern and functional style.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF096"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966592068031",
+        "email": "Customerservices@colehaan.sa",
+        "website": "https://colehaan.sa/ar?tw_source=google&tw_adid=&tw_campaign=22004644044&gad_source=1&gclid=EAIaIQobChMIrcHDgoHBigMVmAMGAB1rkzdcEAAYASAAEgIn4vD_BwE"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/bccf0441ee64d6ba50a6a0579212abd2.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3dbfea59016d740ec84fcaa877cca102.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "footwear",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/colehaan.ksa?igsh=OHQ3YXJmNzRpNXpv"
+      }
+    },
+    {
+      "entity_id": "t-store-046",
+      "entity_type": "store",
+      "name": "Zyros",
+      "brand": "San International  LTD CO",
+      "brand_id": 252778,
+      "category": "Accessories",
+      "subcategory": "Watches & Timepieces",
+      "description": "At Zyrus, we believe that uniqueness is the starting point that shapes a world of individuality and beauty. Every product we design reflects our vision of empowering individuals to express their unique identities in their own way.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF121",
+        "additional_units": [
+          "GF122"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966551717841",
+        "email": "faisal@sanint.com",
+        "website": "https://zyros.com/"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4c3cb0baf947c49dd1e810e7850d8481.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/04e2f7a0341b26c0a1fc6fcd08ce3609.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "accessories",
+        "watches_timepieces"
+      ]
+    },
+    {
+      "entity_id": "t-store-047",
+      "entity_type": "store",
+      "name": "Max",
+      "brand": "Landmark Arabia CO",
+      "brand_id": 252822,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Max Fashion is an Indian fashion brand under the banner of the Landmark Group in Dubai. The brand was first launched in May 2004 in the Middle East in Abu Dhabi.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GFA6"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966542844688",
+        "email": "max.azizmall@landmarkgroup.com",
+        "website": "http://www.maxfashion.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/945906d299452b5f6dcf4e07e493c371.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e568f230d4874db51d7166143fc433a7.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/maxfashionindia",
+        "twitter": "https://x.com/maxfashionindia"
+      }
+    },
+    {
+      "entity_id": "t-store-048",
+      "entity_type": "store",
+      "name": "COACH",
+      "brand": "Al Moallim United CO",
+      "brand_id": 252852,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "For 80 years, Coach has inspired the dreamer in all of us. As we write our next chapter, we’re building on our heritage of craftsmanship and confident New York style to deliver a complete lifestyle brand for modern lives.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF036"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966593018774",
+        "email": "customercare@coach.sa",
+        "website": "https://coach.sa"
+      },
+      "price_range": "premium",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e5815eda893a92889b4933ea363aa2a7.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e49874076597ecec70f7f866f3a19916.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "http://instagram.com/coach",
+        "facebook": "https://facebook.com/coach",
+        "twitter": "https://twitter.com/coach",
+        "snapchat": "https://www.snapchat.com/add/coach"
+      }
+    },
+    {
+      "entity_id": "t-store-049",
+      "entity_type": "store",
+      "name": "Bareeq Silver",
+      "brand": "Silver Glitter Trading CO",
+      "brand_id": 252854,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Bareeq Silver offers exquisite jewelry designed to bring you joy, featuring timeless pieces crafted with precision and elegance, perfect for any occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF059B"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966590002230",
+        "email": "bareeqslv@gmail.com",
+        "website": "https://bareeqslv.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0a5bb80954f7b65b0e9f2df20ee61921.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/37fae200497a373d724a5c3b4124a275.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/bareeqslv?igsh=MTJxOHY3NzliOXFrbg==",
+        "facebook": "https://www.facebook.com/Bareeq925/",
+        "twitter": "https://x.com/bareeqsilver925",
+        "snapchat": "https://www.snapchat.com/add/bareeqslv"
+      }
+    },
+    {
+      "entity_id": "t-store-050",
+      "entity_type": "store",
+      "name": "Musk",
+      "brand": "Musk Al Wataniya CO",
+      "brand_id": 252867,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "The story of Musk began in 2016 in the city of Riyadh, a story crowned by Musk&#x27;s role in presenting perfumes that combine the fragrance of the East and the sophistication of French perfumes, with a new and different concept for the Saudi market. Then Musk proceeded with steady steps to more than 45 branches across the Kingdom, and all of this does not exceed more than a chapter in the Musk story that began with ambition and ended with a perfume that resonates throughout the Kingdom and lasts for the longest possible period.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK12A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920010601",
+        "email": "sales@musk.sa.com",
+        "website": "https://musk.sa.com/ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/854432f34f2fde74a616036b0c89e666.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5d7125ae8e1c62f4c46486d67821af97.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/musk4perfume/#",
+        "tiktok": "https://www.snapchat.com/add/musk.ksa1",
+        "facebook": "https://www.facebook.com/Musk4perfume",
+        "twitter": "https://x.com/musk4perfume?mx=2",
+        "snapchat": "https://www.snapchat.com/add/musk.ksa1",
+        "youtube": "https://www.youtube.com/@musk4perfume"
+      }
+    },
+    {
+      "entity_id": "t-store-051",
+      "entity_type": "store",
+      "name": "Centrepoint",
+      "brand": "Landmark Arabia CO",
+      "brand_id": 252880,
+      "category": "Fashion",
+      "subcategory": "Value Fashion",
+      "description": "Centrepoint is the largest destination for fashion and the best place for family shopping at affordable prices . Centrepoint features several shops under one roof, such as Baby Shop, Splash, Lifestyle and Shoe Mart.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFENT04",
+        "additional_units": [
+          "GFHYPM02"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966597057634",
+        "email": "manager.moa@landmarkgroup.com",
+        "website": "https://www.centrepointstores.com/sa/en/"
+      },
+      "price_range": "budget",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ab138e4d2069dab095a6d8d903e2f2bc.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/befb75030718a1ff1193a39e72486934.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "value_fashion"
+      ]
+    },
+    {
+      "entity_id": "t-store-052",
+      "entity_type": "store",
+      "name": "Reef Perfumes",
+      "brand": "Reef Perfumes Company For Trading",
+      "brand_id": 253028,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Reef Perfumes is a renowned fragrance brand based in Saudi Arabia, celebrated for its diverse collection of perfumes that blend traditional Middle Eastern scents with contemporary notes.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK11",
+        "directions_hint": "GATE 1"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966502111880",
+        "email": "MOHAMMED.ALMALBANJEI@REEF.SA",
+        "website": "https://reefperfumes.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/08afef0a485d178c65b8f3acd277d71f.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/413ec953937472619f141750bbba8cb5.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ]
+    },
+    {
+      "entity_id": "t-store-053",
+      "entity_type": "store",
+      "name": "La Beaute",
+      "brand": "Deraah Trading CO",
+      "brand_id": 253103,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "La Beaute de La mour is a French brand specializing in body care products and perfumes, offering a variety of high-quality products for both men and women.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF097"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966505335075",
+        "email": "noemail@gmail.com",
+        "website": "https://labeautedelamour.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3d1475fe1fc928c5b81ab161f7b1348d.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/07ef89c95ff8fb729a49b0f17870c2ac.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/lbdelamour?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+        "twitter": "https://x.com/LBdelamour"
+      }
+    },
+    {
+      "entity_id": "t-store-054",
+      "entity_type": "store",
+      "name": "Q&A",
+      "brand": "Deraah Trading CO",
+      "brand_id": 253104,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Deraah shares with you beauty in more than 850 branches spread across 162 cities around the Kingdom, for the best products of French perfume, perfume, Oriental Oud, cosmetics, care, men's and women's accessories and hair care devices.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF019"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966112429999",
+        "email": "nfo@deraah.com.sa",
+        "website": "https://www.deraah.com.sa"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5c272059849ebfb0a62d624822a8c1f3.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/37e649d3a1fe813de6055a13dd42f095.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/deraah_sa/",
+        "facebook": "https://www.facebook.com/deraah.sa/"
+      }
+    },
+    {
+      "entity_id": "t-store-055",
+      "entity_type": "store",
+      "name": "Seera",
+      "brand": "Seera Silver For Trading CO",
+      "brand_id": 253193,
+      "category": "Fashion",
+      "subcategory": "Footwear",
+      "description": "SEERA company was established in 2006 to meet the needs of modern women and reflect their passion for elegance. It offers unique designs that combine beauty and high quality. We believe that every women deserves to look her best ,so we work hard to provide products that reflect her good taste.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF048"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966535354119",
+        "email": "seera-2030@hotmail.com",
+        "website": "https://seera.sa.com/ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5620da2b20870e7effb72a0801120fa1.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0d95f2ca8a8a8e3361a179bdfc01feaa.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "footwear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/seera.sa11/",
+        "tiktok": "https://www.tiktok.com/@seera.sa11?_t=ZS-8szyJTCZMKG&_r=1",
+        "twitter": "https://x.com/seerasa11?s=21",
+        "snapchat": "https://snapchat.com/t/oR7JaRSD",
+        "youtube": "https://youtube.com/@seera-sa?si=ovoWF99Hrl7EQhWy"
+      }
+    },
+    {
+      "entity_id": "t-store-056",
+      "entity_type": "store",
+      "name": "La Vallee",
+      "brand": "Najd Al Dwali CO",
+      "brand_id": 253251,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "La Vallee is an online store offering a wide selection of fashion products, including dresses, evening wear, and accessories. The brand features elegant and trendy collections, often focusing on high-quality fabrics like chiffon and crepe. La Vallee provides stylish options for various occasions, from casual wear to special evening events, with a focus on comfort and elegance. The store also offers discounts and promotions for added value.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF037"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966591062017",
+        "email": "INFO@LAVALLEESHOP.COM",
+        "website": "https://lavalleeshop.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e34468735063ea016877532746e05d33.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/8b2812a98282e0f663b752d91aaef317.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/lavalleeshop?igsh=bTM0a201YXl6NWli",
+        "tiktok": "https://www.tiktok.com/@lavalleeshop?_t=8sLV6nDQzsW&_r=1",
+        "twitter": "https://x.com/lavalleeshop?s=21&t=u1XYr_grlDmQt9bg2T2O0Q",
+        "snapchat": "https://snapchat.com/t/83rdx2rX"
+      }
+    },
+    {
+      "entity_id": "t-store-057",
+      "entity_type": "store",
+      "name": "Doctor M",
+      "brand": "Maghrabi Optical CO",
+      "brand_id": 253272,
+      "category": "Health",
+      "subcategory": "Optical",
+      "description": "Medical eyeglasses and sunglasses shop for eye health.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF061"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9660126050190",
+        "email": "jedmoa@doctor-m.com",
+        "website": "https://doctor-m.com/sa-ar/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/a0725585e00b785fbb9cb72136495d87.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0345789852c06b74132317a0bf3a405a.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "health",
+        "optical"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/doctorm.eyewear?igsh=MXZ2Mmh0cmw0ZHMyaw==",
+        "twitter": "https://x.com/doctormoptics?s=11&t=9FUxsvYCMbrfYsmBwJv5XA"
+      }
+    },
+    {
+      "entity_id": "t-store-058",
+      "entity_type": "store",
+      "name": "MI DI.",
+      "brand": "Nama Arabia Trading CO",
+      "brand_id": 253279,
+      "category": "Home",
+      "subcategory": "Home Decor & Furniture",
+      "description": "Midi is a fashion brand known for its elegant and contemporary clothing, offering a wide range of stylish apparel for both casual and formal occasions. With a focus on high-quality materials and timeless designs, Midi provides fashionable pieces that cater to modern tastes.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF113",
+        "additional_units": [
+          "GF114",
+          "GF115"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966563428366",
+        "email": "Rawan@namarabia.com.sa",
+        "website": "https://midiksa.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/43a731ae6832c96ff1b9b4d59c733225.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/05c50046a9467a5f3d90240abb97a978.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "home",
+        "home_decor_furniture"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/midi_ksa/",
+        "tiktok": "https://www.tiktok.com/@midi_ksa?lang=ar",
+        "twitter": "https://twitter.com/home?lang=en",
+        "snapchat": "https://www.snapchat.com/add/midiksa?",
+        "youtube": "https://www.youtube.com/@midi_ksa6681"
+      }
+    },
+    {
+      "entity_id": "t-store-059",
+      "entity_type": "store",
+      "name": "Al Rayes Lingerie",
+      "brand": "Hasan Rayes Trading Est",
+      "brand_id": 253344,
+      "category": "Fashion",
+      "subcategory": "Lingerie & Intimate",
+      "description": "Al Rayes Lingerie is a Saudi brand established in 1967, offering premium global lingerie brands with exceptional quality and elegance through physical stores and online shopping across Riyadh, Eastern Province, and Qassim.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF054",
+        "additional_units": [
+          "GF055A",
+          "GF055B"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920000740",
+        "email": "info@alrayes.com",
+        "website": "https://rayes-lingerie.com/en/brands?srsltid=AfmBOoq2Jj_Dc4iCd1_-yuPNVhjS4WH4JK6O3ZrYy9nsWYfpZStoS27j"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/73913855c27c71bd0f00fbc022ecc678.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/d61fc2dc367da66c8dd26b25603a3276.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "lingerie_intimate"
+      ]
+    },
+    {
+      "entity_id": "t-store-060",
+      "entity_type": "store",
+      "name": "eyewa",
+      "brand": "Innovative Optics LLC",
+      "brand_id": 253407,
+      "category": "Health",
+      "subcategory": "Optical",
+      "description": "Eyewa was founded in 2017, with a purposeful intent to offer an advanced and easy-to-use platform to purchase high-quality eyewear at affordable prices, creating a unique, efficient, and memorable shopping experience to all. Ever since, we became the largest and most trusted online eyewear store in the Middle East to provide the finest brands of prescription glasses, sunglasses, blue light glasses, color contact lenses, and corrective contact lenses.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF051",
+        "additional_units": [
+          "GF053"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920010923",
+        "email": "customercare@eyewa.com",
+        "website": "https://eyewa.com/ae-en"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3eeb50e6a6f67ca283b809a290d1add4.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/29ce88920bb5f463045dac6fe5a2e844.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "health",
+        "optical"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/eyewa/?hl=en",
+        "tiktok": "https://x.com/eyewaME/status/1400375060850950145",
+        "twitter": "https://x.com/eyewaME/status/1400375060850950145"
+      }
+    },
+    {
+      "entity_id": "t-store-061",
+      "entity_type": "store",
+      "name": "Danube HyperMarket",
+      "brand": "Danube for Food stuff and commodities LTD CO",
+      "brand_id": 253514,
+      "category": "Grocery",
+      "subcategory": "Hypermarket",
+      "description": "Danube is a leading Saudi supermarket chain offering groceries, fresh produce, electronics, and household items with excellent customer service.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Hypermarket Area",
+        "unit_number": "GFHYPM01",
+        "additional_units": [
+          "MEZ1"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668002442225",
+        "email": "support@danube.sa",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "budget",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/0565b8d936af47070a1457acb0276244.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/73af71e2c89f3cfb61d22c53a73ba2cb.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "grocery",
+        "hypermarket"
+      ],
+      "social": {
+        "facebook": "https://www.facebook.com/DanubeCo",
+        "twitter": "https://x.com/DanubeCo"
+      }
+    },
+    {
+      "entity_id": "t-store-062",
+      "entity_type": "store",
+      "name": "PARFOIS",
+      "brand": "Imtiaz Al Arabia CO",
+      "brand_id": 253517,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Parfois is a Portuguese women's accessories brand with fashion accessories such as handbags, jewelry, wallets, sunglasses, belts, scarves, watches, hair accessories, etc.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF007",
+        "additional_units": [
+          "GF008"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9660115211111",
+        "email": "contact@parfois.com",
+        "website": "https://www.parfois.com/pt/pt/home/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f8a735c21c93e26cdc132796368c19af.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c3bbaa1011ab9e95f63967a317f1e76d.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/parfois/#",
+        "tiktok": "https://www.tiktok.com/@parfoisofficial",
+        "facebook": "https://www.facebook.com/parfois",
+        "twitter": "https://x.com/PARFOIS_",
+        "youtube": "https://www.youtube.com/user/PARFOISACCESSORIES"
+      }
+    },
+    {
+      "entity_id": "t-store-063",
+      "entity_type": "store",
+      "name": "Home Box",
+      "brand": "Landmark Arabia CO",
+      "brand_id": 253545,
+      "category": "Home",
+      "subcategory": "Home Decor & Furniture",
+      "description": "Home Box is a leading home furniture and accessories retailer, offering a wide range of stylish and affordable products to enhance your living spaces.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFENT03"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668001110888",
+        "email": "support-ksa@homeboxstores.com",
+        "website": "https://www.homeboxstores.com/sa/en/?srsltid=AfmBOopxflSqQKc8uUytmOVDiMmVL7xyR_RJ3nNQzn7S-NVjm_NI6ZaU"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9f9acbe2687b57a65450e962e263c3fa.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/1a5f62a21059141dcc582db76adba445.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "home",
+        "home_decor_furniture"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/homebox_sa",
+        "facebook": "http://www.facebook.com/HomeboxStores"
+      }
+    },
+    {
+      "entity_id": "t-store-064",
+      "entity_type": "store",
+      "name": "Bath & Body Works",
+      "brand": "Alshaya International Trading Co",
+      "brand_id": 254114,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "bath & Body Works is one of the world’s leading specialty retailers of fragrant products for the body, hands & home. Customers look to Bath & Body Works for quality, on-trend products and the newest, freshest fragrances",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF132",
+        "additional_units": [
+          "GF133"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966122203930",
+        "email": "bbw.azizmall-wpksa@alshaya.com",
+        "website": "https://www.bathandbodyworks.com.sa/ar/home/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/deb37b4aee4b20a3c900a370bad50edb.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/581d99c0dc801b24aa922a79951c92e1.png",
+      "anchor_brand": true,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "anchor"
+      ],
+      "features": [
+        "anchor_tenant"
+      ]
+    },
+    {
+      "entity_id": "t-store-065",
+      "entity_type": "store",
+      "name": "Ain Zain",
+      "brand": "Ain Zain Trading EST",
+      "brand_id": 254353,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "Ain Zain Women&#x27;s Abayas offer a stunning collection of modest yet fashionable designs, crafted with high-quality fabrics, blending elegance and comfort for contemporary women. Perfect for every occasion.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF110"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966500044446",
+        "email": "hr_ainzain@hotmail.com",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/317e670ba109fa2303e9e09b3a16b85e.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/b5334753ac8e5910e342b290d1b9b2e0.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ]
+    },
+    {
+      "entity_id": "t-store-066",
+      "entity_type": "store",
+      "name": "Brands For Less",
+      "brand": "Brands For Less CO",
+      "brand_id": 254808,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Brands for Less is your one-stop destination for everything you need, offering a wide range of products at great prices, from fashion to home essentials.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFE4",
+        "additional_units": [
+          "GFE5",
+          "GFE6"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966554573386",
+        "email": "ryd-talamall@bflgroup.ae",
+        "website": "https://www.brandsforless.com/ar-sa/"
+      },
+      "price_range": "budget",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/05b0736d15b977915d80caf2f1e22d48.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e309437f16e989be741aee08614771d4.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ]
+    },
+    {
+      "entity_id": "t-store-067",
+      "entity_type": "store",
+      "name": "Osma",
+      "brand": "Angham My Perfume CO",
+      "brand_id": 255426,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "OSMA Perfumes is a luxury fragrance brand known for its high-quality, unique, and long-lasting scents. The brand blends tradition and innovation, offering a diverse collection of perfumes crafted with premium ingredients. OSMA Perfumes caters to those seeking elegance and exclusivity in their fragrances.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK49"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920034155",
+        "email": "Info@osma.sa",
+        "website": "https://osmaperfumes.com/en"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ad0e03bfbd6ad4e883f968ecd1bcd775.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ec36f6d4c0a6bdeca1833857d8e5bdf4.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/osmaperfumes/?igshid=Zjc2ZTc4Nzk%3D",
+        "tiktok": "https://www.tiktok.com/@osmaperfumes",
+        "twitter": "https://x.com/osmaperfumes?s=11&t=WKEKuw9EiQYiXIdHK_tEdQ&mx=2",
+        "snapchat": "https://www.snapchat.com/add/osmaperfumes"
+      }
+    },
+    {
+      "entity_id": "t-store-068",
+      "entity_type": "store",
+      "name": "Roseel",
+      "brand": "Nafaes Diamond Trading EST",
+      "brand_id": 255553,
+      "category": "Fashion",
+      "subcategory": "Accessories & Bags",
+      "description": "Roseel Accessories represents an entity and ambition, drawing its strength from cadres with a history in the world of accessories, supported by a future vision to ensure the provision of everything new and of high quality.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK20"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966504446617",
+        "email": "Eyas.roseel@gmail.com",
+        "website": "https://roseel-sa.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4a1cc3670fec53019a9a35c92d626ec7.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/d28dc28b895305eb1caacb02184c9b85.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "accessories_bags"
+      ]
+    },
+    {
+      "entity_id": "t-store-069",
+      "entity_type": "store",
+      "name": "Adidas SP",
+      "brand": "Arabian Adidas Trading CO",
+      "brand_id": 255757,
+      "category": "Sportswear",
+      "subcategory": "Athletic Apparel & Footwear",
+      "description": "The company&#x27;s name was named after its founder, Adolf Dassler, by combining the first parts of his name, &quot;Adidas&quot;.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFE2",
+        "additional_units": [
+          "GFG3",
+          "GFG4"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966542424407",
+        "email": "Fawaz.Alsadrani@adidas.com",
+        "website": "https://www.adidas.sa/en"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/d35491c2e9034964a7031801ac0f17ad.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3562cd664c52cf1dd2bc4ec165cfa298.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "sportswear",
+        "athletic_apparel_footwear"
+      ]
+    },
+    {
+      "entity_id": "t-store-070",
+      "entity_type": "store",
+      "name": "Mene Roz",
+      "brand": "Mene Roz For Abaya",
+      "brand_id": 256184,
+      "category": "Fashion",
+      "subcategory": "Traditional Wear",
+      "description": "Brand Mene Roz offers a unique collection of fashion, accessories, and lifestyle essentials, blending style and affordability. Designed for trend-conscious shoppers, Mene Roz brings the latest trends with quality and elegance.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF125"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966565888416",
+        "email": "bsnw22@gmail.com",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/12efbe8f7e281f5da24c1be78eaacc2c.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/cf5a1fa5f26261be9cc0fcb7735871c7.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "fashion",
+        "traditional_wear"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/bs_2naw?igsh=MXhlbHM2a3RhOGFyNA==",
+        "tiktok": "https://www.tiktok.com/@bs_na22?_t=8yosqnqjn1g&_r=1",
+        "snapchat": "https://tr.ee/GHTEH3Zpom"
+      }
+    },
+    {
+      "entity_id": "t-store-071",
+      "entity_type": "store",
+      "name": "Grasse Perfume",
+      "brand": "Mazeej Perfume for Trading CO",
+      "brand_id": 256303,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "The Grasse Fragrance Co. is the exclusive distributor of Expressions Parfumées, a prestigious fragrance house in Grasse, France, offering premium fine fragrance oils inspired by top brands for perfumes, colognes, lotions, and personal care products since 2006.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK54"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+96609228330517",
+        "email": "info@asgharali.com",
+        "website": "https://grassefragrance.com/collections/fragrances/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c38b52787c21764be8e77493dbbbb780.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/20003d12a3bcef88b2dbd205a0a29403.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ]
+    },
+    {
+      "entity_id": "t-store-072",
+      "entity_type": "store",
+      "name": "Fun Time",
+      "brand": "Abdulmohsin Al Hokair for Tourism and Dev CO",
+      "brand_id": 267478,
+      "category": "Kids",
+      "subcategory": "Kids Entertainment",
+      "description": "Sparky's WorldSparky's is the largest and most famous entertainment center in the Middle East. It has been a major brand in the region since its establishment in 1978 in the Kingdom of Saudi Arabia by the Al Hokair Group, which has since grown to become the leading group of family entertainment and leisure centers in the region.The Al Hokair Group has continued to expand the experience from Saudi Arabia to the United Arab Emirates and Egypt, and is seeking to expand into new countries in the region.The premier destination for unforgettable experiences and family entertainmentSparky's has become a significant part of the region's entertainment landscape, now boasting 90 centers offering a wealth of unique social and entertainment activities, all delivered within fully secured environments.Since the launch of the first Sparky's Entertainment Center, the Al Hokair Group has been committed to providing the most distinctive destination for the entire family, offering them wonderful experiences and never feeling far from home. If you've never visited Sparky's before or have missed it, we invite you to an unparalleled experience.Join us now for an unparalleled adventure.Let the fun begin!",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFENT01"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966555711697",
+        "email": "Funtown-qassim@ALHOKAIR.COM",
+        "website": "https://ksa.sparkysme.com/ar"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/63a5338d7d935dfc2b1c73f54c40d28c.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/40a2fefa5a0782441c5ab0fe2bb44d52.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Kids",
+      "tags": [
+        "kids",
+        "kids_entertainment"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/sparkysme?igsh=MXhpeXhwanpvcWRhaA==",
+        "tiktok": "https://www.tiktok.com/@sparkysme?_t=ZS-8wFAuz63rhh&_r=1",
+        "facebook": "https://www.facebook.com/share/16YPiUsfxi/?mibextid=wwXIfr",
+        "twitter": "https://x.com/sparkysme?s=21&t=Ul0Glel1P7AsJR1gLOoarA",
+        "snapchat": "https://snapchat.com/t/k4xqLex8",
+        "youtube": "https://youtube.com/@sparkysme?si=PVknPFcq_HTYxq2v"
+      }
+    },
+    {
+      "entity_id": "t-store-073",
+      "entity_type": "store",
+      "name": "Mobily - Etihad Etisalat",
+      "brand": "Etihad Etisalat - Mobily",
+      "brand_id": 267537,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "Mobily (officially Etihad Etisalat Company) is a major telecommunications brand offering mobile, internet, and digital communication services with a focus on innovative network solutions, customer-centric connectivity, and advanced tech services in the telecom sector.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Service Area",
+        "unit_number": "PRTB01"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966560314099",
+        "email": "info@mobily.com.sa",
+        "website": "https://www.mobily.com.sa"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/47218da6a6f480069ed394eb11c5fa66.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/2bf2321ca4fc08a70112c6b388a78f42.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    },
+    {
+      "entity_id": "t-store-074",
+      "entity_type": "store",
+      "name": "Match",
+      "brand": "Sara Mohammed Alrajhi Trading CO",
+      "brand_id": 273274,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "One of the most beautiful perfumes you'll ever experience, the scent of elegance that lasts and refreshes you all day long. A luxurious oriental fragrance for women, blending coffee beans and vanilla with soft flower petals.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF041"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668001184445",
+        "email": "wecare@matchperfumes.com",
+        "website": "https://matchperfumes.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ee96bcdfe2976c9f42dfd703022a98af.png",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f6582733196864dbed2566face717535.png",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ],
+      "social": {
+        "instagram": "https://www.instagram.com/matchperfumes.sa?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+        "tiktok": "https://www.tiktok.com/@matchperfumesa?is_from_webapp=1&sender_device=pc",
+        "twitter": "https://x.com/MatchPerfumeSA"
+      }
+    },
+    {
+      "entity_id": "t-store-075",
+      "entity_type": "store",
+      "name": "Ateej",
+      "brand": "Matajery Integrated Trading CO",
+      "brand_id": 319265,
+      "category": "Lifestyle",
+      "subcategory": "Miscellaneous",
+      "description": "Ateej is a contemporary fragrance brand offering rich Arabian‑inspired perfumes that blend traditional oriental notes with modern aromatic touches, creating distinguished scents designed to leave a lasting impression",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK66"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966900137000",
+        "email": "ateejkw@gmail.com",
+        "website": "https://ateejperfumes.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3ca2532d2fabc20b1c96b0d821c1609a.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/f098fb8a393b6e8d4e0aa243795880ef.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "lifestyle",
+        "miscellaneous"
+      ]
+    },
+    {
+      "entity_id": "t-store-076",
+      "entity_type": "store",
+      "name": "Ibraq Ibrahim Alqurashi",
+      "brand": "Abdulaziz Ibrahim Al Qurashi CO",
+      "brand_id": 349112,
+      "category": "Beauty",
+      "subcategory": "Cosmetics & Skincare",
+      "description": "Ibraq (originally Ibrahim Al-Qurashi) is a heritage Saudi Arabian perfume house rooted in the traditional art of perfumery since 1929. Starting from a modest shop near the Holy Mosque in Makkah, the brand expanded to Jeddah and across the Gulf, blending Arabic fragrance heritage with contemporary craftsmanship to create oud, amber, musk, and bespoke perfume blends that celebrate luxury and authenticity. Today, Ibraq is considered one of the leading perfume brands in Saudi Arabia and the Gulf region.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GFA2A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920003464",
+        "email": "wecare@ibrahimalqurashi.com",
+        "website": "https://saudi.ibraqperfumes.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/22090bcf0923722de6b41677d1ac52a6.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4851933a381dba8c96b93a9bf93506b8.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "beauty",
+        "cosmetics_skincare"
+      ]
+    },
+    {
+      "entity_id": "t-store-077",
+      "entity_type": "store",
+      "name": "Shader",
+      "brand": "Al Nahar United Trading CO",
+      "brand_id": 353783,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "SHADER is a premium fashion brand specializing in elegant, high-quality abayas and modest wear, known for its refined designs and craftsmanship that reflect timeless style and attention to detail.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF076"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9660556759816",
+        "email": "info@shader.com",
+        "website": "https://shader.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/864c3447ec01c5348802549fb678eaee.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/a330a45e0cfedbc0ff1cb7dc9d0bda67.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    },
+    {
+      "entity_id": "t-store-078",
+      "entity_type": "store",
+      "name": "Arasha",
+      "brand": "Arasha Trading EST",
+      "brand_id": 354307,
+      "category": "Lifestyle",
+      "subcategory": "Miscellaneous",
+      "description": "Arasha offers trendy women’s fashion featuring modern cuts, elegant styles, and versatile outfits for every occasion. The brand blends contemporary design with effortless sophistication.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF100"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920000262",
+        "email": "arasha.store.sa@gmail.com",
+        "website": "https://arashastore.com"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/7d14d9c227805cdf3f8004836827140a.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/e9de976dbdea4b28a0cb0aa624881b2b.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "lifestyle",
+        "miscellaneous"
+      ]
+    },
+    {
+      "entity_id": "t-store-079",
+      "entity_type": "store",
+      "name": "ATM - Saudi Investment Bank",
+      "brand": "The Saudi Investment Bank",
+      "brand_id": 354483,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "Saudi Investment Bank (SAIB) is a major Saudi commercial bank offering a full range of personal, corporate, investment and retail banking services — including accounts, cards, loans, home and auto finance, treasury solutions, and Shariah-compliant products. SAIB also operates a large network of ATMs throughout Saudi Arabia to provide convenient banking and self-service transactions.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK16A"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966114183100",
+        "email": "Customer_Service@saib.com.sa",
+        "website": "https://www.saib.com.sa/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c4936a508bc862b5a19e000c1723391e.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5bba09b4aaab78e41d8b6d81e6bf8976.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    },
+    {
+      "entity_id": "t-store-080",
+      "entity_type": "store",
+      "name": "Fayendra",
+      "brand": "Herebridge Middle East",
+      "brand_id": 354726,
+      "category": "Lifestyle",
+      "subcategory": "Miscellaneous",
+      "description": "Fayendra is a jewelry brand offering a wide range of elegant and refined silver and gemstone jewelry for men and women, blending classic artistry with modern design. The brand’s collections include rings, bracelets, necklaces, earrings, and luxury accessories, designed to celebrate life’s special moments with timeless elegance and craftsmanship. Their products are showcased through numerous showrooms across Saudi Arabia and the UAE",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF016"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920011955",
+        "email": "info@fayendra.com",
+        "website": "https://www.fayendra.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/7380e21fb843331fcd586798042026f2.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/5b276637b99d6ec5b6ecadebdd454d9f.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "Shop",
+      "tags": [
+        "lifestyle",
+        "miscellaneous"
+      ]
+    },
+    {
+      "entity_id": "t-store-081",
+      "entity_type": "store",
+      "name": "Terra Perfum",
+      "brand": "Ard Al Itqan Perfumes CO",
+      "brand_id": 364943,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "Terra Perfum is a premium fragrance brand that believes a perfume is more than just a scent —it’s an emotional story. They focus on carefully selecting high-quality ingredients and elegant bottle designs so each fragrance delivers a rich, distinctive aromatic experience that reflects passion for beauty and creativity.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK47"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966599988908",
+        "email": "support@terraperfumes.com",
+        "website": "https://terraperfumes.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3e1d55053636cdd8be6d20e5ad52243e.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/fb1040eae02837f05cf65fcbcda6599f.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    },
+    {
+      "entity_id": "t-store-082",
+      "entity_type": "store",
+      "name": "Blue Age",
+      "brand": "Al Abdulkarim Trading CO",
+      "brand_id": 365391,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "Blue Age is a fast-fashion retail brand offering urban and streetwear clothing for men, women and children. It is part of the well-established Saudi fashion retail group Al-Abdul Karim, known for bringing the latest international fashion trends at affordable prices and high quality to fashion-savvy customers across the Middle East.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Entertainment Wing",
+        "unit_number": "GFE1",
+        "additional_units": [
+          "GFE7"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920013438",
+        "email": "customer@theblueage.com",
+        "website": "https://theblueage.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/4c5625a639e9461543037717ffcd9791.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/513e56dd29fb571d2540814960e3fddf.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    },
+    {
+      "entity_id": "t-store-083",
+      "entity_type": "store",
+      "name": "RINA",
+      "brand": "Al Abdulkarim Trading CO",
+      "brand_id": 365396,
+      "category": "Retail",
+      "subcategory": "General",
+      "description": "Rina is a Saudi contemporary fashion brand offering women’s clothing with a modern feminine aesthetic, blending elegance, quality, and contemporary details to elevate everyday style.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF099"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920013438",
+        "email": "customer@rinafashion.com",
+        "website": "https://rinafashion.com/"
+      },
+      "price_range": "mid_range",
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/9128d0e3f7103ab1886d7727b42f694e.jpeg",
+      "banner": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/2c12d752fc858261658f56a907b1e649.jpeg",
+      "anchor_brand": false,
+      "accepts_loyalty": false,
+      "group_name": "",
+      "tags": [
+        "retail",
+        "general"
+      ]
+    }
+  ],
+  "dining": [
+    {
+      "entity_id": "t-dining-001",
+      "entity_type": "dining",
+      "name": "McDonald's",
+      "brand": "Riyadh International Food CO",
+      "brand_id": 406,
+      "cuisine_type": "Chicken Cuisine",
+      "dining_style": "fast_food",
+      "description": "McDonald's restaurants are one of the largest restaurant chains in the world, as the company is the global leader in fast food services.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Food Court",
+        "unit_number": "FC005"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9668001212345",
+        "email": "crm@mcdonalds.com.sa",
+        "website": "https://www.mcdonalds.com/sa/en"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/c7540ef9f41602cda1c86914889d7902.png",
+      "price_range": "budget",
+      "halal_certified": true,
+      "has_kids_menu": true,
+      "average_meal_time_minutes": 20,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "fast_food",
+        "halal",
+        "chicken_cuisine"
+      ]
+    },
+    {
+      "entity_id": "t-dining-002",
+      "entity_type": "dining",
+      "name": "FanJan Caffé",
+      "brand": "Saoud Ben Ibrahim Bin Nasser Al-muhaimid CO",
+      "brand_id": 5361,
+      "cuisine_type": "Coffee & Light Dining",
+      "dining_style": "cafe",
+      "description": "Providing a cup of coffee from the best types of specialty coffee in the world, is our goal in FANJAN , which is the motive to present one of the finest cups of coffee, and to participate In promoting luxury by creating an environment prominent as a meeting place for communities to be more than just a cafe. We seek the highest quality standards in preparing our beverages by searching the coffee farms in the world for the best types of specialty coffee beans , then roasting the beans with care and passion, and preparing the beverages by our professional baristas to enjoy you with the best cup of coffee, We do not stop at this point, but we prepare in our factories the most delicious pastries and sweets to complete the beauty of your day with us. And the factor of training and experience is what distinguishes us, as we have established a training center to train all our employees on quality standards and methods of preparing and presenting all products.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF058"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966534941101",
+        "email": "ahmad.h@saudgroup.sa",
+        "website": "https://tenantcentral.cenomi.com"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/bdf5714b6b2ef5cc29e75632e22b82d7.png",
+      "price_range": "mid_range",
+      "halal_certified": true,
+      "has_kids_menu": false,
+      "average_meal_time_minutes": 30,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "cafe",
+        "halal",
+        "coffee_&_light_dining"
+      ]
+    },
+    {
+      "entity_id": "t-dining-003",
+      "entity_type": "dining",
+      "name": "CINNABON",
+      "brand": "Innovative Union LTD CO",
+      "brand_id": 239003,
+      "cuisine_type": "Coffee & Light Dining",
+      "dining_style": "dessert_cafe",
+      "description": "Serving coffee and desserts infused with cinnamon rolls, along with ongoing promotions from time to time throughout the year.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Food Court",
+        "unit_number": "FCW04"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966546559946",
+        "email": "Cinn285@cenomi.com",
+        "website": "https://cinnabon-ksa.com/ar/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/fe28e2ee975166878246859380913c37.png",
+      "price_range": "mid_range",
+      "halal_certified": true,
+      "has_kids_menu": false,
+      "average_meal_time_minutes": 30,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "cafe",
+        "halal",
+        "coffee_&_light_dining",
+        "sweet_treat",
+        "dessert"
+      ]
+    },
+    {
+      "entity_id": "t-dining-004",
+      "entity_type": "dining",
+      "name": "Herfy",
+      "brand": "Herfy Food Services LTD CO",
+      "brand_id": 246128,
+      "cuisine_type": "Chicken Cuisine",
+      "dining_style": "fast_food",
+      "description": "Herfy Food Services Company was established with the aim of providing a unique experience that combines high quality and exceptional flavor, making it one of the leading brands in the restaurant and food industry in Saudi Arabia.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Food Court",
+        "unit_number": "FC003"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966920001111",
+        "email": "herfy116@herfy.com",
+        "website": "https://www.herfy.com/ar/index.htm"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/94e076d2a47b5236aa25d7044de25d8e.jpeg",
+      "price_range": "budget",
+      "halal_certified": true,
+      "has_kids_menu": true,
+      "average_meal_time_minutes": 20,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "fast_food",
+        "halal",
+        "chicken_cuisine"
+      ]
+    },
+    {
+      "entity_id": "t-dining-005",
+      "entity_type": "dining",
+      "name": "Baskin Robbins",
+      "brand": "Aljumaira TRD LTD CO",
+      "brand_id": 252619,
+      "cuisine_type": "Food items/specialities",
+      "dining_style": "dessert",
+      "description": "BASKIN-ROBBINS REVEALS WHAT YOUR FAVORITE ICE CREAM FLAVOR SAYS ABOUT YOU.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK17"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966562403426",
+        "email": "Zinamdar@galadarifoods.com",
+        "website": "https://www.baskinrobbinsmea.com/ar/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/99ecb6c753a97e0b8c12903a5f951203.jpeg",
+      "price_range": "mid_range",
+      "halal_certified": true,
+      "has_kids_menu": false,
+      "average_meal_time_minutes": 10,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "dessert",
+        "halal",
+        "food_items/specialities"
+      ]
+    },
+    {
+      "entity_id": "t-dining-006",
+      "entity_type": "dining",
+      "name": "Kudu Restaurant",
+      "brand": "Kudu Catering Services CO",
+      "brand_id": 252648,
+      "cuisine_type": "Chicken Cuisine",
+      "dining_style": "fast_food",
+      "description": "Kudo Restaurant offers meals that are prepared directly in front of the customer based on his request.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Food Court",
+        "unit_number": "FC006"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966544765617",
+        "email": "kj-021@kudu.com.sa",
+        "website": "https://www.kudu.com.sa"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/81bf2e1530b35f1de34b05266430c126.jpeg",
+      "price_range": "budget",
+      "halal_certified": true,
+      "has_kids_menu": true,
+      "average_meal_time_minutes": 20,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "fast_food",
+        "halal",
+        "chicken_cuisine"
+      ]
+    },
+    {
+      "entity_id": "t-dining-007",
+      "entity_type": "dining",
+      "name": "MammaBunz",
+      "brand": "Food Gate Company Commercial",
+      "brand_id": 252798,
+      "cuisine_type": "Coffee & Light Dining",
+      "dining_style": "dessert_cafe",
+      "description": "Mama Benz Café serves you delicious buns, along with a selection of signature drinks.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK58"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966559163177",
+        "email": "arabia@mammabunzcafe.com",
+        "website": "https://www.mammabunz.com/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/31228827287f205f47675644e934f831.png",
+      "price_range": "mid_range",
+      "halal_certified": true,
+      "has_kids_menu": false,
+      "average_meal_time_minutes": 30,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "cafe",
+        "halal",
+        "coffee_&_light_dining",
+        "sweet_treat",
+        "dessert"
+      ]
+    },
+    {
+      "entity_id": "t-dining-008",
+      "entity_type": "dining",
+      "name": "Starbucks",
+      "brand": "Alshaya International Trading Co",
+      "brand_id": 253508,
+      "cuisine_type": "Coffee & Light Dining",
+      "dining_style": "cafe",
+      "description": "Starbucks offers a delightful experience with rich, flavorful coffee and a variety of delicious snacks, perfect for fueling your day or relaxing with friends.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "unit_number": "GF134",
+        "additional_units": [
+          "GF135"
+        ]
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966122327831",
+        "email": "sbk.azizmalgt4-wpksa@Gmail.com",
+        "website": "https://www.starbucks.sa/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/2225685d54592af69516fb75f3938027.png",
+      "price_range": "mid_range",
+      "halal_certified": true,
+      "has_kids_menu": false,
+      "average_meal_time_minutes": 30,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "cafe",
+        "halal",
+        "coffee_&_light_dining"
+      ]
+    },
+    {
+      "entity_id": "t-dining-009",
+      "entity_type": "dining",
+      "name": "Popeyes Restaurant",
+      "brand": "Gulf Brand For Fast Food CO",
+      "brand_id": 254857,
+      "cuisine_type": "Chicken Cuisine",
+      "dining_style": "fast_food",
+      "description": "The Gulf Brand Fast-Food Company (GBFF), exclusive master franchisee of the US fried chicken giant Popeyes, has opened its fourth restaurant in Riyadh. After opening its first Popeyes restaurant on Anas Bin Malik Street in Riyadh which offers a bright and vibrant family-friendly atmosphere and a convenient Drive thru, GBFF opened two cloud kitchens restaurants, and its latest restaurant on Imam Saud Road in Massif, Riyadh. Guests can look forward to enjoying Popeyes world-famous products, such as the brand’s signature Chicken Sandwich, Chicken on the bone, and Tenders, perfectly marinated for 12 hours in a unique blend of Louisiana seasonings. Founded in New Orleans in the United States in 1972, Popeyes has over 45 years of history and culinary tradition with over 3,600 locations in more than 25 countries. Popeyes is one the world’s largest chicken quick-service restaurants serving chicken dishes in bold and spicy flavors. Popeyes introduces for the first time in the Kingdom of Saudi Arabia its hero Sandwich “The SANDWICH” which comes to you along with the whole menu items 100% local and fresh sourced chicken from Tanmiah Farms. GBFF is planning to open hundreds of new Popeyes restaurants in the Kingdom over the coming years. The Popeyes restaurant with mouth-watering crunchy and juicy fried chicken bursting with Louisiana flavor can quickly establish itself as a lifestyle-led hospitality leader. The new restaurant is designed with the precise needs of the cosmopolitan Saudi market in mind to bring a unique, world-class addition to the Kingdom’s ever-evolving dining scene. GBFF aims to make Popeyes available to guests in every place in the Kingdom through digital platforms, including the mobile app & website. Gulf Brand Fast-Food Company’s strategy to develop the Popeyes presence in the Kingdom will allow it to create hundreds of career opportunities and share the joy of Popeyes with the people of Saudi Arabia.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Food Court",
+        "unit_number": "FC004"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+9660534067554",
+        "email": "6037.aziz@tanmiahrestaurants.com",
+        "website": "https://www.popeyes.com.sa/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/3dd726e89d2d9d593a27e951b22a33aa.png",
+      "price_range": "budget",
+      "halal_certified": true,
+      "has_kids_menu": true,
+      "average_meal_time_minutes": 20,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "fast_food",
+        "halal",
+        "chicken_cuisine"
+      ]
+    },
+    {
+      "entity_id": "t-dining-010",
+      "entity_type": "dining",
+      "name": "Corn World",
+      "brand": "Shareef Bin Abdullah Bin Omar Bakerman EST",
+      "brand_id": 255355,
+      "cuisine_type": "Fast food excluding Food Court",
+      "dining_style": "fast_food",
+      "description": "Corn World is a vibrant, fun brand specializing in a variety of delicious corn-based snacks and dishes. From buttery, savory corn on the cob to creative, flavorful twists, Corn World brings the joy of fresh, high-quality corn to every bite, offering a tasty experience for all ages.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Kiosk Row",
+        "unit_number": "GFK28"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966542413122",
+        "email": "h.tharwat@cornworld.co",
+        "website": "https://cornworld.co/"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/84c1cbd42ded84c0008e24c061ff9401.png",
+      "price_range": "budget",
+      "halal_certified": true,
+      "has_kids_menu": true,
+      "average_meal_time_minutes": 20,
+      "accepts_loyalty": false,
+      "group_name": "Dine",
+      "tags": [
+        "fast_food",
+        "halal",
+        "fast_food_excluding_food_court"
+      ]
+    }
+  ],
+  "cinemas": [
+    {
+      "entity_id": "t-cinema-001",
+      "entity_type": "cinema",
+      "name": "Muvi Cinema",
+      "brand": "Kids",
+      "description": "Muvi Cinema offers a unique experience with a blend of the latest movies and delicious meals, creating a perfect setting for relaxation and enjoyment.",
+      "location": {
+        "floor": "Cinema Level",
+        "zone": "Cinema Zone",
+        "unit_number": "CNL001"
+      },
+      "operating_hours": {
+        "sunday": "09:00 AM–11:00 PM",
+        "weekday": "09:00 AM–11:00 PM",
+        "friday": "01:00 PM–11:00 PM",
+        "saturday": "09:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "+966535491018",
+        "email": "sales.east@muvicinemas.com",
+        "website": "https://www.muvicinemas.com/ar"
+      },
+      "brand_logo": "https://ccwetpprodstorage.blob.core.windows.net/prodpublicaccessblob/public-files/ac81f6620fc35ab354f86b6cc6bc3dde.png",
+      "booking_url": "https://www.muvicinemas.com/ar",
+      "formats_available": [
+        "Standard"
+      ],
+      "price_range": "mid_range",
+      "accepts_loyalty": false,
+      "tags": [
+        "cinema",
+        "movies",
+        "entertainment"
+      ]
+    }
+  ],
+  "movies": [
+    {
+      "entity_id": "t-movie-001",
+      "entity_type": "movie",
+      "title": "SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)",
+      "genre": [
+        "Sport"
+      ],
+      "duration_minutes": 180,
+      "language": "Arabic",
+      "synopsis": "Watch the Saudi Pro League match between AL QADSIAH and AL AHLI. Experience every moment of the match on cinema screens!",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "COMING_SOON",
+      "is_new_release": false,
+      "is_coming_soon": true,
+      "release_date": "2026-03-13",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/saudi-pro-league-al-qadsiah-vs-al-ahli-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345912-d449be0e-528b-4fd6-90ee-1dcc444da21f.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345754-c2a470a7-5053-4861-baa5-e6c4100e512f.webp",
+      "tags": [
+        "Sport",
+        "coming_soon"
+      ]
+    },
+    {
+      "entity_id": "t-movie-002",
+      "entity_type": "movie",
+      "title": "SAUDI PRO LEAGUE (AL NASSR VS NEOM)",
+      "genre": [
+        "Sport"
+      ],
+      "duration_minutes": 180,
+      "language": "Arabic",
+      "synopsis": "Watch the Saudi Pro League match between AL NASSR and NEOM. Experience every moment of the match on cinema screens!",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "COMING_SOON",
+      "is_new_release": false,
+      "is_coming_soon": true,
+      "release_date": "2026-03-07",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/saudi-pro-league-al-nassr-vs-neom-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1772450665055-bd7b624d-6331-4652-bcd8-3ee8ca950775.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772450664916-df6fe9af-2ef9-4269-9269-cc7391e7d239.webp",
+      "tags": [
+        "Sport",
+        "coming_soon"
+      ]
+    },
+    {
+      "entity_id": "t-movie-003",
+      "entity_type": "movie",
+      "title": "SAUDI PRO LEAGUE (AL AHLI VS AL ITTIHAD)",
+      "genre": [
+        "Sport"
+      ],
+      "duration_minutes": 180,
+      "language": "Arabic",
+      "synopsis": "Watch the Saudi Pro League match between AL AHLI and AL ITTIHAD. Experience every moment of the match on cinema screens!",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "COMING_SOON",
+      "is_new_release": false,
+      "is_coming_soon": true,
+      "release_date": "2026-03-06",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/saudi-pro-league-al-ahli-vs-al-ittihad-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1772439988067-c71c2da8-b0fe-4852-892a-00bab8c181a2.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772439987976-0b1234e5-1cc2-4b9f-8a22-90808aa0068c.webp",
+      "tags": [
+        "Sport",
+        "coming_soon"
+      ]
+    },
+    {
+      "entity_id": "t-movie-004",
+      "entity_type": "movie",
+      "title": "SHELTER",
+      "genre": [
+        "Action",
+        "Thriller"
+      ],
+      "duration_minutes": 107,
+      "language": "ENGLISH ",
+      "synopsis": "A recluse on a remote island rescues a girl from the sea, unleashing a dangerous sequence of events that culminate in an attack on his home, compelling him to face his troubled history.",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "SHOWING_NOW",
+      "is_new_release": true,
+      "is_coming_soon": false,
+      "release_date": "2026-01-29",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/shelter?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://youtu.be/XPyXlnaWRf4?si=J4HhUyn6awdlgiO3",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1768734994659-53194bbd-0617-487e-a116-7b194814390d.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1768734994521-f93a9af9-36ac-41a8-84e5-74d3a1281ebe.webp",
+      "tags": [
+        "Action",
+        "Thriller",
+        "new_release"
+      ]
+    },
+    {
+      "entity_id": "t-movie-005",
+      "entity_type": "movie",
+      "title": "CRIME 101",
+      "genre": [
+        "Crime",
+        "Action"
+      ],
+      "duration_minutes": 140,
+      "language": "ENGLISH",
+      "synopsis": "An elusive thief, eyeing his final score, encounters a disillusioned insurance broker at her own crossroads. As their paths intertwine, a relentless detective trails them hoping to thwart the multi-million dollar heist they are planning.",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "SHOWING_NOW",
+      "is_new_release": true,
+      "is_coming_soon": false,
+      "release_date": "2026-02-11",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/crime-101?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://youtu.be/zA3QmjiVnIk?si=u1W9gYP5Yr4vUdoD",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1770804571486-31ef2499-2ba1-4b31-9cd9-803c57293226.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1770804571363-0ba0d588-ac47-40d1-bb86-7ad83df6d822.webp",
+      "tags": [
+        "Crime",
+        "Action",
+        "new_release"
+      ]
+    },
+    {
+      "entity_id": "t-movie-006",
+      "entity_type": "movie",
+      "title": "THE HOUSEMAID",
+      "genre": [
+        "Thriller"
+      ],
+      "duration_minutes": 131,
+      "language": "ENGLISH ",
+      "synopsis": "A struggling woman is happy to start over as a housemaid for an affluent, elite couple.",
+      "cinema_entity_id": "t-cinema-001",
+      "status": "SHOWING_NOW",
+      "is_new_release": true,
+      "is_coming_soon": false,
+      "release_date": "2026-02-05",
+      "booking_url": "https://www.muvicinemas.com/EN/movies/the-housemaid?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
+      "trailer_url": "https://www.youtube.com/watch?v=j8HH6uGzNIs",
+      "cover_url": "https://d3th1nqbpcyfdw.cloudfront.net/1769673187870-db498e3f-b8aa-428e-9c79-de8c241b6238.webp",
+      "image": "https://d3th1nqbpcyfdw.cloudfront.net/1769673187695-00254980-eec7-4b59-8c09-5e82b605b2b7.webp",
+      "tags": [
+        "Thriller",
+        "new_release"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "entity_id": "t-svc-001",
+      "entity_type": "service",
+      "name": "ATM",
+      "service_category": "atm",
+      "description": "Directions Gate 1&2 front of Polo store Gate 2 Gate 1&2 food court",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "ATM"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/ATM_xsgdp2.png",
+      "tags": [
+        "essential"
+      ]
+    },
+    {
+      "entity_id": "t-svc-002",
+      "entity_type": "service",
+      "name": "Wheelchair",
+      "service_category": "accessibility",
+      "description": "Directions Ground Floor: Customer Service Desk, Gate 2 Contact Information",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Wheelchair"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Wheelchair.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696866/unnamed-3_wajdqk.png",
+      "tags": [
+        "essential",
+        "accessibility"
+      ]
+    },
+    {
+      "entity_id": "t-svc-003",
+      "entity_type": "service",
+      "name": "Lost & Found",
+      "service_category": "lost_found",
+      "description": "Description Lost something during your visit? Our Lost & Found service helps reunite you with your belongings Directions Ground Floor: Customer Service Desk, Gate 2 Contact Information",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Lost & Found"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Lost%20Found.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/Lost_Found_ig6cof.png",
+      "tags": [
+        "essential"
+      ]
+    },
+    {
+      "entity_id": "t-svc-004",
+      "entity_type": "service",
+      "name": "Information Desk",
+      "service_category": "information",
+      "description": "Directions Ground Floor: Customer Service Desk, Gate 2",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Information Desk"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Help%20desk.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696864/Gemini_Generated_Image_6p6j66p6j66p6j66_copy_pgljqh.png",
+      "tags": [
+        "essential"
+      ]
+    },
+    {
+      "entity_id": "t-svc-005",
+      "entity_type": "service",
+      "name": "Baby Stroller",
+      "service_category": "family",
+      "description": "Directions Ground Floor: Gate 2, near Doknah Kiosk Ground Floor: Gates 2 & 3, beside Rina Store",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Information Desk"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Baby%20Stroller.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696864/Gemini_Generated_Image_4yndf14yndf14ynd_nzer7v.png",
+      "tags": [
+        "essential",
+        "family"
+      ]
+    },
+    {
+      "entity_id": "t-svc-006",
+      "entity_type": "service",
+      "name": "Parking",
+      "service_category": "parking",
+      "description": "Directions Located on the ground floor, in front of each gate.",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Adidas"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": false,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Car%20park.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902954/Parking_owbayi.png",
+      "tags": [
+        "essential"
+      ]
+    },
+    {
+      "entity_id": "t-svc-007",
+      "entity_type": "service",
+      "name": "Men's Prayer Room",
+      "service_category": "prayer_room",
+      "description": "Directions Ground Floor: Near Lavalle Store, Gate 1",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Men's Prayer Room"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Men's%20Prayer%20Room.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Prayer_Room_jm9qmf.png",
+      "tags": [
+        "essential",
+        "prayer"
+      ]
+    },
+    {
+      "entity_id": "t-svc-008",
+      "entity_type": "service",
+      "name": "Women's Prayer Room",
+      "service_category": "prayer_room",
+      "description": "Directions Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Women's Prayer Room"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Women's%20Prayer%20Room.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Prayer_Room_jm9qmf.png",
+      "tags": [
+        "essential",
+        "prayer"
+      ]
+    },
+    {
+      "entity_id": "t-svc-009",
+      "entity_type": "service",
+      "name": "Men's Washroom",
+      "service_category": "restroom",
+      "description": "Directions Ground Floor: Gate 1, near Lavalle Store Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Men's Washroom"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Men's%20washroom.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902952/Mens_Washrom_bmttuk.png",
+      "tags": [
+        "essential"
+      ]
+    },
+    {
+      "entity_id": "t-svc-010",
+      "entity_type": "service",
+      "name": "Women's Washroom",
+      "service_category": "restroom",
+      "description": "Directions Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
+      "location": {
+        "floor": "Ground",
+        "zone": "Main Gallery",
+        "mappedin_location": "Women's Washroom"
+      },
+      "operating_hours": {
+        "daily": "9:00 AM–11:00 PM"
+      },
+      "contact": {
+        "phone": "920000262"
+      },
+      "is_free": true,
+      "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Women's%20washroom.svg",
+      "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759902953/Womens_Washrrom_nzq6ym.png",
+      "tags": [
+        "essential"
+      ]
+    }
+  ],
+  "events": [],
+  "offers": [
+    {
+      "entity_id": "t-offer-001",
+      "entity_type": "offer",
+      "title": "Osma - Offer ",
+      "offer_type": "promotions",
+      "description": "Osma - Offer One 150ml bottle 99 R.S One 75ml bottle 99 R.S",
+      "terms_conditions": "لايوجد شروط وأحكام اي حبة 99 ريال",
+      "tenant_entity_ids": [
+        "t-store-brand-255426"
+      ],
+      "brand_name": "Osma",
+      "valid_from": "2025-11-10",
+      "valid_until": "2025-11-30",
+      "is_exclusive": false,
+      "loyalty_exclusive": false,
+      "tags": [
+        "عروض أوسما",
+        "عروض ترويجية أوسما",
+        "تخفيضات أوسما"
+      ]
+    }
+  ]
+}

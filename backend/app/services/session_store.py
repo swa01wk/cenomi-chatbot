@@ -1,5 +1,8 @@
 """
-In-memory session store — persists scene memory and history across turns.
+In-memory session store — persists structured scene memory across turns.
+
+Tracks only lightweight session metadata (last_intent, conversation_mode)
+and structured scene memory. Raw LLM outputs are NEVER stored.
 
 Single-process, single-mall session storage for the current phase.
 Replace with Redis or database-backed store for production scaling.
@@ -11,29 +14,35 @@ import logging
 import time
 from typing import Any
 
-from app.models.state import Message, SceneMemory
+from app.models.state import SceneMemory
 
 logger = logging.getLogger(__name__)
 
 
 class SessionData:
-    """Mutable session record held in memory."""
+    """
+    Mutable session record held in memory.
+
+    Stores only structured state — never raw LLM outputs.
+    """
 
     __slots__ = (
         "session_id",
         "mall_id",
         "scene",
-        "messages",
+        "last_intent",
+        "conversation_mode",
         "turn_count",
         "created_at",
         "updated_at",
     )
 
-    def __init__(self, session_id: str, mall_id: str = "cenomi_mall_01"):
+    def __init__(self, session_id: str, mall_id: str = "al_nakheel_plaza_28"):
         self.session_id = session_id
         self.mall_id = mall_id
         self.scene = SceneMemory()
-        self.messages: list[Message] = []
+        self.last_intent: str = ""
+        self.conversation_mode: str = ""
         self.turn_count: int = 0
         self.created_at: float = time.time()
         self.updated_at: float = self.created_at
@@ -43,7 +52,8 @@ class SessionData:
             "session_id": self.session_id,
             "mall_id": self.mall_id,
             "scene": self.scene.model_dump(),
-            "messages": [m.model_dump() for m in self.messages],
+            "last_intent": self.last_intent,
+            "conversation_mode": self.conversation_mode,
             "turn_count": self.turn_count,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -60,7 +70,7 @@ class SessionStore:
     def get(self, session_id: str) -> SessionData | None:
         return self._sessions.get(session_id)
 
-    def get_or_create(self, session_id: str, mall_id: str = "cenomi_mall_01") -> SessionData:
+    def get_or_create(self, session_id: str, mall_id: str = "al_nakheel_plaza_28") -> SessionData:
         if session_id in self._sessions:
             return self._sessions[session_id]
 
@@ -76,7 +86,8 @@ class SessionStore:
         self,
         session_id: str,
         scene: SceneMemory,
-        messages: list[Message],
+        last_intent: str,
+        conversation_mode: str,
     ) -> None:
         session = self._sessions.get(session_id)
         if not session:
@@ -84,7 +95,8 @@ class SessionStore:
             return
 
         session.scene = scene
-        session.messages = messages
+        session.last_intent = last_intent
+        session.conversation_mode = conversation_mode
         session.turn_count += 1
         session.updated_at = time.time()
 

@@ -20,8 +20,8 @@ from pydantic import BaseModel, Field
 class ChatRequest(BaseModel):
     message: str = Field(..., max_length=4000)
     session_id: str | None = None
-    tenant_id: str = "cenomi_mall_01"
-    mall_id: str = "cenomi_mall_01"
+    tenant_id: str = "al_nakheel_plaza_28"
+    mall_id: str = "al_nakheel_plaza_28"
     debug: bool = False
     context: dict | None = Field(
         default=None,
@@ -78,6 +78,9 @@ class SessionSummary(BaseModel):
     occasion: str = ""
     budget: str = ""
     active_shortlist: list[str] = Field(default_factory=list)
+    target_person: str = ""
+    visit_type: str = ""
+    goal: str = ""
 
 
 class ChatResponse(BaseModel):
@@ -109,7 +112,8 @@ class SessionDetailResponse(BaseModel):
     mall_id: str = ""
     turn_count: int = 0
     scene: dict[str, Any] = Field(default_factory=dict)
-    messages: list[dict[str, Any]] = Field(default_factory=list)
+    last_intent: str = ""
+    conversation_mode: str = ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -121,8 +125,8 @@ class FeedbackRequest(BaseModel):
     """Full feedback payload from the UI."""
 
     session_id: str
-    tenant_id: str = "cenomi_mall_01"
-    mall_id: str = "cenomi_mall_01"
+    tenant_id: str = "al_nakheel_plaza_28"
+    mall_id: str = "al_nakheel_plaza_28"
     turn_id: str = ""
     message_id: str | None = None
     user_message: str = ""

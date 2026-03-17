@@ -44,5 +44,6 @@ async def get_session(session_id: str):
         mall_id=session.mall_id,
         turn_count=session.turn_count,
         scene=session.scene.model_dump(),
-        messages=[m.model_dump() for m in session.messages[-20:]],
+        last_intent=session.last_intent,
+        conversation_mode=session.conversation_mode,
     )

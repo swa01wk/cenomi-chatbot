@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-8a16c883f878",
+  "session_id": "session-6f10037f3a2b40d4",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-94e8ba9380d7",
+  "user_message": "any entertainment zones for kids?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-16 20:11:37.603800"
+}

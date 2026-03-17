@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.models.context_pack import GlobalContextPack, TopicBlock
+from app.models.context_pack import GlobalContextPack, MallProfileBlock, TopicBlock
 from app.models.playbook import ScenarioPlaybook
 from app.models.semantic import SemanticProfile
 from app.services.context_builder import ContextBuilder
@@ -78,6 +78,12 @@ class MallContextLoader:
         """Rank entities according to a playbook's strategy."""
         return self._playbook_engine.rank_entities(playbook, self._profiles)
 
+    def get_mall_profile(self) -> MallProfileBlock | None:
+        """Return the structured mall profile block for overview questions."""
+        if not self._context_pack:
+            return None
+        return self._context_pack.mall_profile
+
     def get_entity_by_id(self, entity_id: str) -> dict | None:
         """Look up a single canonical entity across all types."""
         canonical = self._builder._canonical
@@ -93,6 +99,177 @@ class MallContextLoader:
             if profile.entity_id == entity_id:
                 return profile
         return None
+
+    def get_entities_by_category(
+        self,
+        category_key: str,
+    ) -> list[dict[str, Any]]:
+        """
+        Deterministic lookup: return all canonical entities matching
+        a category rule key (e.g. "cafe", "perfume", "beauty").
+
+        Delegates to ``MallRetriever.search_by_category`` synchronously
+        by directly applying category rules against canonical data.
+        Returns enriched entity dicts ready for prompt injection.
+        """
+        from app.retrieval.retriever import MallRetriever
+
+        retriever = MallRetriever(self.mall_id)
+        # We can't await here in sync code, so use the same matching logic directly
+        from app.retrieval.retriever import _CATEGORY_RULES
+
+        rule = _CATEGORY_RULES.get(category_key)
+        if not rule:
+            return []
+
+        entity_types = rule["entity_types"]
+        match_rules = rule["match"]
+        exclude_category = {c.lower() for c in rule.get("exclude_category", set())}
+        exclude_ds = {d.lower() for d in rule.get("exclude_dining_style", set())}
+        results: list[dict[str, Any]] = []
+
+        for etype in entity_types:
+            canonical = self._builder._canonical.get(etype, [])
+            for entity in canonical:
+                if retriever._entity_matches_rule(
+                    entity, match_rules, exclude_category, exclude_ds,
+                ):
+                    entity_data = entity.model_dump()
+                    entity_id = entity.entity_id
+                    profile = self.get_semantic_profile(entity_id)
+
+                    enriched: dict[str, Any] = {
+                        "entity_id": entity_id,
+                        "name": entity_data.get("name") or entity_data.get("title", ""),
+                        "entity_type": entity_data.get("entity_type", etype.rstrip("s")),
+                        "category": entity_data.get("category", ""),
+                        "subcategory": entity_data.get("subcategory", ""),
+                        "description": entity_data.get("description", ""),
+                        "score": 1.0,
+                        "source": f"category/{category_key}",
+                    }
+
+                    loc = entity_data.get("location")
+                    if isinstance(loc, dict):
+                        enriched["floor"] = loc.get("floor", "")
+                        enriched["zone"] = loc.get("zone", "")
+                        enriched["directions_hint"] = loc.get("directions_hint", "")
+
+                    if profile:
+                        enriched["concierge_notes"] = profile.concierge_notes
+                        enriched["semantic_tags"] = profile.semantic_tags[:8]
+                        enriched["audience_fit"] = profile.audience_fit
+                        enriched["vibe"] = profile.vibe
+
+                    results.append(enriched)
+
+        logger.info(
+            "Category lookup '%s': %d entities", category_key, len(results),
+        )
+        return results
+
+    def search_semantic_by_tags(
+        self,
+        tags: list[str],
+        audience_tags: list[str] | None = None,
+        top_k: int = 10,
+    ) -> list[dict[str, Any]]:
+        """
+        Search semantic profiles by tag overlap, optionally filtered by
+        audience tags.  Returns enriched entity dicts scored by relevance.
+        """
+        search_tags = set(tags)
+        audience_set = set(audience_tags or [])
+        scored: list[tuple[float, dict[str, Any]]] = []
+
+        for profile in self._profiles:
+            profile_tags = set(profile.semantic_tags)
+            profile_audience = set(profile.audience_fit)
+
+            tag_overlap = profile_tags & search_tags
+            if not tag_overlap and not (audience_set and profile_audience & audience_set):
+                continue
+
+            score = len(tag_overlap) * 0.2
+            if audience_set:
+                audience_overlap = profile_audience & audience_set
+                score += len(audience_overlap) * 0.3
+
+            entity_data = self.get_entity_by_id(profile.entity_id)
+            if not entity_data:
+                continue
+
+            enriched: dict[str, Any] = {
+                "entity_id": profile.entity_id,
+                "name": entity_data.get("name") or entity_data.get("title", ""),
+                "entity_type": profile.entity_type,
+                "score": round(min(score, 1.0), 2),
+                "source": "semantic",
+                "matched_tags": list(tag_overlap),
+                "concierge_notes": profile.concierge_notes,
+                "semantic_tags": profile.semantic_tags[:8],
+                "audience_fit": profile.audience_fit,
+                "vibe": profile.vibe,
+            }
+
+            loc = entity_data.get("location")
+            if isinstance(loc, dict):
+                enriched["floor"] = loc.get("floor", "")
+                enriched["zone"] = loc.get("zone", "")
+
+            scored.append((score, enriched))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [item for _, item in scored[:top_k]]
+
+    def get_canonical_for_guard(self) -> dict[str, Any]:
+        """
+        Return canonical data as plain dicts in the sectioned format that
+        the hallucination guard's _MallFactIndex expects:
+        {stores, dining, cinemas, movies, events, offers, services}.
+        """
+        canonical = self._builder._canonical
+        if not canonical:
+            return {}
+        return {
+            section: [e.model_dump() for e in canonical.get(section, [])]
+            for section in ("stores", "dining", "cinemas", "movies", "events", "offers", "services")
+        }
+
+    def get_canonical_for_prompt(self) -> dict[str, Any]:
+        """
+        Return canonical mall data in the flat structure that
+        ``_format_mall_context`` expects: mall_profile (with zones,
+        floors, facilities), a merged tenants list, operational context,
+        and events/offers.
+        """
+        canonical = self._builder._canonical
+        if not canonical:
+            return {}
+
+        mp = canonical.get("mall_profile")
+        profile_dict = mp.model_dump() if mp else {}
+
+        tenants: list[dict[str, Any]] = []
+        for section in ("stores", "dining", "services"):
+            for entity in canonical.get(section, []):
+                d = entity.model_dump()
+                d.setdefault("entity_type", section.rstrip("s"))
+                tenants.append(d)
+
+        for entity in canonical.get("cinemas", []):
+            d = entity.model_dump()
+            d.setdefault("entity_type", "cinema")
+            tenants.append(d)
+
+        pack = self.get_context_pack()
+
+        return {
+            "mall_profile": profile_dict,
+            "tenants": tenants,
+            "operational_context": pack.get("operational_context", {}),
+            "events_and_offers": pack.get("events_and_offers", []),
+        }
 
     @property
     def is_loaded(self) -> bool:

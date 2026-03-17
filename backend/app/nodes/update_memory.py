@@ -38,10 +38,71 @@ async def update_memory(state: ConciergeState) -> dict:
         scene.active_shortlist = mentioned
         changes.append(f"shortlist: {mentioned}")
 
+    # ── Visit plan progression — mark current step as completed ───────
+    _advance_completed_steps(state, scene, changes)
+
     return {
         "scene": scene,
         "_trace_summary": f"Memory: {', '.join(changes) if changes else 'no changes'}",
     }
+
+
+def _advance_completed_steps(
+    state: ConciergeState,
+    scene,
+    changes: list[str],
+) -> None:
+    """
+    Record a completed visit-plan step only when the user has genuinely moved
+    to a NEW domain — not when they re-ask about the same topic.
+
+    Rules:
+    - Only marks a domain complete when it is NOT already the last item in
+      completed_steps (prevents "Dinner?" + "any restaurants?" from double-
+      advancing to the movie step).
+    - Does not advance for pure followup/refinement turns that stay in the
+      same domain (same-domain retry detection).
+    - Always advances for explicitly sequential turns (message_kind signals
+      the user has moved on).
+    """
+    domain = state.intent.domain
+    if not domain or domain in ("general",):
+        return
+
+    # Map domain → activity label used in visit_plan
+    domain_to_activity: dict[str, str] = {
+        "dining": "dining",
+        "shopping": "shopping",
+        "entertainment": "movie",
+        "services": "services",
+        "navigation": "navigation",
+        "exploration": "exploration",
+        "mall_info": "mall_info",
+    }
+    activity = domain_to_activity.get(domain, domain)
+
+    # Don't re-mark as complete if this domain was the LAST completed step
+    # (the user is still exploring the same domain, e.g. "any restaurants?"
+    # after "Dinner?").  Only mark complete when it's genuinely new.
+    last_completed = scene.completed_steps[-1] if scene.completed_steps else None
+    is_same_domain_retry = (last_completed == activity)
+
+    if activity not in scene.completed_steps:
+        scene.completed_steps = (scene.completed_steps + [activity])[-8:]
+        changes.append(f"completed_step:{activity}")
+    elif is_same_domain_retry:
+        # User is still asking about the same domain — do NOT advance the plan
+        return
+
+    # If we have a visit_plan, advance current_plan_step to next unfinished step
+    if scene.visit_plan:
+        for step in scene.visit_plan:
+            step_activity = domain_to_activity.get(step, step)
+            if step_activity not in scene.completed_steps and step not in scene.completed_steps:
+                if scene.current_plan_step != step:
+                    scene.current_plan_step = step
+                    changes.append(f"next_plan_step:{step}")
+                break
 
 
 def _extract_mentioned_entities(state: ConciergeState) -> list[str]:
@@ -65,4 +126,4 @@ def _extract_mentioned_entities(state: ConciergeState) -> list[str]:
         except RuntimeError:
             pass
 
-    return mentioned[:5]
+    return mentioned[:10]

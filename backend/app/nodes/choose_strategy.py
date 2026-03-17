@@ -19,6 +19,17 @@ from app.nodes._tracing import traced_node
 from app.services.tenant_runtime import TenantRuntime
 
 _STRATEGY_RULES: list[tuple[str, dict]] = [
+    ("mall_overview", {
+        "sub_intents": {
+            "overview", "what_is_available", "family_friendliness",
+            "facilities_summary",
+        },
+        "message_kinds": {"fresh_request", "followup", "refinement"},
+    }),
+    ("direct_fact", {
+        "sub_intents": {"opening_hours"},
+        "message_kinds": {"fresh_request", "followup"},
+    }),
     ("exploration_overview", {
         "sub_intents": {
             "open_exploration", "activity_suggestion", "first_visit_guide",
@@ -76,6 +87,7 @@ _PLAYBOOK_STRATEGY_MAP: dict[str, str] = {
 }
 
 _STRATEGY_SHAPES: dict[str, str] = {
+    "mall_overview": "structured_overview",
     "direct_fact": "brief_answer",
     "shortlist_recommendation": "numbered_shortlist",
     "mini_itinerary": "step_by_step",

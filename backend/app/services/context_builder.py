@@ -14,9 +14,14 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.context.semantic_mall_model import (
+    build_mall_overview_block,
+    build_mall_profile,
+)
 from app.models.context_pack import (
     ConciergeGuidelines,
     GlobalContextPack,
+    MallProfileBlock,
     TopicBlock,
 )
 from app.models.playbook import ScenarioPlaybook
@@ -36,10 +41,12 @@ class ContextBuilder:
         self.mall_id = mall_id
         self._normalizer = MallNormalizer()
         self._enricher = SemanticEnricher()
+        self._raw_json: dict[str, Any] = {}
         self._canonical: dict[str, Any] = {}
         self._profiles: list[SemanticProfile] = []
         self._playbooks: list[ScenarioPlaybook] = []
         self._context_pack: GlobalContextPack | None = None
+        self._mall_profile_block: MallProfileBlock | None = None
 
     # ------------------------------------------------------------------
     # Data loading
@@ -49,6 +56,7 @@ class ContextBuilder:
         """Load and normalize canonical data from JSON."""
         file_path = path or (DATA_DIR / "canonical" / f"{self.mall_id}.json")
         raw = _load_json(file_path)
+        self._raw_json = raw
         self._canonical = self._normalizer.normalize_all(raw)
         self._canonical["mall_profile"] = self._normalizer.normalize_mall_profile(
             raw.get("mall_profile", {})
@@ -92,11 +100,31 @@ class ContextBuilder:
 
         profile_data = mall_profile.model_dump()
 
+        # Build the structured mall profile block from raw trusted data
+        raw_profile_dict = build_mall_profile(self._raw_json)
+        self._mall_profile_block = (
+            MallProfileBlock(**raw_profile_dict) if raw_profile_dict else None
+        )
+
+        topic_blocks = self._build_topic_blocks()
+
+        # Inject mall_overview topic block built from the profile
+        if self._mall_profile_block:
+            overview_data = build_mall_overview_block(raw_profile_dict)
+            topic_blocks["mall_overview"] = TopicBlock(
+                topic="mall_overview",
+                summary="High-level mall overview, hours, highlights, and facilities",
+                entities=[],
+                semantic_highlights=overview_data.get("highlights", []),
+                concierge_tips=overview_data.get("summary_lines", []),
+            )
+
         pack = GlobalContextPack(
             mall_id=self.mall_id,
+            mall_profile=self._mall_profile_block,
             mall_profile_summary=self._build_profile_summary(profile_data),
             operational_context=self._build_operational_context(profile_data),
-            topic_blocks=self._build_topic_blocks(),
+            topic_blocks=topic_blocks,
             events_and_offers=self._build_events_offers(),
             playbooks=[self._playbook_summary(pb) for pb in self._playbooks],
             contextual_reasoning_hints=self._build_reasoning_hints(),
@@ -119,7 +147,7 @@ class ContextBuilder:
         if not self._context_pack:
             raise ValueError("No context pack built yet — call build_context_pack first")
 
-        file_path = path or (DATA_DIR / "context_packs" / "global_context.json")
+        file_path = path or (DATA_DIR / "context_packs" / f"{self.mall_id}_context.json")
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(
             self._context_pack.model_dump_json(indent=2),
@@ -131,6 +159,11 @@ class ContextBuilder:
     # ------------------------------------------------------------------
     # Runtime topic block selection
     # ------------------------------------------------------------------
+
+    @property
+    def mall_profile_block(self) -> MallProfileBlock | None:
+        """Return the structured mall profile block, if built."""
+        return self._mall_profile_block
 
     def get_topic_block(self, topic: str) -> TopicBlock | None:
         """Retrieve a single topic block by key for runtime injection."""
@@ -151,7 +184,13 @@ class ContextBuilder:
             "gift": ["gift"],
             "present": ["gift"],
             "shopping": ["gift"],
-            "family": ["family", "dining"],
+            "perfume": ["gift"],
+            "fragrance": ["gift"],
+            "oud": ["gift"],
+            "jewelry": ["gift"],
+            "jewellery": ["gift"],
+            "accessories": ["gift"],
+            "family": ["family", "dining", "mall_overview"],
             "kids": ["family"],
             "children": ["family"],
             "movie": ["movie", "dining"],
@@ -166,6 +205,14 @@ class ContextBuilder:
             "date": ["dining", "movie", "gift"],
             "romantic": ["dining", "gift"],
             "anniversary": ["dining", "gift", "movie"],
+            "mall": ["mall_overview", "services"],
+            "about": ["mall_overview"],
+            "overview": ["mall_overview"],
+            "what": ["mall_overview"],
+            "tell": ["mall_overview"],
+            "hours": ["mall_overview", "services"],
+            "facilities": ["mall_overview", "services"],
+            "amenities": ["mall_overview", "services"],
         }
 
         selected_topics: set[str] = set()
@@ -175,7 +222,7 @@ class ContextBuilder:
                 selected_topics.update(topics)
 
         if "exploration" in intent_lower or "open_exploration" in intent_lower:
-            selected_topics = {"dining", "gift", "movie", "family", "services"}
+            selected_topics = {"mall_overview", "dining", "gift", "movie", "family", "services"}
 
         if not selected_topics:
             selected_topics = {"dining", "gift", "services"}
@@ -332,6 +379,14 @@ class ContextBuilder:
 
     def _build_events_offers(self) -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
+        entity_id_to_name: dict[str, str] = {}
+        for section in ("stores", "dining", "cinemas", "services"):
+            for entity in self._canonical.get(section, []):
+                eid = getattr(entity, "entity_id", "")
+                name = getattr(entity, "name", "")
+                if eid and name:
+                    entity_id_to_name[eid] = name
+
         for event in self._canonical.get("events", []):
             items.append({
                 "type": "event",
@@ -340,12 +395,19 @@ class ContextBuilder:
                 "description": event.description,
             })
         for offer in self._canonical.get("offers", []):
+            tenant_names = [
+                entity_id_to_name[tid]
+                for tid in getattr(offer, "tenant_entity_ids", [])
+                if tid in entity_id_to_name
+            ]
             items.append({
                 "type": "offer",
                 "title": offer.title,
                 "valid": f"{offer.valid_from} to {offer.valid_until}",
                 "discount": offer.discount_value,
                 "description": offer.description,
+                "stores": tenant_names,
+                "terms": getattr(offer, "terms", ""),
             })
         return items
 
@@ -371,10 +433,11 @@ class ContextBuilder:
             "If unsure about something, say so and suggest the Information Desk",
         ]
 
-    @staticmethod
-    def _build_guidelines() -> ConciergeGuidelines:
+    def _build_guidelines(self) -> ConciergeGuidelines:
+        mall_profile = self._canonical.get("mall_profile")
+        mall_name = getattr(mall_profile, "name", None) or self.mall_id.replace("_", " ").title()
         return ConciergeGuidelines(
-            persona_name="Cenomi Concierge",
+            persona_name=f"{mall_name} Concierge",
             tone="friendly, knowledgeable, helpful, professional",
             language="English (with Arabic cultural awareness)",
             response_style="Answer first, then elaborate. Be concise but thorough.",

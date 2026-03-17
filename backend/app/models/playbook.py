@@ -38,7 +38,7 @@ class ScenarioPlaybook(BaseModel):
 
     # --- Response shaping ---
     response_shape_hint: str = ""
-    shortlist_size_hint: int = 3
+    shortlist_size_hint: int = 8
     next_step_hint: str = ""
 
     # --- Exclusions ---

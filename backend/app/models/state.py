@@ -68,6 +68,10 @@ class SceneMemory(BaseModel):
     Persists across turns and is updated incrementally by the
     update_scene_memory node.  Captures who the visitor is, what they
     need, and where they are in their mall journey.
+
+    The ``target_person`` field resolves *who* the current query is about
+    (e.g. "child", "girlfriend") so that terse follow-ups like "food?"
+    are interpreted as "food for child" rather than "food in general".
     """
 
     visit_type: str = ""
@@ -77,11 +81,39 @@ class SceneMemory(BaseModel):
     audience: list[str] = Field(default_factory=list)
     current_area: str = ""
     current_need: str = ""
+    previous_need: str = ""
     active_topic: str = ""
     previous_topic: str = ""
     active_shortlist: list[str] = Field(default_factory=list)
     rejected_options: list[str] = Field(default_factory=list)
     current_preferences: dict[str, Any] = Field(default_factory=dict)
+
+    # Conversation frame extensions
+    target_person: str = ""
+    goal: str = ""
+    topic_history: list[str] = Field(default_factory=list)
+
+    # Visit planning — tracks multi-step visit sequences across turns
+    visit_plan: list[str] = Field(
+        default_factory=list,
+        description="Ordered planned activity sequence, e.g. ['shopping', 'coffee', 'dessert']",
+    )
+    completed_steps: list[str] = Field(
+        default_factory=list,
+        description="Activities already discussed/recommended in this conversation",
+    )
+    visit_constraints: list[str] = Field(
+        default_factory=list,
+        description="User-expressed constraints, e.g. ['quick', 'light', 'affordable']",
+    )
+    multi_activity_mode: bool = Field(
+        default=False,
+        description="True when the user has stated a multi-step visit plan",
+    )
+    current_plan_step: str = Field(
+        default="",
+        description="Which step of visit_plan is currently being addressed",
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -130,7 +162,9 @@ class RetrievalDecision(BaseModel):
 # ═══════════════════════════════════════════════════════════════════════════
 
 STRATEGY_CHOICES = Literal[
+    "mall_overview",
     "direct_fact",
+    "exploration_overview",
     "shortlist_recommendation",
     "mini_itinerary",
     "gift_formula",
@@ -183,17 +217,22 @@ class ConciergeState(BaseModel):
 
     # ── 1. Session Identity ───────────────────────────────────────────
     session_id: str = ""
-    tenant_id: str = "cenomi_mall_01"
-    mall_id: str = "cenomi_mall_01"
+    tenant_id: str = "al_nakheel_plaza_28"
+    mall_id: str = "al_nakheel_plaza_28"
     turn_id: str = ""
+
+    # ── 1b. Lightweight session continuity (NO raw LLM outputs) ──────
+    last_intent: str = ""
+    conversation_mode: str = ""
 
     # ── 2. User Input ─────────────────────────────────────────────────
     raw_user_message: str = ""
     normalized_user_message: str = ""
+    expanded_query: str = ""
 
     # ── 3. Scope ──────────────────────────────────────────────────────
     mode: Literal["single_mall"] = "single_mall"
-    active_mall_id: str = "cenomi_mall_01"
+    active_mall_id: str = "al_nakheel_plaza_28"
 
     # ── 4. Conversation History (append-only via reducer) ─────────────
     messages: Annotated[list[Message], operator.add] = Field(default_factory=list)

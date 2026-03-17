@@ -1,0 +1,46 @@
+{
+  "mall_id": "al_nakheel_plaza_28",
+  "config_version": "1.0.0",
+  "description": "Al Nakheel Plaza (Buraidah) — family-oriented, accessible, and entertainment-focused configuration. Emphasizes family and kid-friendliness, practical guidance, and clear recommendations.",
+  "tone": {
+    "warmth": 0.82,
+    "directness": 0.83,
+    "formality": 0.32,
+    "concierge_confidence": 0.88,
+    "mall_branding_prominence": 0.45,
+    "practicalness_vs_exploratory": 0.72
+  },
+  "clarification": {
+    "ambiguity_tolerance": 0.84,
+    "answer_first_bias": 0.93,
+    "assumption_aggressiveness": 0.8
+  },
+  "strategy_weights": {
+    "shortlist_recommendation": 1.3,
+    "family_plan": 1.2,
+    "gift_formula": 1.0,
+    "movie_plus_food": 1.0
+  },
+  "response_shape": {
+    "default_shortlist_size": 4,
+    "location_detail_level": "floor_zone",
+    "recommendation_density": 0.78,
+    "exact_name_usage_bias": 0.88
+  },
+  "context_weights": {
+    "prioritize_playbooks": 0.85,
+    "prioritize_family_signals": 0.85,
+    "prioritize_kid_signals": 0.8,
+    "prioritize_exact_entity_examples": 0.8
+  },
+  "ranking": {
+    "favor_family_friendly": 0.75,
+    "favor_kid_friendly": 0.7,
+    "favor_anchor_entities": 0.6,
+    "favor_diversity_vs_confidence": 0.5
+  },
+  "session_adaptation": {
+    "preserve_companions_strongly": 0.92,
+    "reinterpret_short_followups_aggressively": 0.85
+  }
+}
