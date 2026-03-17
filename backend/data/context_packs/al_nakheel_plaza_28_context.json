@@ -393,6 +393,268 @@
         "Mention ATM locations for fast cash withdrawals."
       ]
     },
+    "mall_overview": {
+      "topic": "mall_overview",
+      "summary": "Al Nakheel Plaza is a modern shopping and entertainment destination in Buraidah (Qassim region), Saudi Arabia. Located on King Abdullah Road, Al Muntazah. 2 floors: Ground Level and Cinema Level. 100+ stores and kiosks across 6 zones. Key anchors: Muvi Cinema, Danube HyperMarket, Fun Time (Sparky's), and a diverse Food Court.",
+      "key_facts": {
+        "name": "Al Nakheel Plaza",
+        "city": "Buraidah, Qassim, Saudi Arabia",
+        "address": "King Abdullah Road, Al Muntazah, Buraydah 52381",
+        "floors": ["Ground Level", "Cinema Level"],
+        "total_stores": "100+",
+        "opening_hours": {
+          "sun_thu_sat": "09:00 AM – 11:00 PM",
+          "friday": "01:00 PM – 11:00 PM"
+        },
+        "parking": "Free at all gates",
+        "phone": "+966 920000262",
+        "map": "https://maps.app.goo.gl/83uUvGeEcBC28Qdm6"
+      },
+      "zones": [
+        "Main Gallery (Ground) — Fashion, Jewelry, Beauty, Accessories",
+        "Kiosk Row (Ground) — Perfumes, Cafes, Quick Gifts",
+        "Food Court (Ground) — Fast Food, Cafes, Dessert",
+        "Entertainment Wing (Ground) — Sports, Value Fashion, Kids Entertainment",
+        "Hypermarket Area (Ground) — Danube HyperMarket",
+        "Cinema Zone (Cinema Level) — Muvi Cinema"
+      ],
+      "key_services": ["Prayer Rooms", "Baby Stroller Loans", "Wheelchair Loans", "ATM", "Information Desk", "Lost & Found", "Free WiFi (Mobily)"],
+      "concierge_tips": [
+        "Friday opening is later (01:00 PM) — inform guests planning early visits.",
+        "Cinema Level is accessed from Ground floor via escalator/lift.",
+        "Stroller loans available 4:00 PM – 11:00 PM at Gate 2."
+      ]
+    },
+    "shopping_overview": {
+      "topic": "shopping_overview",
+      "summary": "Al Nakheel Plaza's Main Gallery is the primary shopping corridor with premium fashion, jewelry, beauty, and accessories. The Entertainment Wing offers sportswear and value fashion. Kiosk Row features quick-access perfumes and accessories.",
+      "zones": {
+        "Main Gallery": "Fashion anchors: Zara, NINE WEST, Stradivarius, Charles & Keith. Premium: Swarovski, Tous, L'Occitane, The Body Shop. Watches: Al Daham Watches, Season Accessorize.",
+        "Kiosk Row": "Quick stops: Ajmal Perfumes, Osma, Doknah, Season Accessorize (watches/accessories).",
+        "Entertainment Wing": "Value fashion: Centrepoint, Brands For Less, Red Tag. Sportswear: Adidas SP. Home: Home Box.",
+        "Hypermarket Area": "Danube HyperMarket — groceries, essentials, household items."
+      },
+      "category_guide": {
+        "fashion": ["Zara (GF)", "Stradivarius (GF)", "NINE WEST (GF)", "Centrepoint (Ent Wing)"],
+        "beauty": ["L'Occitane (GF044)", "The Body Shop (GF010/011)", "Nayomi (GF)"],
+        "jewelry": ["Swarovski (GF040)", "Tous (GF038)"],
+        "perfumes": ["Ajmal Perfumes (GF126)", "Osma (GFK49 — current offer)", "Doknah (Kiosk Row)"],
+        "value_shopping": ["Centrepoint (Ent Wing)", "Brands For Less (Ent Wing)", "MINISO (GF)"],
+        "gifts": ["Swarovski", "Tous", "L'Occitane", "Season Accessorize", "Osma (99 SAR offer)"]
+      },
+      "concierge_tips": [
+        "For quick gifts: Osma (Kiosk Row, 99 SAR offer), Season Accessorize.",
+        "For premium gifts: Swarovski, Tous, L'Occitane.",
+        "For family value shopping: Centrepoint and Brands For Less in Entertainment Wing."
+      ]
+    },
+    "entertainment": {
+      "topic": "entertainment",
+      "summary": "Al Nakheel Plaza has two main entertainment anchors: Muvi Cinema on the Cinema Level (latest movies, online booking) and Fun Time (Sparky's) in the Entertainment Wing (large indoor play center for kids). Saudi Pro League matches are also screened at Muvi Cinema.",
+      "entities": [
+        {
+          "name": "Muvi Cinema",
+          "type": "cinema",
+          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "contact": "+966535491018",
+          "booking": "https://www.muvicinemas.com/ar",
+          "key_note": "Latest movies + Saudi Pro League screenings. Multiple screens. Online booking recommended."
+        },
+        {
+          "name": "Fun Time (Sparky's)",
+          "type": "kids_entertainment",
+          "location": "Ground floor, Entertainment Wing (GFENT01)",
+          "contact": "+966555711697",
+          "website": "https://ksa.sparkysme.com/ar",
+          "key_note": "Largest indoor play center for kids in the region. Part of Al Hokair Group / Sparky's brand."
+        }
+      ],
+      "semantic_highlights": [
+        "Muvi Cinema: movies, entertainment anchor, date spot, group outing",
+        "Fun Time (Sparky's): kids entertainment anchor, child relief, family outing",
+        "Saudi Pro League matches screened at Muvi Cinema (upcoming)"
+      ],
+      "concierge_tips": [
+        "For kids: Fun Time in Entertainment Wing is the primary destination.",
+        "For movie lovers: Check current lineup at muvicinemas.com and book online.",
+        "For sports fans: Saudi Pro League matches (Al Qadsiah vs Al Ahli, etc.) coming soon at Muvi Cinema."
+      ]
+    },
+    "cinema_and_movies": {
+      "topic": "cinema_and_movies",
+      "summary": "Muvi Cinema on the Cinema Level is Al Nakheel Plaza's entertainment anchor. Currently showing action and thriller films. Saudi Pro League matches coming soon. Online booking available.",
+      "cinema": {
+        "name": "Muvi Cinema",
+        "entity_id": "t-cinema-001",
+        "location": "Cinema Level, Cinema Zone, Unit CNL001",
+        "phone": "+966535491018",
+        "booking_url": "https://www.muvicinemas.com/ar",
+        "formats": ["Standard"],
+        "hours": "09:00 AM – 11:00 PM (Fri: 01:00 PM – 11:00 PM)"
+      },
+      "now_showing": [
+        {
+          "title": "SHELTER",
+          "genre": "Action, Thriller",
+          "language": "English",
+          "duration": "107 min",
+          "audience": "Adults",
+          "synopsis": "A recluse on a remote island rescues a girl, unleashing dangerous events.",
+          "booking_url": "https://www.muvicinemas.com/EN/movies/shelter?cityId=20"
+        },
+        {
+          "title": "CRIME 101",
+          "genre": "Crime, Action",
+          "language": "English",
+          "duration": "140 min",
+          "audience": "Adults",
+          "synopsis": "A thief and insurance broker plan a multi-million dollar heist while a detective trails them.",
+          "booking_url": "https://www.muvicinemas.com/EN/movies/crime-101?cityId=20"
+        },
+        {
+          "title": "THE HOUSEMAID",
+          "genre": "Thriller",
+          "language": "English",
+          "duration": "131 min",
+          "audience": "Adults",
+          "synopsis": "A struggling woman starts over as a housemaid for an elite couple.",
+          "booking_url": "https://www.muvicinemas.com/EN/movies/the-housemaid?cityId=20"
+        }
+      ],
+      "coming_soon": [
+        {
+          "title": "SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)",
+          "genre": "Sport",
+          "language": "Arabic",
+          "audience": "Sports fans",
+          "release_date": "2026-03-13"
+        },
+        {
+          "title": "SAUDI PRO LEAGUE (AL NASSR VS NEOM)",
+          "genre": "Sport",
+          "language": "Arabic",
+          "release_date": "2026-03-07"
+        },
+        {
+          "title": "SAUDI PRO LEAGUE (AL AHLI VS AL ITTIHAD)",
+          "genre": "Sport",
+          "language": "Arabic",
+          "release_date": "2026-03-06"
+        }
+      ],
+      "kids_movies_note": "No animation or family-friendly films currently showing. For kids entertainment, recommend Fun Time (Sparky's) in the Entertainment Wing.",
+      "semantic_highlights": [
+        "Currently showing: action (SHELTER), crime/action (CRIME 101), thriller (THE HOUSEMAID)",
+        "Coming soon: Saudi Pro League matches",
+        "No kids/animation films currently — redirect families to Fun Time"
+      ],
+      "concierge_tips": [
+        "For a quick pre-movie snack: Food Court (Kudu, Herfy, McDonald's) is directly below Cinema Level.",
+        "For post-movie dessert: Baskin Robbins (Kiosk Row) or Cinnabon (Food Court).",
+        "If user asks 'what movies' — list now-showing films with genre/audience flags.",
+        "If family with kids asks about movies — redirect to Fun Time and explain current adult lineup."
+      ]
+    },
+    "kids_visit": {
+      "topic": "kids_visit",
+      "summary": "Al Nakheel Plaza is well-equipped for visits with children. Fun Time (Sparky's) in the Entertainment Wing is the main kids anchor. Family services include stroller loans, prayer rooms, and kid-friendly dining in the Food Court.",
+      "primary_anchor": {
+        "name": "Fun Time (Sparky's)",
+        "entity_id": "t-store-072",
+        "type": "kids_entertainment",
+        "location": "Ground floor, Entertainment Wing (GFENT01)",
+        "contact": "+966555711697",
+        "key_note": "Large indoor play center. Part of Sparky's ME (90 centers). Ages 2-12 approximately. Staff supervised."
+      },
+      "family_services": [
+        {"service": "Baby Stroller Loans", "location": "Gate 2, near Doknah Kiosk", "hours": "4:00 PM – 11:00 PM", "cost": "Free"},
+        {"service": "Wheelchair Loans", "location": "Gate 2, Customer Service", "hours": "Mall hours", "cost": "Free"},
+        {"service": "Prayer Rooms", "location": "Men's near Gate 1; Women's near Max Store/Food Court", "hours": "Mall hours"},
+        {"service": "Accessible Washrooms", "location": "Near Gates 1, 2, and 3", "hours": "Mall hours"}
+      ],
+      "kid_friendly_dining": [
+        {"name": "McDonald's", "location": "Food Court (FC005)", "kids_menu": true, "note": "Global favorite, halal"},
+        {"name": "Herfy", "location": "Food Court (FC003)", "kids_menu": true, "note": "Saudi fast food, halal"},
+        {"name": "Kudu Restaurant", "location": "Food Court (FC006)", "kids_menu": true, "note": "Fresh made, halal"},
+        {"name": "Corn World", "location": "Kiosk Row (GFK28)", "kids_menu": true, "note": "Fun corn snacks"},
+        {"name": "Baskin Robbins", "location": "Kiosk Row (GFK17)", "kids_menu": false, "note": "Ice cream treat"}
+      ],
+      "movies_for_kids": "No animation or family-friendly films currently at Muvi Cinema. Check muvicinemas.com for updates.",
+      "recommended_itinerary": "1) Fun Time (Entertainment Wing) for play → 2) McDonald's or Herfy (Food Court) for a kids meal → 3) Baskin Robbins for ice cream treat",
+      "concierge_tips": [
+        "Always lead with Fun Time as the primary kids destination.",
+        "Mention stroller loans at Gate 2 proactively for parents with infants.",
+        "If no kids movies showing, don't mention cinema — redirect to Fun Time.",
+        "For shopping with a child, suggest MINISO (kids love it) and Centrepoint."
+      ]
+    },
+    "date_night": {
+      "topic": "date_night",
+      "summary": "Al Nakheel Plaza offers a pleasant date night experience combining cinema, dining, and optional gift shopping. Muvi Cinema shows current thrillers and action films. Cozy café options available. Premium gift stores in Main Gallery.",
+      "itinerary": [
+        {"step": 1, "activity": "Movie at Muvi Cinema", "options": ["SHELTER (Action/Thriller)", "CRIME 101 (Crime/Action)", "THE HOUSEMAID (Thriller)"], "location": "Cinema Level, Cinema Zone", "note": "Book online at muvicinemas.com"},
+        {"step": 2, "activity": "Dinner or coffee", "options": ["Kudu Restaurant (Food Court, quick & tasty)", "FanJan Caffé (Main Gallery, cozy)", "Starbucks (Main Gallery, casual)"], "location": "Ground floor"},
+        {"step": 3, "activity": "Dessert treat", "options": ["Baskin Robbins (Kiosk Row)", "Cinnabon (Food Court)", "CoolNup (sweet treats)"], "location": "Ground floor"},
+        {"step": 4, "activity": "Optional gift shopping", "options": ["Swarovski (GF040)", "Tous (GF038)", "Ajmal Perfumes (GF126)", "Osma (GFK49, 99 SAR offer)"], "location": "Main Gallery / Kiosk Row"}
+      ],
+      "semantic_highlights": [
+        "Cinema: Muvi Cinema (Cinema Level) — thriller/action current lineup",
+        "Cozy dining: FanJan Caffé, Starbucks (both Main Gallery)",
+        "Dessert: Baskin Robbins, Cinnabon, CoolNup",
+        "Romantic gifts: Swarovski, Tous, L'Occitane, Ajmal"
+      ],
+      "concierge_tips": [
+        "Lead with cinema experience — pick a movie together.",
+        "For dinner before the movie: Food Court is convenient and fast.",
+        "For after the movie: FanJan Caffé or Starbucks for a relaxed coffee chat.",
+        "If they want a gift: Swarovski or Tous for jewelry, Ajmal for fragrance."
+      ]
+    },
+    "before_movie": {
+      "topic": "before_movie",
+      "summary": "Quick options near Muvi Cinema before the movie starts. Food Court is directly below the Cinema Level. Kiosk Row offers fast snacks. Time-sensitive — keep it brief.",
+      "proximity_note": "Food Court (Ground floor) is the most convenient dining option before heading to Cinema Level. Kiosk Row snacks are also fast and accessible.",
+      "quick_options": [
+        {"name": "McDonald's", "type": "fast_food", "location": "Food Court (FC005)", "time": "~15 min", "note": "Fastest option, halal"},
+        {"name": "Herfy", "type": "fast_food", "location": "Food Court (FC003)", "time": "~15 min", "note": "Saudi fast food, quick"},
+        {"name": "Kudu Restaurant", "type": "fast_food", "location": "Food Court (FC006)", "time": "~20 min", "note": "Fresh, quick"},
+        {"name": "Corn World", "type": "kiosk_snack", "location": "Kiosk Row (GFK28)", "time": "~5 min", "note": "Movie-style snack"},
+        {"name": "Baskin Robbins", "type": "dessert", "location": "Kiosk Row (GFK17)", "time": "~5 min", "note": "Sweet pre-movie treat"}
+      ],
+      "semantic_highlights": [
+        "All Food Court options are near_cinema and quick_stop",
+        "Kiosk Row snacks (Corn World, Baskin Robbins) are fastest",
+        "Starbucks (Main Gallery) for a coffee to take in"
+      ],
+      "concierge_tips": [
+        "If they have 15+ min: any Food Court option (McDonald's, Herfy, Kudu).",
+        "If they have 5-10 min: Corn World or Baskin Robbins from Kiosk Row.",
+        "Always respect the time constraint — lead with fastest option first."
+      ]
+    },
+    "after_movie": {
+      "topic": "after_movie",
+      "summary": "Winding down after the movie at Al Nakheel Plaza. Dessert spots, cafes, and casual dining all accessible from Cinema Level. Keep it relaxed — no intensive shopping needed.",
+      "post_movie_flow": "Exit cinema → take escalator/lift to Ground floor → Kiosk Row or Food Court for dessert/coffee",
+      "casual_options": [
+        {"name": "Baskin Robbins", "type": "dessert", "location": "Kiosk Row (GFK17)", "note": "Classic post-movie ice cream treat"},
+        {"name": "Cinnabon", "type": "cafe", "location": "Food Court (FCW04)", "note": "Warm cinnamon rolls, sweet ending"},
+        {"name": "MammaBunz", "type": "cafe", "location": "Kiosk Row (GFK58)", "note": "Sweet buns and drinks"},
+        {"name": "Starbucks", "type": "cafe", "location": "Main Gallery (GF134/135)", "note": "Relaxed coffee and chat"},
+        {"name": "FanJan Caffé", "type": "cafe", "location": "Main Gallery (GF058)", "note": "Cozy specialty coffee, great for couples"}
+      ],
+      "semantic_highlights": [
+        "Dessert: Baskin Robbins (quick), Cinnabon (warm, cozy), MammaBunz",
+        "Coffee: Starbucks, FanJan Caffé (both Main Gallery)",
+        "All options are near_cinema and reward_stop"
+      ],
+      "concierge_tips": [
+        "Lead with dessert — it's the natural post-movie reward.",
+        "For couples: FanJan Caffé for a quiet chat after the movie.",
+        "For families: Baskin Robbins for kids, Starbucks for adults.",
+        "Avoid recommending full meals — they've likely already eaten."
+      ]
+    },
     "services": {
       "topic": "services",
       "summary": "Essential guest services include Information Desk, lost & found, prayer rooms, ATMs, stroller and wheelchair loans, and accessible washrooms.",

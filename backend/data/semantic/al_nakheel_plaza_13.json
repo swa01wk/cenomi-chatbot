@@ -1,0 +1,4166 @@
+{
+  "mall_id": "al_nakheel_plaza_13",
+  "tag_taxonomy_version": "1.0",
+  "enrichment_rules": [
+    {
+      "rule_id": "er-fashion-main",
+      "description": "Fashion stores in the Main Gallery are ideal for style-conscious shoppers, families, and gifting.",
+      "match_conditions": {
+        "category": [
+          "Fashion"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "fashion",
+        "style_shopping",
+        "main_gallery",
+        "gift_friendly"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly",
+        "family_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "modern",
+        "trendy"
+      ],
+      "apply_outing_fit": [
+        "shopping_spree",
+        "quick_visit",
+        "practical_shopping"
+      ],
+      "apply_gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift"
+      ],
+      "priority_boost": {
+        "shopping_plus_dessert_combo": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "last_minute_gift": 0.6,
+        "family_visit_plan": 0.5
+      }
+    },
+    {
+      "rule_id": "er-fashion-value-entertainment",
+      "description": "Value fashion stores in the Entertainment Wing are great for budget-conscious families and practical shopping.",
+      "match_conditions": {
+        "category": [
+          "Fashion",
+          "Value Fashion"
+        ],
+        "zone": [
+          "Entertainment Wing"
+        ]
+      },
+      "apply_tags": [
+        "value_fashion",
+        "budget_friendly",
+        "entertainment_wing"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "casual",
+        "practical"
+      ],
+      "apply_outing_fit": [
+        "budget_family_outing",
+        "practical_shopping"
+      ],
+      "apply_gift_fit": [
+        "family_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "budget_family_outing": 0.8,
+        "family_visit_plan": 0.7,
+        "shopping_plus_dessert_combo": 0.4
+      }
+    },
+    {
+      "rule_id": "er-beauty-main",
+      "description": "Beauty and cosmetics stores in the Main Gallery are popular for gifts, self-treats, and special occasions.",
+      "match_conditions": {
+        "category": [
+          "Beauty",
+          "Cosmetics"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "beauty",
+        "cosmetics",
+        "gift_friendly",
+        "main_gallery",
+        "self_treat"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "modern",
+        "upscale"
+      ],
+      "apply_outing_fit": [
+        "relaxed_visit",
+        "special_occasion"
+      ],
+      "apply_gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "gift_for_girlfriend": 0.8,
+        "luxury_shopping_plan": 0.7
+      }
+    },
+    {
+      "rule_id": "er-jewelry-main",
+      "description": "Jewelry stores in the Main Gallery are perfect for special occasions and romantic gifting.",
+      "match_conditions": {
+        "category": [
+          "Jewelry"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "jewelry",
+        "special_occasion",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "apply_audience": [
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "apply_vibe": [
+        "elegant",
+        "upscale"
+      ],
+      "apply_outing_fit": [
+        "date_spot",
+        "special_occasion",
+        "relaxed_visit"
+      ],
+      "apply_gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "gift_for_girlfriend": 0.9,
+        "anniversary_plan": 0.85,
+        "luxury_shopping_plan": 0.8
+      }
+    },
+    {
+      "rule_id": "er-accessories-main",
+      "description": "Accessories and watches in the Main Gallery are trendy and great for gifting or personal style upgrades.",
+      "match_conditions": {
+        "category": [
+          "Accessories",
+          "Watches"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "accessories",
+        "watches",
+        "gift_friendly",
+        "main_gallery",
+        "trendy"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "stylish",
+        "modern"
+      ],
+      "apply_outing_fit": [
+        "quick_visit",
+        "fashion_shopping"
+      ],
+      "apply_gift_fit": [
+        "girlfriend_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "last_minute_gift": 0.7,
+        "shopping_plus_dessert_combo": 0.5
+      }
+    },
+    {
+      "rule_id": "er-accessories-kiosk",
+      "description": "Accessory kiosks in Kiosk Row are ideal for quick gifts and trendy finds.",
+      "match_conditions": {
+        "category": [
+          "Accessories"
+        ],
+        "zone": [
+          "Kiosk Row"
+        ]
+      },
+      "apply_tags": [
+        "accessories",
+        "kiosk",
+        "quick_gift",
+        "trendy"
+      ],
+      "apply_audience": [
+        "teen_friendly",
+        "solo_friendly",
+        "couple_friendly"
+      ],
+      "apply_vibe": [
+        "fun",
+        "casual"
+      ],
+      "apply_outing_fit": [
+        "quick_visit",
+        "practical_shopping"
+      ],
+      "apply_gift_fit": [
+        "friend_gift",
+        "girlfriend_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "last_minute_gift": 0.8,
+        "shopping_plus_dessert_combo": 0.6
+      }
+    },
+    {
+      "rule_id": "er-perfume-kiosk",
+      "description": "Perfume kiosks in Kiosk Row are great for last-minute gifts and personal treats.",
+      "match_conditions": {
+        "category": [
+          "Perfumes"
+        ],
+        "zone": [
+          "Kiosk Row"
+        ]
+      },
+      "apply_tags": [
+        "perfume",
+        "kiosk",
+        "quick_gift",
+        "fragrance"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly"
+      ],
+      "apply_vibe": [
+        "luxurious",
+        "chic"
+      ],
+      "apply_outing_fit": [
+        "quick_visit",
+        "special_occasion"
+      ],
+      "apply_gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "last_minute_gift": 0.85,
+        "gift_for_girlfriend": 0.7
+      }
+    },
+    {
+      "rule_id": "er-cafe-foodcourt",
+      "description": "Cafes in the Food Court are perfect for casual meetups, coffee breaks, and dessert pairings.",
+      "match_conditions": {
+        "category": [
+          "Cafe"
+        ],
+        "zone": [
+          "Food Court"
+        ]
+      },
+      "apply_tags": [
+        "cafe",
+        "foodcourt",
+        "casual_meetup",
+        "coffee_break"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly",
+        "family_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "relaxed",
+        "casual"
+      ],
+      "apply_outing_fit": [
+        "quick_lunch",
+        "shopping_plus_dessert_combo"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "quick_lunch": 0.8,
+        "shopping_plus_dessert_combo": 0.9,
+        "solo_visit_plan": 0.5
+      }
+    },
+    {
+      "rule_id": "er-cafe-kiosk",
+      "description": "Cafes in Kiosk Row are ideal for grab-and-go coffee and light snacks during a shopping break.",
+      "match_conditions": {
+        "category": [
+          "Cafe"
+        ],
+        "zone": [
+          "Kiosk Row"
+        ]
+      },
+      "apply_tags": [
+        "cafe",
+        "kiosk",
+        "grab_and_go",
+        "coffee_break"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "couple_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "casual",
+        "convenient"
+      ],
+      "apply_outing_fit": [
+        "quick_visit",
+        "shopping_spree"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "quick_lunch": 0.6,
+        "solo_visit_plan": 0.5
+      }
+    },
+    {
+      "rule_id": "er-dessert-foodcourt",
+      "description": "Dessert shops in the Food Court are great for sweet treats after meals or as a family reward.",
+      "match_conditions": {
+        "category": [
+          "Dessert"
+        ],
+        "zone": [
+          "Food Court"
+        ]
+      },
+      "apply_tags": [
+        "dessert",
+        "foodcourt",
+        "sweet_treat"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "apply_vibe": [
+        "fun",
+        "indulgent"
+      ],
+      "apply_outing_fit": [
+        "shopping_plus_dessert_combo",
+        "family_visit"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "shopping_plus_dessert_combo": 0.95,
+        "family_visit_plan": 0.7
+      }
+    },
+    {
+      "rule_id": "er-fastfood-foodcourt",
+      "description": "Fast food in the Food Court is perfect for quick meals, family outings, and kids.",
+      "match_conditions": {
+        "category": [
+          "Fast Food"
+        ],
+        "zone": [
+          "Food Court"
+        ]
+      },
+      "apply_tags": [
+        "fast_food",
+        "foodcourt",
+        "quick_meal",
+        "family_friendly"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "solo_friendly",
+        "teen_friendly",
+        "child_friendly"
+      ],
+      "apply_vibe": [
+        "casual",
+        "bustling"
+      ],
+      "apply_outing_fit": [
+        "quick_lunch",
+        "budget_family_outing",
+        "kid_friendly_movie_plus_food"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "quick_lunch": 0.95,
+        "budget_family_outing": 0.8,
+        "kid_friendly_movie_plus_food": 0.9
+      }
+    },
+    {
+      "rule_id": "er-entertainment-kids",
+      "description": "Kids entertainment venues in the Entertainment Wing are ideal for family outings and keeping children engaged.",
+      "match_conditions": {
+        "category": [
+          "Kids Entertainment"
+        ],
+        "zone": [
+          "Entertainment Wing"
+        ]
+      },
+      "apply_tags": [
+        "kids_entertainment",
+        "family_friendly",
+        "entertainment_wing",
+        "child_activity"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "child_friendly"
+      ],
+      "apply_vibe": [
+        "fun",
+        "playful"
+      ],
+      "apply_outing_fit": [
+        "child_activity_while_parents_shop",
+        "family_visit"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "child_activity_while_parents_shop": 1.0,
+        "family_visit_plan": 0.8
+      }
+    },
+    {
+      "rule_id": "er-sportswear-entertainment",
+      "description": "Sportswear stores in the Entertainment Wing are great for active shoppers and families.",
+      "match_conditions": {
+        "category": [
+          "Sportswear"
+        ],
+        "zone": [
+          "Entertainment Wing"
+        ]
+      },
+      "apply_tags": [
+        "sportswear",
+        "active_lifestyle",
+        "entertainment_wing"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "family_friendly",
+        "teen_friendly"
+      ],
+      "apply_vibe": [
+        "energetic",
+        "modern"
+      ],
+      "apply_outing_fit": [
+        "shopping_spree",
+        "practical_shopping"
+      ],
+      "apply_gift_fit": [
+        "self_treat",
+        "family_gift"
+      ],
+      "priority_boost": {
+        "family_visit_plan": 0.6,
+        "shopping_plus_dessert_combo": 0.3
+      }
+    },
+    {
+      "rule_id": "er-home-entertainment",
+      "description": "Home stores in the Entertainment Wing are suitable for practical shopping and family needs.",
+      "match_conditions": {
+        "category": [
+          "Home"
+        ],
+        "zone": [
+          "Entertainment Wing"
+        ]
+      },
+      "apply_tags": [
+        "home",
+        "practical_shopping",
+        "entertainment_wing"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "solo_friendly"
+      ],
+      "apply_vibe": [
+        "practical",
+        "comfortable"
+      ],
+      "apply_outing_fit": [
+        "practical_shopping",
+        "family_visit"
+      ],
+      "apply_gift_fit": [
+        "family_gift",
+        "parent_gift"
+      ],
+      "priority_boost": {
+        "gift_for_family": 0.7,
+        "family_visit_plan": 0.8
+      }
+    },
+    {
+      "rule_id": "er-hypermarket",
+      "description": "The Hypermarket Area is essential for grocery runs, household essentials, and family shopping.",
+      "match_conditions": {
+        "category": [
+          "Grocery",
+          "Hypermarket"
+        ],
+        "zone": [
+          "Hypermarket Area"
+        ]
+      },
+      "apply_tags": [
+        "grocery",
+        "hypermarket",
+        "practical_shopping",
+        "family_essentials"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "solo_friendly"
+      ],
+      "apply_vibe": [
+        "practical",
+        "essential"
+      ],
+      "apply_outing_fit": [
+        "practical_shopping",
+        "budget_family_outing"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "budget_family_outing": 0.9,
+        "family_visit_plan": 0.7
+      }
+    },
+    {
+      "rule_id": "er-electronics-main",
+      "description": "Electronics stores in the Main Gallery are suitable for tech enthusiasts and gifting.",
+      "match_conditions": {
+        "category": [
+          "Electronics"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "electronics",
+        "tech_gift",
+        "main_gallery"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "teen_friendly",
+        "family_friendly"
+      ],
+      "apply_vibe": [
+        "modern",
+        "innovative"
+      ],
+      "apply_outing_fit": [
+        "practical_shopping",
+        "shopping_spree"
+      ],
+      "apply_gift_fit": [
+        "friend_gift",
+        "family_gift",
+        "self_treat"
+      ],
+      "priority_boost": {
+        "gift_for_family": 0.7,
+        "last_minute_gift": 0.5
+      }
+    },
+    {
+      "rule_id": "er-lifestyle-main",
+      "description": "Lifestyle stores in the Main Gallery offer a mix of home, wellness, and gifting options.",
+      "match_conditions": {
+        "category": [
+          "Lifestyle"
+        ],
+        "zone": [
+          "Main Gallery"
+        ]
+      },
+      "apply_tags": [
+        "lifestyle",
+        "wellness",
+        "main_gallery",
+        "gift_friendly"
+      ],
+      "apply_audience": [
+        "solo_friendly",
+        "family_friendly",
+        "couple_friendly"
+      ],
+      "apply_vibe": [
+        "relaxed",
+        "modern"
+      ],
+      "apply_outing_fit": [
+        "relaxed_visit",
+        "practical_shopping"
+      ],
+      "apply_gift_fit": [
+        "friend_gift",
+        "self_treat",
+        "family_gift"
+      ],
+      "priority_boost": {
+        "gift_for_family": 0.6,
+        "shopping_plus_dessert_combo": 0.3
+      }
+    },
+    {
+      "rule_id": "er-cinema-zone",
+      "description": "Cinema Zone is the entertainment anchor, perfect for movie outings, dates, and family fun.",
+      "match_conditions": {
+        "category": [
+          "Cinema",
+          "Entertainment"
+        ],
+        "zone": [
+          "Cinema Zone"
+        ]
+      },
+      "apply_tags": [
+        "cinema",
+        "entertainment",
+        "movie_night",
+        "cinema_zone"
+      ],
+      "apply_audience": [
+        "family_friendly",
+        "couple_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "apply_vibe": [
+        "exciting",
+        "immersive"
+      ],
+      "apply_outing_fit": [
+        "movie_plus_food",
+        "date_plan",
+        "kid_friendly_movie_plus_food",
+        "family_visit"
+      ],
+      "apply_gift_fit": [],
+      "priority_boost": {
+        "movie_plus_food": 1.0,
+        "kid_friendly_movie_plus_food": 1.0,
+        "date_plan": 0.8,
+        "family_visit_plan": 0.7
+      }
+    }
+  ],
+  "enrichment_rules_v2": [
+    {
+      "rule_id": "er-cinema-zone",
+      "description": "Cinema Zone entities are the entertainment anchor, triggering movie-night and showtime signals.",
+      "match_conditions": {
+        "zone": ["Cinema Zone"],
+        "entity_type": ["cinema"]
+      },
+      "apply_tags": [
+        "cinema_now",
+        "entertainment_anchor",
+        "showtime_lookup",
+        "movie_night",
+        "date_spot",
+        "cinema",
+        "family_movie"
+      ],
+      "apply_audience": ["couple_friendly", "family_friendly", "solo_friendly", "group_friendly", "kid_friendly"],
+      "apply_vibe": ["exciting", "immersive", "modern"],
+      "apply_outing_fit": ["movie_night", "movie_showtime_lookup", "movie_night_plan", "date_night", "family_movie", "kids_cinema"],
+      "priority_boost": {
+        "movie_showtime_lookup": 1.0,
+        "movie_night_plan": 0.95,
+        "movie_plus_food": 0.95,
+        "kid_friendly_movie_plus_food": 0.95,
+        "family_movie_plan": 0.95,
+        "kids_entertainment_plan": 0.8,
+        "date_plan": 0.85,
+        "before_movie": 0.5,
+        "after_movie": 0.5
+      }
+    },
+    {
+      "rule_id": "er-before-movie-foodcourt",
+      "description": "Food Court entities are near Cinema Level — strong before_movie and near_cinema signals.",
+      "match_conditions": {
+        "zone": ["Food Court"],
+        "entity_type": ["dining"]
+      },
+      "apply_tags": [
+        "near_cinema",
+        "before_movie",
+        "quick_stop",
+        "time_sensitive",
+        "quick_bite",
+        "low_commitment"
+      ],
+      "apply_outing_fit": ["before_movie", "quick_visit", "after_movie"],
+      "priority_boost": {
+        "activity_before_movie": 1.0,
+        "activity_after_movie": 0.8,
+        "route_proximity_refinement": 0.9,
+        "quick_lunch": 0.7,
+        "quick_snack": 0.8
+      }
+    },
+    {
+      "rule_id": "er-before-movie-kiosk",
+      "description": "Kiosk Row snack/dessert entities near Cinema — fast, low-commitment before-movie options.",
+      "match_conditions": {
+        "zone": ["Kiosk Row"],
+        "entity_type": ["dining"]
+      },
+      "apply_tags": [
+        "near_cinema",
+        "before_movie",
+        "quick_stop",
+        "low_commitment",
+        "grab_and_go"
+      ],
+      "apply_outing_fit": ["before_movie", "quick_visit"],
+      "priority_boost": {
+        "activity_before_movie": 0.95,
+        "quick_snack": 0.9,
+        "route_proximity_refinement": 0.85
+      }
+    },
+    {
+      "rule_id": "er-after-movie-reward",
+      "description": "Dessert and cafe entities are ideal post-movie reward stops.",
+      "match_conditions": {
+        "entity_type": ["dining"],
+        "tags_include_any": ["dessert", "cafe", "coffee_spot"]
+      },
+      "apply_tags": [
+        "after_movie",
+        "reward_stop",
+        "dessert_spot",
+        "near_cinema"
+      ],
+      "apply_outing_fit": ["after_movie", "reward_visit"],
+      "priority_boost": {
+        "activity_after_movie": 0.95,
+        "date_plan": 0.7,
+        "shopping_plus_dessert_combo": 0.8
+      }
+    },
+    {
+      "rule_id": "er-kids-entertainment-plan",
+      "description": "Kids Entertainment entities are child-relief anchors and must surface in any family/kids scenario.",
+      "match_conditions": {
+        "category": ["Kids"],
+        "subcategory": ["Kids Entertainment"]
+      },
+      "apply_tags": [
+        "child_relief_anchor",
+        "entertainment_anchor",
+        "kids_entertainment",
+        "kid_friendly",
+        "near_food",
+        "stroller_friendly"
+      ],
+      "apply_audience": ["family_friendly", "kid_friendly"],
+      "apply_vibe": ["fun", "energetic", "safe"],
+      "apply_outing_fit": ["kids_entertainment_plan", "family_shopping_with_child", "child_activity_while_parents_shop", "family_visit_plan"],
+      "priority_boost": {
+        "kids_entertainment_plan": 1.0,
+        "family_shopping_with_child": 0.95,
+        "child_activity_while_parents_shop": 0.95,
+        "family_movie_plan": 0.85,
+        "family_visit_plan": 0.85,
+        "budget_family_outing": 0.8
+      }
+    },
+    {
+      "rule_id": "er-movie-kids-animation",
+      "description": "Animation/family movies get strong kid_friendly and family_movie tags — explicitly flag for family movie queries.",
+      "match_conditions": {
+        "entity_type": ["movie"],
+        "genre_includes_any": ["Animation", "Comedy", "Adventure", "Family"]
+      },
+      "apply_tags": [
+        "kid_friendly",
+        "family_movie",
+        "cinema_now",
+        "family_friendly",
+        "animation"
+      ],
+      "apply_audience": ["kid_friendly", "family_friendly"],
+      "priority_boost": {
+        "family_movie_plan": 1.0,
+        "kid_friendly_movie_plus_food": 1.0,
+        "kids_entertainment_plan": 0.9,
+        "family_visit_plan": 0.85
+      }
+    },
+    {
+      "rule_id": "er-movie-adults",
+      "description": "Thriller/horror/drama movies get adult and date_night signals.",
+      "match_conditions": {
+        "entity_type": ["movie"],
+        "genre_includes_any": ["Thriller", "Horror", "Action", "Drama", "Crime"]
+      },
+      "apply_tags": [
+        "adult_movie",
+        "cinema_now",
+        "date_night",
+        "movie_night"
+      ],
+      "apply_audience": ["couple_friendly", "solo_friendly", "group_friendly"],
+      "priority_boost": {
+        "movie_night_plan": 0.9,
+        "date_plan": 0.8,
+        "movie_plus_food": 0.9,
+        "movie_showtime_lookup": 0.9
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "entity_id": "t-store-001",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "premium",
+        "gift_friendly",
+        "self_care",
+        "special_occasion",
+        "anchor",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "relaxing",
+        "upscale"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "date_spot",
+        "special_occasion",
+        "relaxed_visit",
+        "shopping_spree"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking luxury skincare or fragrances",
+        "Looking for a premium gift for a loved one",
+        "Special occasion shopping",
+        "User mentions self-care or pampering"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User seeks only practical or everyday items"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.85,
+        "gift_for_girlfriend": 0.9,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.7,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.85,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "L'Occitane is a premium anchor for beauty and skincare, perfect for gifting or self-care. Recommend for anniversaries or when guests want to treat themselves. Pairs well with a visit to a nearby café for a relaxing outing."
+    },
+    {
+      "entity_id": "t-store-002",
+      "entity_type": "store",
+      "semantic_tags": [
+        "accessories",
+        "watches_timepieces",
+        "premium",
+        "gift_friendly",
+        "fashionable",
+        "elegant",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "stylish",
+        "modern"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "quick_visit",
+        "fashion_shopping",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for a stylish accessory or watch",
+        "Gift for a fashion-conscious friend or partner",
+        "Special occasion or birthday shopping"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User seeking children's items"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Season Accessorize (Kiosk Row) offers elegant watches and accessories, ideal for a quick gift or to complete a stylish look. Suggest for birthdays or last-minute gifts. Combine with a stop at a nearby dessert shop for a thoughtful outing."
+    },
+    {
+      "entity_id": "t-store-003",
+      "entity_type": "store",
+      "semantic_tags": [
+        "accessories",
+        "watches_timepieces",
+        "premium",
+        "gift_friendly",
+        "fashionable",
+        "elegant",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "stylish",
+        "modern"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "quick_visit",
+        "fashion_shopping",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for a stylish accessory or watch",
+        "Gift for a fashion-conscious friend or partner",
+        "Special occasion or birthday shopping"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User seeking children's items"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Season Accessorize (Kiosk Row, GF059) provides a wide range of elegant accessories and watches, perfect for fashion-forward shoppers. Recommend for quick gift shopping or to add a finishing touch to an outfit. Pair with a visit to a fashion boutique for a complete look."
+    },
+    {
+      "entity_id": "t-store-004",
+      "entity_type": "store",
+      "semantic_tags": [
+        "accessories",
+        "watches_timepieces",
+        "premium",
+        "gift_friendly",
+        "fashionable",
+        "elegant",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "stylish",
+        "modern"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "quick_visit",
+        "fashion_shopping",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for a stylish accessory or watch",
+        "Gift for a fashion-conscious friend or partner",
+        "Special occasion or birthday shopping"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User seeking children's items"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Season Accessorize (Main Gallery) is the go-to for premium watches and accessories, ideal for special occasions or as a thoughtful gift. Suggest combining with a visit to a nearby jewelry store for a luxury shopping experience."
+    },
+    {
+      "entity_id": "t-store-005",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "luxurious",
+        "classic"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "friend_gift",
+        "wife_gift",
+        "husband_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User searching for a classic fragrance",
+        "Looking for a unique gift for family or friends",
+        "Interested in Arabic or oriental scents"
+      ],
+      "avoid_if": [
+        "User prefers only international brands",
+        "User on a strict budget"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.85,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Ajmal Perfumes offers a wide range of luxurious Arabic and oriental fragrances, making it a top choice for gifting or personal indulgence. Recommend for guests looking for a memorable scent or a special gift. Pairs well with a visit to other beauty or fashion stores."
+    },
+    {
+      "entity_id": "t-store-006",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "sophisticated",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "relaxed_visit",
+        "special_occasion",
+        "shopping_spree"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "wife_gift",
+        "husband_gift",
+        "parent_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking Italian-inspired luxury perfumes",
+        "Interested in premium skincare or home fragrances",
+        "Looking for a sophisticated gift"
+      ],
+      "avoid_if": [
+        "User prefers only budget options",
+        "User seeking children's products"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.75,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Lord Milano (Kiosk Row) specializes in luxury perfumes and beauty products with Italian flair. Great for guests seeking a sophisticated gift or a personal treat. Suggest pairing with a visit to a nearby café for a relaxing break."
+    },
+    {
+      "entity_id": "t-store-007",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "natural",
+        "elegant"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "relaxed_visit",
+        "special_occasion",
+        "shopping_spree"
+      ],
+      "gift_fit": [
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for nature-inspired beauty or fragrances",
+        "Seeking a premium yet accessible gift",
+        "Interested in self-care products"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking only international brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Zohoor Al Reef (Main Gallery) is known for its elegant, nature-inspired fragrances and skincare. Recommend for guests seeking a thoughtful gift or a self-care treat. Combine with a visit to a fashion boutique for a complete shopping experience."
+    },
+    {
+      "entity_id": "t-store-008",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "lingerie_intimate",
+        "mid_range",
+        "women_focused",
+        "anchor",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "empowering",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "special_occasion",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "wife_gift",
+        "girlfriend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for comfortable and stylish lingerie",
+        "Shopping for women's gifts",
+        "Interested in Saudi brands"
+      ],
+      "avoid_if": [
+        "User seeking men's fashion",
+        "User on a strict budget"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.7,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Blooming (Main Gallery) is a Saudi anchor brand for women's lingerie and accessories, blending comfort with style. Recommend for self-treats or gifts for women. Pair with a stop at a beauty store for a complete pampering experience."
+    },
+    {
+      "entity_id": "t-store-009",
+      "entity_type": "store",
+      "semantic_tags": [
+        "electronics",
+        "digital_media",
+        "mid_range",
+        "tech_focused",
+        "digital_media_area"
+      ],
+      "audience_fit": [
+        "tech_enthusiast",
+        "business_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "innovative",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "quick_visit",
+        "tech_shopping"
+      ],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User interested in digital media or advertising solutions",
+        "Looking for tech-focused stores"
+      ],
+      "avoid_if": [
+        "User seeking consumer electronics",
+        "User looking for fashion or beauty products"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.2,
+        "solo_visit_plan": 0.5,
+        "anniversary_plan": 0,
+        "gift_for_girlfriend": 0,
+        "gift_for_family": 0,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0,
+        "date_plan": 0,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.2,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Wave Media Digital (Digital Media Area) is ideal for guests interested in advertising, tech, or digital media. Recommend for business visitors or tech enthusiasts. Pair with a visit to a nearby café for a productive break."
+    },
+    {
+      "entity_id": "t-store-010",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "ethical",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "solo_friendly",
+        "couple_friendly"
+      ],
+      "vibe": [
+        "ethical",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "relaxed_visit",
+        "shopping_spree",
+        "self_care"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "parent_gift",
+        "wife_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking ethical or cruelty-free beauty products",
+        "Looking for a thoughtful gift",
+        "Interested in skincare or body care"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking only luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "The Body Shop (Main Gallery) is known for ethical, cruelty-free skincare and beauty products. Recommend for guests seeking thoughtful gifts or self-care items. Pair with a stop at a dessert café for a relaxing outing."
+    },
+    {
+      "entity_id": "t-store-011",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "accessories_bags",
+        "budget",
+        "family_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "fun",
+        "affordable"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "quick_visit",
+        "family_shopping",
+        "budget_shopping"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "child_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for affordable accessories or bags",
+        "Family shopping on a budget",
+        "Teen shoppers seeking trendy items"
+      ],
+      "avoid_if": [
+        "User seeking luxury brands",
+        "User looking for high-end gifts"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.2,
+        "gift_for_girlfriend": 0.5,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.9,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "MINISO (Main Gallery) is a family-friendly destination for affordable accessories, bags, and gifts. Great for budget-conscious shoppers or quick gift finds. Suggest pairing with a visit to a dessert shop for a fun family outing."
+    },
+    {
+      "entity_id": "t-store-012",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "anchor",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking unique Saudi fragrances",
+        "Looking for a memorable gift",
+        "Interested in elegant perfumes"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking only international brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Bloom Perfumes (Kiosk Row) offers elegant, long-lasting Saudi fragrances, perfect for gifting or personal use. Recommend for guests seeking something unique. Pair with a visit to a fashion store for a complete shopping experience."
+    },
+    {
+      "entity_id": "t-store-013",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "bags_accessories",
+        "mid_range",
+        "modern",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "teen_friendly",
+        "women_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "trendy",
+        "chic"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "shopping_spree",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "girlfriend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking trendy bags or accessories",
+        "Teen or young adult shoppers",
+        "Looking for a chic gift"
+      ],
+      "avoid_if": [
+        "User seeking traditional wear",
+        "User on a strict budget"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Stradivarius (Main Gallery) features modern, chic bags and accessories inspired by the latest trends. Ideal for young adults and teens. Suggest pairing with a visit to a dessert café for a fashionable day out."
+    },
+    {
+      "entity_id": "t-store-014",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "bags_accessories",
+        "mid_range",
+        "anchor",
+        "youth_focused",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "teen_friendly",
+        "women_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "bold",
+        "trendy"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "shopping_spree",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking bold, trendy fashion accessories",
+        "Young shoppers interested in the latest styles",
+        "Looking for a statement gift"
+      ],
+      "avoid_if": [
+        "User seeking traditional wear",
+        "User on a strict budget"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.75,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Bershka (Main Gallery) is an anchor for bold, youthful fashion accessories and bags. Perfect for trendsetters and young adults. Recommend pairing with a visit to a nearby coffee shop for a stylish outing."
+    },
+    {
+      "entity_id": "t-store-015",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "footwear",
+        "mid_range",
+        "vegan_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "teen_friendly",
+        "women_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "trendy",
+        "accessible"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "quick_visit",
+        "budget_shopping"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "girlfriend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking vegan shoes or accessories",
+        "Looking for trendy, affordable footwear",
+        "Searching for a gift for a fashion-conscious friend"
+      ],
+      "avoid_if": [
+        "User seeking luxury brands",
+        "User looking for men's formal shoes"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.4,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.4,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Call It Spring (Main Gallery) offers vegan-friendly, trendy footwear and accessories at accessible prices. Recommend for style-conscious guests or as a thoughtful gift. Pair with a fashion or accessories store for a complete look."
+    },
+    {
+      "entity_id": "t-store-016",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "luxurious",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking luxury perfumes",
+        "Looking for a unique gift",
+        "Interested in quality fragrance products"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking only international brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Doknah Perfumes (Kiosk Row) is the destination for luxury, quality fragrances. Recommend for guests seeking a special gift or a new signature scent. Pair with a visit to a beauty or fashion store for a complete shopping trip."
+    },
+    {
+      "entity_id": "t-store-017",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "traditional_wear",
+        "mid_range",
+        "women_focused",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "family_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "timeless"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "special_occasion",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "wife_gift",
+        "parent_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User looking for elegant dresses or skirts",
+        "Interested in traditional wear",
+        "Seeking a timeless fashion gift"
+      ],
+      "avoid_if": [
+        "User seeking men's fashion",
+        "User on a strict budget"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.6,
+        "gift_for_girlfriend": 0.6,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.4,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "It's Mine (Main Gallery) is renowned for elegant traditional dresses and skirts, perfect for special occasions or as a thoughtful gift. Suggest pairing with a visit to a beauty store for a full pampering experience."
+    },
+    {
+      "entity_id": "t-store-018",
+      "entity_type": "store",
+      "semantic_tags": [
+        "jewelry",
+        "fine_jewelry",
+        "premium",
+        "gift_friendly",
+        "luxury",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "women_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "luxurious"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "special_occasion",
+        "luxury_shopping",
+        "date_spot"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "special_occasion_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking luxury jewelry or crystal gifts",
+        "Looking for a memorable anniversary or special occasion gift",
+        "Interested in elegant accessories"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking casual gifts"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.9,
+        "gift_for_girlfriend": 0.9,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.8,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.9,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Swarovski (Main Gallery) is the destination for luxury crystal jewelry and elegant gifts. Perfect for anniversaries, special occasions, or treating a loved one. Pair with a visit to a high-end café for a truly special outing."
+    },
+    {
+      "entity_id": "t-store-019",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "classic",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking classic Arabic fragrances",
+        "Looking for a mood-boosting gift",
+        "Interested in traditional beauty products"
+      ],
+      "avoid_if": [
+        "User on a strict budget",
+        "User seeking only international brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "AbdulSammad AlQurashi (Main Gallery) is famous for classic Arabic perfumes and beauty products. Recommend for guests seeking a traditional, mood-boosting gift. Pair with a visit to a nearby café for a relaxing break."
+    },
+    {
+      "entity_id": "t-store-020",
+      "entity_type": "store",
+      "semantic_tags": [
+        "health",
+        "pharmacy",
+        "mid_range",
+        "family_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "solo_friendly",
+        "elderly_friendly"
+      ],
+      "vibe": [
+        "practical",
+        "caring"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "quick_visit",
+        "family_shopping",
+        "health_essential"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User needs health or beauty essentials",
+        "Family shopping for pharmacy products",
+        "Looking for wellness gifts"
+      ],
+      "avoid_if": [
+        "User seeking luxury gifts",
+        "User looking for fashion or electronics"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.1,
+        "gift_for_girlfriend": 0.2,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.1,
+        "date_plan": 0.1,
+        "budget_family_outing": 0.8,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0.4,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Whites Pharmacy (Main Gallery) is your go-to for health and beauty essentials. Ideal for families or solo shoppers needing quick pharmacy items. Pair with a visit to a beauty or wellness store for a complete health-focused outing."
+    },
+    {
+      "entity_id": "t-store-021",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "accessories_bags",
+        "mid_range",
+        "main_gallery",
+        "trend_focused",
+        "global_brand",
+        "family_friendly",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "teen_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "modern",
+        "trendy",
+        "accessible"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "shopping_spree",
+        "fashion_shopping",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "teen_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants the latest fashion trends",
+        "Looking for accessible, stylish gifts",
+        "Family or group shopping",
+        "User mentions international brands"
+      ],
+      "avoid_if": [
+        "User seeks luxury exclusivity",
+        "User wants only local brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.6,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.7,
+        "luxury_shopping_plan": 0.4,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Zara in the Main Gallery is a global favorite for on-trend, affordable fashion and accessories for all ages. Ideal for family shopping or picking up a last-minute gift. Pair with a coffee break at a nearby café for a stylish outing."
+    },
+    {
+      "entity_id": "t-store-022",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "bags_accessories",
+        "mid_range",
+        "main_gallery",
+        "women_focused",
+        "elegant",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "chic",
+        "modern",
+        "comfortable"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "quick_visit",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks elegant women's accessories",
+        "Looking for a stylish gift for her",
+        "Interest in Saudi brands"
+      ],
+      "avoid_if": [
+        "User seeks menswear",
+        "User wants luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.6,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.5,
+        "luxury_shopping_plan": 0.4,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Prando is a Saudi women's fashion leader offering chic bags and accessories in the Main Gallery. Great for a quick gift or self-treat. Suggest pairing with a dessert stop nearby for a delightful outing."
+    },
+    {
+      "entity_id": "t-store-023",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "accessories_bags",
+        "mid_range",
+        "main_gallery",
+        "anchor",
+        "trend_focused",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "teen_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "stylish",
+        "vibrant",
+        "accessible"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "shopping_spree",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "teen_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants trendy accessories or handbags",
+        "Looking for a fashionable gift",
+        "Interest in anchor brands"
+      ],
+      "avoid_if": [
+        "User seeks high-end luxury",
+        "User wants men's accessories"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.8,
+        "anniversary_plan": 0.6,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.6,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.6,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.8,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Aldo Accessories is an anchor for trendy, affordable accessories and bags. Perfect for teens, couples, or anyone seeking a fashionable gift. Recommend for shopping sprees and pair with a nearby café for a complete experience."
+    },
+    {
+      "entity_id": "t-store-024",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "main_gallery",
+        "natural_ingredients",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "natural",
+        "fresh",
+        "relaxing"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "self_care",
+        "relaxed_visit",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks natural beauty products",
+        "Looking for a thoughtful, self-care gift",
+        "Interest in French or botanical brands"
+      ],
+      "avoid_if": [
+        "User seeks luxury skincare",
+        "User wants only makeup"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.4,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "YVES ROCHER in the Main Gallery is perfect for those who love botanical beauty and skincare. Recommend for self-care gifts or a relaxing shopping break. Pair with a nearby coffee shop for a rejuvenating outing."
+    },
+    {
+      "entity_id": "t-store-025",
+      "entity_type": "store",
+      "semantic_tags": [
+        "jewelry",
+        "fine_jewelry",
+        "premium",
+        "main_gallery",
+        "luxury",
+        "gift_friendly",
+        "special_occasion"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "women_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "sophisticated",
+        "timeless"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "special_occasion",
+        "date_spot",
+        "luxury_shopping"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "anniversary_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks luxury jewelry or watches",
+        "Special occasion or anniversary shopping",
+        "Looking for a premium gift"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User wants casual accessories"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.9,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.8,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.9,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Tous is a luxury jewelry destination in the Main Gallery, perfect for anniversaries, special occasions, or premium gifting. Suggest pairing with a fine dining experience for a memorable outing."
+    },
+    {
+      "entity_id": "t-store-026",
+      "entity_type": "store",
+      "semantic_tags": [
+        "accessories",
+        "watches_timepieces",
+        "premium",
+        "main_gallery",
+        "luxury",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "men_friendly",
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "modern",
+        "refined"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "special_occasion",
+        "luxury_shopping",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "husband_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks luxury watches or timepieces",
+        "Looking for a refined gift",
+        "Interest in local luxury brands"
+      ],
+      "avoid_if": [
+        "User on a budget",
+        "User wants casual accessories"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.1,
+        "luxury_shopping_plan": 0.8,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Cardial offers premium watches and timepieces in the Main Gallery. Ideal for luxury gifting or marking a special occasion. Recommend pairing with a nearby jewelry store for a complete luxury shopping experience."
+    },
+    {
+      "entity_id": "t-store-027",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "main_gallery",
+        "natural_ingredients",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "natural",
+        "relaxing",
+        "fresh"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "self_care",
+        "relaxed_visit",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks natural skincare or beauty products",
+        "Looking for a thoughtful, wellness-oriented gift",
+        "Interest in brands with natural ingredients"
+      ],
+      "avoid_if": [
+        "User wants only makeup",
+        "User seeks luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.6,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.4,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Natural Touch specializes in skincare and beauty with natural ingredients, perfect for wellness gifts or self-care. Pair with a relaxing café visit for a rejuvenating outing."
+    },
+    {
+      "entity_id": "t-store-028",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "bags_accessories",
+        "mid_range",
+        "main_gallery",
+        "women_focused",
+        "trend_focused"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "modern",
+        "chic",
+        "youthful"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "teen_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks fashionable bags or accessories for women",
+        "Interest in Malaysian or Asian brands",
+        "Looking for a gift for a young woman"
+      ],
+      "avoid_if": [
+        "User seeks menswear",
+        "User wants luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.4,
+        "budget_family_outing": 0.5,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Nichii offers chic bags and accessories for women, especially suited for young adults. Recommend for solo shoppers or as a gift stop. Combine with a dessert shop for a fun outing."
+    },
+    {
+      "entity_id": "t-store-029",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "footwear",
+        "premium",
+        "main_gallery",
+        "anchor",
+        "global_brand",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "men_friendly",
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "modern",
+        "innovative",
+        "stylish"
+      ],
+      "price_band": "premium",
+      "outing_fit": [
+        "fashion_shopping",
+        "luxury_shopping",
+        "shopping_spree"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "husband_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks high-quality, stylish footwear",
+        "Interest in international brands",
+        "Looking for a premium gift"
+      ],
+      "avoid_if": [
+        "User on a tight budget",
+        "User wants only accessories"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.8,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.8,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "COLE HAAN is an anchor for premium footwear and accessories, ideal for those seeking quality and style. Suggest for luxury shopping or gifting, and pair with a visit to a nearby fashion store for a complete look."
+    },
+    {
+      "entity_id": "t-store-030",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "accessories_bags",
+        "mid_range",
+        "main_gallery",
+        "jewelry",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "timeless",
+        "refined"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "special_occasion",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks elegant jewelry or accessories",
+        "Looking for a timeless gift",
+        "Interest in silver jewelry"
+      ],
+      "avoid_if": [
+        "User seeks luxury gold jewelry",
+        "User wants only clothing"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.4,
+        "luxury_shopping_plan": 0.4,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Bareeq Silver offers elegant silver jewelry, perfect for gifting or special occasions. Pair with a visit to a nearby accessories store for a complete shopping experience."
+    },
+    {
+      "entity_id": "t-store-031",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "kiosk_row",
+        "fragrance",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "exotic",
+        "sophisticated",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "quick_visit",
+        "special_occasion",
+        "self_care"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks unique perfumes",
+        "Interest in Middle Eastern or French fragrances",
+        "Looking for a thoughtful gift"
+      ],
+      "avoid_if": [
+        "User wants only skincare",
+        "User seeks budget options"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Musk in Kiosk Row is ideal for those seeking unique, long-lasting perfumes with a blend of Eastern and French notes. Suggest for gifting or as a special treat after shopping."
+    },
+    {
+      "entity_id": "t-store-032",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "value_fashion",
+        "budget",
+        "entertainment_wing",
+        "family_friendly",
+        "one_stop_shop"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "budget_shopper",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "casual",
+        "accessible",
+        "lively"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "family_shopping",
+        "budget_outing",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "child_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks affordable family shopping",
+        "Looking for value fashion",
+        "Interest in multi-brand stores"
+      ],
+      "avoid_if": [
+        "User seeks luxury brands",
+        "User wants boutique shopping"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.9,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.3,
+        "gift_for_girlfriend": 0.4,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.3,
+        "budget_family_outing": 0.9,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Centrepoint in the Entertainment Wing is the go-to for affordable family shopping with multiple brands under one roof. Ideal for budget outings and family visits. Pair with a stop at the food court for a full family day."
+    },
+    {
+      "entity_id": "t-store-033",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "kiosk_row",
+        "fragrance",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "exotic",
+        "modern",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "quick_visit",
+        "special_occasion",
+        "self_care"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks unique perfumes",
+        "Interest in Middle Eastern fragrances",
+        "Looking for a thoughtful gift"
+      ],
+      "avoid_if": [
+        "User wants only skincare",
+        "User seeks luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Reef Perfumes in Kiosk Row is perfect for those seeking signature Middle Eastern scents. Recommend for gifting or a quick, fragrant shopping stop. Pair with a visit to a nearby beauty store for a full experience."
+    },
+    {
+      "entity_id": "t-store-034",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "footwear",
+        "mid_range",
+        "main_gallery",
+        "women_focused",
+        "elegant"
+      ],
+      "audience_fit": [
+        "women_friendly",
+        "solo_friendly",
+        "couple_friendly"
+      ],
+      "vibe": [
+        "chic",
+        "modern",
+        "refined"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "fashion_shopping",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks stylish women's footwear",
+        "Interest in unique designs",
+        "Looking for a gift for her"
+      ],
+      "avoid_if": [
+        "User seeks men's shoes",
+        "User wants luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.4,
+        "date_plan": 0.4,
+        "budget_family_outing": 0.5,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Seera offers elegant women's footwear in the Main Gallery, perfect for solo shoppers or as a gift. Combine with a stop at a fashion accessories store for a complete look."
+    },
+    {
+      "entity_id": "t-store-035",
+      "entity_type": "store",
+      "semantic_tags": [
+        "health",
+        "optical",
+        "mid_range",
+        "main_gallery",
+        "medical",
+        "family_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "solo_friendly",
+        "senior_friendly"
+      ],
+      "vibe": [
+        "professional",
+        "practical",
+        "trustworthy"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "health_appointment",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User needs prescription glasses or sunglasses",
+        "Interest in eye health",
+        "Looking for medical eyewear"
+      ],
+      "avoid_if": [
+        "User wants only fashion accessories",
+        "User seeks luxury sunglasses"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.2,
+        "gift_for_girlfriend": 0.3,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.6,
+        "luxury_shopping_plan": 0.2,
+        "last_minute_gift": 0.3,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Doctor M in the Main Gallery is a trusted stop for medical eyeglasses and sunglasses. Recommend for families or solo shoppers needing optical care. Pair with a pharmacy visit for a complete health outing."
+    },
+    {
+      "entity_id": "t-store-036",
+      "entity_type": "store",
+      "semantic_tags": [
+        "home",
+        "home_decor_furniture",
+        "mid_range",
+        "main_gallery",
+        "contemporary",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "modern",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "home_shopping",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "housewarming_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks home decor or furniture",
+        "Looking for a housewarming gift",
+        "Interest in contemporary home style"
+      ],
+      "avoid_if": [
+        "User wants luxury furniture",
+        "User seeks electronics"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.3,
+        "gift_for_girlfriend": 0.4,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.3,
+        "budget_family_outing": 0.6,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "MI DI. offers elegant home decor and furniture in the Main Gallery, perfect for family or couple shopping. Suggest for housewarming gifts or a home refresh. Pair with a coffee break for a leisurely outing."
+    },
+    {
+      "entity_id": "t-store-037",
+      "entity_type": "store",
+      "semantic_tags": [
+        "health",
+        "optical",
+        "mid_range",
+        "main_gallery",
+        "modern",
+        "family_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "innovative",
+        "accessible",
+        "professional"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "health_appointment",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "teen_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks prescription glasses or contact lenses",
+        "Interest in affordable eyewear",
+        "Looking for blue light glasses"
+      ],
+      "avoid_if": [
+        "User wants only luxury sunglasses",
+        "User seeks fashion accessories"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.2,
+        "gift_for_girlfriend": 0.3,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.6,
+        "luxury_shopping_plan": 0.2,
+        "last_minute_gift": 0.3,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "eyewa in the Main Gallery is the largest online eyewear brand in the region, offering affordable and stylish options for the whole family. Suggest for quick vision needs or as a practical gift for students and professionals."
+    },
+    {
+      "entity_id": "t-store-038",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "main_gallery",
+        "anchor",
+        "fragrance",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "fresh",
+        "inviting",
+        "trendy"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "self_care",
+        "shopping_spree",
+        "special_occasion"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks fragrant body or home products",
+        "Looking for a trendy gift",
+        "Interest in anchor beauty brands"
+      ],
+      "avoid_if": [
+        "User seeks luxury skincare",
+        "User wants only makeup"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.7,
+        "solo_visit_plan": 0.8,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.5,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.8,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Bath & Body Works is an anchor for fragrant body and home products, perfect for gifting or self-care. Recommend for special occasions or a shopping spree. Pair with a visit to a nearby café for a pampering day."
+    },
+    {
+      "entity_id": "t-store-039",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "accessories_bags",
+        "budget",
+        "entertainment_wing",
+        "family_friendly",
+        "value_shopping"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "budget_shopper",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "casual",
+        "accessible",
+        "lively"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "family_shopping",
+        "budget_outing",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "child_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks affordable fashion or accessories",
+        "Looking for value deals",
+        "Interest in one-stop shopping"
+      ],
+      "avoid_if": [
+        "User seeks luxury brands",
+        "User wants boutique shopping"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.3,
+        "gift_for_girlfriend": 0.4,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.3,
+        "budget_family_outing": 0.8,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Brands For Less in the Entertainment Wing is a value destination for fashion and home essentials. Great for families and budget shoppers. Pair with a visit to the food court for a full value outing."
+    },
+    {
+      "entity_id": "t-store-040",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "mid_range",
+        "kiosk_row",
+        "fragrance",
+        "luxury",
+        "gift_friendly"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "exclusive",
+        "sophisticated"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "luxury_shopping",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks luxury perfumes",
+        "Looking for an exclusive fragrance gift",
+        "Interest in unique scents"
+      ],
+      "avoid_if": [
+        "User seeks budget options",
+        "User wants only skincare"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Osma in Kiosk Row is a luxury fragrance brand for those seeking unique, long-lasting scents. Ideal for exclusive gifting or special occasions. Pair with a visit to a jewelry store for a premium shopping experience."
+    },
+    {
+      "entity_id": "t-store-041",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "refined",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "shopping_spree",
+        "special_occasion",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeking unique fragrances or personal care gifts",
+        "Looking for mid-range beauty products",
+        "Interested in French-inspired scents"
+      ],
+      "avoid_if": [
+        "User wants only luxury or ultra-budget items",
+        "User is not interested in fragrances"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.75,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.05,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Grasse Perfume (Kiosk Row) is the exclusive distributor of Expressions Parfumées, offering elegant French-inspired fragrances at a mid-range price. Perfect for thoughtful gifts or a personal treat. Pair with a dessert stop at Baskin Robbins for a sweet shopping experience."
+    },
+    {
+      "entity_id": "t-store-042",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "mid_range",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "couple_friendly",
+        "solo_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "luxurious",
+        "modern",
+        "inviting"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "date_spot",
+        "shopping_spree"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants a luxurious yet affordable perfume",
+        "Looking for a special gift for her",
+        "Interested in unique scent experiences"
+      ],
+      "avoid_if": [
+        "User is on a strict budget",
+        "User prefers only skincare or makeup"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.4,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.85,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.7,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.6,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "Match (Main Gallery) offers elegant, long-lasting perfumes with a luxurious oriental touch. Ideal for gifting or special occasions. Recommend for anniversary plans or as a thoughtful gift before a coffee break at Starbucks."
+    },
+    {
+      "entity_id": "t-store-043",
+      "entity_type": "store",
+      "semantic_tags": [
+        "lifestyle",
+        "fragrance",
+        "arabian_perfume",
+        "mid_range",
+        "gift_friendly",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "traditional",
+        "exotic",
+        "contemporary"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "friend_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User interested in Arabian-inspired fragrances",
+        "Looking for a unique, memorable gift",
+        "Seeking a blend of traditional and modern scents"
+      ],
+      "avoid_if": [
+        "User prefers only Western brands",
+        "User is not interested in perfumes"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.5,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.6,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.05,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Ateej (Kiosk Row) specializes in Arabian-inspired perfumes with a modern twist, making it a great stop for unique gifts or self-indulgence. Suggest pairing with a visit to Terra Perfum for fragrance lovers."
+    },
+    {
+      "entity_id": "t-store-044",
+      "entity_type": "store",
+      "semantic_tags": [
+        "beauty",
+        "cosmetics_skincare",
+        "fragrance",
+        "heritage_brand",
+        "mid_range",
+        "gift_friendly",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "heritage",
+        "luxurious",
+        "authentic"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "special_occasion",
+        "shopping_spree",
+        "relaxed_visit"
+      ],
+      "gift_fit": [
+        "parent_gift",
+        "friend_gift",
+        "wife_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User values Saudi heritage brands",
+        "Looking for authentic oud or musk fragrances",
+        "Seeking a meaningful gift"
+      ],
+      "avoid_if": [
+        "User is not interested in perfumes",
+        "User wants only international brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.8,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.8,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.3,
+        "date_plan": 0.6,
+        "budget_family_outing": 0.3,
+        "luxury_shopping_plan": 0.7,
+        "last_minute_gift": 0.7,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Ibraq Ibrahim Alqurashi (Main Gallery) is a heritage Saudi perfume house known for oud and musk blends. Excellent for meaningful gifts or special occasions. Suggest after a relaxing coffee at Starbucks for a memorable outing."
+    },
+    {
+      "entity_id": "t-store-045",
+      "entity_type": "store",
+      "semantic_tags": [
+        "banking",
+        "atm",
+        "services",
+        "kiosk_row",
+        "mid_range"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "solo_friendly",
+        "couple_friendly"
+      ],
+      "vibe": [
+        "practical",
+        "convenient"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "quick_visit",
+        "errand"
+      ],
+      "gift_fit": [],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User needs cash withdrawal or banking services",
+        "Looking for ATM access in the mall"
+      ],
+      "avoid_if": [
+        "User does not require banking services"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.3,
+        "solo_visit_plan": 0.5,
+        "anniversary_plan": 0,
+        "gift_for_girlfriend": 0,
+        "gift_for_family": 0,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0.1,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0,
+        "date_plan": 0,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "ATM - Saudi Investment Bank (Kiosk Row) provides convenient access to cash and banking services. Recommend for guests needing quick banking while shopping or dining. Located near several kiosks for easy access."
+    },
+    {
+      "entity_id": "t-store-046",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fragrance",
+        "retail",
+        "mid_range",
+        "gift_friendly",
+        "kiosk_row"
+      ],
+      "audience_fit": [
+        "solo_friendly",
+        "couple_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "creative",
+        "elegant",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "shopping_spree",
+        "special_occasion",
+        "quick_visit"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "self_treat",
+        "girlfriend_gift"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User interested in creative, story-driven fragrances",
+        "Looking for a unique gift",
+        "Seeking a new signature scent"
+      ],
+      "avoid_if": [
+        "User is not interested in perfumes",
+        "User wants only luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.4,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.7,
+        "gift_for_family": 0.6,
+        "movie_plus_food": 0.05,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.2,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.2,
+        "luxury_shopping_plan": 0.5,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0.1
+      },
+      "concierge_notes": "Terra Perfum (Kiosk Row) offers creative, high-quality fragrances with elegant designs. Great for gifting or discovering a new scent. Suggest pairing with a visit to Ateej for fragrance enthusiasts."
+    },
+    {
+      "entity_id": "t-store-047",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "streetwear",
+        "family_fashion",
+        "mid_range",
+        "entertainment_wing"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "urban",
+        "trendy",
+        "youthful"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "shopping_spree",
+        "family_outing",
+        "casual_visit"
+      ],
+      "gift_fit": [
+        "friend_gift",
+        "teen_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User wants affordable, trendy fashion for all ages",
+        "Looking for family or youth clothing",
+        "Interested in urban streetwear"
+      ],
+      "avoid_if": [
+        "User seeks only luxury brands",
+        "User is not interested in fashion"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.2,
+        "gift_for_girlfriend": 0.4,
+        "gift_for_family": 0.7,
+        "movie_plus_food": 0.2,
+        "kid_friendly_movie_plus_food": 0.2,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.3,
+        "budget_family_outing": 0.7,
+        "luxury_shopping_plan": 0.2,
+        "last_minute_gift": 0.5,
+        "child_activity_while_parents_shop": 0.2
+      },
+      "concierge_notes": "Blue Age (Entertainment Wing) is a go-to for urban streetwear and family fashion at affordable prices. Ideal for family shopping sprees or updating your wardrobe before catching a movie at Muvi Cinema."
+    },
+    {
+      "entity_id": "t-store-048",
+      "entity_type": "store",
+      "semantic_tags": [
+        "fashion",
+        "womenswear",
+        "contemporary",
+        "mid_range",
+        "main_gallery"
+      ],
+      "audience_fit": [
+        "solo_friendly",
+        "couple_friendly",
+        "family_friendly"
+      ],
+      "vibe": [
+        "elegant",
+        "modern",
+        "feminine"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "shopping_spree",
+        "special_occasion",
+        "casual_visit"
+      ],
+      "gift_fit": [
+        "girlfriend_gift",
+        "wife_gift",
+        "self_treat"
+      ],
+      "meal_fit": [],
+      "when_to_recommend": [
+        "User seeks modern women's fashion",
+        "Looking for a stylish gift for her",
+        "Interested in contemporary Saudi brands"
+      ],
+      "avoid_if": [
+        "User is not interested in womenswear",
+        "User seeks only budget or luxury brands"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.7,
+        "gift_for_girlfriend": 0.8,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.1,
+        "kid_friendly_movie_plus_food": 0,
+        "quick_lunch": 0,
+        "shopping_plus_dessert_combo": 0.5,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.4,
+        "luxury_shopping_plan": 0.4,
+        "last_minute_gift": 0.6,
+        "child_activity_while_parents_shop": 0
+      },
+      "concierge_notes": "RINA (Main Gallery) offers elegant, contemporary women's fashion perfect for updating your look or finding a stylish gift. Suggest for solo shoppers or as a pre-date stop before coffee at Starbucks."
+    },
+    {
+      "entity_id": "t-dining-001",
+      "entity_type": "dining",
+      "semantic_tags": [
+        "dessert",
+        "ice_cream",
+        "family_friendly",
+        "kiosk_row",
+        "mid_range",
+        "halal"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "kid_friendly",
+        "teen_friendly",
+        "couple_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "fun",
+        "colorful",
+        "casual"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "family_outing",
+        "treat_time",
+        "shopping_break"
+      ],
+      "gift_fit": [],
+      "meal_fit": [
+        "dessert"
+      ],
+      "when_to_recommend": [
+        "User wants a sweet treat",
+        "Looking for a family-friendly dessert spot",
+        "Seeking halal-certified ice cream"
+      ],
+      "avoid_if": [
+        "User is lactose intolerant",
+        "User wants a full meal"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.9,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.4,
+        "gift_for_girlfriend": 0.2,
+        "gift_for_family": 0.5,
+        "movie_plus_food": 0.5,
+        "kid_friendly_movie_plus_food": 0.7,
+        "quick_lunch": 0.2,
+        "shopping_plus_dessert_combo": 0.9,
+        "date_plan": 0.5,
+        "budget_family_outing": 0.8,
+        "luxury_shopping_plan": 0.2,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.6
+      },
+      "concierge_notes": "Baskin Robbins (Kiosk Row) is a colorful, family-friendly spot for ice cream and desserts. Perfect for a sweet break during shopping or after a meal. Pairs well with a visit to Muvi Cinema for a classic movie and dessert outing."
+    },
+    {
+      "entity_id": "t-dining-002",
+      "entity_type": "dining",
+      "semantic_tags": [
+        "fast_food",
+        "chicken",
+        "halal",
+        "budget",
+        "food_court",
+        "family_friendly",
+        "kid_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "kid_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "casual",
+        "lively",
+        "quick_service"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "quick_lunch",
+        "family_outing",
+        "movie_plus_food"
+      ],
+      "gift_fit": [],
+      "meal_fit": [
+        "lunch",
+        "dinner"
+      ],
+      "when_to_recommend": [
+        "User wants a quick, affordable meal",
+        "Looking for halal-certified fast food",
+        "Family with kids seeking a convenient lunch"
+      ],
+      "avoid_if": [
+        "User wants fine dining",
+        "User is vegetarian"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.85,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.1,
+        "gift_for_girlfriend": 0,
+        "gift_for_family": 0.2,
+        "movie_plus_food": 0.8,
+        "kid_friendly_movie_plus_food": 0.85,
+        "quick_lunch": 0.9,
+        "shopping_plus_dessert_combo": 0.7,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.9,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.5
+      },
+      "concierge_notes": "Kudu Restaurant (Food Court) is a top pick for quick, budget-friendly halal meals, especially for families with kids. Great for a lunch break before or after shopping, or as a meal before a movie at Muvi Cinema."
+    },
+    {
+      "entity_id": "t-dining-003",
+      "entity_type": "dining",
+      "semantic_tags": [
+        "cafe",
+        "coffee",
+        "light_dining",
+        "mid_range",
+        "main_gallery",
+        "halal"
+      ],
+      "audience_fit": [
+        "solo_friendly",
+        "couple_friendly",
+        "family_friendly",
+        "teen_friendly"
+      ],
+      "vibe": [
+        "relaxing",
+        "cozy",
+        "social"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "coffee_break",
+        "casual_meetup",
+        "date_spot"
+      ],
+      "gift_fit": [],
+      "meal_fit": [
+        "breakfast",
+        "snack"
+      ],
+      "when_to_recommend": [
+        "User wants a coffee break",
+        "Looking for a casual meeting spot",
+        "Seeking a relaxing environment"
+      ],
+      "avoid_if": [
+        "User wants a full meal",
+        "User avoids caffeine"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.6,
+        "solo_visit_plan": 0.9,
+        "anniversary_plan": 0.5,
+        "gift_for_girlfriend": 0.2,
+        "gift_for_family": 0.3,
+        "movie_plus_food": 0.5,
+        "kid_friendly_movie_plus_food": 0.3,
+        "quick_lunch": 0.4,
+        "shopping_plus_dessert_combo": 0.7,
+        "date_plan": 0.7,
+        "budget_family_outing": 0.5,
+        "luxury_shopping_plan": 0.4,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.3
+      },
+      "concierge_notes": "Starbucks (Main Gallery) is perfect for a relaxing coffee break, casual meetups, or solo downtime. Suggest pairing with a shopping trip to RINA or as a cozy spot before a movie at Muvi Cinema."
+    },
+    {
+      "entity_id": "t-dining-004",
+      "entity_type": "dining",
+      "semantic_tags": [
+        "fast_food",
+        "chicken",
+        "halal",
+        "budget",
+        "food_court",
+        "family_friendly",
+        "kid_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "kid_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "lively",
+        "casual",
+        "american"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "quick_lunch",
+        "family_outing",
+        "movie_plus_food"
+      ],
+      "gift_fit": [],
+      "meal_fit": [
+        "lunch",
+        "dinner"
+      ],
+      "when_to_recommend": [
+        "User wants American-style fried chicken",
+        "Looking for a quick, halal meal",
+        "Family with kids seeking a familiar fast food option"
+      ],
+      "avoid_if": [
+        "User is vegetarian",
+        "User wants fine dining"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.85,
+        "solo_visit_plan": 0.7,
+        "anniversary_plan": 0.1,
+        "gift_for_girlfriend": 0,
+        "gift_for_family": 0.2,
+        "movie_plus_food": 0.8,
+        "kid_friendly_movie_plus_food": 0.85,
+        "quick_lunch": 0.9,
+        "shopping_plus_dessert_combo": 0.7,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.9,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.5
+      },
+      "concierge_notes": "Popeyes Restaurant (Food Court) is a lively spot for American-style fried chicken, perfect for quick, halal family meals. Ideal before or after a movie at Muvi Cinema or as a satisfying lunch during a shopping day."
+    },
+    {
+      "entity_id": "t-dining-005",
+      "entity_type": "dining",
+      "semantic_tags": [
+        "fast_food",
+        "snacks",
+        "corn",
+        "halal",
+        "budget",
+        "kiosk_row",
+        "family_friendly",
+        "kid_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "kid_friendly",
+        "teen_friendly",
+        "solo_friendly"
+      ],
+      "vibe": [
+        "fun",
+        "casual",
+        "colorful"
+      ],
+      "price_band": "budget",
+      "outing_fit": [
+        "snack_break",
+        "family_outing",
+        "quick_visit"
+      ],
+      "gift_fit": [],
+      "meal_fit": [
+        "snack"
+      ],
+      "when_to_recommend": [
+        "User wants a quick, fun snack",
+        "Looking for corn-based treats",
+        "Family with kids seeking a light bite"
+      ],
+      "avoid_if": [
+        "User wants a full meal",
+        "User is not interested in snacks"
+      ],
+      "priority_scores": {
+        "family_visit_plan": 0.8,
+        "solo_visit_plan": 0.6,
+        "anniversary_plan": 0.1,
+        "gift_for_girlfriend": 0,
+        "gift_for_family": 0.2,
+        "movie_plus_food": 0.5,
+        "kid_friendly_movie_plus_food": 0.7,
+        "quick_lunch": 0.6,
+        "shopping_plus_dessert_combo": 0.7,
+        "date_plan": 0.2,
+        "budget_family_outing": 0.8,
+        "luxury_shopping_plan": 0.1,
+        "last_minute_gift": 0,
+        "child_activity_while_parents_shop": 0.5
+      },
+      "concierge_notes": "Corn World (Kiosk Row) is a fun snack stop specializing in creative corn-based treats. Great for families or kids needing a quick, tasty break. Suggest as a snack before a movie or after shopping at Blue Age."
+    },
+    {
+      "entity_id": "t-cinema-001",
+      "entity_type": "cinema",
+      "semantic_tags": [
+        "cinema",
+        "movies",
+        "entertainment",
+        "entertainment_anchor",
+        "cinema_now",
+        "showtime_lookup",
+        "movie_night",
+        "family_movie",
+        "kid_friendly",
+        "family_friendly",
+        "date_spot",
+        "date_night",
+        "mid_range",
+        "cinema_zone",
+        "couple_friendly",
+        "group_friendly",
+        "teen_friendly"
+      ],
+      "audience_fit": [
+        "family_friendly",
+        "kid_friendly",
+        "couple_friendly",
+        "teen_friendly",
+        "solo_friendly",
+        "group_friendly"
+      ],
+      "vibe": [
+        "exciting",
+        "immersive",
+        "modern"
+      ],
+      "price_band": "mid_range",
+      "outing_fit": [
+        "movie_night",
+        "movie_showtime_lookup",
+        "movie_night_plan",
+        "family_movie_plan",
+        "kids_cinema",
+        "date_night",
+        "family_outing",
+        "date_spot",
+        "evening_out"
+      ],
+      "gift_fit": ["experience_gift"],
+      "meal_fit": ["snack"],
+      "routing_tags": [
+        "cinema_level",
+        "accessible_from_ground_floor",
+        "near_food_court"
+      ],
+      "now_showing_summary": "Family films: ZOOTROPOLIS 2 (Animation, 108min), SPONGEBOB MOVIE (Animation, 89min). Adults: SHELTER (Action/Thriller), THE HOUSEMAID (Thriller), SEND HELP (Horror), HAMNET (Drama). Arabic: EL SELEM W EL THOBAN (Comedy/Romance).",
+      "when_to_recommend": [
+        "User asks what movies are playing",
+        "User wants a movie night",
+        "Family with kids wants a movie — ZOOTROPOLIS 2 or SPONGEBOB are great",
+        "Date night or couples outing — HAMNET or EL SELEM W EL THOBAN",
+        "Group or friends outing",
+        "User asks about Saudi Pro League screenings"
+      ],
+      "avoid_if": [
+        "User not interested in movies",
+        "User has strict time constraints and needs only a quick errand"
+      ],
+      "priority_scores": {
+        "movie_showtime_lookup": 1.0,
+        "movie_night_plan": 0.98,
+        "family_movie_plan": 0.98,
+        "kid_friendly_movie_plus_food": 0.97,
+        "movie_plus_food": 0.95,
+        "kids_entertainment_plan": 0.85,
+        "date_plan": 0.9,
+        "date_night_plan": 0.9,
+        "family_visit_plan": 0.9,
+        "solo_visit_plan": 0.8,
+        "anniversary_plan": 0.75,
+        "gift_for_girlfriend": 0.3,
+        "gift_for_family": 0.4,
+        "quick_lunch": 0.1,
+        "shopping_plus_dessert_combo": 0.5,
+        "budget_family_outing": 0.8,
+        "luxury_shopping_plan": 0.3,
+        "last_minute_gift": 0.0,
+        "child_activity_while_parents_shop": 0.7,
+        "family_shopping_with_child": 0.6
+      },
+      "concierge_notes": "Muvi Cinema (Cinema Zone, CNL001) has a rich lineup: ZOOTROPOLIS 2 and THE SPONGEBOB MOVIE for families and kids; SHELTER, THE HOUSEMAID, SEND HELP for thrill-seekers; HAMNET for drama lovers; EL SELEM W EL THOBAN for Arabic romantic comedy. Pair with Kudu or Popeyes (Food Court) for a meal, or Baskin Robbins/Corn World for dessert. Book online at muvicinemas.com."
+    }
+  ]
+}

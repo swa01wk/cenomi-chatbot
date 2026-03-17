@@ -3776,7 +3776,7 @@
       "brand": "Innovative Union LTD CO",
       "brand_id": 239003,
       "cuisine_type": "Coffee & Light Dining",
-      "dining_style": "dessert_cafe",
+      "dining_style": "cafe",
       "description": "Serving coffee and desserts infused with cinnamon rolls, along with ongoing promotions from time to time throughout the year.",
       "location": {
         "floor": "Ground",
@@ -3804,9 +3804,7 @@
       "tags": [
         "cafe",
         "halal",
-        "coffee_&_light_dining",
-        "sweet_treat",
-        "dessert"
+        "coffee_&_light_dining"
       ]
     },
     {
@@ -3930,7 +3928,7 @@
       "brand": "Food Gate Company Commercial",
       "brand_id": 252798,
       "cuisine_type": "Coffee & Light Dining",
-      "dining_style": "dessert_cafe",
+      "dining_style": "cafe",
       "description": "Mama Benz Café serves you delicious buns, along with a selection of signature drinks.",
       "location": {
         "floor": "Ground",
@@ -3958,9 +3956,7 @@
       "tags": [
         "cafe",
         "halal",
-        "coffee_&_light_dining",
-        "sweet_treat",
-        "dessert"
+        "coffee_&_light_dining"
       ]
     },
     {

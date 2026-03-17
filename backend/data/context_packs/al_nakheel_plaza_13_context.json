@@ -1,0 +1,886 @@
+{
+  "mall_id": "al_nakheel_plaza_13",
+  "version": "1.0",
+  "mall_profile_summary": {
+    "name": "Mall of Arabia",
+    "city": "Jeddah, Saudi Arabia",
+    "tagline": "Transforming Your Shopping Experience, One Mall At A Time",
+    "floors": [
+      "Ground",
+      "Cinema Level"
+    ],
+    "key_zones": {
+      "Main Gallery": "Ground floor — fashion, cosmetics, jewelry, accessories, watches. Includes Zara, Swarovski, L'Occitane, Stradivarius, The Body Shop, Tous.",
+      "Kiosk Row": "Ground floor — inline kiosks for perfumes, cafes, accessories. Includes Baskin Robbins, Doknah, Lord, Bloom, Corn World, Musk, Reef Perfumes.",
+      "Food Court": "Ground floor — fast food and dessert. Kudu, Popeyes, Cinnabon.",
+      "Entertainment Wing": "Ground floor — large-format retail and kids' entertainment. Adidas, Brands For Less, Home Box, Centrepoint, Fun Time.",
+      "Hypermarket Area": "Ground floor — Danube HyperMarket for groceries and essentials.",
+      "Cinema Zone": "Cinema Level — Muvi Cinema, the entertainment anchor."
+    },
+    "highlights": [
+      "100+ stores and kiosks across 2 levels",
+      "Muvi Cinema with latest movie releases and sports events",
+      "Danube HyperMarket for groceries and essentials",
+      "Family shopping at Centrepoint and Brands For Less",
+      "Food Court and Kiosk Row with fast food, dessert, and cafes",
+      "Free parking at all gates",
+      "Prayer rooms, baby stroller and wheelchair loans, accessible washrooms"
+    ]
+  },
+  "operational_context": {
+    "hours": {
+      "sunday": "09:00 AM–11:59 PM",
+      "monday": "09:00 AM–11:59 PM",
+      "tuesday": "09:00 AM–11:59 PM",
+      "wednesday": "09:00 AM–11:59 PM",
+      "thursday": "09:00 AM–11:59 PM",
+      "friday": "09:00 PM–11:59 PM",
+      "saturday": "09:00 AM–11:59 PM"
+    },
+    "parking": {
+      "capacity": "Ground floor parking in front of each gate",
+      "rate": "Free",
+      "valet": "Not available",
+      "ev_charging": "Not available"
+    },
+    "accessibility": [
+      "Wheelchair ramps at all entrances",
+      "Accessible washrooms",
+      "Complimentary wheelchair loans from Information Desk (Gate 2, Main Gallery)",
+      "Baby stroller loans available at Gate 2 and near Doknah Kiosk (Kiosk Row)"
+    ],
+    "essential_services": {
+      "information_desk": "Ground floor, Main Gallery, near Gate 2 — directions, lost & found, wheelchair/stroller loans",
+      "prayer_rooms": "Men's Prayer Room (Ground, Main Gallery, near Gate 1, Lavalle Store); Women's Prayer Room (Ground, Main Gallery)",
+      "atms": "Multiple locations, including Kiosk Row (GFK16A, Saudi Investment Bank ATM)",
+      "washrooms": "Ground floor, near main entrances and in Main Gallery",
+      "lost_and_found": "Customer Service Desk, Gate 2"
+    },
+    "current_season": "Spring 2026",
+    "active_promotions": [
+      "Osma Perfumes: 150ml or 75ml bottle for 99 SAR (until Nov 30, 2025)"
+    ],
+    "upcoming_events": []
+  },
+  "topic_blocks": {
+    "dining": {
+      "topic": "dining",
+      "summary": "Mall of Arabia's Food Court and Kiosk Row offer a variety of fast food, cafes, and dessert options. All dining is halal. Popular brands include Kudu, Popeyes, Starbucks, Baskin Robbins, and Corn World.",
+      "entities": [
+        {
+          "name": "Kudu Restaurant",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC006)",
+          "best_for": "quick meals, families, kids",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Saudi fast food, halal, made-to-order meals"
+        },
+        {
+          "name": "Popeyes Restaurant",
+          "type": "fast_food",
+          "cuisine": "Chicken Cuisine",
+          "price": "budget",
+          "location": "Ground floor, Food Court (FC004)",
+          "best_for": "fried chicken, families, kids",
+          "meal_time": "20 min",
+          "kids_menu": true,
+          "key_note": "Famous for Louisiana-style fried chicken, halal"
+        },
+        {
+          "name": "Starbucks",
+          "type": "cafe",
+          "cuisine": "Coffee & Light Dining",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF134, GF135)",
+          "best_for": "coffee break, snacks, meetings",
+          "meal_time": "30 min",
+          "kids_menu": false,
+          "key_note": "Global coffeehouse, halal, comfortable seating"
+        },
+        {
+          "name": "Baskin Robbins",
+          "type": "dessert",
+          "cuisine": "Ice Cream",
+          "price": "mid_range",
+          "location": "Ground floor, Kiosk Row (GFK17)",
+          "best_for": "dessert, families, kids",
+          "meal_time": "10 min",
+          "kids_menu": false,
+          "key_note": "Popular ice cream, halal, quick treat"
+        },
+        {
+          "name": "Corn World",
+          "type": "fast_food",
+          "cuisine": "Corn Snacks",
+          "price": "budget",
+          "location": "Ground floor, Kiosk Row (GFK28)",
+          "best_for": "snacks, kids, quick bite",
+          "meal_time": "10 min",
+          "kids_menu": true,
+          "key_note": "Corn-based snacks, halal, fun for kids"
+        }
+      ],
+      "semantic_highlights": [
+        "Quick lunch: Kudu and Popeyes (Food Court, ~20 min)",
+        "Coffee break: Starbucks (Main Gallery), also light snacks",
+        "Dessert treat: Baskin Robbins (Kiosk Row), Corn World (Kiosk Row)",
+        "All dining options are halal"
+      ],
+      "concierge_tips": [
+        "For a quick meal before a movie, choose Kudu or Popeyes in the Food Court.",
+        "For a sweet treat after shopping, recommend Baskin Robbins or Corn World.",
+        "Starbucks is ideal for a coffee break or casual meeting."
+      ]
+    },
+    "gift": {
+      "topic": "gift",
+      "summary": "Mall of Arabia offers a wide range of gift options, from luxury jewelry and perfumes to trendy accessories and beauty products. Suitable for all occasions including birthdays, anniversaries, and last-minute gifts.",
+      "entities": [
+        {
+          "name": "Swarovski",
+          "type": "jewelry",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF040)",
+          "best_for": "anniversary, luxury gifts",
+          "key_note": "Luxury crystal jewelry, elegant gift packaging"
+        },
+        {
+          "name": "Tous",
+          "type": "jewelry",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF038)",
+          "best_for": "special occasions, women's gifts",
+          "key_note": "Luxury jewelry and accessories, unique designs"
+        },
+        {
+          "name": "L'Occitane",
+          "type": "beauty",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF044)",
+          "best_for": "self-care, birthdays, anniversaries",
+          "key_note": "Premium skincare and fragrance, gift sets available"
+        },
+        {
+          "name": "Ajmal Perfumes",
+          "type": "perfume",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF126)",
+          "best_for": "Arabic fragrances, family gifts",
+          "key_note": "Wide selection of luxurious perfumes"
+        },
+        {
+          "name": "Osma",
+          "type": "perfume",
+          "price": "mid_range",
+          "location": "Ground floor, Kiosk Row (GFK49)",
+          "best_for": "value gifts, quick gifts",
+          "key_note": "Current offer: any 150ml or 75ml bottle for 99 SAR"
+        },
+        {
+          "name": "Season Accessorize",
+          "type": "accessories",
+          "price": "premium",
+          "location": "Ground floor, Main Gallery (GF033, GF034) and Kiosk Row (GFK40, GFK59)",
+          "best_for": "watches, stylish gifts",
+          "key_note": "Elegant watches and accessories, suitable for all ages"
+        },
+        {
+          "name": "MINISO",
+          "type": "lifestyle",
+          "price": "budget",
+          "location": "Ground floor, Main Gallery (GF101–GF104)",
+          "best_for": "affordable gifts, kids, last-minute",
+          "key_note": "Trendy, budget-friendly gifts and accessories"
+        }
+      ],
+      "semantic_highlights": [
+        "Luxury gifts: Swarovski, Tous, L'Occitane (Main Gallery)",
+        "Perfume gifts: Ajmal, Osma (Kiosk Row), Zohoor Al Reef, Doknah",
+        "Quick, affordable gifts: MINISO (Main Gallery), Season Accessorize (Kiosk Row/Main Gallery)",
+        "Gift sets available at L'Occitane and Ajmal"
+      ],
+      "concierge_tips": [
+        "For last-minute gifts, MINISO and Osma (Kiosk Row) are fast and convenient.",
+        "For anniversaries or special occasions, recommend Swarovski or Tous.",
+        "Clarify recipient and occasion to suggest the best fit."
+      ]
+    },
+    "family": {
+      "topic": "family",
+      "summary": "Mall of Arabia is family-friendly, offering shopping, dining, and entertainment for all ages. Family amenities include stroller loans, prayer rooms, and accessible washrooms.",
+      "entities": [
+        {
+          "name": "Centrepoint",
+          "type": "fashion",
+          "price": "budget",
+          "location": "Ground floor, Entertainment Wing (GFENT04, GFHYPM02)",
+          "best_for": "family shopping, value fashion",
+          "key_note": "Largest family fashion destination"
+        },
+        {
+          "name": "Brands For Less",
+          "type": "fashion",
+          "price": "budget",
+          "location": "Ground floor, Entertainment Wing (GFE4–GFE6)",
+          "best_for": "value shopping, families",
+          "key_note": "Wide range of products at great prices"
+        },
+        {
+          "name": "Fun Time",
+          "type": "entertainment",
+          "price": "mid_range",
+          "location": "Ground floor, Entertainment Wing",
+          "best_for": "kids' play, family fun",
+          "key_note": "Indoor play area for children"
+        },
+        {
+          "name": "Muvi Cinema",
+          "type": "cinema",
+          "price": "mid_range",
+          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "best_for": "family movies, weekend outings",
+          "key_note": "Latest movies, family-friendly screenings"
+        },
+        {
+          "name": "Baby Stroller Service",
+          "type": "service",
+          "price": "free",
+          "location": "Ground floor, Main Gallery (Gate 2, near Doknah Kiosk)",
+          "best_for": "families with young children",
+          "key_note": "Complimentary stroller loans, 4:00 PM–11:00 PM"
+        }
+      ],
+      "semantic_highlights": [
+        "Family shopping: Centrepoint, Brands For Less (Entertainment Wing)",
+        "Kids' play: Fun Time (Entertainment Wing)",
+        "Family dining: Food Court (Kudu, Popeyes), Baskin Robbins (dessert)",
+        "Family movies: Muvi Cinema (Cinema Level)"
+      ],
+      "concierge_tips": [
+        "For a full family day: shop at Centrepoint, let kids play at Fun Time, enjoy a meal at the Food Court, and catch a movie at Muvi Cinema.",
+        "Stroller loans are available at Gate 2 and near Doknah Kiosk.",
+        "Prayer rooms are accessible for both men and women in the Main Gallery."
+      ]
+    },
+    "movie": {
+      "topic": "movie",
+      "summary": "Muvi Cinema at Mall of Arabia features the latest movie releases and live sports events. Located on the Cinema Level, it is accessible from the Main Gallery.",
+      "entities": [
+        {
+          "name": "Muvi Cinema",
+          "type": "cinema",
+          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "formats": "Standard",
+          "booking_url": "https://www.muvicinemas.com/ar",
+          "contact": "+966535491018",
+          "key_note": "Multiple screens, latest movies, family-friendly"
+        }
+      ],
+      "semantic_highlights": [
+        "Current movies: 'SHELTER', 'THE HOUSEMAID', 'SEND HELP', 'ZOOTROPOLIS 2', 'HAMNET', 'THE SPONGEBOB MOVIE: SEARCH FOR SQUAREPANTS', 'EL SELEM W EL THOBAN (ARABIC)'",
+        "Upcoming: 'SAMBHAVAM ADHYAYAM ONNU (MALAYALAM)', 'SAUDI PRO LEAGUE' matches",
+        "Online booking available via Muvi Cinema website"
+      ],
+      "concierge_tips": [
+        "For family-friendly movies, recommend 'ZOOTROPOLIS 2' or 'THE SPONGEBOB MOVIE'.",
+        "For thrillers or action, suggest 'SHELTER', 'THE HOUSEMAID', or 'SEND HELP'.",
+        "Check movie times and book tickets online for convenience."
+      ]
+    },
+    "quick_visit": {
+      "topic": "quick_visit",
+      "summary": "For a short visit, focus on essential shopping, quick dining, and accessible services near main entrances and the Main Gallery.",
+      "entities": [
+        {
+          "name": "MINISO",
+          "type": "lifestyle",
+          "price": "budget",
+          "location": "Ground floor, Main Gallery (GF101–GF104)",
+          "best_for": "quick gifts, essentials",
+          "key_note": "Fast, affordable shopping"
+        },
+        {
+          "name": "Danube HyperMarket",
+          "type": "hypermarket",
+          "price": "mid_range",
+          "location": "Ground floor, Hypermarket Area",
+          "best_for": "groceries, essentials",
+          "key_note": "One-stop shop for food and household items"
+        },
+        {
+          "name": "Starbucks",
+          "type": "cafe",
+          "price": "mid_range",
+          "location": "Ground floor, Main Gallery (GF134, GF135)",
+          "best_for": "quick coffee break",
+          "key_note": "Grab-and-go coffee and snacks"
+        },
+        {
+          "name": "ATM - Saudi Investment Bank",
+          "type": "atm",
+          "price": "free",
+          "location": "Ground floor, Kiosk Row (GFK16A)",
+          "best_for": "cash withdrawal",
+          "key_note": "Convenient for quick banking needs"
+        },
+        {
+          "name": "Information Desk",
+          "type": "service",
+          "price": "free",
+          "location": "Ground floor, Main Gallery (Gate 2)",
+          "best_for": "directions, lost & found",
+          "key_note": "Central help point for all visitors"
+        }
+      ],
+      "semantic_highlights": [
+        "Quick shopping: MINISO (Main Gallery), Danube HyperMarket (Hypermarket Area)",
+        "Fast food: Kudu, Popeyes (Food Court), Corn World (Kiosk Row)",
+        "ATM and Information Desk near main entrances"
+      ],
+      "concierge_tips": [
+        "For a quick visit, recommend shopping at MINISO or Danube, and grabbing a coffee at Starbucks.",
+        "ATMs are easily accessible in Kiosk Row.",
+        "For directions or urgent needs, direct visitors to the Information Desk at Gate 2."
+      ]
+    },
+    "mall_overview": {
+      "topic": "mall_overview",
+      "summary": "Mall of Arabia is a large shopping and entertainment destination in Jeddah, Saudi Arabia, located on Medina Road, An Nuzhah. 2 floors: Ground Level and Cinema Level. 100+ stores and kiosks across 6 zones. Key anchors: Muvi Cinema (with current kid-friendly movies), Danube HyperMarket, Fun Time (Sparky's), and a diverse Food Court.",
+      "key_facts": {
+        "name": "Mall of Arabia",
+        "city": "Jeddah, Saudi Arabia",
+        "address": "Medina Road, An Nuzhah, Jeddah",
+        "floors": ["Ground Level", "Cinema Level"],
+        "total_stores": "100+",
+        "opening_hours": {
+          "sun_thu_sat": "09:00 AM – 11:59 PM",
+          "friday": "09:00 PM – 11:59 PM"
+        },
+        "parking": "Free at all gates",
+        "phone": "+966 920000262",
+        "map": "https://maps.app.goo.gl/txKv5NJhCuY7yffw5"
+      },
+      "zones": [
+        "Main Gallery (Ground) — Fashion, Jewelry, Beauty, Accessories",
+        "Kiosk Row (Ground) — Perfumes, Cafes, Quick Gifts",
+        "Food Court (Ground) — Fast Food, Cafes, Dessert",
+        "Entertainment Wing (Ground) — Sports, Value Fashion, Kids Entertainment",
+        "Hypermarket Area (Ground) — Danube HyperMarket",
+        "Cinema Zone (Cinema Level) — Muvi Cinema"
+      ],
+      "key_services": ["Prayer Rooms", "Baby Stroller Loans", "Wheelchair Loans", "ATM", "Information Desk", "Lost & Found", "Free WiFi (Mobily)"],
+      "concierge_tips": [
+        "Friday opening is very late (09:00 PM) — inform guests planning daytime Friday visits.",
+        "Cinema Level is accessed from Ground floor via escalator/lift.",
+        "Stroller loans available 4:00 PM – 11:00 PM at Gate 2, near Doknah Kiosk."
+      ]
+    },
+    "shopping_overview": {
+      "topic": "shopping_overview",
+      "summary": "Mall of Arabia's Main Gallery is the primary shopping corridor with premium fashion, jewelry, beauty, and accessories. The Entertainment Wing offers sportswear and value fashion. Kiosk Row features perfumes and accessories.",
+      "zones": {
+        "Main Gallery": "Fashion anchors: Zara, NINE WEST, Stradivarius, Bershka, Charles & Keith, COLE HAAN. Premium: Swarovski, Tous, Cardial, L'Occitane, The Body Shop. Accessories: Aldo, Season Accessorize.",
+        "Kiosk Row": "Quick stops: Ajmal Perfumes, Osma, Zohoor Al Reef, Doknah, Season Accessorize (watches).",
+        "Entertainment Wing": "Value fashion: Centrepoint, Brands For Less. Sportswear: Adidas. Home: Home Box.",
+        "Hypermarket Area": "Danube HyperMarket — groceries, essentials, household items."
+      },
+      "category_guide": {
+        "fashion": ["Zara (GF)", "Stradivarius (GF)", "Bershka (GF)", "NINE WEST (GF)", "Centrepoint (Ent Wing)"],
+        "beauty": ["L'Occitane (GF044)", "The Body Shop (GF010/011)"],
+        "jewelry": ["Swarovski (GF040)", "Tous (GF038)", "Cardial (GF)"],
+        "perfumes": ["Ajmal Perfumes (GF126)", "Osma (GFK49 — current 99 SAR offer)", "Zohoor Al Reef (Kiosk)", "Doknah (Kiosk)"],
+        "value_shopping": ["Centrepoint (Ent Wing)", "Brands For Less (Ent Wing)", "MINISO (GF101-104)"],
+        "gifts": ["Swarovski", "Tous", "L'Occitane", "Aldo Accessories", "MINISO (quick/affordable)", "Osma (99 SAR offer)"]
+      },
+      "concierge_tips": [
+        "For quick gifts: MINISO (Main Gallery, affordable) or Osma (Kiosk Row, 99 SAR offer).",
+        "For premium gifts: Swarovski, Tous, Cardial, L'Occitane.",
+        "For family value shopping: Centrepoint and Brands For Less in Entertainment Wing."
+      ]
+    },
+    "entertainment": {
+      "topic": "entertainment",
+      "summary": "Mall of Arabia has two main entertainment anchors: Muvi Cinema on the Cinema Level (current kids movies ZOOTROPOLIS 2 and SPONGEBOB plus adult films) and Fun Time (Sparky's) in the Entertainment Wing. Saudi Pro League matches are also streamed at Muvi Cinema.",
+      "entities": [
+        {
+          "name": "Muvi Cinema",
+          "type": "cinema",
+          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "contact": "+966535491018",
+          "booking": "https://www.muvicinemas.com/ar",
+          "key_note": "Latest movies including ZOOTROPOLIS 2 and SPONGEBOB for families. Online booking recommended."
+        },
+        {
+          "name": "Fun Time (Sparky's)",
+          "type": "kids_entertainment",
+          "location": "Ground floor, Entertainment Wing (GFENT01)",
+          "key_note": "Large indoor play center. Part of Sparky's ME brand. Perfect for families with children."
+        }
+      ],
+      "semantic_highlights": [
+        "Muvi Cinema: movies, entertainment anchor, family movies available, date spot",
+        "Fun Time (Sparky's): kids entertainment anchor, child relief, family outing",
+        "ZOOTROPOLIS 2 and SPONGEBOB currently showing — great for families!"
+      ],
+      "concierge_tips": [
+        "For kids: Both Fun Time AND family movies (ZOOTROPOLIS 2, SPONGEBOB) are available.",
+        "For movie lovers: Full lineup at muvicinemas.com — book online.",
+        "For adults: SHELTER (action), THE HOUSEMAID (thriller), SEND HELP (horror) now showing."
+      ]
+    },
+    "cinema_and_movies": {
+      "topic": "cinema_and_movies",
+      "summary": "Muvi Cinema at Mall of Arabia is currently showing a rich lineup: family-friendly animation (ZOOTROPOLIS 2, SPONGEBOB) plus adult thrillers and Arabic films. Online booking available at muvicinemas.com.",
+      "cinema": {
+        "name": "Muvi Cinema",
+        "entity_id": "t-cinema-001",
+        "location": "Cinema Level, Cinema Zone, Unit CNL001",
+        "phone": "+966535491018",
+        "booking_url": "https://www.muvicinemas.com/ar",
+        "formats": ["Standard"],
+        "hours": "09:00 AM – 11:59 PM (Fri: 09:00 PM – 11:59 PM)"
+      },
+      "now_showing": [
+        {
+          "title": "ZOOTROPOLIS 2",
+          "genre": "Animation, Comedy",
+          "language": "English",
+          "duration": "108 min",
+          "audience": "Family, All Ages",
+          "synopsis": "Judy Hopps and Nick Wilde team up again for their most perilous case yet.",
+          "family_friendly": true,
+          "booking_url": "https://www.muvicinemas.com/EN/movies/zootropolis-2?cityId=6"
+        },
+        {
+          "title": "THE SPONGEBOB MOVIE: SEARCH FOR SQUAREPANTS",
+          "genre": "Animation, Adventure, Comedy",
+          "language": "English",
+          "duration": "89 min",
+          "audience": "Family, Kids, All Ages",
+          "synopsis": "SpongeBob and friends set sail in their biggest cinematic event.",
+          "family_friendly": true,
+          "booking_url": "https://www.muvicinemas.com/EN/movies/the-spongebob-movie-search-for-squarepants?cityId=6"
+        },
+        {
+          "title": "SHELTER",
+          "genre": "Action, Thriller",
+          "language": "English",
+          "duration": "107 min",
+          "audience": "Adults",
+          "synopsis": "A recluse rescues a girl from the sea, unleashing dangerous events.",
+          "family_friendly": false
+        },
+        {
+          "title": "THE HOUSEMAID",
+          "genre": "Thriller",
+          "language": "English",
+          "duration": "131 min",
+          "audience": "Adults",
+          "synopsis": "A struggling woman starts over as a housemaid for an elite couple.",
+          "family_friendly": false
+        },
+        {
+          "title": "SEND HELP",
+          "genre": "Horror, Thriller",
+          "language": "English",
+          "duration": "113 min",
+          "audience": "Adults",
+          "synopsis": "Two colleagues stranded on a deserted island must survive.",
+          "family_friendly": false
+        },
+        {
+          "title": "HAMNET",
+          "genre": "Drama, Biography",
+          "language": "English",
+          "duration": "125 min",
+          "audience": "Adults",
+          "synopsis": "Shakespeare's personal tragedy inspires his greatest masterpiece.",
+          "family_friendly": false
+        },
+        {
+          "title": "EL SELEM W EL THOBAN (ARABIC)",
+          "genre": "Comedy, Romance",
+          "language": "Arabic",
+          "duration": "120 min",
+          "audience": "Adults, Arabic speakers",
+          "synopsis": "Love and ambition intertwine in a story of romance and choices.",
+          "family_friendly": false
+        }
+      ],
+      "coming_soon": [
+        {
+          "title": "SAMBHAVAM ADHYAYAM ONNU (MALAYALAM)",
+          "genre": "Malayalam Film",
+          "language": "Malayalam",
+          "audience": "Malayalam speakers"
+        }
+      ],
+      "semantic_highlights": [
+        "Family-friendly NOW: ZOOTROPOLIS 2 (Animation/Comedy), SPONGEBOB MOVIE (Animation/Adventure)",
+        "Adult films NOW: SHELTER (Action), THE HOUSEMAID (Thriller), SEND HELP (Horror), HAMNET (Drama)",
+        "Arabic film NOW: EL SELEM W EL THOBAN (Comedy/Romance)"
+      ],
+      "concierge_tips": [
+        "For families with kids: ZOOTROPOLIS 2 or SPONGEBOB MOVIE — mention both options!",
+        "For couples on a date: HAMNET (romantic drama) or EL SELEM W EL THOBAN (Arabic romance).",
+        "For thrill-seekers: SHELTER, THE HOUSEMAID, or SEND HELP.",
+        "Pre-movie dining: Kudu or Popeyes (Food Court) — fast and close.",
+        "Post-movie: Baskin Robbins or Corn World for dessert."
+      ]
+    },
+    "kids_visit": {
+      "topic": "kids_visit",
+      "summary": "Mall of Arabia is excellent for families with children. Two great kids options: Fun Time (Sparky's) indoor play center AND family-friendly movies at Muvi Cinema (ZOOTROPOLIS 2, SPONGEBOB). Plus kid-friendly dining in Food Court.",
+      "primary_anchor": {
+        "name": "Fun Time (Sparky's)",
+        "entity_id": "t-store-072",
+        "type": "kids_entertainment",
+        "location": "Ground floor, Entertainment Wing (GFENT01)",
+        "key_note": "Large indoor play center. Ages approximately 2-12. Staff supervised. Great for birthday parties too."
+      },
+      "kids_movies": [
+        {"title": "ZOOTROPOLIS 2", "genre": "Animation/Comedy", "duration": "108 min", "suitable_for": "All ages", "note": "Excellent for all families"},
+        {"title": "THE SPONGEBOB MOVIE", "genre": "Animation/Adventure", "duration": "89 min", "suitable_for": "Young children", "note": "Shorter, great for younger kids"}
+      ],
+      "family_services": [
+        {"service": "Baby Stroller Loans", "location": "Gate 2, near Doknah Kiosk", "hours": "4:00 PM – 11:00 PM", "cost": "Free"},
+        {"service": "Wheelchair Loans", "location": "Gate 2, Information Desk", "hours": "Mall hours", "cost": "Free"},
+        {"service": "Prayer Rooms", "location": "Men's near Gate 1/Lavalle Store; Women's in Main Gallery", "hours": "Mall hours"},
+        {"service": "WiFi (Mobily)", "location": "Throughout mall", "cost": "Free"}
+      ],
+      "kid_friendly_dining": [
+        {"name": "Kudu Restaurant", "location": "Food Court (FC006)", "kids_menu": true, "note": "Fresh made, halal"},
+        {"name": "Popeyes", "location": "Food Court (FC004)", "kids_menu": true, "note": "Fried chicken, halal"},
+        {"name": "Corn World", "location": "Kiosk Row (GFK28)", "kids_menu": true, "note": "Fun corn snacks for kids"},
+        {"name": "Baskin Robbins", "location": "Kiosk Row (GFK17)", "kids_menu": false, "note": "Ice cream reward"}
+      ],
+      "recommended_itinerary": "Option A (Play): Fun Time (Entertainment Wing) → Food Court meal (Kudu/Popeyes) → Baskin Robbins treat. Option B (Movie): ZOOTROPOLIS 2 or SPONGEBOB at Muvi Cinema → Food Court meal → Baskin Robbins.",
+      "concierge_tips": [
+        "Offer BOTH Fun Time and kids movies as options — Mall of Arabia has both!",
+        "ZOOTROPOLIS 2 is 108 min — good for kids 5+. SPONGEBOB is 89 min — great for younger kids.",
+        "Mention stroller loans at Gate 2 proactively for parents with infants.",
+        "For shopping with a child, suggest MINISO (kids love it) and Centrepoint."
+      ]
+    },
+    "date_night": {
+      "topic": "date_night",
+      "summary": "Mall of Arabia offers a great date night experience. Rich movie lineup for couples, cozy Starbucks, and romantic gift options in Main Gallery.",
+      "itinerary": [
+        {"step": 1, "activity": "Movie at Muvi Cinema", "options": ["HAMNET (Drama/Biography — romantic)", "EL SELEM W EL THOBAN (Arabic Comedy/Romance)", "SHELTER (Action/Thriller)", "THE HOUSEMAID (Thriller)"], "location": "Cinema Level", "note": "Book at muvicinemas.com"},
+        {"step": 2, "activity": "Dinner or coffee", "options": ["Starbucks (Main Gallery, cozy)", "Kudu Restaurant (Food Court, quick dinner)"], "location": "Ground floor"},
+        {"step": 3, "activity": "Dessert treat", "options": ["Baskin Robbins (Kiosk Row)", "Corn World (Kiosk Row)"], "location": "Ground floor"},
+        {"step": 4, "activity": "Optional gift shopping", "options": ["Swarovski (GF040)", "Tous (GF038)", "L'Occitane (GF044)", "Ajmal Perfumes (GF126)", "Osma (99 SAR offer)"], "location": "Main Gallery / Kiosk Row"}
+      ],
+      "semantic_highlights": [
+        "Romantic movies: HAMNET (drama), EL SELEM W EL THOBAN (Arabic romance)",
+        "Cozy dining: Starbucks (Main Gallery)",
+        "Dessert: Baskin Robbins, Corn World",
+        "Romantic gifts: Swarovski, Tous, L'Occitane"
+      ],
+      "concierge_tips": [
+        "For a romantic movie: HAMNET or EL SELEM W EL THOBAN are natural picks.",
+        "Lead with cinema experience first, shopping second.",
+        "Starbucks after the movie for a quiet coffee conversation.",
+        "If they want a gift: Swarovski or Tous for jewelry, L'Occitane for beauty."
+      ]
+    },
+    "before_movie": {
+      "topic": "before_movie",
+      "summary": "Quick options near Muvi Cinema before the movie starts. Food Court is directly below the Cinema Level. Kiosk Row offers fast snacks. Time-sensitive — keep recommendations brief.",
+      "proximity_note": "Food Court (Ground floor) is the most convenient dining option before heading to Cinema Level. Kiosk Row snacks are also very fast.",
+      "quick_options": [
+        {"name": "Kudu Restaurant", "type": "fast_food", "location": "Food Court (FC006)", "time": "~15-20 min", "note": "Fresh, quick, halal"},
+        {"name": "Popeyes", "type": "fast_food", "location": "Food Court (FC004)", "time": "~15 min", "note": "Quick fried chicken"},
+        {"name": "Corn World", "type": "kiosk_snack", "location": "Kiosk Row (GFK28)", "time": "~5 min", "note": "Movie-style snack"},
+        {"name": "Baskin Robbins", "type": "dessert", "location": "Kiosk Row (GFK17)", "time": "~5 min", "note": "Sweet pre-movie treat"},
+        {"name": "Starbucks", "type": "cafe", "location": "Main Gallery (GF134/135)", "time": "~10 min", "note": "Coffee to go"}
+      ],
+      "semantic_highlights": [
+        "All Food Court options are near_cinema and quick_stop",
+        "Kiosk Row snacks (Corn World, Baskin Robbins) are fastest",
+        "Starbucks (Main Gallery) for a coffee to take in"
+      ],
+      "concierge_tips": [
+        "If they have 15+ min: Kudu or Popeyes (Food Court, quick meals).",
+        "If they have 5-10 min: Corn World or Baskin Robbins (Kiosk Row).",
+        "Always respect the time constraint — lead with fastest option first."
+      ]
+    },
+    "after_movie": {
+      "topic": "after_movie",
+      "summary": "Winding down after the movie at Mall of Arabia. Dessert spots and cafes accessible from Cinema Level. Keep it relaxed.",
+      "post_movie_flow": "Exit cinema → take escalator/lift to Ground floor → Kiosk Row or Main Gallery for dessert/coffee",
+      "casual_options": [
+        {"name": "Baskin Robbins", "type": "dessert", "location": "Kiosk Row (GFK17)", "note": "Classic post-movie ice cream treat"},
+        {"name": "Corn World", "type": "kiosk_snack", "location": "Kiosk Row (GFK28)", "note": "Fun snack on the way out"},
+        {"name": "Starbucks", "type": "cafe", "location": "Main Gallery (GF134/135)", "note": "Relaxed coffee and chat"},
+        {"name": "Cinnabon", "type": "cafe", "location": "Food Court", "note": "Warm cinnamon rolls, sweet ending"}
+      ],
+      "semantic_highlights": [
+        "Dessert: Baskin Robbins (quick), Corn World (fun/light)",
+        "Coffee: Starbucks (Main Gallery)",
+        "All options are near_cinema and reward_stop"
+      ],
+      "concierge_tips": [
+        "Lead with dessert — it's the natural post-movie reward.",
+        "For couples: Starbucks for a quiet coffee after the movie.",
+        "For families with kids: Baskin Robbins for a sweet treat reward.",
+        "Avoid recommending full meals — they've likely already eaten."
+      ]
+    },
+    "services": {
+      "topic": "services",
+      "summary": "Mall of Arabia provides essential guest services including information desk, lost & found, prayer rooms, stroller and wheelchair loans, accessible washrooms, and free WiFi.",
+      "entities": [
+        {
+          "name": "Information Desk",
+          "type": "service",
+          "location": "Ground floor, Main Gallery (Gate 2)",
+          "hours": "Mall hours",
+          "key_note": "Directions, lost & found, wheelchair and stroller loans"
+        },
+        {
+          "name": "Men's Prayer Room",
+          "type": "prayer_room",
+          "location": "Ground floor, Main Gallery (near Gate 1, Lavalle Store)",
+          "hours": "Mall hours",
+          "key_note": "Ablution facilities available"
+        },
+        {
+          "name": "Women's Prayer Room",
+          "type": "prayer_room",
+          "location": "Ground floor, Main Gallery",
+          "hours": "Mall hours",
+          "key_note": "Ablution facilities available"
+        },
+        {
+          "name": "Wheelchair Service",
+          "type": "accessibility",
+          "location": "Ground floor, Main Gallery (Gate 2)",
+          "hours": "Mall hours",
+          "key_note": "Complimentary wheelchair loans"
+        },
+        {
+          "name": "Baby Stroller Service",
+          "type": "family",
+          "location": "Ground floor, Main Gallery (Gate 2, near Doknah Kiosk)",
+          "hours": "4:00 PM–11:00 PM",
+          "key_note": "Complimentary stroller loans"
+        },
+        {
+          "name": "ATM - Saudi Investment Bank",
+          "type": "atm",
+          "location": "Ground floor, Kiosk Row (GFK16A)",
+          "hours": "Mall hours",
+          "key_note": "Cash withdrawal"
+        },
+        {
+          "name": "Washrooms",
+          "type": "facility",
+          "location": "Ground floor, near main entrances and Main Gallery",
+          "hours": "Mall hours",
+          "key_note": "Accessible washrooms"
+        },
+        {
+          "name": "WiFi (Mobily)",
+          "type": "facility",
+          "location": "Throughout mall",
+          "hours": "Mall hours",
+          "key_note": "Free WiFi for visitors"
+        }
+      ],
+      "semantic_highlights": [
+        "Information Desk at Gate 2 for all guest needs",
+        "Prayer rooms for men and women in Main Gallery",
+        "Wheelchair and stroller loans available",
+        "Accessible washrooms and free WiFi throughout the mall"
+      ],
+      "concierge_tips": [
+        "Proactively mention wheelchair and stroller services for families and those with mobility needs.",
+        "For lost items, direct guests to the Information Desk at Gate 2.",
+        "Clarify prayer room locations and accessibility, especially during prayer times."
+      ]
+    }
+  },
+  "events_and_offers": [
+    {
+      "type": "offer",
+      "title": "Osma - Offer",
+      "dates": "Nov 10–30, 2025",
+      "location": "Ground floor, Kiosk Row (GFK49)",
+      "description": "One 150ml bottle 99 SAR, One 75ml bottle 99 SAR. No conditions — any bottle 99 SAR.",
+      "audience": "shoppers, gift seekers, perfume lovers",
+      "free": false
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "pb-family-visit",
+      "scenario": "family_visit_plan",
+      "trigger": [
+        "User mentions family, kids, or children",
+        "User asks for things to do as a family"
+      ],
+      "approach": "Start at Centrepoint for family shopping → Kids play at Fun Time (Entertainment Wing) → Family meal at Food Court (Kudu, Popeyes) → Dessert at Baskin Robbins (Kiosk Row) → Prayer break in Main Gallery prayer rooms"
+    },
+    {
+      "id": "pb-solo-visit",
+      "scenario": "solo_visit_plan",
+      "trigger": [
+        "User visiting alone",
+        "No mention of companions or family"
+      ],
+      "approach": "Quick shopping at Zara or L'Occitane (Main Gallery) → Coffee at Starbucks → Movie at Muvi Cinema (Cinema Level) → Essential errands (ATM, Danube HyperMarket)"
+    },
+    {
+      "id": "pb-anniversary",
+      "scenario": "anniversary_plan",
+      "trigger": [
+        "User mentions anniversary, wedding anniversary",
+        "User planning a special couples outing"
+      ],
+      "approach": "Gift shopping at Swarovski or Tous (Main Gallery) → Coffee break at Starbucks → Movie at Muvi Cinema → Relaxing stroll through Main Gallery"
+    },
+    {
+      "id": "pb-gift-girlfriend",
+      "scenario": "gift_for_girlfriend",
+      "trigger": [
+        "User mentions girlfriend, partner, or significant other",
+        "User asks for gift ideas for girlfriend"
+      ],
+      "approach": "Luxury jewelry at Swarovski or Tous → Perfume at Ajmal or Osma → Trendy accessories at Season Accessorize (Main Gallery/Kiosk Row)"
+    },
+    {
+      "id": "pb-gift-family",
+      "scenario": "gift_for_family",
+      "trigger": [
+        "User mentions buying gifts for family",
+        "User asks for family gift ideas"
+      ],
+      "approach": "Perfume at Ajmal, Osma, or Zohoor Al Reef → Accessories at MINISO or Season Accessorize → Gift sets at L'Occitane"
+    },
+    {
+      "id": "pb-movie-food",
+      "scenario": "movie_plus_food",
+      "trigger": [
+        "User mentions movie and food",
+        "User asks for dinner and a movie"
+      ],
+      "approach": "Meal at Kudu or Popeyes (Food Court) → Movie at Muvi Cinema (Cinema Level) → Dessert at Baskin Robbins"
+    },
+    {
+      "id": "pb-kid-movie-food",
+      "scenario": "kid_friendly_movie_plus_food",
+      "trigger": [
+        "User mentions kids and movie",
+        "User asks for child-appropriate cinema and food"
+      ],
+      "approach": "Family meal at Kudu or Popeyes (kids menu) → Watch 'ZOOTROPOLIS 2' or 'THE SPONGEBOB MOVIE' at Muvi Cinema → Dessert at Baskin Robbins"
+    },
+    {
+      "id": "pb-quick-lunch",
+      "scenario": "quick_lunch",
+      "trigger": [
+        "User mentions short time, quick lunch, or fast meal",
+        "User asks for lunch recommendations"
+      ],
+      "approach": "Quick meal at Kudu or Popeyes (Food Court) → Coffee at Starbucks (Main Gallery) if time allows"
+    },
+    {
+      "id": "pb-shopping-dessert",
+      "scenario": "shopping_plus_dessert_combo",
+      "trigger": [
+        "User mentions shopping and dessert",
+        "User asks for a treat after shopping"
+      ],
+      "approach": "Shopping at Zara, Stradivarius, or MINISO (Main Gallery) → Dessert at Baskin Robbins or Corn World (Kiosk Row)"
+    },
+    {
+      "id": "pb-date-plan",
+      "scenario": "date_plan",
+      "trigger": [
+        "User mentions date, outing with partner, or romantic plan",
+        "User asks for date ideas"
+      ],
+      "approach": "Gift shopping at Swarovski or Tous → Coffee at Starbucks → Movie at Muvi Cinema → Walk through Main Gallery"
+    },
+    {
+      "id": "pb-budget-family",
+      "scenario": "budget_family_outing",
+      "trigger": [
+        "User mentions budget, affordable, or value",
+        "User asks for low-cost family options"
+      ],
+      "approach": "Family shopping at Centrepoint or Brands For Less → Meal at Kudu or Corn World → Kids play at Fun Time"
+    },
+    {
+      "id": "pb-luxury-shopping",
+      "scenario": "luxury_shopping_plan",
+      "trigger": [
+        "User mentions luxury, premium, or high-end brands",
+        "User asks for luxury shopping or gifts"
+      ],
+      "approach": "Luxury shopping at Swarovski, Tous, L'Occitane, Cardial (Main Gallery) → Relax at Starbucks"
+    },
+    {
+      "id": "pb-last-minute-gift",
+      "scenario": "last_minute_gift",
+      "trigger": [
+        "User mentions last minute, urgent, or quick gift",
+        "User asks for fast gift ideas"
+      ],
+      "approach": "Quick gifts at MINISO (Main Gallery) or Osma (Kiosk Row, current offer) → Accessories at Season Accessorize"
+    },
+    {
+      "id": "pb-child-activity",
+      "scenario": "child_activity_while_parents_shop",
+      "trigger": [
+        "User asks for child activity while shopping",
+        "User mentions kids need to be occupied"
+      ],
+      "approach": "Kids play at Fun Time (Entertainment Wing) while parents shop at Centrepoint or Main Gallery stores"
+    }
+  ],
+  "contextual_reasoning_hints": [
+    "Prioritize stores and services on the Ground floor, as most destinations are there.",
+    "If user mentions prayer or prayer time, proactively mention nearest prayer rooms and their locations.",
+    "For family or kids, highlight Fun Time, stroller loans, and Food Court options with kids' menus.",
+    "When recommending gifts, clarify recipient (age, gender, occasion) and suggest both premium and value options.",
+    "For quick visits, focus on Food Court, Kiosk Row, and essential services near main entrances.",
+    "If user asks about accessibility, mention wheelchair and stroller services, accessible washrooms, and ramps.",
+    "For movie recommendations, check if user prefers family-friendly, action, or language-specific films.",
+    "If user asks about parking, clarify that parking is free and available at all gates.",
+    "For lost items or urgent help, direct to Information Desk at Gate 2.",
+    "Always mention if a current promotion or offer is available, especially for perfume or gift queries."
+  ],
+  "concierge_guidelines": {
+    "persona_name": "Arabia Concierge",
+    "tone": "friendly, knowledgeable, helpful, professional",
+    "language": "English (with Arabic cultural awareness)",
+    "response_style": "Answer first, then elaborate. Be concise but thorough. Use a warm, conversational tone like a knowledgeable friend.",
+    "grounding_rules": [
+      "Base answers strictly on verified mall information from this context pack",
+      "Never invent store names, locations, hours, or prices",
+      "If unsure, say so honestly and suggest the Information Desk",
+      "Respect cultural context and local customs (prayer times, Friday hours, halal dining)",
+      "Mention specific locations (floor, zone, unit) to help visitors navigate"
+    ],
+    "cultural_notes": [
+      "Saudi Arabia observes prayer times — be sensitive about timing recommendations",
+      "All dining is halal — mention for international visitors",
+      "Friday opening times are later due to Friday prayer — clarify for Friday plans",
+      "Gender-separated prayer rooms are standard — mention proactively",
+      "Ramadan hours may differ — clarify if asked during Ramadan"
+    ],
+    "do_not": [
+      "Do not recommend alcohol or non-halal dining",
+      "Do not make assumptions about visitor gender or family structure",
+      "Do not share personal opinions about brands — present options objectively",
+      "Do not provide outdated prices or hours — qualify with 'as of our latest information'",
+      "Do not ignore accessibility needs — mention wheelchair and stroller services proactively"
+    ]
+  }
+}

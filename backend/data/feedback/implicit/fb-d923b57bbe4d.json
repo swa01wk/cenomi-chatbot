@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-d923b57bbe4d",
+  "session_id": "session-a89aae887e684b3f",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-0593eae99044",
+  "user_message": "for couples?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-17 20:18:52.451445"
+}

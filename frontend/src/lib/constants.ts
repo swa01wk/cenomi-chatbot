@@ -1,4 +1,4 @@
-export const APP_NAME = "Al Nakheel Plaza Concierge";
+export const APP_NAME = "Cenomi Mall Concierge";
 export const DEFAULT_TENANT_ID = "al_nakheel_plaza_28";
 export const DEFAULT_MALL_ID = "al_nakheel_plaza_28";
 export const MAX_MESSAGE_LENGTH = 4000;
@@ -40,8 +40,10 @@ export const FEEDBACK_REASON_LABELS: Record<string, string> = {
 
 export const TENANTS = [
   { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza" },
+  { id: "al_nakheel_plaza_13", label: "Mall of Arabia" },
 ] as const;
 
 export const MALLS = [
   { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza — Buraidah" },
+  { id: "al_nakheel_plaza_13", label: "Mall of Arabia — Jeddah" },
 ] as const;

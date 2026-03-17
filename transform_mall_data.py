@@ -2,31 +2,35 @@
 transform_mall_data.py
 
 Reads 5 JSON source files from ./data and produces a single structured output
-JSON for mall property_group_id = 28, shaped to match the sample.json contract.
+JSON for any mall property_group_id, shaped to match the sample.json contract.
 
 Source files:
   - data/sample.json        → output schema contract
   - data/mall_and_movie.json → mall metadata + muvilist
-  - data/services.json       → mall services
+  - data/services.json       → mall services (pre-filtered for mall 28; empty for others)
   - data/engagements.json    → promotions/offers (reverse-mapped by brand_id)
   - data/brands.json         → brand/tenant records (reverse-mapped by available_in_malls)
 
+Usage:
+  python transform_mall_data.py            # defaults to mall 28
+  python transform_mall_data.py --mall-id 13
+  python transform_mall_data.py --mall-id 13 --out output_mall_13.json
+
 Output:
-  - output_mall_28.json
+  - output_mall_<id>.json
 """
 
+import argparse
 import json
 import os
 import sys
 from typing import Any, Dict, List, Optional
 
 # ─────────────────────────────────────────────
-# Configuration
+# Configuration (overridden via CLI args)
 # ─────────────────────────────────────────────
 
-TARGET_PROPERTY_GROUP_ID = 28
 DATA_DIR = "./data"
-OUTPUT_FILE = "output_mall_28.json"
 
 
 # ─────────────────────────────────────────────
@@ -410,17 +414,17 @@ def transform_engagement(eng: Dict) -> Dict:
 # Transformation: brands
 # ─────────────────────────────────────────────
 
-def transform_brand(brand: Dict, engagements: List[Dict]) -> Dict:
+def transform_brand(brand: Dict, engagements: List[Dict], target_property_group_id: int) -> Dict:
     """
     Transform a raw brand record to the sample.json brand schema.
     Keeps only English-variant keys and schema-defined metadata.
-    Filters available_in_malls to only the entry for property_group_id = 28.
+    Filters available_in_malls to only the entry for the given property_group_id.
     Attaches the brand's pre-filtered engagements list.
     """
     if not isinstance(brand, dict):
         return {}
 
-    target = normalize_id(TARGET_PROPERTY_GROUP_ID)
+    target = normalize_id(target_property_group_id)
 
     # Filter available_in_malls to only the current mall's entry
     raw_available = brand.get("available_in_malls") or []
@@ -526,11 +530,11 @@ def validate_output(output: Dict, sample: Dict) -> None:
 # Orchestration
 # ─────────────────────────────────────────────
 
-def build_output_mall_28() -> Dict:
+def build_output_mall(target_property_group_id: int) -> Dict:
     """
     Main orchestration function.
     1. Load all 5 source files.
-    2. Extract and filter relevant records for property_group_id = 28.
+    2. Extract and filter relevant records for the given property_group_id.
     3. Transform each section into the sample.json-compatible shape.
     4. Assemble the final output object.
     5. Validate and print a transformation summary.
@@ -560,27 +564,30 @@ def build_output_mall_28() -> Dict:
     )
 
     # ── Mall data mapping ─────────────────────────────────────────────────────
-    # Locate the single mall record for property_group_id = 28 from
-    # mall_and_movie.json, which is used for top-level fields and muvilist.
 
-    mall_record = get_mall_record(mall_list, TARGET_PROPERTY_GROUP_ID)
+    mall_record = get_mall_record(mall_list, target_property_group_id)
     mall_found = mall_record is not None
 
     if not mall_found:
-        print(f"[WARN] No mall found for property_group_id = {TARGET_PROPERTY_GROUP_ID}.")
+        print(f"[WARN] No mall found for property_group_id = {target_property_group_id}.")
         mall_record = {}
 
     # ── Services mapping ──────────────────────────────────────────────────────
-    # services.json is already scoped to property_group_id = 28; extract list.
+    # services.json is pre-filtered for mall 28; for other malls the list is empty.
 
-    raw_services = get_services_for_mall(services_raw or {})
+    services_data_pg_id = (services_raw or {}).get("data", {}).get("property_group_id")
+    if str(services_data_pg_id) == str(target_property_group_id):
+        raw_services = get_services_for_mall(services_raw or {})
+    else:
+        raw_services = []
+        if services_data_pg_id is not None:
+            print(f"[INFO] services.json is scoped to mall {services_data_pg_id}, "
+                  f"not {target_property_group_id} — services will be empty.")
     services = [transform_service(s) for s in raw_services if isinstance(s, dict)]
 
     # ── Engagements mapping ───────────────────────────────────────────────────
-    # Filter engagements whose property_group_ids list includes 28.
-    # Then group them by brand_id for O(1) brand-level merging below.
 
-    engagements_for_mall = filter_engagements_for_mall(engagement_list, TARGET_PROPERTY_GROUP_ID)
+    engagements_for_mall = filter_engagements_for_mall(engagement_list, target_property_group_id)
 
     engagements_by_brand: Dict[str, List[Dict]] = {}
     for eng in engagements_for_mall:
@@ -589,26 +596,22 @@ def build_output_mall_28() -> Dict:
             engagements_by_brand.setdefault(bid, []).append(eng)
 
     # ── Brands mapping ────────────────────────────────────────────────────────
-    # Filter brands whose available_in_malls contains property_group_id = 28.
-    # Merge each brand's engagements before transforming.
 
-    filtered_brands = filter_brands_for_mall(brand_list, TARGET_PROPERTY_GROUP_ID)
+    filtered_brands = filter_brands_for_mall(brand_list, target_property_group_id)
     brands = [
         transform_brand(
             brand=b,
             engagements=engagements_by_brand.get(normalize_id(b.get("brand_id")), []),
+            target_property_group_id=target_property_group_id,
         )
         for b in filtered_brands
         if isinstance(b, dict)
     ]
 
     # ── Final sample.json-shaped output assembly ──────────────────────────────
-    # Top-level keys mirror sample.json exactly. mall_information and muvilist
-    # are sourced from mall_and_movie.json; services from services.json;
-    # brands (with embedded engagements) from brands.json + engagements.json.
 
     output: Dict = {
-        "property_group_id": mall_record.get("property_group_id", TARGET_PROPERTY_GROUP_ID),
+        "property_group_id": mall_record.get("property_group_id", target_property_group_id),
         "marketing_name": mall_record.get("marketing_name", ""),
         "city": mall_record.get("city", ""),
         "country": mall_record.get("country", ""),
@@ -624,17 +627,13 @@ def build_output_mall_28() -> Dict:
 
     validate_output(output, sample)
 
-    # Count total engagements included across all brands
     total_engagements = sum(len(b.get("engagements", [])) for b in brands)
-
-    # ── Transformation summary ────────────────────────────────────────────────
 
     print("\n─── Transformation Summary ───────────────────────────────")
     print(f"  Mall found          : {'Yes — ' + str(mall_record.get('marketing_name', '')) if mall_found else 'No'}")
     print(f"  Services included   : {len(services)}")
     print(f"  Brands included     : {len(brands)}")
     print(f"  Engagements included: {total_engagements}")
-    print(f"  Output path         : {os.path.abspath(OUTPUT_FILE)}")
     print("──────────────────────────────────────────────────────────\n")
 
     return output
@@ -645,12 +644,30 @@ def build_output_mall_28() -> Dict:
 # ─────────────────────────────────────────────
 
 def main() -> None:
-    output = build_output_mall_28()
+    parser = argparse.ArgumentParser(description="Transform raw mall data into output_mall_<id>.json")
+    parser.add_argument(
+        "--mall-id",
+        type=int,
+        default=28,
+        help="property_group_id of the mall to transform (default: 28)",
+    )
+    parser.add_argument(
+        "--out",
+        type=str,
+        default=None,
+        help="Output filename (default: output_mall_<mall-id>.json)",
+    )
+    args = parser.parse_args()
+
+    target_id = args.mall_id
+    output_file = args.out or f"output_mall_{target_id}.json"
+
+    output = build_output_mall(target_id)
 
     try:
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as fh:
+        with open(output_file, "w", encoding="utf-8") as fh:
             json.dump(output, fh, ensure_ascii=False, indent=4)
-        print(f"[OK] Output written → {OUTPUT_FILE}")
+        print(f"[OK] Output written → {os.path.abspath(output_file)}")
     except OSError as exc:
         print(f"[ERROR] Could not write output file: {exc}")
         sys.exit(1)

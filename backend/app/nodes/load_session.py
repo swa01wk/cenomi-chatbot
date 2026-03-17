@@ -19,6 +19,7 @@ from app.models.tenant import TenantConfig
 from app.nodes._tracing import traced_node
 from app.services.tenant_params import load_tenant_config
 from app.utils.ids import generate_message_id
+from intent.query_classifier import normalize_query
 from llm.prompts.query_expander import expand_short_query
 
 
@@ -37,7 +38,7 @@ async def load_session(state: ConciergeState) -> dict:
             tenant_config = TenantConfig(mall_id=mall_id)
             warnings.append("Tenant config not found — using defaults")
 
-    normalized = state.raw_user_message.strip()
+    normalized = normalize_query(state.raw_user_message.strip())
 
     scene_ctx = None
     if state.scene and (

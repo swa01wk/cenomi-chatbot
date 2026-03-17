@@ -59,28 +59,61 @@ _BYE_RE = re.compile(
 )
 
 # ── Response pools (always redirect to mall services) ─────────────────
+#
+# Greeting responses use a scaffold that:
+#   1. Gives a warm, short greeting
+#   2. Lists 3-5 concrete mall capabilities (teaches the user what to ask)
+#   3. Ends with an open question
+#
+# This replaces the generic "what are you in the mood for?" with a more
+# guided, mall-native experience that helps users know what's possible.
 
 _RESPONSES: dict[str, list[str]] = {
     "greeting": [
-        "Hi! Welcome to the mall concierge. Looking for shopping, food, or something fun to do?",
-        "Hello! I'm your mall concierge — here to help you find the best spots. What are you in the mood for?",
-        "Hey there! Whether it's dining, shopping, or entertainment, I've got you covered. What can I help with?",
-        "Welcome! I can help you discover great stores, restaurants, and activities. What sounds good?",
+        (
+            "Hi there! 👋\n"
+            "I can help with shops and brands, restaurants and cafés, "
+            "cinema and entertainment, or services like parking, ATMs, and prayer rooms. "
+            "What are you looking for today?"
+        ),
+        (
+            "Hello! Welcome to the mall concierge.\n"
+            "Ask me about movies and showtimes, dining options, stores and brands, "
+            "or anything like 'where is the ATM' or 'is there parking nearby'. "
+            "What can I help you with?"
+        ),
+        (
+            "Hey! Good to have you here.\n"
+            "I can point you to the best shops, restaurants, and entertainment — "
+            "or help with practical things like opening hours, prayer rooms, and directions. "
+            "What are you in the mood for?"
+        ),
+        (
+            "Hi! I'm your mall guide.\n"
+            "Whether you're here for shopping, a meal, catching a movie, or just exploring — "
+            "I can help you find the right spot. What's on your agenda today?"
+        ),
+        (
+            "Ahlan! 👋\n"
+            "Looking for something specific or just exploring? I can help with stores, "
+            "dining, cinema, kids' activities, or services like parking and prayer rooms. "
+            "What would you like to know?"
+        ),
     ],
     "howru": [
-        "Just here to help you explore the mall! What are you in the mood for today?",
-        "Doing great — ready to help you make the most of your visit! Shopping, food, or fun?",
-        "All good on my end! Tell me what you're looking for and I'll point you in the right direction.",
+        "All good — ready to help! What are you looking for today: shopping, food, cinema, or something else?",
+        "Doing great, thanks! Tell me what you need — I can help with stores, dining, movies, or services.",
+        "Just here to help you make the most of your visit. What can I point you to?",
     ],
     "thanks": [
-        "You're welcome! Let me know if there's anything else you'd like to explore.",
-        "Happy to help! Need anything else — maybe a dining spot or some shopping?",
-        "Anytime! If you need more suggestions, just ask.",
+        "You're welcome! Let me know if there's anything else — more recommendations, directions, or anything.",
+        "Happy to help! Need anything else? I can suggest dining, shopping, or help you find something specific.",
+        "Anytime! If you want more suggestions or have another question, just ask.",
     ],
     "bye": [
-        "Goodbye! Hope you enjoy your time at the mall. Come back anytime!",
-        "See you around! Enjoy your visit.",
-        "Take care! Hope you have a great time here.",
+        "Goodbye! Hope you have a great time. Feel free to ask if you need anything else during your visit.",
+        "See you around! Enjoy your time here.",
+        "Take care and enjoy the mall!",
     ],
 }
 
@@ -112,16 +145,23 @@ async def smalltalk(state: ConciergeState) -> dict:
 
     response_text = random.choice(_RESPONSES[category])
 
+    # Greetings use the greeting_scaffold experience mode for debug tracking
+    experience_mode = "greeting_scaffold" if category == "greeting" else "smalltalk"
+
     assistant_msg = Message(
         role="assistant",
         content=response_text,
         turn_id=state.turn_id,
-        metadata={"strategy": "smalltalk", "category": category},
+        metadata={
+            "strategy": "smalltalk",
+            "category": category,
+            "experience_mode": experience_mode,
+        },
     )
 
     return {
         "final_response_text": response_text,
-        "response_debug_summary": f"smalltalk/{category}",
+        "response_debug_summary": f"smalltalk/{category} [{experience_mode}]",
         "messages": [assistant_msg],
         "_trace_summary": f"Small talk ({category}): {len(response_text)} chars",
     }

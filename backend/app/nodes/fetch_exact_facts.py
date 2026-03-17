@@ -5,10 +5,17 @@ CONTRACT
 ────────
   Purpose:  Execute targeted retrieval against canonical data for queries
             that need exact answers (store hours, showtimes, offers, etc.).
-  Reads:    retrieval (targets), active_mall_id, normalized_user_message
+  Reads:    retrieval (targets), active_mall_id, normalized_user_message,
+            flow_type, fact_query_entity, fact_scope
   Writes:   retrieval (updated with results), context (enriched with facts)
   Failure:  Retrieval error → warning, proceed with empty results
-  Routing:  Always → generate_response
+  Routing:  Always → generate_response (concierge) or
+                     compose_fact_response_context (factual)
+
+Flow-aware behavior:
+  - factual flow: retrieval is required and dominant; fact_query_entity is used
+    for precise name-based lookup; partial retrieval is surfaced honestly.
+  - concierge flow: retrieval is conditional and supportive (existing behavior).
 """
 
 from __future__ import annotations
@@ -26,8 +33,16 @@ async def fetch_exact_facts(state: ConciergeState) -> dict:
     context = state.context.model_copy(deep=True)
     trace_warnings: list[str] = []
 
-    mall_ctx = get_mall_context()
+    mall_ctx = get_mall_context(state.mall_id)
     msg = state.normalized_user_message.lower()
+
+    # In factual flow, enrich the message with the resolved entity name
+    # for more precise lookups (e.g. "starbucks" for "do you have starbucks?")
+    fact_query_entity = getattr(state, "fact_query_entity", "") or ""
+    if fact_query_entity:
+        # Inject entity name into msg if not already present
+        if fact_query_entity.lower() not in msg:
+            msg = f"{msg} {fact_query_entity.lower()}"
 
     results: list[dict[str, Any]] = []
     for target in retrieval.retrieval_targets:
@@ -44,19 +59,24 @@ async def fetch_exact_facts(state: ConciergeState) -> dict:
 
     retrieval.retrieval_results = results
 
-    for r in results:
-        if r.get("data"):
-            context.selected_entities.append(r["data"])
+    # In factual flow: only inject facts, NOT semantic entities, into context.
+    # In concierge flow: append normally so downstream compose_context can use them.
+    is_factual = getattr(state, "flow_type", "") == "factual"
+    if not is_factual:
+        for r in results:
+            if r.get("data"):
+                context.selected_entities.append(r["data"])
 
     found_count = sum(1 for r in results if r.get("data"))
+    flow_tag = "factual" if is_factual else "concierge"
     return {
         "retrieval": retrieval,
         "context": context,
         "_trace_summary": (
-            f"Fetched {len(results)} targets "
+            f"Fetched[{flow_tag}] {len(results)} targets "
             f"({found_count} with data)"
         ),
-        "_trace_warnings": trace_warnings,
+        "_trace_warnings": trace_warnings if trace_warnings else [],
     }
 
 

@@ -82,7 +82,7 @@ class PromptBuilder:
         mall_name = "Cenomi Mall"
         pack = {}
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(state.mall_id)
             pack = ctx.get_context_pack()
             summary = pack.get("mall_profile_summary", {})
             mall_name = summary.get("name", mall_name)
@@ -235,20 +235,20 @@ class PromptBuilder:
     def build_context_block(self, state: ConciergeState) -> str:
         parts: list[str] = []
 
-        parts.append(self._mall_operational_context())
+        parts.append(self._mall_operational_context(state.mall_id))
         parts.append(self._topic_block_context(state))
         parts.append(self._entity_context(state))
         parts.append(self._retrieval_facts(state))
-        parts.append(self._events_offers_context())
+        parts.append(self._events_offers_context(state.mall_id))
 
         block = "\n\n".join(p for p in parts if p)
         if block:
             return f"MALL INTELLIGENCE (use this to ground your answers):\n\n{block}"
         return ""
 
-    def _mall_operational_context(self) -> str:
+    def _mall_operational_context(self, mall_id: str) -> str:
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(mall_id)
             pack = ctx.get_context_pack()
         except RuntimeError:
             return ""
@@ -276,7 +276,7 @@ class PromptBuilder:
 
     def _topic_block_context(self, state: ConciergeState) -> str:
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(state.mall_id)
         except RuntimeError:
             return ""
 
@@ -403,9 +403,9 @@ class PromptBuilder:
 
         return "\n".join(lines)
 
-    def _events_offers_context(self) -> str:
+    def _events_offers_context(self, mall_id: str) -> str:
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(mall_id)
             pack = ctx.get_context_pack()
         except RuntimeError:
             return ""
@@ -432,7 +432,7 @@ class PromptBuilder:
 
         parts.append(self._scene_block(state))
         parts.append(self._playbook_block(state))
-        parts.append(self._reasoning_hints())
+        parts.append(self._reasoning_hints(state.mall_id))
 
         block = "\n\n".join(p for p in parts if p)
         return block
@@ -491,7 +491,7 @@ class PromptBuilder:
             return ""
 
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(state.mall_id)
             pb_obj = ctx.match_playbook(intent=pb.selected_playbook)
             if pb_obj:
                 lines = [f"ACTIVE PLAYBOOK: {pb_obj.scenario}"]
@@ -509,9 +509,9 @@ class PromptBuilder:
 
         return f"ACTIVE PLAYBOOK: {pb.selected_playbook}"
 
-    def _reasoning_hints(self) -> str:
+    def _reasoning_hints(self, mall_id: str) -> str:
         try:
-            ctx = get_mall_context()
+            ctx = get_mall_context(mall_id)
             pack = ctx.get_context_pack()
         except RuntimeError:
             return ""

@@ -17,9 +17,12 @@ Build a production-grade single-mall concierge chatbot that delivers an AI Findr
 
 ## Out of Scope (Iteration 2+)
 
-- Multi-mall support and cross-mall queries
-- Mall comparison features
-- Cross-mall tenant hopping
+> **Note:** Items marked ✓ have since shipped — see [CHANGELOG.md](../CHANGELOG.md).
+
+- ✓ Multi-mall support (shipped v1.1)
+- ✓ Cross-mall queries / inline brand awareness (shipped v1.2)
+- Mall comparison features (side-by-side stats across malls)
+- Cross-mall tenant hopping (route visitor to another mall for a brand)
 - Production deployment infrastructure
 - User authentication
 - Analytics dashboards

@@ -1,6 +1,6 @@
 # Cenomi Mall Concierge
 
-AI-powered single-mall concierge chatbot platform. Answers visitor questions about stores, dining, entertainment, and services — grounded in structured mall intelligence.
+AI-powered multi-mall concierge chatbot platform. Answers visitor questions about stores, dining, entertainment, and services — grounded in structured mall intelligence, with cross-mall brand awareness.
 
 ---
 
@@ -643,15 +643,25 @@ git remote set-url origin git@github.com:<your-username>/cenomi-chatbot.git
 
 ## Project Status
 
-**Iteration 1 — Core pipeline implemented.** The full LangGraph concierge pipeline is operational against live mall data.
+**v1.2 — Multi-mall platform with cross-mall brand search.**
 
-- Single mall knowledge layer (Al Nakheel Plaza 28)
+See [CHANGELOG.md](CHANGELOG.md) for full release history.
+
+### v1.2 — Cross-mall brand search (current)
+- Inline awareness: visitor anchored to home mall, but can ask about brands across all Cenomi malls
+- `cross_mall` intent with 0.97-confidence rule-based detection
+- Home mall results surfaced first; hallucination guard extended to merged canonical
+
+### v1.1 — Multi-mall support
+- Runtime registry holds N malls simultaneously (`BACKEND_MALL_IDS=...` comma-separated)
+- Data pipeline extended to Mall of Arabia (mall 13, Jeddah)
+- All pipeline nodes mall-context-aware via `mall_id` per request
+
+### v1.0 — Core pipeline (single mall)
 - 12-node LangGraph pipeline with smalltalk fast-path and conditional retrieval routing
 - Semantic mall model with tag-based enrichment
 - Tenant parameter system with feedback-driven tuning
-- Clean context builder (contamination-free per-turn context)
 - Anti-hallucination architecture (grounded prompts + post-generation guard)
-- Single-mall concierge runtime
 - Chatbot testing UI with full debug inspector
 - Feedback system (explicit + implicit)
 

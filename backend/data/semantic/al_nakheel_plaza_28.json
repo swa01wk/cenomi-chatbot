@@ -736,6 +736,145 @@
       }
     }
   ],
+  "enrichment_rules_v2": [
+    {
+      "rule_id": "er-cinema-zone",
+      "description": "Cinema Zone entities are the entertainment anchor, triggering movie-night and showtime signals.",
+      "match_conditions": {
+        "zone": ["Cinema Zone"],
+        "entity_type": ["cinema"]
+      },
+      "apply_tags": [
+        "cinema_now",
+        "entertainment_anchor",
+        "showtime_lookup",
+        "movie_night",
+        "date_spot",
+        "cinema"
+      ],
+      "apply_audience": ["couple_friendly", "family_friendly", "solo_friendly", "group_friendly"],
+      "apply_vibe": ["exciting", "immersive", "modern"],
+      "apply_outing_fit": ["movie_night", "movie_showtime_lookup", "movie_night_plan", "date_night", "family_movie"],
+      "priority_boost": {
+        "movie_showtime_lookup": 1.0,
+        "movie_night_plan": 0.95,
+        "movie_plus_food": 0.95,
+        "kid_friendly_movie_plus_food": 0.9,
+        "date_plan": 0.85,
+        "family_movie_plan": 0.9,
+        "before_movie": 0.5,
+        "after_movie": 0.5
+      }
+    },
+    {
+      "rule_id": "er-before-movie-foodcourt",
+      "description": "Food Court entities are near Cinema Level — strong before_movie and near_cinema signals for time-pressed visitors.",
+      "match_conditions": {
+        "zone": ["Food Court"],
+        "entity_type": ["dining"]
+      },
+      "apply_tags": [
+        "near_cinema",
+        "before_movie",
+        "quick_stop",
+        "time_sensitive",
+        "quick_bite",
+        "low_commitment"
+      ],
+      "apply_outing_fit": ["before_movie", "quick_visit", "after_movie"],
+      "priority_boost": {
+        "activity_before_movie": 1.0,
+        "activity_after_movie": 0.85,
+        "route_proximity_refinement": 0.9,
+        "quick_lunch": 0.7,
+        "quick_snack": 0.8
+      }
+    },
+    {
+      "rule_id": "er-before-movie-kiosk",
+      "description": "Kiosk Row snack/dessert entities are near Cinema — fast, low-commitment before-movie options.",
+      "match_conditions": {
+        "zone": ["Kiosk Row"],
+        "entity_type": ["dining"],
+        "subcategory_includes_any": ["dessert", "snack", "kiosk", "cafe"]
+      },
+      "apply_tags": [
+        "near_cinema",
+        "before_movie",
+        "quick_stop",
+        "low_commitment",
+        "grab_and_go"
+      ],
+      "apply_outing_fit": ["before_movie", "quick_visit"],
+      "priority_boost": {
+        "activity_before_movie": 0.95,
+        "quick_snack": 0.9,
+        "route_proximity_refinement": 0.85
+      }
+    },
+    {
+      "rule_id": "er-after-movie-reward",
+      "description": "Dessert and cafe entities near cinema are ideal post-movie reward stops.",
+      "match_conditions": {
+        "entity_type": ["dining"],
+        "tags_include_any": ["dessert", "cafe", "coffee_spot"]
+      },
+      "apply_tags": [
+        "after_movie",
+        "reward_stop",
+        "dessert_spot",
+        "near_cinema"
+      ],
+      "apply_outing_fit": ["after_movie", "reward_visit"],
+      "priority_boost": {
+        "activity_after_movie": 0.95,
+        "date_plan": 0.7,
+        "shopping_plus_dessert_combo": 0.8
+      }
+    },
+    {
+      "rule_id": "er-kids-entertainment-plan",
+      "description": "Kids Entertainment entities are child-relief anchors and must surface in any family/kids scenario.",
+      "match_conditions": {
+        "category": ["Kids"],
+        "subcategory": ["Kids Entertainment"]
+      },
+      "apply_tags": [
+        "child_relief_anchor",
+        "entertainment_anchor",
+        "kids_entertainment",
+        "kid_friendly",
+        "near_food",
+        "stroller_friendly"
+      ],
+      "apply_audience": ["family_friendly", "kid_friendly"],
+      "apply_vibe": ["fun", "energetic", "safe"],
+      "apply_outing_fit": ["kids_entertainment_plan", "family_shopping_with_child", "child_activity_while_parents_shop", "family_visit_plan"],
+      "priority_boost": {
+        "kids_entertainment_plan": 1.0,
+        "family_shopping_with_child": 0.95,
+        "child_activity_while_parents_shop": 0.95,
+        "family_movie_plan": 0.9,
+        "family_visit_plan": 0.85,
+        "budget_family_outing": 0.8
+      }
+    },
+    {
+      "rule_id": "er-near-cinema-main-gallery",
+      "description": "Main Gallery stores closest to Cinema Level escalator/lift are eligible for near_cinema routing.",
+      "match_conditions": {
+        "zone": ["Main Gallery"],
+        "entity_type": ["dining", "store"]
+      },
+      "apply_tags": [
+        "near_cinema"
+      ],
+      "priority_boost": {
+        "route_proximity_refinement": 0.6,
+        "activity_before_movie": 0.4
+      }
+    }
+  ],
   "profiles": [
     {
       "entity_id": "t-store-001",
@@ -4942,56 +5081,79 @@
       "semantic_tags": [
         "kids",
         "kids_entertainment",
+        "child_relief_anchor",
+        "entertainment_anchor",
         "family_friendly",
+        "kid_friendly",
         "mid_range",
         "play_zone",
-        "entertainment_wing"
+        "entertainment_wing",
+        "near_food",
+        "stroller_friendly",
+        "supervised_activity"
       ],
       "audience_fit": [
         "family_friendly",
-        "kid_friendly"
+        "kid_friendly",
+        "parent_friendly"
       ],
       "vibe": [
         "fun",
-        "energetic"
+        "energetic",
+        "safe",
+        "lively"
       ],
       "price_band": "mid_range",
       "outing_fit": [
         "family_outing",
         "child_activity",
-        "birthday_party"
+        "birthday_party",
+        "kids_entertainment_plan",
+        "family_shopping_with_child",
+        "family_movie_plan"
       ],
       "gift_fit": [
         "child_gift",
         "experience_gift"
       ],
       "meal_fit": [],
+      "routing_tags": [
+        "entertainment_wing",
+        "ground_floor",
+        "near_centrepoint",
+        "near_food_court"
+      ],
       "when_to_recommend": [
-        "User wants kids' entertainment",
+        "User asks for something for kids to do",
         "Family outing with children",
-        "User looking for a birthday party venue"
+        "User needs a child-relief anchor while shopping",
+        "User looking for a birthday party venue",
+        "Family movie plan when no kids films are showing at cinema"
       ],
       "avoid_if": [
         "User is adults only",
         "User wants quiet or relaxing activities"
       ],
       "priority_scores": {
-        "family_visit_plan": 0.95,
-        "solo_visit_plan": 0.1,
+        "kids_entertainment_plan": 1.0,
+        "family_shopping_with_child": 0.95,
+        "child_activity_while_parents_shop": 0.95,
+        "family_movie_plan": 0.9,
+        "family_visit_plan": 0.9,
+        "budget_family_outing": 0.8,
+        "kid_friendly_movie_plus_food": 0.85,
+        "family_gift": 0.7,
+        "solo_visit_plan": 0.05,
         "anniversary_plan": 0.05,
         "gift_for_girlfriend": 0.05,
-        "gift_for_family": 0.7,
-        "movie_plus_food": 0.25,
-        "kid_friendly_movie_plus_food": 0.85,
+        "movie_plus_food": 0.2,
         "quick_lunch": 0.05,
-        "shopping_plus_dessert_combo": 0.15,
+        "shopping_plus_dessert_combo": 0.1,
         "date_plan": 0.05,
-        "budget_family_outing": 0.75,
         "luxury_shopping_plan": 0.05,
-        "last_minute_gift": 0.1,
-        "child_activity_while_parents_shop": 0.95
+        "last_minute_gift": 0.05
       },
-      "concierge_notes": "Fun Time is the ultimate destination for kids' entertainment and family fun. Recommend for birthday parties or as a way to keep children engaged while parents shop. Pair with a quick meal nearby for a complete outing."
+      "concierge_notes": "Fun Time (Sparky's, GFENT01) is the primary kids entertainment anchor at Al Nakheel Plaza. Large indoor play center operated by Al Hokair Group — one of the largest kids entertainment brands in Saudi Arabia. Recommend as the child-relief anchor for any family shopping scenario. Pair with McDonald's or Herfy (Food Court nearby) for a complete family outing. No animation movies currently at Muvi Cinema — Fun Time is the right redirect for family movie queries with kids."
     },
     {
       "entity_id": "t-store-073",
@@ -6265,15 +6427,24 @@
         "cinema",
         "movies",
         "entertainment",
+        "entertainment_anchor",
+        "cinema_now",
+        "showtime_lookup",
+        "movie_night",
         "family_friendly",
         "date_spot",
-        "mid_range"
+        "date_night",
+        "mid_range",
+        "group_friendly",
+        "couple_friendly"
       ],
       "audience_fit": [
         "family_friendly",
         "couple_friendly",
         "solo_friendly",
-        "kid_friendly"
+        "kid_friendly",
+        "group_friendly",
+        "teen_friendly"
       ],
       "vibe": [
         "exciting",
@@ -6283,41 +6454,59 @@
       "price_band": "mid_range",
       "outing_fit": [
         "movie_night",
+        "movie_showtime_lookup",
+        "movie_night_plan",
+        "family_movie_plan",
+        "date_night",
         "family_outing",
-        "date_spot"
+        "date_spot",
+        "evening_out"
       ],
       "gift_fit": [
         "experience_gift"
       ],
       "meal_fit": [],
+      "routing_tags": [
+        "cinema_level",
+        "accessible_from_ground_floor",
+        "near_food_court"
+      ],
+      "now_showing_summary": "Action/Thriller lineup: SHELTER, CRIME 101 (SHOWING_NOW). THE HOUSEMAID (SHOWING_NOW). Saudi Pro League matches (COMING_SOON). No animation/family films currently.",
       "when_to_recommend": [
-        "User wants to watch the latest movies",
-        "Family or group outing",
-        "Date night or special occasion",
-        "Pairing with food for a complete outing"
+        "User asks what movies are playing",
+        "User wants a movie night",
+        "User asks about cinema, showtimes, or entertainment",
+        "Date night or couples outing",
+        "Group or friends outing",
+        "User asks about Saudi Pro League screenings"
       ],
       "avoid_if": [
         "User not interested in movies",
-        "User has time constraints",
-        "User seeking only shopping or dining"
+        "User has strict time constraints and needs quick errand",
+        "User seeking only shopping"
       ],
       "priority_scores": {
+        "movie_showtime_lookup": 1.0,
+        "movie_night_plan": 0.98,
         "movie_plus_food": 0.95,
-        "kid_friendly_movie_plus_food": 0.95,
-        "family_visit_plan": 0.9,
-        "date_plan": 0.8,
+        "family_movie_plan": 0.9,
+        "kid_friendly_movie_plus_food": 0.85,
+        "date_plan": 0.85,
+        "date_night_plan": 0.88,
+        "family_visit_plan": 0.7,
         "solo_visit_plan": 0.7,
-        "shopping_plus_dessert_combo": 0.5,
-        "gift_for_family": 0.4,
-        "gift_for_girlfriend": 0.3,
-        "anniversary_plan": 0.3,
-        "luxury_shopping_plan": 0.2,
-        "last_minute_gift": 0.2,
-        "budget_family_outing": 0.7,
+        "shopping_plus_dessert_combo": 0.3,
+        "gift_for_family": 0.2,
+        "gift_for_girlfriend": 0.2,
+        "anniversary_plan": 0.6,
+        "luxury_shopping_plan": 0.15,
+        "last_minute_gift": 0.1,
+        "budget_family_outing": 0.65,
         "quick_lunch": 0.1,
-        "child_activity_while_parents_shop": 0.7
+        "child_activity_while_parents_shop": 0.5,
+        "kids_entertainment_plan": 0.4
       },
-      "concierge_notes": "Muvi Cinema is the entertainment hub for movie lovers, families, and couples. Suggest pairing a movie with a meal at McDonald's or Herfy for families, or Starbucks for a date night. Located in the Cinema Zone for easy access to the latest blockbusters."
+      "concierge_notes": "Muvi Cinema is the entertainment anchor at Cinema Level (CNL001). Currently showing: SHELTER (Action/Thriller), CRIME 101 (Crime/Action), THE HOUSEMAID (Thriller). Saudi Pro League matches coming soon. No animation/family films currently — for kids, redirect to Fun Time. Online booking: muvicinemas.com. Pair with Food Court for a meal before, or Baskin Robbins/Cinnabon for dessert after."
     }
   ]
 }

@@ -339,7 +339,7 @@ class MallRetriever:
             return []
 
         try:
-            mall_ctx = get_mall_context()
+            mall_ctx = get_mall_context(self.mall_id)
         except RuntimeError:
             return []
 
@@ -406,7 +406,7 @@ class MallRetriever:
     ) -> list[RetrievalResult]:
         """Name-based search over canonical tenant entities."""
         try:
-            mall_ctx = get_mall_context()
+            mall_ctx = get_mall_context(self.mall_id)
         except RuntimeError:
             return []
 
@@ -443,7 +443,7 @@ class MallRetriever:
     ) -> list[RetrievalResult]:
         """Tag-based search over semantic profiles."""
         try:
-            mall_ctx = get_mall_context()
+            mall_ctx = get_mall_context(self.mall_id)
         except RuntimeError:
             return []
 
@@ -477,7 +477,7 @@ class MallRetriever:
     ) -> list[RetrievalResult]:
         """Find matching scenario playbooks for the given intent."""
         try:
-            mall_ctx = get_mall_context()
+            mall_ctx = get_mall_context(self.mall_id)
         except RuntimeError:
             return []
 

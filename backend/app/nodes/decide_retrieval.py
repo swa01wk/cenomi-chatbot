@@ -16,7 +16,7 @@ CONTRACT
 
 from __future__ import annotations
 
-from app.models.state import ConciergeState, RetrievalDecision
+from app.models.state import ConciergeState, DebugEnrichment, RetrievalDecision
 from app.nodes._tracing import traced_node
 from app.services.tenant_runtime import TenantRuntime
 
@@ -84,8 +84,16 @@ async def decide_retrieval(state: ConciergeState) -> dict:
             retrieval_reason="Default: no retrieval needed",
         )
 
+    discipline_reason = (
+        f"sub_intent={sub!r} → {'exact_retrieval_required' if decision.retrieval_needed else 'context_only'}"
+        + (f" [tenant_policy_skip]" if skip_via_policy else "")
+    )
+
     return {
         "retrieval": decision,
+        "debug_enrichment": DebugEnrichment(
+            retrieval_discipline_reason=discipline_reason,
+        ),
         "_trace_summary": (
             f"Retrieval: {'YES' if decision.retrieval_needed else 'NO'} "
             f"— {decision.retrieval_reason}"

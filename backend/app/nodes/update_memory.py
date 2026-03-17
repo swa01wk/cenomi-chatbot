@@ -5,9 +5,11 @@ CONTRACT
 ────────
   Purpose:  After response generation, update the scene with any entities
             mentioned in the response, refresh shortlists, and prepare
-            for the next turn.
-  Reads:    scene, final_response_text, intent, context
-  Writes:   scene (updated with shortlist, topic confirmation)
+            for the next turn.  Also persists session-level continuity
+            fields (last_successful_playbook, preferred_categories, etc.)
+  Reads:    scene, final_response_text, intent, context, response_plan, playbook
+  Writes:   scene (updated with shortlist, topic confirmation),
+            last_successful_playbook, last_response_shape, preferred_categories
   Failure:  Memory update error → warning, scene unchanged
   Routing:  Always → emit_debug_payload
 """
@@ -23,7 +25,166 @@ from app.runtime import get_mall_context
 async def update_memory(state: ConciergeState) -> dict:
     scene = state.scene.model_copy(deep=True)
     changes: list[str] = []
+    result: dict = {}
 
+    # ── Flow-type memory ──────────────────────────────────────────────
+    current_flow = state.flow_type or "concierge"
+    scene.last_flow_type = current_flow
+    changes.append(f"last_flow_type={current_flow}")
+
+    # ── Context-setting tracking ──────────────────────────────────────
+    # Record when the user last provided scene context so downstream nodes
+    # can reason about how fresh the scene framing is.
+    turn_index = len(state.messages)  # proxy for turn counter
+    if state.intent.message_kind == "context_setting":
+        scene.last_context_setting_turn = turn_index
+        changes.append(f"last_context_setting_turn={turn_index}")
+
+    # ── Experience mode tracking ──────────────────────────────────────
+    if state.debug_enrichment.response_experience_mode:
+        scene.last_response_experience_mode = state.debug_enrichment.response_experience_mode
+        changes.append(f"last_response_experience_mode={scene.last_response_experience_mode}")
+
+    # ── Hybrid intent memory — persist across turns for follow-up ─────
+    # primary_intent and secondary_filters are stored so the NEXT turn
+    # can inherit them (e.g. "anything with the kid?" follow-up to movies).
+    primary_intent = state.primary_intent or ""
+    secondary_intents = list(state.secondary_intents or [])
+    modifiers = list(state.modifiers or [])
+    is_topic_switch = state.intent.message_kind == "topic_switch"
+
+    if primary_intent:
+        if is_topic_switch and scene.active_primary_intent:
+            # On explicit topic switch, replace (don't lock to old domain)
+            changes.append(
+                f"active_primary_intent: {scene.active_primary_intent} → {primary_intent} (topic_switch)"
+            )
+        scene.active_primary_intent = primary_intent
+        changes.append(f"active_primary_intent={primary_intent}")
+
+    elif is_topic_switch:
+        # Explicit switch without a new primary intent → clear the lock
+        # so the next turn doesn't inherit a stale factual domain.
+        old = scene.active_primary_intent
+        scene.active_primary_intent = ""
+        changes.append(f"active_primary_intent cleared (topic_switch from {old})")
+
+    # Secondary filters: audience/companion filters persist across topics;
+    # domain-specific constraints are cleared on topic switch.
+    _PERSISTENT_FILTERS = frozenset({
+        "family_filter", "kid_friendly", "family_friendly",
+        "budget_filter", "budget_sensitive",
+        "romantic_filter", "romantic",
+    })
+    _DOMAIN_SPECIFIC_FILTERS = frozenset({
+        "before_movie_constraint", "near_cinema", "near_cinema_preferred",
+        "time_sensitive", "quick_stop_preferred",
+    })
+
+    if is_topic_switch:
+        # Clear domain-specific filters; keep audience/companion filters
+        surviving = [f for f in (scene.active_secondary_filters or [])
+                     if f in _PERSISTENT_FILTERS]
+        if surviving != scene.active_secondary_filters:
+            changes.append(
+                f"active_secondary_filters pruned on topic_switch: "
+                f"{scene.active_secondary_filters} → {surviving}"
+            )
+        scene.active_secondary_filters = surviving
+
+    if secondary_intents:
+        # Merge, don't replace, so cumulative filters survive across turns
+        existing = set(scene.active_secondary_filters or [])
+        for f in secondary_intents:
+            existing.add(f)
+        scene.active_secondary_filters = list(existing)
+        changes.append(f"active_secondary_filters={scene.active_secondary_filters}")
+
+    if modifiers:
+        existing_mods = set(scene.active_modifiers or [])
+        for m in modifiers:
+            existing_mods.add(m)
+        scene.active_modifiers = list(existing_mods)
+        changes.append(f"active_modifiers={scene.active_modifiers}")
+
+    # ── Topic lock — maintain active topic coherence across turns ─────
+    # The topic_lock is derived from the active_primary_intent and active_topic.
+    # Rules:
+    #   - New factual intent → lock to that intent (high confidence)
+    #   - Follow-up / refinement → strengthen existing lock
+    #   - Topic switch → clear the lock or reset to new topic
+    #   - Context-setting → preserve existing lock (it's just scene enrichment)
+    #   - Concierge intent → lock if no existing lock or same domain
+    _LOCKABLE_INTENTS = frozenset({
+        "movie_lookup", "location_lookup", "mall_fact_lookup",
+        "service_lookup", "cross_mall_lookup", "offer_lookup",
+        "dining_recommendation", "shopping_recommendation",
+        "gift_shopping", "mall_overview", "discovery",
+    })
+    message_kind = state.intent.message_kind
+    new_primary = state.primary_intent or ""
+
+    if message_kind == "topic_switch":
+        # Clear topic lock on explicit topic switch
+        old_lock = scene.topic_lock
+        scene.topic_lock = new_primary if new_primary in _LOCKABLE_INTENTS else ""
+        scene.topic_lock_confidence = 0.7 if scene.topic_lock else 0.0
+        changes.append(f"topic_lock reset: {old_lock} → {scene.topic_lock}")
+    elif message_kind == "context_setting":
+        # Context setting doesn't change the topic lock — it enriches the scene
+        pass
+    elif message_kind in ("followup", "refinement", "constraint_refinement"):
+        # Follow-up strengthens existing lock
+        if scene.topic_lock:
+            scene.topic_lock_confidence = min(1.0, scene.topic_lock_confidence + 0.1)
+            changes.append(f"topic_lock reinforced: {scene.topic_lock} conf={scene.topic_lock_confidence:.2f}")
+    elif new_primary and new_primary in _LOCKABLE_INTENTS:
+        # New lockable intent — establish or update lock
+        if scene.topic_lock != new_primary:
+            scene.topic_lock = new_primary
+            scene.topic_lock_confidence = 0.8
+            changes.append(f"topic_lock set: {new_primary} conf=0.8")
+        else:
+            # Same topic repeated → reinforce
+            scene.topic_lock_confidence = min(1.0, scene.topic_lock_confidence + 0.1)
+            changes.append(f"topic_lock reinforced: {scene.topic_lock}")
+
+    # ── Persist selected playbook ─────────────────────────────────────
+    if state.playbook.selected_playbook:
+        scene.last_selected_playbook = state.playbook.selected_playbook
+        changes.append(f"last_selected_playbook={scene.last_selected_playbook}")
+
+    # ── Factual-flow memory updates ───────────────────────────────────
+    if current_flow == "factual":
+        # Update factual follow-up tracking fields
+        if state.fact_scope:
+            scene.active_fact_scope = state.fact_scope
+            changes.append(f"active_fact_scope={state.fact_scope}")
+
+        if state.fact_query_entity:
+            scene.last_resolved_entity = state.fact_query_entity
+            changes.append(f"last_resolved_entity={state.fact_query_entity!r}")
+
+        if state.fact_entity_type:
+            scene.last_resolved_entity_type = state.fact_entity_type
+            changes.append(f"last_resolved_entity_type={state.fact_entity_type}")
+
+        # Lightly update active_topic for follow-up coherence
+        if state.intent.domain and state.intent.domain != "general":
+            scene.active_topic = state.intent.domain
+            changes.append(f"active_topic (factual): {state.intent.domain}")
+
+        # Do NOT advance visit plan or update shortlists in factual flow
+        result["scene"] = scene
+        if state.response_plan.response_shape_hint:
+            result["last_response_shape"] = state.response_plan.response_shape_hint
+
+        result["_trace_summary"] = (
+            f"Memory[factual]: {', '.join(changes) if changes else 'no changes'}"
+        )
+        return result
+
+    # ── Concierge-flow memory updates (existing logic) ────────────────
     if state.intent.domain and state.intent.domain != "general":
         scene.active_topic = state.intent.domain
         changes.append(f"active_topic confirmed: {state.intent.domain}")
@@ -33,18 +194,43 @@ async def update_memory(state: ConciergeState) -> dict:
         scene.active_shortlist = []
         changes.append("moved shortlist to rejected (correction)")
 
+    # Extract shortlist from response (top-5 entities from context)
     mentioned = _extract_mentioned_entities(state)
     if mentioned:
-        scene.active_shortlist = mentioned
-        changes.append(f"shortlist: {mentioned}")
+        scene.active_shortlist = mentioned[:5]
+        changes.append(f"shortlist: {mentioned[:5]}")
 
     # ── Visit plan progression — mark current step as completed ───────
     _advance_completed_steps(state, scene, changes)
 
-    return {
-        "scene": scene,
-        "_trace_summary": f"Memory: {', '.join(changes) if changes else 'no changes'}",
-    }
+    result["scene"] = scene
+
+    # ── Session continuity fields ─────────────────────────────────────
+    if state.playbook.selected_playbook and state.playbook.playbook_confidence >= 0.3:
+        result["last_successful_playbook"] = state.playbook.selected_playbook
+        changes.append(f"last_successful_playbook={state.playbook.selected_playbook}")
+
+    if state.response_plan.response_shape_hint:
+        result["last_response_shape"] = state.response_plan.response_shape_hint
+        changes.append(f"last_response_shape={state.response_plan.response_shape_hint}")
+
+    # Update preferred_categories from successful category retrievals
+    preferred = list(state.preferred_categories)
+    is_category_retrieval = any(
+        e.get("source", "").startswith("category/")
+        for e in state.context.selected_entities
+    )
+    if is_category_retrieval:
+        for entity in state.context.selected_entities[:3]:
+            cat = entity.get("category", "")
+            if cat and cat not in preferred:
+                preferred.append(cat)
+        preferred = preferred[-10:]  # keep last 10
+        result["preferred_categories"] = preferred
+        changes.append(f"preferred_categories updated: {preferred[-3:]}")
+
+    result["_trace_summary"] = f"Memory: {', '.join(changes) if changes else 'no changes'}"
+    return result
 
 
 def _advance_completed_steps(
@@ -117,7 +303,7 @@ def _extract_mentioned_entities(state: ConciergeState) -> list[str]:
 
     if not mentioned:
         try:
-            mall_ctx = get_mall_context()
+            mall_ctx = get_mall_context(state.mall_id)
             for etype in ("stores", "dining", "cinemas"):
                 canonical = mall_ctx._builder._canonical.get(etype, [])
                 for e in canonical:

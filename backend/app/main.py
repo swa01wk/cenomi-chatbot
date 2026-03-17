@@ -20,10 +20,11 @@ async def lifespan(app: FastAPI):
 
     from app import runtime
 
-    await runtime.initialize(settings.mall_id)
+    mall_ids = settings.get_mall_id_list()
+    await runtime.initialize(mall_ids)
     print(
         f"[startup] Cenomi Concierge ready — "
-        f"mall={settings.mall_id} env={settings.env}"
+        f"malls={mall_ids} env={settings.env}"
     )
     yield
     print("[shutdown] Cenomi Concierge shutting down")
@@ -35,7 +36,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Cenomi Mall Concierge",
         version="0.1.0",
-        description="AI-powered single-mall concierge platform",
+        description="AI-powered multi-mall concierge platform",
         lifespan=lifespan,
     )
 

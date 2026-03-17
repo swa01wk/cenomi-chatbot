@@ -5,11 +5,13 @@ CONTRACT
 ────────
   Purpose:  Given intent, scene, playbook, and tenant config, select
             the best response strategy and its shape hint.
-            Uses tenant strategy weights for modulation.
-  Reads:    intent, scene, playbook, active_tenant_parameters
+            Prioritizes concierge-guided behavior when visit context is present.
+            In factual flow: selects factual strategies only.
+  Reads:    intent, scene, playbook, active_tenant_parameters, flow_type,
+            fact_scope, fact_response_mode
   Writes:   response_plan (ResponsePlan)
-  Failure:  No clear fit → fallback_guided_response
-  Routing:  Always → compose_context
+  Failure:  No clear fit → fallback_guided_response (concierge) / direct_lookup (factual)
+  Routing:  Always → compose_context (concierge) or next factual node
 """
 
 from __future__ import annotations
@@ -66,24 +68,32 @@ _STRATEGY_RULES: list[tuple[str, dict]] = [
 
 _PLAYBOOK_STRATEGY_MAP: dict[str, str] = {
     "pb-romantic-dinner": "shortlist_recommendation",
-    "pb-family-visit": "mini_itinerary",
+    "pb-family-visit": "guided_plan",           # upgraded from mini_itinerary
+    "pb-family-shopping": "guided_plan",         # new
     "pb-gift-recommendation": "gift_formula",
     "pb-gift-girlfriend": "gift_formula",
     "pb-gift-family": "gift_formula",
-    "pb-quick-bite": "shortlist_recommendation",
-    "pb-quick-lunch": "shortlist_recommendation",
-    "pb-dessert-combo": "shortlist_recommendation",
+    "pb-quick-bite": "concise_shortlist",        # upgraded from shortlist_recommendation
+    "pb-quick-lunch": "concise_shortlist",
+    "pb-quick-errand": "concise_shortlist",      # new
+    "pb-before-movie": "concise_shortlist",      # new
+    "pb-after-movie": "concise_shortlist",       # new
+    "pb-dessert-combo": "concise_shortlist",
+    "pb-shop-dessert": "concise_shortlist",
     "pb-movie-night": "movie_plus_food",
     "pb-movie-food": "movie_plus_food",
-    "pb-kid-movie-food": "movie_plus_food",
+    "pb-kid-movie-food": "guided_plan",          # upgraded
     "pb-solo-visit": "exploration_overview",
-    "pb-date-plan": "shortlist_recommendation",
+    "pb-date-plan": "guided_plan",               # upgraded from shortlist_recommendation
     "pb-budget-plan": "budget_plan",
     "pb-budget-family": "budget_plan",
+    "pb-luxury-shop": "shortlist_recommendation",
     "pb-luxury-shopping": "shortlist_recommendation",
     "pb-last-minute-gift": "gift_formula",
-    "pb-anniversary": "mini_itinerary",
-    "pb-child-activity-parents": "family_plan",
+    "pb-anniversary": "guided_plan",             # upgraded from mini_itinerary
+    "pb-child-activity-parents": "guided_plan",
+    "pb-child-activity-parents-shop": "guided_plan",
+    "pb-child-activity": "guided_plan",
 }
 
 _STRATEGY_SHAPES: dict[str, str] = {
@@ -98,6 +108,55 @@ _STRATEGY_SHAPES: dict[str, str] = {
     "budget_plan": "value_focused_list",
     "exploration_overview": "mini_itinerary",
     "fallback_guided_response": "conversational",
+    # Concierge-first shapes
+    "guided_plan": "concierge_guided_plan",
+    "concise_shortlist": "compact_shortlist",
+    "route_plus_plan": "route_with_plan",
+    "quick_answer": "brief_refined_answer",
+    "route_hint": "brief_answer",
+    # Factual-flow shapes
+    "structured_fact_list": "fact_list",
+    "schedule_answer": "schedule_list",
+    "direct_lookup": "yes_no_plus_location",
+    "cross_mall_availability": "cross_mall_table",
+    "compare_and_recommend": "comparison_list",
+    # Hybrid factual shapes
+    "filtered_factual_list": "filtered_fact_list",
+    "factual_presence": "yes_no_plus_location",
+}
+
+# Factual fact_scope → strategy mapping
+_FACT_SCOPE_STRATEGY: dict[str, str] = {
+    "movie_schedule": "structured_fact_list",
+    "mall_fact": "quick_answer",
+    "store_lookup": "direct_lookup",
+    "service_lookup": "route_hint",
+    "cinema_lookup": "route_hint",
+    "brand_availability": "direct_lookup",
+    "cross_mall_availability": "cross_mall_availability",
+    "route_hint": "route_hint",
+}
+
+# Child companion signals
+_CHILD_COMPANIONS: frozenset[str] = frozenset({
+    "child", "kids", "son", "daughter",
+})
+
+# Entity caps for each strategy
+_STRATEGY_ENTITY_CAPS: dict[str, int] = {
+    "guided_plan": 5,
+    "concise_shortlist": 4,
+    "quick_answer": 3,
+    "route_plus_plan": 4,
+    "gift_formula": 4,
+    "mini_itinerary": 6,
+    "movie_plus_food": 4,
+    "shortlist_recommendation": 8,
+    "exploration_overview": 12,
+    "mall_overview": 20,
+    "direct_fact": 5,
+    "budget_plan": 6,
+    "fallback_guided_response": 8,
 }
 
 
@@ -105,18 +164,65 @@ _STRATEGY_SHAPES: dict[str, str] = {
 async def choose_strategy(state: ConciergeState) -> dict:
     intent = state.intent
     playbook = state.playbook
+    scene = state.scene
+
+    # ── Factual flow: select factual-only strategy ────────────────────
+    if state.flow_type == "factual":
+        return _choose_factual_strategy(state)
 
     chosen = "fallback_guided_response"
+    strategy_reason = "default fallback"
+
     for strategy, rules in _STRATEGY_RULES:
         if intent.sub_intent in rules["sub_intents"]:
             if intent.message_kind in rules["message_kinds"]:
                 chosen = strategy
+                strategy_reason = f"sub_intent={intent.sub_intent} matched rule"
                 break
 
-    if playbook.selected_playbook and playbook.playbook_confidence > 0.4:
+    if playbook.selected_playbook and playbook.playbook_confidence > 0.3:
         pb_strategy = _PLAYBOOK_STRATEGY_MAP.get(playbook.selected_playbook)
         if pb_strategy:
             chosen = pb_strategy
+            strategy_reason = f"playbook={playbook.selected_playbook} → {pb_strategy}"
+
+    # ── Context-aware override: guided_plan when visit context present ──
+    has_child = bool(_CHILD_COMPANIONS & set(scene.companions)) or any(
+        d.get("type") == "child" for d in scene.companion_details
+    )
+    has_companions = bool(scene.companions and scene.companions != ["solo"])
+    has_occasion = bool(scene.occasion)
+    has_visit_context = has_companions or has_occasion or bool(scene.visit_type)
+    is_contextual_query = has_visit_context and intent.domain in (
+        "shopping", "dining", "entertainment", "exploration",
+    )
+
+    # Exclude category-level lookups from being forced to guided_plan —
+    # those should remain shortlist_recommendation
+    is_category_query = intent.sub_intent in {
+        "general_dining", "general_shopping", "cafe_recommendation",
+        "dessert_recommendation", "perfume_shopping", "jewelry_shopping",
+        "accessories_shopping", "fashion_shopping",
+    }
+
+    if is_contextual_query and not is_category_query and chosen not in (
+        "mall_overview", "direct_fact", "gift_formula", "movie_plus_food",
+    ):
+        chosen = "guided_plan"
+        strategy_reason = "contextual visit (companions/occasion/child) → guided_plan"
+
+    # ── Constraint refinement: use quick_answer ───────────────────────
+    if intent.message_kind == "constraint_refinement":
+        chosen = "quick_answer"
+        strategy_reason = "constraint_refinement message_kind → quick_answer"
+
+    # ── Route/proximity queries → route_plus_plan ─────────────────────
+    if intent.sub_intent == "location_query":
+        if scene.visit_constraints and any(
+            c in ("near_cinema_preferred",) for c in scene.visit_constraints
+        ):
+            chosen = "route_plus_plan"
+            strategy_reason = "near_cinema constraint + location → route_plus_plan"
 
     if state.active_tenant_parameters:
         try:
@@ -135,17 +241,119 @@ async def choose_strategy(state: ConciergeState) -> dict:
             pass
 
     shape = _STRATEGY_SHAPES.get(chosen, "conversational")
-    constraints = _build_constraints(intent, state.scene)
+    constraints = _build_constraints(intent, scene)
+    entity_cap = _STRATEGY_ENTITY_CAPS.get(chosen, 8)
+
+    # ── Determine answer_mode and tone_mode ───────────────────────────
+    if chosen in ("guided_plan", "mini_itinerary", "family_plan"):
+        answer_mode = "concierge_guided"
+        tone_mode = "compact_human_concierge"
+    elif chosen in ("concise_shortlist", "quick_answer"):
+        answer_mode = "direct_answer"
+        tone_mode = "compact_human_concierge"
+    elif chosen in ("mall_overview", "direct_fact", "exploration_overview"):
+        answer_mode = "direct_answer"
+        tone_mode = "structured"
+    else:
+        answer_mode = "shortlist"
+        tone_mode = "compact_human_concierge"
+
+    # ── must_acknowledge_scene ────────────────────────────────────────
+    must_acknowledge = is_contextual_query or chosen == "guided_plan"
+
+    # ── must_include_anchor_type ──────────────────────────────────────
+    anchor_type = ""
+    if has_child and chosen in ("guided_plan", "mini_itinerary", "family_plan"):
+        anchor_type = "entertainment"
 
     plan = ResponsePlan(
         chosen_strategy=chosen,
         response_shape_hint=shape,
         response_constraints=constraints,
+        answer_mode=answer_mode,
+        tone_mode=tone_mode,
+        entity_cap=entity_cap,
+        must_acknowledge_scene=must_acknowledge,
+        must_include_anchor_type=anchor_type,
     )
 
     return {
         "response_plan": plan,
-        "_trace_summary": f"Strategy: {chosen} | shape: {shape}",
+        "_trace_summary": f"Strategy: {chosen} | shape: {shape} | reason: {strategy_reason}",
+    }
+
+
+def _choose_factual_strategy(state: ConciergeState) -> dict:
+    """
+    Select the appropriate strategy for factual-flow queries.
+
+    Hard rule: movie/showtime queries with successful retrieval must NEVER
+    choose fallback_guided_response.
+
+    When secondary filters are active on a list-type scope (movie schedule,
+    service list) → upgrade to filtered_factual_list so the response composer
+    applies genre/audience filtering in its instructions.
+    """
+    from app.models.state import ResponsePlan
+
+    scope = state.fact_scope or ""
+    response_mode = state.fact_response_mode or ""
+    secondary_intents = state.secondary_intents or []
+    modifiers = state.modifiers or []
+
+    # ── Check if pre-resolved response_strategy from route_flow should win ──
+    # route_flow already resolves the response_strategy using the full
+    # primary_intent + filter combination.  Map it to the closest strategy.
+    route_strategy = state.response_strategy or ""
+    if route_strategy == "filtered_factual_list":
+        chosen = "filtered_factual_list"
+        reason = f"factual flow: route_flow resolved filtered_factual_list (secondary={secondary_intents})"
+    # ── Use fact_response_mode from resolve_fact_scope if set ────────
+    elif response_mode and response_mode in _STRATEGY_SHAPES:
+        chosen = response_mode
+        reason = f"factual flow: fact_response_mode={response_mode}"
+        # Upgrade to filtered_factual_list when filters are present on list scopes
+        _FILTERABLE_SCOPES = {"movie_schedule", "service_lookup", "store_lookup"}
+        _ACTIVE_FILTERS = frozenset({"family_filter", "kid_friendly", "budget_filter",
+                                     "romantic_filter", "proximity_filter"})
+        has_active_filter = bool(_ACTIVE_FILTERS & (set(secondary_intents) | set(modifiers)))
+        if has_active_filter and scope in _FILTERABLE_SCOPES:
+            chosen = "filtered_factual_list"
+            reason += f" → upgraded to filtered_factual_list (filters={secondary_intents})"
+    elif scope in _FACT_SCOPE_STRATEGY:
+        chosen = _FACT_SCOPE_STRATEGY[scope]
+        reason = f"factual flow: fact_scope={scope} → {chosen}"
+    else:
+        chosen = "direct_lookup"
+        reason = "factual flow: default direct_lookup"
+
+    shape = _STRATEGY_SHAPES.get(chosen, "brief_answer")
+    entity_cap = _STRATEGY_ENTITY_CAPS.get(chosen, 10)
+
+    # Build response constraints — include filter hints when active
+    constraints = ["answer_first", "factual_only", "no_semantic_padding"]
+    if secondary_intents:
+        constraints.append(f"secondary_filters:{','.join(secondary_intents)}")
+    if modifiers:
+        constraints.append(f"modifiers:{','.join(modifiers)}")
+
+    plan = ResponsePlan(
+        chosen_strategy=chosen,
+        response_shape_hint=shape,
+        response_constraints=constraints,
+        answer_mode="direct_answer",
+        tone_mode="structured",
+        entity_cap=entity_cap,
+        must_acknowledge_scene=False,
+        must_include_anchor_type="",
+        secondary_filters=list(secondary_intents),
+    )
+
+    return {
+        "response_plan": plan,
+        "_trace_summary": (
+            f"Strategy[factual]: {chosen} | shape: {shape} | reason: {reason}"
+        ),
     }
 
 
@@ -161,4 +369,8 @@ def _build_constraints(intent, scene) -> list[str]:
         constraints.append("acknowledge_correction")
     if intent.message_kind == "refinement":
         constraints.append("build_on_previous")
+    if intent.message_kind == "constraint_refinement":
+        constraints.append("refine_existing_suggestion")
+    if scene.visit_constraints:
+        constraints.extend(scene.visit_constraints)
     return constraints

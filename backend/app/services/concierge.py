@@ -63,7 +63,7 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     """
     t0 = time.perf_counter()
     store = get_session_store()
-    mall_ctx = get_mall_context()
+    mall_ctx = get_mall_context(request.mall_id)
 
     session_id = request.session_id or generate_session_id()
     session = store.get_or_create(session_id, request.mall_id)

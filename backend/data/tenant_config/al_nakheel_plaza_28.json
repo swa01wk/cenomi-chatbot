@@ -1,7 +1,7 @@
 {
   "mall_id": "al_nakheel_plaza_28",
-  "config_version": "1.0.0",
-  "description": "Al Nakheel Plaza (Buraidah) — family-oriented, accessible, and entertainment-focused configuration. Emphasizes family and kid-friendliness, practical guidance, and clear recommendations.",
+  "config_version": "2.0.0",
+  "description": "Al Nakheel Plaza (Buraidah) — family-oriented, entertainment-focused. Muvi Cinema shows adult thrillers/action only; Fun Time (Sparky's) is the primary kids anchor. Emphasizes practical guidance, family/kid signals, quick-visit support, and strong movie intent handling.",
   "tone": {
     "warmth": 0.82,
     "directness": 0.83,
@@ -13,34 +13,174 @@
   "clarification": {
     "ambiguity_tolerance": 0.84,
     "answer_first_bias": 0.93,
-    "assumption_aggressiveness": 0.8
+    "assumption_aggressiveness": 0.80
+  },
+  "behavior_rules": {
+    "movie_intent_override": {
+      "enabled": true,
+      "description": "When user explicitly asks about movies, showtimes, or cinema, entertainment/movie intent overrides shopping drift. Route to cinema entity and movie list first.",
+      "trigger_signals": ["movie", "cinema", "showtime", "what's playing", "now showing", "film"],
+      "preferred_strategy": "exact_retrieval",
+      "preferred_response_shape": "direct_fact",
+      "override_shopping_signals": true,
+      "cinema_entity_id": "t-cinema-001",
+      "note": "Al Nakheel Plaza has adult-only thriller/action lineup. Redirect family+kids movie queries to Fun Time (t-store-072)."
+    },
+    "kids_movie_redirect": {
+      "enabled": true,
+      "description": "If user wants kids movies and none are showing at Muvi Cinema, redirect to Fun Time entertainment instead.",
+      "trigger_signals": ["kids movie", "animated", "cartoon", "child movie", "movie for my kid"],
+      "preferred_strategy": "redirect",
+      "redirect_entity_id": "t-store-072",
+      "redirect_message_hint": "No animated or family films currently at Muvi Cinema. Fun Time is the best kids entertainment option at the mall."
+    },
+    "service_lookup": {
+      "enabled": true,
+      "description": "Service queries (ATM, stroller, prayer room, wheelchair, info desk) prefer direct fact response, not shortlists.",
+      "trigger_signals": ["ATM", "stroller", "wheelchair", "prayer", "prayer room", "info", "information desk", "restroom", "toilet"],
+      "preferred_strategy": "direct_fact",
+      "preferred_response_shape": "direct_fact",
+      "entity_cap": 2
+    },
+    "before_movie_quick_stop": {
+      "enabled": true,
+      "description": "Before-movie queries bias toward Food Court and Kiosk Row — quick, low-commitment options near cinema.",
+      "trigger_signals": ["before movie", "quick", "fast", "quick bite", "close to cinema", "near cinema"],
+      "preferred_strategy": "proximity_guided_shortlist",
+      "ranking_boost_tags": ["near_cinema", "before_movie", "quick_stop", "low_commitment"],
+      "preferred_zones": ["Food Court", "Kiosk Row"],
+      "entity_cap": 3
+    },
+    "after_movie_reward": {
+      "enabled": true,
+      "description": "After-movie queries bias toward dessert and cafe options near cinema.",
+      "trigger_signals": ["after movie", "dessert", "something sweet", "reward"],
+      "preferred_strategy": "shortlist",
+      "ranking_boost_tags": ["after_movie", "reward_stop", "dessert_spot", "near_cinema"],
+      "entity_cap": 3
+    },
+    "family_guided_plan": {
+      "enabled": true,
+      "description": "Contextual family asks with young children prefer guided plans that include a child-relief anchor.",
+      "trigger_signals": ["5 year old", "toddler", "young child", "kid", "with my child", "my baby", "family with kids"],
+      "preferred_strategy": "guided_plan",
+      "must_include_entity_types": ["kids_entertainment"],
+      "child_relief_anchor_entity_id": "t-store-072",
+      "preferred_response_shape": "itinerary"
+    },
+    "route_proximity_refinement": {
+      "enabled": true,
+      "description": "Route/proximity refinement is allowed when user asks for nearby or closer options.",
+      "trigger_signals": ["closer to", "near", "nearby", "next to", "close to cinema", "on the way"],
+      "preferred_strategy": "proximity_filtered",
+      "ranking_boost_tags": ["near_cinema", "near_food", "near_entertainment"]
+    },
+    "brand_direct_lookup": {
+      "enabled": true,
+      "description": "Explicit brand lookup triggers direct entity retrieval, not shortlist generation.",
+      "trigger_signals": ["do you have", "where is", "is there a", "looking for [brand]"],
+      "preferred_strategy": "direct_lookup",
+      "preferred_response_shape": "direct_fact"
+    },
+    "cross_mall_fallback": {
+      "enabled": true,
+      "description": "When no matching entity found in home mall, cross-mall fallback may be enabled.",
+      "fallback_scope": "same_city_first",
+      "max_fallback_results": 2
+    }
   },
   "strategy_weights": {
     "shortlist_recommendation": 1.3,
     "family_plan": 1.2,
     "gift_formula": 1.0,
-    "movie_plus_food": 1.0
+    "movie_plus_food": 1.0,
+    "movie_showtime_lookup": 1.5,
+    "kids_entertainment_plan": 1.4,
+    "before_movie_plan": 1.2,
+    "after_movie_plan": 1.1,
+    "service_direct_fact": 1.4,
+    "route_refinement": 1.1,
+    "quick_errand": 1.2
   },
   "response_shape": {
     "default_shortlist_size": 4,
+    "movie_shortlist_size": 5,
+    "service_shortlist_size": 2,
+    "before_after_movie_shortlist_size": 3,
+    "kids_entertainment_shortlist_size": 2,
     "location_detail_level": "floor_zone",
     "recommendation_density": 0.78,
-    "exact_name_usage_bias": 0.88
+    "exact_name_usage_bias": 0.88,
+    "always_include_location_hint": true
   },
   "context_weights": {
     "prioritize_playbooks": 0.85,
     "prioritize_family_signals": 0.85,
-    "prioritize_kid_signals": 0.8,
-    "prioritize_exact_entity_examples": 0.8
+    "prioritize_kid_signals": 0.82,
+    "prioritize_exact_entity_examples": 0.80,
+    "prioritize_movie_signals": 0.90,
+    "prioritize_service_signals": 0.88,
+    "prioritize_proximity_signals": 0.80
+  },
+  "retrieval": {
+    "movie_showtime_query": {
+      "strategy": "exact_retrieval",
+      "source": "canonical.movies",
+      "filter_by": "status=SHOWING_NOW",
+      "include_cinema_entity": true
+    },
+    "service_query": {
+      "strategy": "exact_retrieval",
+      "source": "canonical.services",
+      "max_results": 2
+    },
+    "kids_entertainment_query": {
+      "strategy": "tag_filtered",
+      "required_tags": ["child_relief_anchor", "kids_entertainment"],
+      "max_results": 2
+    },
+    "before_movie_query": {
+      "strategy": "tag_filtered",
+      "required_tags": ["near_cinema", "before_movie"],
+      "preferred_zones": ["Food Court", "Kiosk Row"],
+      "max_results": 3
+    },
+    "after_movie_query": {
+      "strategy": "tag_filtered",
+      "required_tags": ["after_movie", "reward_stop"],
+      "max_results": 3
+    },
+    "near_cinema_query": {
+      "strategy": "proximity_filtered",
+      "anchor": "t-cinema-001",
+      "max_results": 4
+    }
   },
   "ranking": {
     "favor_family_friendly": 0.75,
-    "favor_kid_friendly": 0.7,
-    "favor_anchor_entities": 0.6,
-    "favor_diversity_vs_confidence": 0.5
+    "favor_kid_friendly": 0.72,
+    "favor_anchor_entities": 0.65,
+    "favor_diversity_vs_confidence": 0.50,
+    "favor_near_cinema_for_movie_context": 0.85,
+    "favor_quick_stop_for_time_sensitive": 0.80,
+    "penalize_shopping_for_explicit_movie_query": 0.70,
+    "boost_child_relief_anchor_for_family": 0.90
   },
   "session_adaptation": {
     "preserve_companions_strongly": 0.92,
-    "reinterpret_short_followups_aggressively": 0.85
+    "reinterpret_short_followups_aggressively": 0.85,
+    "carry_movie_context_across_turns": true,
+    "carry_family_context_across_turns": true,
+    "treat_refinement_as_proximity_filter": true
+  },
+  "intent_override_priority": {
+    "movie_showtime_lookup": 1,
+    "service_lookup": 2,
+    "kids_entertainment": 3,
+    "before_after_movie": 4,
+    "family_guided_plan": 5,
+    "gift_plan": 6,
+    "dining": 7,
+    "shopping": 8
   }
 }

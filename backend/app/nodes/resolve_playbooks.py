@@ -6,17 +6,57 @@ CONTRACT
   Purpose:  Score available playbooks against intent + scene using the
             PlaybookEngine loaded from real mall data.
             Select the best-matching playbook if one clears the threshold.
-  Reads:    intent, scene, active_tenant_parameters
-  Writes:   playbook (PlaybookResolution)
+            Uses semantic signals for richer matching.
+  Reads:    intent, scene, active_tenant_parameters, normalized_user_message,
+            flow_type
+  Writes:   playbook (PlaybookResolution), debug_enrichment (partial)
   Failure:  No match → empty resolution; downstream uses strategy defaults
   Routing:  Always → choose_strategy
+
+Flow-aware behavior:
+  - flow_type == "concierge": full rich playbook resolution (existing behavior)
+  - flow_type == "factual":   playbooks are suppressed; only minimal factual
+    playbooks (movie_showtime_lookup, service_lookup) may apply for formatting.
+    Generic shopping/gift/family playbooks MUST NOT override factual intent.
 """
 
 from __future__ import annotations
 
-from app.models.state import ConciergeState, PlaybookResolution
+from app.models.state import ConciergeState, DebugEnrichment, PlaybookResolution
 from app.nodes._tracing import traced_node
 from app.runtime import get_mall_context
+from app.services.semantic_signals import (
+    build_semantic_match_explanations,
+    extract_semantic_signals,
+)
+
+# Playbooks that are inappropriate for factual flow — they must be suppressed
+# to prevent semantic recommendations from overriding exact lookups.
+_FACTUAL_FLOW_BLOCKED_PLAYBOOKS: frozenset[str] = frozenset({
+    "pb-family-shopping",
+    "pb-family-visit",
+    "pb-gift-recommendation",
+    "pb-gift-girlfriend",
+    "pb-gift-family",
+    "pb-last-minute-gift",
+    "pb-romantic-dinner",
+    "pb-date-plan",
+    "pb-budget-plan",
+    "pb-budget-family",
+    "pb-luxury-shopping",
+    "pb-luxury-dining",
+    "pb-fine-dining",
+    "pb-solo-visit",
+    "pb-anniversary",
+    "pb-child-activity-parents",
+    "pb-child-activity-parents-shop",
+    "pb-child-activity",
+    "pb-movie-night",
+    "pb-movie-food",
+    "pb-kid-movie-food",
+    "pb-dessert-combo",
+    "pb-shop-dessert",
+})
 
 _CONFIDENCE_THRESHOLD = 0.25
 
@@ -28,6 +68,13 @@ _GIFT_ONLY_PLAYBOOKS: frozenset[str] = frozenset({
     "pb-gift-family",
     "pb-last-minute-gift",
     "pb-gift-recommendation",
+})
+
+# Luxury playbooks that should NOT fire when children are present
+_LUXURY_PLAYBOOKS: frozenset[str] = frozenset({
+    "pb-luxury-shopping",
+    "pb-luxury-dining",
+    "pb-fine-dining",
 })
 
 # Domains / sub-intents where gift playbooks should NOT be selected
@@ -45,34 +92,231 @@ _EXPLICIT_GIFT_SIGNALS: frozenset[str] = frozenset({
     "gift", "present", "buy", "purchase", "shop for",
 })
 
+# Child companion signals
+_CHILD_COMPANIONS: frozenset[str] = frozenset({
+    "child", "kids", "son", "daughter",
+})
+
+# Preferred family shopping playbook IDs (in priority order)
+_FAMILY_SHOPPING_PLAYBOOKS: list[str] = [
+    "pb-family-shopping",
+    "pb-family-visit",
+]
+
+# User roles that indicate an occasion/event shopping context
+# These must NOT be redirected to family shopping playbooks.
+_OCCASION_USER_ROLES: frozenset[str] = frozenset({
+    "bridesmaid", "bride", "groom", "maid_of_honor", "best_man",
+    "mother_of_bride", "father_of_bride",
+})
+
+# Scenarios that require occasion-aware playbooks
+_OCCASION_SCENARIOS: frozenset[str] = frozenset({
+    "wedding_related",
+})
+
+# Preferred occasion playbook IDs (in priority order)
+# pb-luxury-shop covers elegant/occasion/wedding shopping
+_OCCASION_PLAYBOOKS: list[str] = [
+    "pb-luxury-shop",
+    "pb-category-shopping",
+    "pb-gift-recommendation",
+]
+
 
 @traced_node("resolve_playbooks")
 async def resolve_playbooks(state: ConciergeState) -> dict:
     intent = state.intent
     scene = state.scene
+    msg = state.normalized_user_message or state.raw_user_message
+
+    rejections: list[str] = []
+
+    # ── Factual flow: suppress all non-factual playbooks ─────────────
+    if state.flow_type == "factual":
+        # Factual playbooks may still shape response formatting, but
+        # concierge/recommendation playbooks must not win.
+        # Emit empty resolution — strategy selection handles factual modes.
+        suppressed_note = (
+            "Factual flow: all generic concierge playbooks suppressed. "
+            "Exact retrieval dominates."
+        )
+        debug = DebugEnrichment(
+            playbook_rejection_reasons=[suppressed_note],
+            playbook_suppressed=list(_FACTUAL_FLOW_BLOCKED_PLAYBOOKS),
+        )
+        return {
+            "playbook": PlaybookResolution(
+                matched_playbooks=[],
+                selected_playbook="",
+                playbook_confidence=0.0,
+            ),
+            "debug_enrichment": debug,
+            "_trace_summary": "Playbooks suppressed: factual flow",
+        }
+
+    # ── Build semantic signals ────────────────────────────────────────
+    semantic_signals = extract_semantic_signals(
+        msg=msg,
+        scene=scene,
+        intent_domain=intent.domain,
+        intent_sub_intent=intent.sub_intent,
+    )
 
     scene_signals = _collect_scene_signals(scene, intent)
+    # Merge semantic signals into scene signals for matching
+    all_signals = list(dict.fromkeys(scene_signals + semantic_signals))
 
-    mall_ctx = get_mall_context()
+    mall_ctx = get_mall_context(state.mall_id)
 
+    # ── Hybrid guard: secondary filters must not replace factual primary intent ─
+    # When primary_intent is a factual lookup (movie_lookup, location_lookup, etc.)
+    # the playbook engine must not select a concierge planning playbook based on
+    # companion signals alone.  Family/kid context is a modifier, not the intent.
+    primary_intent = state.primary_intent or ""
+    _FACTUAL_PRIMARY_INTENT_PREFIXES = (
+        "movie_lookup", "location_lookup", "mall_fact_lookup",
+        "service_lookup", "cross_mall_lookup", "brand_availability",
+        "movie_showtime", "store_hours", "opening_hours",
+    )
+    if primary_intent in _FACTUAL_PRIMARY_INTENT_PREFIXES:
+        # Factual primary intent — playbooks that would redirect away from the
+        # factual answer are rejected; return empty so strategy defaults to factual.
+        suppressed_note = (
+            f"Hybrid guard: primary_intent='{primary_intent}' is factual; "
+            "concierge playbooks suppressed to preserve factual answer structure"
+        )
+        debug = DebugEnrichment(
+            playbook_rejection_reasons=[suppressed_note],
+            playbook_suppressed=list(_FACTUAL_FLOW_BLOCKED_PLAYBOOKS),
+        )
+        return {
+            "playbook": PlaybookResolution(
+                matched_playbooks=[],
+                selected_playbook="",
+                playbook_confidence=0.0,
+            ),
+            "debug_enrichment": debug,
+            "_trace_summary": f"Playbooks suppressed: factual primary_intent={primary_intent}",
+        }
+
+    # ── Occasion / wedding override (MUST run before family override) ────
+    # When the user has declared an occasion role (bridesmaid, bride, etc.) or
+    # the scene scenario is wedding_related, route to an occasion-appropriate
+    # playbook.  This MUST NOT fall through to the family shopping override.
+    is_occasion_role = scene.user_role in _OCCASION_USER_ROLES
+    is_occasion_scenario = getattr(scene, "scenario", "") in _OCCASION_SCENARIOS
+    is_shopping_context = intent.domain in ("shopping", "exploration") or bool(
+        msg.lower().find("shop") != -1 or msg.lower().find("shopping") != -1
+    )
+
+    if (is_occasion_role or is_occasion_scenario) and is_shopping_context:
+        for pb_id in _OCCASION_PLAYBOOKS:
+            occasion_pb = mall_ctx.match_playbook(
+                intent=pb_id,
+                context_signals=all_signals,
+            )
+            if occasion_pb:
+                ranked_entities = mall_ctx.rank_for_playbook(occasion_pb)
+                resolution = PlaybookResolution(
+                    matched_playbooks=[occasion_pb.playbook_id],
+                    selected_playbook=occasion_pb.playbook_id,
+                    playbook_confidence=min(1.0, 0.75 + len(ranked_entities) * 0.02),
+                )
+                explanations = build_semantic_match_explanations(semantic_signals, scene, msg)
+                debug = DebugEnrichment(
+                    playbook_rejection_reasons=rejections + [
+                        f"Family shopping suppressed: user_role={scene.user_role!r} "
+                        f"scenario={getattr(scene, 'scenario', '')!r} "
+                        f"→ occasion playbook selected instead"
+                    ],
+                    semantic_match_explanations=explanations,
+                    playbook_suppressed=["pb-family-shopping", "pb-family-visit"],
+                )
+                return {
+                    "playbook": resolution,
+                    "debug_enrichment": debug,
+                    "_trace_summary": (
+                        f"Playbook[occasion_override]: {occasion_pb.playbook_id} "
+                        f"(user_role={scene.user_role!r}, scenario="
+                        f"{getattr(scene, 'scenario', '')!r})"
+                    ),
+                }
+
+    # ── Family shopping override ──────────────────────────────────────
+    # A parent + child shopping query must NEVER default to luxury/adult playbooks.
+    has_child = bool(_CHILD_COMPANIONS & set(scene.companions)) or any(
+        d.get("type") == "child" for d in scene.companion_details
+    )
+    is_shopping_domain = intent.domain == "shopping"
+    is_family_or_exploration = intent.domain in ("shopping", "exploration", "entertainment", "dining")
+
+    if has_child and is_family_or_exploration:
+        for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
+            family_pb = mall_ctx.match_playbook(
+                intent=pb_id,
+                context_signals=all_signals,
+            )
+            if family_pb:
+                ranked_entities = mall_ctx.rank_for_playbook(family_pb)
+                resolution = PlaybookResolution(
+                    matched_playbooks=[family_pb.playbook_id],
+                    selected_playbook=family_pb.playbook_id,
+                    playbook_confidence=min(1.0, 0.7 + len(ranked_entities) * 0.03),
+                )
+                explanations = build_semantic_match_explanations(semantic_signals, scene, msg)
+                debug = DebugEnrichment(
+                    playbook_rejection_reasons=rejections,
+                    semantic_match_explanations=explanations,
+                )
+                return {
+                    "playbook": resolution,
+                    "debug_enrichment": debug,
+                    "_trace_summary": (
+                        f"Playbook[family_override]: {family_pb.playbook_id} "
+                        f"({len(ranked_entities)} entities)"
+                    ),
+                }
+
+    # ── Normal playbook matching ──────────────────────────────────────
     matched_pb = mall_ctx.match_playbook(
         intent=f"{intent.domain}/{intent.sub_intent}",
-        context_signals=scene_signals,
+        context_signals=all_signals,
     )
 
     # ── Guard: prevent gift playbooks from hijacking activity/date queries ──
     if matched_pb and matched_pb.playbook_id in _GIFT_ONLY_PLAYBOOKS:
-        msg_lower = state.normalized_user_message.lower()
+        msg_lower = msg.lower()
         has_explicit_gift = any(sig in msg_lower for sig in _EXPLICIT_GIFT_SIGNALS)
         is_activity_query = (
             intent.domain in _ACTIVITY_DOMAINS
             or intent.sub_intent in _ACTIVITY_SUB_INTENTS
         )
         if is_activity_query and not has_explicit_gift:
-            # Swap to the date-plan or exploration playbook instead
-            override = _find_activity_playbook(intent, scene, mall_ctx, scene_signals)
+            rejections.append(
+                f"{matched_pb.playbook_id} rejected: gift playbook on non-gift query "
+                f"(domain={intent.domain}, no explicit gift signal)"
+            )
+            override = _find_activity_playbook(intent, scene, mall_ctx, all_signals)
             if override:
                 matched_pb = override
+            else:
+                matched_pb = None
+
+    # ── Guard: prevent luxury playbooks when children are present ────
+    if matched_pb and matched_pb.playbook_id in _LUXURY_PLAYBOOKS and has_child:
+        rejections.append(
+            f"{matched_pb.playbook_id} rejected: luxury playbook inappropriate "
+            f"when child companions are present"
+        )
+        # Try family playbook instead
+        for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
+            family_pb = mall_ctx.match_playbook(pb_id, all_signals)
+            if family_pb:
+                matched_pb = family_pb
+                break
+        else:
+            matched_pb = None
 
     if matched_pb:
         ranked_entities = mall_ctx.rank_for_playbook(matched_pb)
@@ -82,15 +326,28 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
             selected_playbook=matched_pb.playbook_id,
             playbook_confidence=min(1.0, 0.5 + entity_count * 0.05),
         )
+        explanations = build_semantic_match_explanations(semantic_signals, scene, msg)
+        selection_reason = (
+            f"PlaybookEngine matched: {matched_pb.playbook_id} "
+            f"(domain={intent.domain}, sub_intent={intent.sub_intent})"
+        )
+        debug = DebugEnrichment(
+            playbook_rejection_reasons=rejections,
+            semantic_match_explanations=explanations,
+            selected_playbook_id=matched_pb.playbook_id,
+            selected_playbook_reason=selection_reason,
+        )
         return {
             "playbook": resolution,
+            "debug_enrichment": debug,
             "_trace_summary": (
                 f"Playbook: {matched_pb.playbook_id} "
                 f"({entity_count} ranked entities)"
             ),
         }
 
-    scored = _score_fallback(intent, scene)
+    # ── Fallback scoring ─────────────────────────────────────────────
+    scored = _score_fallback(intent, scene, semantic_signals)
     matched = [pb_id for pb_id, _ in scored]
     selected = scored[0][0] if scored else ""
     confidence = scored[0][1] if scored else 0.0
@@ -101,29 +358,43 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
         playbook_confidence=confidence,
     )
 
+    explanations = build_semantic_match_explanations(semantic_signals, scene, msg)
+    selection_reason = (
+        f"Fallback scoring: {selected!r} (conf={confidence}, "
+        f"domain={intent.domain})"
+        if selected else "No playbook matched"
+    )
+    debug = DebugEnrichment(
+        playbook_rejection_reasons=rejections,
+        semantic_match_explanations=explanations,
+        selected_playbook_id=selected,
+        selected_playbook_reason=selection_reason,
+        playbook_suppressed=[r.split(" ")[0] for r in rejections if r],
+    )
+
     return {
         "playbook": resolution,
+        "debug_enrichment": debug,
         "_trace_summary": f"Playbook: {selected or 'none'} (conf={confidence})",
     }
 
 
-def _find_activity_playbook(intent, scene, mall_ctx, scene_signals: list[str]):
+def _find_activity_playbook(intent, scene, mall_ctx, all_signals: list[str]):
     """
     Find a better playbook for activity/date-idea queries when a gift
     playbook incorrectly fired.
     """
-    # Couple context → date plan
     couple_companions = {"girlfriend", "boyfriend", "wife", "husband"}
     if couple_companions & set(scene.companions) or scene.visit_type == "couple":
-        pb = mall_ctx.match_playbook("pb-date-plan", scene_signals)
+        pb = mall_ctx.match_playbook("pb-date-plan", all_signals)
         if pb:
             return pb
-    # Family context → family visit
-    family_companions = {"family", "kids", "son", "daughter"}
-    if family_companions & set(scene.companions) or scene.visit_type == "family":
-        pb = mall_ctx.match_playbook("pb-family-visit", scene_signals)
-        if pb:
-            return pb
+    family_companions = {"family", "kids", "son", "daughter", "child"}
+    if family_companions & set(scene.companions) or scene.visit_type in ("family", "family_visit"):
+        for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
+            pb = mall_ctx.match_playbook(pb_id, all_signals)
+            if pb:
+                return pb
     return None
 
 
@@ -135,40 +406,67 @@ def _collect_scene_signals(scene, intent) -> list[str]:
     if scene.budget:
         signals.append(scene.budget)
     signals.extend(scene.audience)
+    signals.extend(scene.visit_constraints)
+    if scene.visit_type:
+        signals.append(scene.visit_type)
+    if scene.goal:
+        signals.append(scene.goal)
     if intent.domain:
         signals.append(intent.domain)
     if intent.sub_intent:
         signals.append(intent.sub_intent)
     if scene.active_topic:
         signals.append(scene.active_topic)
+    # Scenario and user_role are rich context signals
+    if getattr(scene, "scenario", ""):
+        signals.append(scene.scenario)
+    if getattr(scene, "user_role", ""):
+        signals.append(scene.user_role)
+    if getattr(scene, "style_intent", []):
+        signals.extend(scene.style_intent)
     return signals
 
 
 # Lightweight fallback for when the PlaybookEngine doesn't match
 _FALLBACK_TRIGGERS: dict[str, dict] = {
     "pb-date-plan": {
-        # Fires for couple context on ANY domain — activity, dining, entertainment
         "domains": {"exploration", "dining", "entertainment", "shopping"},
         "scene_signals": {
             "girlfriend", "boyfriend", "wife", "husband",
             "date", "romantic", "couple", "couple_friendly",
         },
     },
+    "pb-family-shopping": {
+        "domains": {"shopping", "exploration"},
+        "scene_signals": {
+            "family", "kids", "children", "son", "daughter", "child",
+            "kid_friendly", "family_friendly", "family_visit",
+        },
+    },
     "pb-family-visit": {
         "domains": {"dining", "entertainment", "shopping", "exploration"},
-        "scene_signals": {"family", "kids", "children", "son", "daughter", "kid_friendly", "family_friendly"},
+        "scene_signals": {
+            "family", "kids", "children", "son", "daughter", "child",
+            "kid_friendly", "family_friendly",
+        },
     },
     "pb-gift-recommendation": {
-        # Requires explicit shopping domain — does NOT fire on activity/exploration
         "domains": {"shopping"},
         "scene_signals": {
             "girlfriend", "boyfriend", "wife", "husband",
-            "birthday", "anniversary", "gift", "present",
+            "birthday", "anniversary", "gift", "present", "gift_friendly",
         },
+    },
+    "pb-before-movie": {
+        "domains": {"dining", "shopping", "exploration"},
+        "scene_signals": {"before_movie", "time_sensitive", "near_cinema"},
     },
     "pb-quick-bite": {
         "domains": {"dining"},
-        "scene_signals": {"quick_visit", "before_movie", "quick"},
+        "scene_signals": {
+            "quick_visit", "before_movie", "quick", "quick_stop_preferred",
+            "time_sensitive", "quick_stop",
+        },
     },
     "pb-movie-night": {
         "domains": {"entertainment", "dining"},
@@ -180,12 +478,22 @@ _FALLBACK_TRIGGERS: dict[str, dict] = {
     },
     "pb-budget-plan": {
         "domains": {"dining", "shopping", "entertainment"},
-        "scene_signals": {"budget"},
+        "scene_signals": {"budget", "budget_sensitive", "value_shopping"},
+    },
+    "pb-luxury-shop": {
+        "domains": {"shopping", "exploration"},
+        "scene_signals": {
+            "wedding_related", "bridesmaid", "bride", "groom",
+            "elegant", "occasion_wear", "luxury", "premium",
+            "wedding", "anniversary",
+        },
     },
 }
 
 
-def _score_fallback(intent, scene) -> list[tuple[str, float]]:
+def _score_fallback(
+    intent, scene, semantic_signals: list[str],
+) -> list[tuple[str, float]]:
     scene_tokens: set[str] = set()
     scene_tokens.update(scene.companions)
     if scene.occasion:
@@ -193,6 +501,10 @@ def _score_fallback(intent, scene) -> list[tuple[str, float]]:
     if scene.budget:
         scene_tokens.add(scene.budget)
     scene_tokens.update(scene.audience)
+    scene_tokens.update(scene.visit_constraints)
+    scene_tokens.update(semantic_signals)
+    if scene.visit_type:
+        scene_tokens.add(scene.visit_type)
 
     scored: list[tuple[str, float]] = []
     for pb_id, triggers in _FALLBACK_TRIGGERS.items():
