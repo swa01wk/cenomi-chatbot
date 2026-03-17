@@ -3,6 +3,411 @@
     "data": {
         "list": [
             {
+                "engagement_id": 823,
+                "brand_id": 296868,
+                "tenant_profile_id": 636644,
+                "title_en": "OSSAGI - 30% Discount on our Abaya Collection",
+                "title_ar": "عروض استثنائيه لمحبي التفرد في العيد",
+                "type": "offer",
+                "description_en": "Because your elegance deserves the best…\nEnjoy a 30% discount on our abaya collection now!\n\nSpecial Offers:\nBuy two abayas and get the third one free.\n\nLimited quantities available before Eid.",
+                "description_ar": "لأن أناقتك تستحق الأفضل…\nاستمتع الآن بـ خصم 30% على تشكيلة العبايات،\nو ايضا :\nاشتري عبايتين واحصلي على الثالثة مجاناً.\n\nالكميات المحدودة قبل العيد،\n",
+                "terms_conditions_en": "Terms and conditions apply to selected products",
+                "terms_conditions_ar": "تطبيق الشروط والاجكام على منتجات مختارة",
+                "start_date": "2026-03-13T00:00:00+03:00",
+                "end_date": "2026-03-31T00:00:00+03:00",
+                "publish_date": "2026-03-13T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/af85dad5ac3d1ffad48887a79ee2becf.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/1dbe9966bfb479c73c625ba38a18003e.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/50f39304c177b71c8c3b28cc61d2c3b7.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/96e2f6ea5f43d286a879a39afc4594af.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/7b3e00f2b0eceb4778c054fde982e243.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/5298b489f12c08ae9f4ca3ae05cf5d67.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/cf8bf718ab253b1e514564fc5a0cff19.jpeg",
+                "brand_name": "Brand Ossagi",
+                "brand_name_arabic": "أوساجي",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    198,
+                    615,
+                    678,
+                    3691
+                ],
+                "property_group_ids": [
+                    2,
+                    7,
+                    13,
+                    25
+                ]
+            },
+            {
+                "engagement_id": 782,
+                "brand_id": 254400,
+                "tenant_profile_id": 1563,
+                "title_en": "ramadan offer",
+                "title_ar": "عرض رمضان",
+                "type": "offer",
+                "description_en": "Sale 20%-70% discount",
+                "description_ar": "تخفيضات من 20% إلى 70%\n",
+                "terms_conditions_en": "Bp  and  Must  not included in discount",
+                "terms_conditions_ar": "لا يشمل الخصم منتجات بي بي وماست.\n",
+                "start_date": "2026-02-11T00:00:00+03:00",
+                "end_date": "2026-03-29T00:00:00+03:00",
+                "publish_date": "2026-02-11T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/039e9bd8c6d18c8354ba83b560f90dc5.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/a89f7afc3280ff611fae0dfe9055a403.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/1a1e1254596926dc53b5c123702c6c13.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/8dd4b18a03ffeee784af4ac4731ad254.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/116ad4bfcfccb89273f8ed7b82252bf9.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/b2eb7a49c34ba6bb50405871710e769d.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/abe7682e9ed9c756e3f685b433deb80a.jpeg",
+                "brand_name": "Brand Home Centre Accessories",
+                "brand_name_arabic": "هوم سنتر للاكسسوارات",
+                "group_name": "Shop",
+                "group_name_ar": "محل ",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
+            },
+            {
+                "engagement_id": 787,
+                "brand_id": 3580,
+                "tenant_profile_id": 198,
+                "title_en": "Ramadan offers",
+                "title_ar": "عروض رمضان",
+                "type": "offer",
+                "description_en": "Hijab Abayas is a company specializing in abaya manufacturing for over 20 years. The Hijab website showcases our original products, which we consistently offer at the highest quality to satisfy our customers. We have experts in selecting the finest materials.\n",
+                "description_ar": "الحجاب للعبايات شركة متخصصة في صناعة العبايات لأكثر من 20 عام يعرض موقع الحجاب الالكتروني منتجاتنا الأصلية التي تعودنا أن نقدمها دائما على أفضل جودة نرضى بها لعملائنا يوجد لدينا خبراء في اختيار افضل الخامات",
+                "terms_conditions_en": "Return and exchange service for products within 3 days from the date of purchase, provided that the products are in their original condition and unused, and that the purchase receipt is presented.",
+                "terms_conditions_ar": "خدمة الإرجاع والاستبدال للمنتجات خلال فترة 3 ايام من تاريخ الشراء، بشرط أن تكون المنتجات بحالتها الأصلية وغير مستخدمة، مع إبراز إيصال الشراء.",
+                "start_date": "2026-02-04T00:00:00+03:00",
+                "end_date": "2026-04-30T00:00:00+03:00",
+                "publish_date": "2026-02-04T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/eb5191628a548a3cc8fec87e1d5326c2.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/2f78edefb053b9cb20efc44583556ec4.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/c58350bb58178b40316348beabe84753.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/b3ef5dcffdbee80d47999da032223ef0.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/832f5ddebb29fcb533002fd540e9e016.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/edd0d222ebf9cde4f26a631f8cbb063e.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/7862b8b2d3c62701e44b1dc4c4145afe.png",
+                "brand_name": "Brand AL Hijab",
+                "brand_name_arabic": "الحجاب",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
+            },
+            {
+                "engagement_id": 775,
+                "brand_id": 1760,
+                "tenant_profile_id": 78,
+                "title_en": "Sharing Time!",
+                "title_ar": "عرض وقت المشاركة!",
+                "type": "offer",
+                "description_en": "Buy any Main Course from our Burger, Sandwich, or Chicken sections and get the second one FREE. Check out the offers on our menu page to find out more! \n\nhttps://dineselite.com/Menu/Applebees",
+                "description_ar": "العرض ساري من الأحد للأربعاء، 5-8 مساءً. للطلبات داخل المطعم فقط. يطبق على الوجبة الأقل سعراً ولا يدمج مع عروض أخرى. \n\nاشتري أي وجبة رئيسية من قائمة البرجر أو الساندوتشات أو الدجاج واحصل على الثانية مجاناً. \n\nاطلع على العروض الموجودة في صفحة قائمة الطعام لدينا لمعرفة المزيد!\n\nhttps://dineselite.com/Menu/Applebees\n",
+                "terms_conditions_en": "Valid Sun–Wed, 5 PM – 8 PM. Dine-in only. \nApplicable to Main Courses of equal or lesser value. \nCannot be combined with other offers.\n",
+                "terms_conditions_ar": "العرض ساري من الأحد للأربعاء، 5-8 مساءً. للطلبات داخل المطعم فقط. يطبق على الوجبة الأقل سعراً ولا يدمج مع عروض أخرى",
+                "start_date": "2026-01-11T00:00:00+03:00",
+                "end_date": "2026-06-30T00:00:00+03:00",
+                "publish_date": "2026-01-11T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/238f03ed379ff81d1665e8e8293651c6.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/6e5a561b181dcea45aa17fcab65704bf.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/dd2d43ed8e9408a7aa281a1df76e3fb8.png",
+                "brand_name": "Brand Applebee's",
+                "brand_name_arabic": "أبل بيز",
+                "group_name": "Dine",
+                "group_name_ar": "مطعم ",
+                "unique_property_ids": [
+                    678,
+                    2482
+                ],
+                "property_group_ids": [
+                    13,
+                    19
+                ]
+            },
+            {
+                "engagement_id": 789,
+                "brand_id": 1760,
+                "tenant_profile_id": 78,
+                "title_en": "Lunch Offers",
+                "title_ar": "عروض الغداء",
+                "type": "offer",
+                "description_en": "Applebee's new lunch offers are here with more choices and amazing value! Check out the offers on our menu page to find your perfect lunch combo today! https://dineselite.com/Menu/Applebees\n\n",
+                "description_ar": "عروض الغداء الجديدة من آبل بيز هنا مع خيارات أكثر وقيمة مذهلة! تحقق من العروض على صفحة قائمتنا لتجد وجبة الغداء المثالية لك اليوم!\n🥳🍎\nhttps://dineselite.com/Menu/Applebees\n",
+                "terms_conditions_en": "Available Sunday to Thursday from 11 AM to 5 PM.\nAppetizer + Main Course + Drink\nThis offer is not available on weekends and public holidays.\nThis offer cannot be combined with any other offer or percentage (%) discount.\n",
+                "terms_conditions_ar": "متوفر من الأحد إلى الخميس من الساعة ١١ صباحًا حتى ٥ مساءً.\nمقبلات + طبق رئيسي + مشروب\nهذا العرض غير متوفر في عطلات نهاية الأسبوع والعطلات الرسمية.\nلا يمكن دمج هذا العرض مع أي عرض آخر.\nلا يمكن دمجه مع أي عروض أخرى أو نسبة خصم (%).\n",
+                "start_date": "2026-01-11T00:00:00+03:00",
+                "end_date": "2026-12-31T00:00:00+03:00",
+                "publish_date": "2026-01-11T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/6ea722fa4fd872d0a9b69ba680af6660.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/b192af725f8e4df401f5bbeeea723549.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/3fa9910d31d4c8c719fafc36a1be347a.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/bcb9b99283539ff92b8d1e69ea671304.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/35d60fccbe060c726050fa7152588d02.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/e4b56f3a1e4f024454e9927ad8d746bf.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/dd2d43ed8e9408a7aa281a1df76e3fb8.png",
+                "brand_name": "Brand Applebee's",
+                "brand_name_arabic": "أبل بيز",
+                "group_name": "Dine",
+                "group_name_ar": "مطعم ",
+                "unique_property_ids": [
+                    678,
+                    2107
+                ],
+                "property_group_ids": [
+                    13,
+                    20
+                ]
+            },
+            {
+                "engagement_id": 773,
+                "brand_id": 253257,
+                "tenant_profile_id": 534,
+                "title_en": "Diva - Sale up to 50%",
+                "title_ar": "تخفيضات حتي 50% - Diva",
+                "type": "offer",
+                "description_en": "Diva On Sale Up To 50%",
+                "description_ar": "ديفا اون تخفيضات حتى 50% ",
+                "terms_conditions_en": "Diva On Sale Up To 50% On selected items\nselected items 100 riyal",
+                "terms_conditions_ar": "ديفا اون تخفيضات حتى 50% على اصناف مختاره\nواصناف مختارة ب 100 ريال ",
+                "start_date": "2026-01-05T00:00:00+03:00",
+                "end_date": "2026-04-30T00:00:00+03:00",
+                "publish_date": "2026-01-05T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/8851280baf67e433950c69d858665d63.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/980bb2c462226e3d0e09fd0b383c7946.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/64aa25533019064098b4f3c7747cb576.png",
+                "brand_name": "Brand Diva",
+                "brand_name_arabic": "",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
+            },
+            {
+                "engagement_id": 767,
+                "brand_id": 252953,
+                "tenant_profile_id": 372,
+                "title_en": "IBrahim AL Qurash -30% to 59% off",
+                "title_ar": "عروض ابراهيم القرشي - خصومات من 30% الي 59%",
+                "type": "offer",
+                "description_en": "IBrahim AL Qurash -30% to 59% off",
+                "description_ar": "عروض ابراهيم القرشي - خصومات من 30% الي 59%",
+                "terms_conditions_en": "IBrahim AL Qurash -30% to 59% off",
+                "terms_conditions_ar": "عروض ابراهيم القرشي - خصومات من 30% الي 59%",
+                "start_date": "2026-01-03T00:00:00+03:00",
+                "end_date": "2026-05-01T00:00:00+03:00",
+                "publish_date": "2026-01-03T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/051e98b6eb7a2a979aa938bf59bbecea.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/c39eb89e0497a8ac962805fd21c651ae.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/65e12c7cf348312c8841c79a3552012b.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/3c22ea68dc238082eeb4eba9558c9f14.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/4770b4dbe69a2faa471ba1f11e782d2c.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/eb7319a913bc32ee273b48f827bbf99d.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": null,
+                "tags_ar": null,
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/f98ea85d3903d87964f6044dcce7cbb0.png",
+                "brand_name": "Brand Ibrahim AlQurashi",
+                "brand_name_arabic": "ابراهيم القرشي",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
+            },
+            {
                 "engagement_id": 164,
                 "brand_id": 255426,
                 "tenant_profile_id": 1301,
@@ -108,9 +513,266 @@
                     26,
                     28
                 ]
+            },
+            {
+                "engagement_id": 165,
+                "brand_id": 989,
+                "tenant_profile_id": 1745,
+                "title_en": "Our prices start from 69 riyals to 129 riyals",
+                "title_ar": "أسعارنا تبدأ من 69 ريال الى 129 ريالا",
+                "type": "promotions",
+                "description_en": "<p>First Show prices will start from 69 riyals to 129 riyals on selected items.</p>",
+                "description_ar": "<p style=\"text-align:right;direction:rtl\">اسعار فيرست شو سيبدأ من من 69 ريالا الى 129 ريال على أصناف مختارة</p>",
+                "terms_conditions_en": "<p>Offer valid on selected items</p>",
+                "terms_conditions_ar": "<p style=\"text-align:right;direction:rtl\">يسري العرض على أصناف مختارة</p>",
+                "start_date": "2025-05-07T00:00:00+03:00",
+                "end_date": "2025-06-06T00:00:00+03:00",
+                "publish_date": "2025-05-07T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/714b88372c9716f8c846f6de1d2e0416.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/1254e6f5cac26e2dfa0322e30e7d6e31.jpeg",
+                        "is_primary": true
+                    }
+                ],
+                "tags_en": [
+                    {
+                        "tag_id": "3733",
+                        "tag_text": "firstshow  Women's Bags"
+                    },
+                    {
+                        "tag_id": "3734",
+                        "tag_text": "firstshow  Women's shoes"
+                    },
+                    {
+                        "tag_id": "3735",
+                        "tag_text": "First_Show Women's Bags and Shoes"
+                    }
+                ],
+                "tags_ar": [
+                    {
+                        "tag_id": "3736",
+                        "tag_text": "حقائب نسائية فيرست_شو"
+                    },
+                    {
+                        "tag_id": "3737",
+                        "tag_text": "أحذية نسائية  فيرست_شو"
+                    },
+                    {
+                        "tag_id": "3738",
+                        "tag_text": "حقائب وأحذية نسائية فيرست_شو"
+                    }
+                ],
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/b3f4a034ad1d92f8cfc9638b763e2cde.jpeg",
+                "brand_name": "Brand FirstShow Shoes",
+                "brand_name_arabic": "فرست شو",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    1,
+                    59,
+                    352,
+                    615,
+                    678,
+                    2107,
+                    3691
+                ],
+                "property_group_ids": [
+                    2,
+                    6,
+                    9,
+                    12,
+                    13,
+                    20,
+                    25
+                ]
+            },
+            {
+                "engagement_id": 302,
+                "brand_id": 252622,
+                "tenant_profile_id": 1737,
+                "title_en": "PART SALE 30% UP TO  60% OFF ON SELECTED ITEMS",
+                "title_ar": "تخفيضات جزئية من 30% إلى 60% على منتجات مختارة",
+                "type": "announcements",
+                "description_en": "PART SALE 30% UP TO  60% OFF ON SELECTED ITEMS",
+                "description_ar": "تخفيضات جزئية من 30% إلى 60% على منتجات مختارة",
+                "terms_conditions_en": "DURING SALE OR PROMOTION, EXCHANGES WITH IN 3 DAYS OR REFUNDS WITH IN 1 DAY",
+                "terms_conditions_ar": "أثناء البيع أو العرض الترويجي، يتم الاستبدال خلال 3 أيام أو استرداد الأموال خلال يوم واحد",
+                "start_date": "2025-11-14T00:00:00+03:00",
+                "end_date": "2025-12-24T00:00:00+03:00",
+                "publish_date": "2025-11-14T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/306a6c04a62580b9bedcfbf9c68b70d5.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/b39e95168a539a9422ed8b20cd98a1c7.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/82361beddd8ef5d18556c516734afd8a.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/ecd7c1549b88369d1de5d96d30ea2c47.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/bc7883b53a8ba8516446a7abb9873fd8.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/3ef0a7a2fb1445b228a6d48ccd8845ec.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": [
+                    {
+                        "tag_id": "2519",
+                        "tag_text": "NEW COLLECTIONS"
+                    },
+                    {
+                        "tag_id": "3215",
+                        "tag_text": "sale"
+                    },
+                    {
+                        "tag_id": "4300",
+                        "tag_text": "VANS"
+                    }
+                ],
+                "tags_ar": [
+                    {
+                        "tag_id": "3679",
+                        "tag_text": "SALE"
+                    },
+                    {
+                        "tag_id": "4301",
+                        "tag_text": "NEW COLLECTION"
+                    },
+                    {
+                        "tag_id": "4302",
+                        "tag_text": "VANS"
+                    }
+                ],
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/f5b1ca9e77ef0b5e220756c82295c9d7.png",
+                "brand_name": "Brand Vans",
+                "brand_name_arabic": "فانز",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
+            },
+            {
+                "engagement_id": 369,
+                "brand_id": 252621,
+                "tenant_profile_id": 1737,
+                "title_en": "Timberland - 30% UP TO 60% OFF ON SELECTED ITEMS",
+                "title_ar": "تخفيضات جزئية 30% حتى60% خصم على منتجات مختارة",
+                "type": "announcements",
+                "description_en": "PART SALE 30% UP TO 60% OFF ON SELECTED ITEMS",
+                "description_ar": "تخفيضات جزئية 30% حتى 60% خصم على منتجات مختارة",
+                "terms_conditions_en": "DURING SALE OR PROMOTION, EXCHANGES WITH IN 3 DAYS OR REFUNDS WITH IN 1 DAY",
+                "terms_conditions_ar": "أثناء البيع أو العرض الترويجي، يتم الاستبدال خلال 3 أيام أو استرداد الأموال خلال يوم واحد",
+                "start_date": "2025-11-14T00:00:00+03:00",
+                "end_date": "2025-12-24T00:00:00+03:00",
+                "publish_date": "2025-11-14T00:00:00+03:00",
+                "is_exclusive": 0,
+                "images_en": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/ccf743a10e69f9bf7377d30fd815e369.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/f0871f3b0761b546fe1e6dcf725a1600.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/af4a05d9c807842c0e76489630ca37c5.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "images_ar": [
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/587b4937d79290f652499f3203aa20b6.jpeg",
+                        "is_primary": true
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/4a447693240966a89691b300336a305a.jpeg",
+                        "is_primary": false
+                    },
+                    {
+                        "url": "https://img.antum.com/prodpublicaccessblob/public-files/9c545812a1e038fd4f37961a6dc7251a.jpeg",
+                        "is_primary": false
+                    }
+                ],
+                "tags_en": [
+                    {
+                        "tag_id": "3215",
+                        "tag_text": "sale"
+                    },
+                    {
+                        "tag_id": "3294",
+                        "tag_text": "timberland"
+                    },
+                    {
+                        "tag_id": "4292",
+                        "tag_text": "JEANS"
+                    }
+                ],
+                "tags_ar": [
+                    {
+                        "tag_id": "3679",
+                        "tag_text": "SALE"
+                    },
+                    {
+                        "tag_id": "4293",
+                        "tag_text": "TIMBERLAND"
+                    },
+                    {
+                        "tag_id": "4294",
+                        "tag_text": "JEANS"
+                    }
+                ],
+                "ext_url": "",
+                "ext_url_ar": "",
+                "user_profile_complete_required": 0,
+                "home_banner_disp": 0,
+                "brand_logo": "https://img.antum.com/prodpublicaccessblob/public-files/e01fd29833ec648b638814f063b77d64.jpeg",
+                "brand_name": "Brand Timberland",
+                "brand_name_arabic": "تمبرلاند",
+                "group_name": "Shop",
+                "group_name_ar": "محل",
+                "unique_property_ids": [
+                    678
+                ],
+                "property_group_ids": [
+                    13
+                ]
             }
         ],
-        "total_count": 1,
+        "total_count": 11,
         "page": 1,
         "brand": null,
         "related_brands": []

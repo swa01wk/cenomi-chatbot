@@ -1,27 +1,123 @@
 {
     "success": true,
     "data": {
-        "property_group_id": 28,
+        "property_group_id": 13,
         "services": [
             {
                 "details": [
                     {
-                        "content": "Directions",
-                        "content_ar": "الاتجاهات",
+                        "content": "Available ATMs",
+                        "content_ar": "الصراف الآلي متوفر",
                         "type": "heading"
                     },
                     {
                         "content": [
-                            "Gate 1&2 front of Polo store",
-                            "Gate 2",
-                            "Gate 1&2 food court"
+                            {
+                                "content": [
+                                    {
+                                        "content": "Etihad Etisalat",
+                                        "content_ar": "اتحاد اتصالات",
+                                        "type": "subheading"
+                                    },
+                                    {
+                                        "content": "Ground Floor – Gate 1, In Front of Mango",
+                                        "content_ar": "الدور الأرضي – بوابة 1، أمام معرض مانجو",
+                                        "type": "location"
+                                    }
+                                ],
+                                "floor": "firstFloor",
+                                "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                                "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759842562/Rectangle_12656_square_w0czi4.png",
+                                "mappedin_location": "ATM",
+                                "mappedin_location_ar": "صراف",
+                                "navigation_enable": false,
+                                "service_opened": true
+                            },
+                            {
+                                "content": [
+                                    {
+                                        "content": "Alawwal Bank ATM",
+                                        "content_ar": "صراف",
+                                        "type": "subheading"
+                                    },
+                                    {
+                                        "content": "Basement (Parking) – Gate 2",
+                                        "content_ar": "القبو (مواقف السيارات) – بوابة 2",
+                                        "type": "location"
+                                    },
+                                    {
+                                        "content": "Basement (Parking) – Gate 4",
+                                        "content_ar": "القبو (مواقف السيارات) – بوابة 4",
+                                        "type": "location"
+                                    },
+                                    {
+                                        "content": "Basement (Parking) – Gate 5",
+                                        "content_ar": "القبو (مواقف السيارات) – بوابة 5",
+                                        "type": "location"
+                                    },
+                                    {
+                                        "content": "Basement (Parking) – Gate 6",
+                                        "content_ar": "القبو (مواقف السيارات) – بوابة 6",
+                                        "type": "location"
+                                    },
+                                    {
+                                        "content": "First Floor – Food Court, Next to L’Douh Bakery Café",
+                                        "content_ar": "الدور الأول – ساحة المطاعم، بجانب مقهى لادووه",
+                                        "type": "location"
+                                    }
+                                ],
+                                "floor": "firstFloor",
+                                "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                                "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759842562/Rectangle_12656_square_w0czi4.png",
+                                "mappedin_location": "ATM",
+                                "mappedin_location_ar": "صراف",
+                                "navigation_enable": false,
+                                "service_opened": true
+                            },
+                            {
+                                "content": [
+                                    {
+                                        "content": "Saudi Investment Bank ATM",
+                                        "content_ar": "صراف",
+                                        "type": "subheading"
+                                    },
+                                    {
+                                        "content": "First Floor – Food Court, Next to Shawarma Almuhalhal",
+                                        "content_ar": "الدور الأول – ساحة المطاعم، بجانب مطعم شاورما المهلهل",
+                                        "type": "location"
+                                    }
+                                ],
+                                "floor": "firstFloor",
+                                "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                                "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759842562/Rectangle_12656_square_w0czi4.png",
+                                "mappedin_location": "ATM",
+                                "mappedin_location_ar": "صراف",
+                                "navigation_enable": false,
+                                "service_opened": true
+                            },
+                            {
+                                "content": [
+                                    {
+                                        "content": "Emirates NBD Bank ATM",
+                                        "content_ar": "صراف",
+                                        "type": "subheading"
+                                    },
+                                    {
+                                        "content": "First Floor – Food Court, Next to Baskin Robbins",
+                                        "content_ar": " الدور الأول – ساحة المطاعم، بجانب معرض باسكن روبنز",
+                                        "type": "location"
+                                    }
+                                ],
+                                "floor": "firstFloor",
+                                "icon": "https://img.antum.com/prodpublicaccessblob/public-files/ATM.svg",
+                                "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759842562/Rectangle_12656_square_w0czi4.png",
+                                "mappedin_location": "ATM",
+                                "mappedin_location_ar": "صراف",
+                                "navigation_enable": false,
+                                "service_opened": true
+                            }
                         ],
-                        "content_ar": [
-                            "بوابة 1&2 مقابل معرض بولو",
-                            "بوابة 2",
-                            "بوابة 1&2 في ساحة المطاعم"
-                        ],
-                        "type": "bullet"
+                        "type": "paragraph"
                     }
                 ],
                 "id": 1,
@@ -33,19 +129,9 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
-                        },
-                        {
-                            "content": "Ground Floor",
-                            "content_ar": "الدور الأرضي",
-                            "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -64,8 +150,8 @@
                         "type": "heading"
                     },
                     {
-                        "content": "Ground Floor: Customer Service Desk, Gate 2",
-                        "content_ar": "الدور الأرضي:  كاونتر خدمة العملاء، بوابة 2",
+                        "content": "Ground Floor: Main Gate, Customer Service Counter",
+                        "content_ar": "الدور الأرضي: البوابة الرئيسية، مكتب خدمة العملاء",
                         "type": "paragraph"
                     },
                     {
@@ -94,19 +180,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
                             "content": "Ground Floor",
                             "content_ar": "الدور الأرضي",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -135,8 +216,8 @@
                         "type": "heading"
                     },
                     {
-                        "content": "Ground Floor: Customer Service Desk, Gate 2",
-                        "content_ar": "الدور الأرضي: كاونتر خدمة العملاء، بوابة 2",
+                        "content": "Ground Floor: Main Gate, Customer Service Counter",
+                        "content_ar": "الدور الأرضي: البوابة الرئيسية، مكتب خدمة العملاء",
                         "type": "paragraph"
                     },
                     {
@@ -159,19 +240,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
                             "content": "Ground Floor",
                             "content_ar": "الدور الأرضي",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -190,8 +266,8 @@
                         "type": "heading"
                     },
                     {
-                        "content": "Ground Floor: Customer Service Desk, Gate 2",
-                        "content_ar": "الدور الأرضي:  كاونتر خدمة العملاء، بوابة 2",
+                        "content": "Ground Floor: Main Gate, Customer Service Counter",
+                        "content_ar": "الدور الأرضي: البوابة الرئيسية، مكتب خدمة العملا",
                         "type": "paragraph"
                     }
                 ],
@@ -204,19 +280,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
                             "content": "Ground Floor",
                             "content_ar": "الدور الأرضي",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -235,65 +306,8 @@
                         "type": "heading"
                     },
                     {
-                        "content": [
-                            "Ground Floor: Gate 2, near Doknah Kiosk",
-                            "Ground Floor: Gates 2 & 3, beside Rina Store"
-                        ],
-                        "content_ar": [
-                            "الدور الأرضي: بوابة 2، بجوار كشك دكنه",
-                            "الدور الأرضي: بوابة 2 و3، بعد معرض رينا"
-                        ],
-                        "type": "bullet"
-                    },
-                    {
-                        "button_icon_type": "request",
-                        "content": "Request Baby Stroller",
-                        "content_ar": "طلب عربة اطفال",
-                        "type": "button"
-                    }
-                ],
-                "id": 7,
-                "service_details": {
-                    "content": [
-                        {
-                            "content": "Baby Stroller",
-                            "content_ar": "عربة اطفال",
-                            "type": "title"
-                        },
-                        {
-                            "content": "4:00 PM to 11:00 PM",
-                            "content_ar": "4:00 PM to 11:00 PM",
-                            "type": "time"
-                        },
-                        {
-                            "content": "Ground Floor",
-                            "content_ar": "الدور الأرضي",
-                            "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
-                        }
-                    ],
-                    "floor": "groundFloor",
-                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Baby%20Stroller.svg",
-                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1758696864/Gemini_Generated_Image_4yndf14yndf14ynd_nzer7v.png",
-                    "mappedin_location": "Information Desk",
-                    "mappedin_location_ar": "مكتب المعلومات",
-                    "navigation_enable": false
-                }
-            },
-            {
-                "details": [
-                    {
-                        "content": "Directions",
-                        "content_ar": "الاتجاهات",
-                        "type": "heading"
-                    },
-                    {
-                        "content": "Located on the ground floor, in front of each gate.",
-                        "content_ar": "في الدور الأرضي أمام جميع البوابات.",
+                        "content": "Basement",
+                        "content_ar": "القبو",
                         "type": "paragraph"
                     }
                 ],
@@ -306,19 +320,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
                             "content": "Ground Floor",
                             "content_ar": "الدور الأرضي",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -337,9 +346,15 @@
                         "type": "heading"
                     },
                     {
-                        "content": "Ground Floor: Near Lavalle Store, Gate 1",
-                        "content_ar": "الدور الأرضي: بجانب معرض لافالي، بوابة 1",
-                        "type": "paragraph"
+                        "content": [
+                            "Gate 6, in front of H&M",
+                            "Main Gate, next to Monsoon"
+                        ],
+                        "content_ar": [
+                            "بوابة 6، أمام معرض اتش آند إم",
+                            "البوابة الرئيسية، بجانب معرض مونسون"
+                        ],
+                        "type": "bullet"
                     },
                     {
                         "content": "1247 kms",
@@ -356,19 +371,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
                             "content": "Ground Floor",
                             "content_ar": "الدور الأرضي",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -388,12 +398,16 @@
                     },
                     {
                         "content": [
-                            "Ground Floor: Gates 1 & 2 (Food Court)",
-                            "Ground Floor: Gates 2 & 3, near Max Store"
+                            "Ground Floor: Gate 3, next to Ipekyol",
+                            "First Floor: Gate 1, next to Ibrahim Al Qurashi",
+                            "First Floor: Food Court, next to Shawarma Almuhalhal",
+                            "First Floor: Gate 3, next to First Show"
                         ],
                         "content_ar": [
-                            "الدور الأرضي – المواقع: بوابتان 1 و2 في ساحة المطاعم",
-                            "الدور الأرضي – بوابة 2 و3 بجانب معرض ماكس"
+                            "الدور الأرضي: بوابة 3، بجانب معرض أيبكول",
+                            "الدور الأول: بوابة 1، بجانب معرض إبراهيم القرشي",
+                            "الدور الأول: ساحة المطاعم، بجانب مطعم شاورما المهلهل",
+                            "الدور الأول: بوابة 3، بجانب معرض فيرست شو**"
                         ],
                         "type": "bullet"
                     },
@@ -412,19 +426,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
-                            "content": "Ground Floor",
-                            "content_ar": "الدور الأرضي",
+                            "content": "Ground Floor & First Floor",
+                            "content_ar": "الطابق الأرضي والطابق الأول",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -444,14 +453,25 @@
                     },
                     {
                         "content": [
-                            "Ground Floor: Gate 1, near Lavalle Store",
-                            "Ground Floor: Gates 1 & 2 (Food Court)",
-                            "Ground Floor: Gates 2 & 3, near Max Store"
+                            "Ground Floor",
+                            "Main Gate – Next to Monsoon",
+                            "Gate 3 – Next to Ipekyol",
+                            "Gate 6 – Next to Season Accessorize",
+                            "Gate 6 – In Front of H&M",
+                            "First Floor",
+                            "Gate 1 – Next to TGI Friday’s",
+                            "Gate 1 – Next to Spring",
+                            "Gate 1 – Next to La Senza"
                         ],
                         "content_ar": [
-                            "الدور الأرضي: بوابة 1، بجانب معرض لافالي",
-                            "الدور الأرضي: بوابة 1 و2، ساحة المطاعم",
-                            "الدور الأرضي: بوابة 2 و3، بجانب معرض ماكس"
+                            "الدور الأرضي",
+                            "البوابة الرئيسية – بجانب معرض مونسون",
+                            "بوابة 3 – بجانب معرض أيبكول",
+                            "بوابة 6 – بجانب معرض سيزون أكسسواريز",
+                            "بوابة 6 – أمام معرض اتش آند إم",
+                            "الدور الأول",
+                            "بوابة 1 – بجانب مطعم تي جي آي فرايديز",
+                            "بوابة 1 – بجانب معرض سبرينغ"
                         ],
                         "type": "bullet"
                     }
@@ -465,19 +485,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
-                            "content": "Ground Floor",
-                            "content_ar": "الدور الأرضي",
+                            "content": "Ground Floor & First Floor",
+                            "content_ar": "الطابق الأرضي والطابق الأول",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -497,12 +512,22 @@
                     },
                     {
                         "content": [
-                            "Ground Floor: Gates 1 & 2 (Food Court)",
-                            "Ground Floor: Gates 2 & 3, near Max Store"
+                            "Ground Floor",
+                            "Main Gate – Next to Make Up For Ever",
+                            "Gate 3 – Next to Ipekyol",
+                            "Gate 6 – Next to Etam",
+                            "First Floor",
+                            "Gate 1 – Next to TGI Friday’s",
+                            "Gate 1 – Next to Ibrahim Al Qurashi"
                         ],
                         "content_ar": [
-                            "الدور الأرضي: بوابة 1 و2، ساحة المطاعم",
-                            "الدور الأرضي: بوابة 2 و3، بجانب معرض ماكس"
+                            "الدور الأرضي",
+                            "البوابة الرئيسية – بجانب معرض ميك أب فور إيفر",
+                            "بوابة 3 – بجانب معرض أيبكول",
+                            "بوابة 6 – بجانب معرض إيتام",
+                            "الدور الأول",
+                            "بوابة 1 – بجانب مطعم تي جي آي فرايديز",
+                            "بوابة 1 – بجانب معرض إبراهيم القرشي"
                         ],
                         "type": "bullet"
                     }
@@ -516,19 +541,14 @@
                             "type": "title"
                         },
                         {
-                            "content": "9:00 AM - 12:00 AM",
-                            "content_ar": "9:00 AM - 12:00 AM",
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
                             "type": "time"
                         },
                         {
-                            "content": "Ground Floor",
-                            "content_ar": "الدور الأرضي",
+                            "content": "Ground Floor & First Floor",
+                            "content_ar": "الطابق الأرضي والطابق الأول",
                             "type": "location"
-                        },
-                        {
-                            "content": "920000262",
-                            "content_ar": "920000262",
-                            "type": "phone"
                         }
                     ],
                     "floor": "groundFloor",
@@ -538,8 +558,32 @@
                     "mappedin_location_ar": "دورة مياه نساء",
                     "navigation_enable": false
                 }
+            },
+            {
+                "details": [],
+                "id": 13,
+                "service_details": {
+                    "content": [
+                        {
+                            "content": "Free WiFi",
+                            "content_ar": "واي فاي مجاني",
+                            "type": "title"
+                        },
+                        {
+                            "content": "09:00AM - 12:00AM",
+                            "content_ar": "09:00AM - 12:00AM",
+                            "type": "time"
+                        }
+                    ],
+                    "floor": "groundFloor",
+                    "icon": "https://img.antum.com/prodpublicaccessblob/public-files/Wifi.svg",
+                    "image": "https://res.cloudinary.com/dqhvntxjs/image/upload/v1759903423/Free_Wifi_txv0c8.png",
+                    "mappedin_location": "Free WiFi",
+                    "mappedin_location_ar": "واي فاي مجاني",
+                    "navigation_enable": false
+                }
             }
         ],
-        "unique_property_id": 1987
+        "unique_property_id": 678
     }
 }

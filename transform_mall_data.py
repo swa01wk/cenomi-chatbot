@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional
 
 TARGET_PROPERTY_GROUP_ID = 28
 DATA_DIR = "./data"
-OUTPUT_FILE = "output_mall_28.json"
+OUTPUT_FILE = "output_mall_13.json"
 
 
 # ─────────────────────────────────────────────
