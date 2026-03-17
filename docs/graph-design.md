@@ -14,34 +14,43 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
                     │  response · trace                            │
                     └──────────────────────────────────────────────┘
                                         │
-    ┌───────────┬───────────┬───────────┼───────────┬──────────────┐
-    │           │           │           │           │              │
-  load     interpret   update_scene  resolve   choose         compose
-  session    turn       memory      playbooks  strategy       context
-    │           │           │           │           │              │
-    └───────────┴───────────┴───────────┴───────────┴──────────────┘
+                                    load_session
                                         │
-                                  decide_retrieval
+                                  interpret_turn
                                    ╱           ╲
-                          (needed)               (skip)
+                          (smalltalk)           (normal)
                               │                    │
-                       fetch_exact_facts           │
+                           smalltalk        update_scene_memory
                               │                    │
-                              └──────┬─────────────┘
-                                     │
-                              generate_response
-                                     │
-                               update_memory
-                                     │
-                            emit_debug_payload
-                                     │
-                                    END
+                              │             resolve_playbooks
+                              │                    │
+                              │             choose_strategy
+                              │                    │
+                              │             compose_context
+                              │                    │
+                              │             decide_retrieval
+                              │              ╱           ╲
+                              │       (needed)             (skip)
+                              │           │                  │
+                              │    fetch_exact_facts         │
+                              │           │                  │
+                              │           └────────┬─────────┘
+                              │                    │
+                              └──────► generate_response
+                                             │
+                                       update_memory
+                                             │
+                                     emit_debug_payload
+                                             │
+                                            END
 ```
 
 ### Design Principles
 
-- **Single-mall scoped** — `mode = "single_mall"` always; multi-mall is a future concern.
+- **Single-mall scoped** — `mall_id = "al_nakheel_plaza_28"` by default; multi-mall is a future concern.
 - **Answer-first** — the pipeline is biased toward generating a response immediately, not interrogating the user.
+- **Smalltalk fast-path** — greetings and casual messages are detected after `interpret_turn` and handled by a dedicated `smalltalk` node with zero LLM cost; they skip the full 10-node pipeline entirely.
+- **Clean context** — each turn receives only structured scene memory + current mall data, never raw LLM history, preventing hallucination re-injection.
 - **Scene memory** — visitor context (companions, budget, occasion, etc.) persists across turns, enabling natural conversation flow.
 - **Playbook-driven** — scenario playbooks shape strategy selection and entity ranking.
 - **Retrieval-optional** — exact retrieval only fires when the query demands factual precision (hours, showtimes, offers).
@@ -175,6 +184,7 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 |---|------|-------|--------|-----------|
 | 1 | `load_session` | session_id, mall_id, raw_user_message | turn_id, tenant_id, active_mall_id, active_tenant_parameters, normalized_user_message, messages | Config miss → defaults |
 | 2 | `interpret_turn` | normalized_user_message, messages, scene | intent | Classification fail → general |
+| 2a | `smalltalk` *(fast-path)* | normalized_user_message, raw_user_message, turn_id | final_response_text, response_debug_summary, messages | Never — static responses only |
 | 3 | `update_scene_memory` | intent, normalized_user_message, scene | scene | Parse error → preserve scene |
 | 4 | `resolve_playbooks` | intent, scene, active_tenant_parameters | playbook | No match → empty |
 | 5 | `choose_strategy` | intent, scene, playbook, active_tenant_parameters | response_plan | No fit → fallback |
@@ -190,7 +200,9 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 | Node | Next Node | Condition |
 |------|-----------|-----------|
 | load_session | interpret_turn | Always |
-| interpret_turn | update_scene_memory | Always |
+| interpret_turn | **smalltalk** | `is_smalltalk(state) = True` (greeting, thanks, casual) |
+| interpret_turn | **update_scene_memory** | `is_smalltalk(state) = False` |
+| smalltalk | update_memory | Always (skips nodes 3–9) |
 | update_scene_memory | resolve_playbooks | Always |
 | resolve_playbooks | choose_strategy | Always |
 | choose_strategy | compose_context | Always |
@@ -205,6 +217,17 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 ---
 
 ## 4. Routing Logic — Conditional Rules
+
+### Rule 0: Smalltalk Fast-Path
+
+```python
+if is_smalltalk(state):
+    → smalltalk → update_memory → emit_debug_payload → END
+else:
+    → update_scene_memory → ... (full pipeline)
+```
+
+Triggered by `interpret_turn` when `is_smalltalk()` returns `True`. The `smalltalk` node uses static pattern matching (regex) for greetings, thanks, how-are-you, and goodbye patterns — zero LLM cost. All responses steer back to mall services.
 
 ### Rule 1: Retrieval Gate
 
@@ -342,12 +365,14 @@ When `intent.message_kind == "followup"`:
 
 ## 6. Production Design
 
-### Recommended File Structure
+### Implemented File Structure
 
 ```
 backend/app/
+├── main.py                     # FastAPI entrypoint + lifespan
+├── runtime.py                  # Global singletons (mall context, sessions, feedback)
 ├── graph/
-│   └── builder.py              # StateGraph construction + routing
+│   └── builder.py              # StateGraph construction + conditional routing
 ├── models/
 │   ├── state.py                # ConciergeState + all sub-models
 │   ├── tenant.py               # TenantConfig + entity models
@@ -358,41 +383,57 @@ backend/app/
 │   ├── api.py                  # ChatRequest / ChatResponse
 │   └── feedback.py             # FeedbackRecord
 ├── nodes/
-│   ├── __init__.py             # Re-exports all node functions
+│   ├── __init__.py             # Re-exports all node functions + is_smalltalk
 │   ├── _tracing.py             # @traced_node decorator
 │   ├── load_session.py         # 1. Session initialization
-│   ├── interpret_turn.py       # 2. Intent classification
+│   ├── interpret_turn.py       # 2. Intent classification + smalltalk detection
+│   ├── smalltalk.py            # 2a. Smalltalk fast-path (static, zero LLM cost)
 │   ├── update_scene_memory.py  # 3. Scene enrichment
 │   ├── resolve_playbooks.py    # 4. Playbook matching
 │   ├── choose_strategy.py      # 5. Strategy selection
 │   ├── compose_context.py      # 6. Context assembly
 │   ├── decide_retrieval.py     # 7. Retrieval gate
 │   ├── fetch_exact_facts.py    # 8. Exact data lookup
-│   ├── generate_response.py    # 9. LLM generation
+│   ├── generate_response.py    # 9. LLM generation + hallucination guard
 │   ├── update_memory.py        # 10. Memory persistence
 │   └── emit_debug_payload.py   # 11. Observability
 ├── services/
 │   ├── concierge.py            # High-level orchestration
-│   ├── context_builder.py      # Context pack assembly
-│   ├── enricher.py             # Semantic enrichment
-│   ├── normalizer.py           # Message normalization
+│   ├── clean_context.py        # Contamination-free per-turn context assembly
+│   ├── context_builder.py      # Context pack assembly from data layers
+│   ├── enricher.py             # Semantic enrichment of entities
+│   ├── normalizer.py           # Canonical data normalization
 │   ├── playbook_engine.py      # Playbook loading + matching
+│   ├── session_store.py        # In-memory LRU session store
 │   ├── tenant_params.py        # Parameter resolution
-│   └── tenant_runtime.py       # TenantConfig loader
+│   ├── tenant_runtime.py       # TenantConfig loader
+│   ├── feedback_service.py     # Feedback lifecycle management
+│   ├── feedback_normalizer.py  # Feedback normalization
+│   ├── implicit_feedback_detector.py  # Implicit signal detection
+│   ├── session_tuning_engine.py       # Per-session feedback tuning
+│   ├── tenant_parameter_tuner.py      # Tenant-level feedback aggregation
+│   └── knowledge_gap_analyzer.py      # Playbook/knowledge gap analysis
+├── context/
+│   ├── mall_context.py         # Mall data loader + entity lookup
+│   └── semantic_mall_model.py  # Semantic mall intelligence layer
 ├── retrieval/
-│   └── retriever.py            # Vector store / canonical lookup
+│   └── retriever.py            # Canonical/semantic/playbook lookup
 ├── prompts/
-│   └── builder.py              # LLM prompt templates
+│   └── builder.py              # LLM prompt assembly (identity + context + scene)
 ├── api/
 │   ├── chat.py                 # POST /api/chat
 │   ├── health.py               # GET /api/health
-│   └── feedback.py             # POST /api/feedback
+│   ├── feedback.py             # POST/GET /api/feedback
+│   └── session.py              # GET /api/session, POST /api/session/reset
 ├── config/
-│   ├── settings.py             # Pydantic Settings
+│   ├── settings.py             # Pydantic Settings (BACKEND_ prefix)
 │   └── constants.py            # App constants
 ├── observability/
 │   └── logger.py               # Structured logging
-└── main.py                     # FastAPI entrypoint
+├── feedback/
+│   └── service.py              # Feedback service wrapper
+└── utils/
+    └── ids.py                  # ID generation (session, message, feedback)
 ```
 
 ### State Typing Strategy
@@ -414,7 +455,7 @@ graph = build_concierge_graph()
 async def chat(request: ChatRequest):
     result = await graph.ainvoke({
         "session_id": request.session_id or generate_session_id(),
-        "mall_id": request.mall_id,
+        "mall_id": request.mall_id or "al_nakheel_plaza_28",
         "raw_user_message": request.message,
         # Pass previous scene for multi-turn
         "scene": load_scene_from_session_store(request.session_id),
@@ -460,13 +501,22 @@ Scene memory must persist across turns. Options:
 
 The `load_session` node reads from the store; `update_memory` writes back.
 
-### Next Implementation Steps
+### Implementation Status
 
-1. **Wire LLM** — Replace placeholder in `generate_response` with actual OpenAI/Anthropic call.
-2. **Wire retrieval** — Implement `fetch_exact_facts` with canonical data lookups.
-3. **Wire context builder** — Have `compose_context` pull real entities from `GlobalContextPack`.
-4. **Wire normalizer** — Plug `normalizer.py` into `load_session`.
-5. **Wire playbook loader** — Load `ScenarioPlaybook` objects in `resolve_playbooks`.
-6. **Add LLM-based classifier** — Replace heuristic intent detection in `interpret_turn`.
-7. **Add session store** — Implement Redis/memory-based scene persistence.
-8. **Add evaluator** — Build quality scoring from `evaluator_stub` data.
+| Step | Status |
+|------|--------|
+| LLM wired in `generate_response` (OpenAI GPT-4o) | Done |
+| `fetch_exact_facts` with canonical data lookups | Done |
+| `compose_context` pulls real entities from context packs | Done |
+| `normalizer.py` wired into `load_session` | Done |
+| `ScenarioPlaybook` objects loaded in `resolve_playbooks` | Done |
+| Hybrid intent classifier (rule-based + LLM fallback) in `interpret_turn` | Done |
+| In-memory session store (LRU, max 1 000) | Done |
+| Smalltalk fast-path node (`smalltalk.py`) | Done |
+| Clean context builder (no LLM history contamination) | Done |
+| Semantic mall model (`semantic_mall_model.py`) | Done |
+| Feedback system (explicit + implicit + tuning) | Done |
+| Redis-based session persistence | Future |
+| LangGraph checkpointer for durable state | Future |
+| Quality evaluator from `evaluator_stub` data | Future |
+| Streaming responses (SSE) | Future |

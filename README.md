@@ -42,15 +42,16 @@ cenomi-chatbot/
 │   ├── app/          Application source code
 │   │   ├── api/      FastAPI route handlers
 │   │   ├── config/   Settings and constants
-│   │   ├── context/  Mall context loader
+│   │   ├── context/  Mall context loader and semantic model
 │   │   ├── feedback/ Feedback service
 │   │   ├── graph/    LangGraph pipeline builder
 │   │   ├── models/   Pydantic data models
-│   │   ├── nodes/    LangGraph processing nodes
+│   │   ├── nodes/    LangGraph processing nodes (12 nodes)
 │   │   ├── observability/  Logging
 │   │   ├── prompts/  Prompt builder
 │   │   ├── retrieval/ Retrieval engine
-│   │   └── services/ Business logic services
+│   │   ├── services/ Business logic services
+│   │   └── utils/    ID generation utilities
 │   ├── data/         Mall intelligence data (JSON)
 │   ├── scripts/      Dev helper scripts
 │   └── tests/        Pytest test suite
@@ -140,7 +141,8 @@ backend/
 │   │   ├── constants.py        # Application constants
 │   │   └── settings.py         # Pydantic-settings configuration
 │   ├── context/
-│   │   └── mall_context.py     # Mall context loader and entity lookup
+│   │   ├── mall_context.py     # Mall context loader and entity lookup
+│   │   └── semantic_mall_model.py # Semantic mall intelligence layer (tag enrichment)
 │   ├── feedback/
 │   │   └── service.py          # Feedback service implementation
 │   ├── graph/
@@ -162,9 +164,10 @@ backend/
 │   │   ├── emit_debug_payload.py # Finalize debug trace
 │   │   ├── fetch_exact_facts.py  # Optional retrieval step
 │   │   ├── generate_response.py  # LLM response generation
-│   │   ├── interpret_turn.py   # Intent classification
+│   │   ├── interpret_turn.py   # Intent classification (with smalltalk detection)
 │   │   ├── load_session.py     # Load session and tenant config
 │   │   ├── resolve_playbooks.py # Match scenario playbooks
+│   │   ├── smalltalk.py        # Fast-path handler for greetings/casual messages
 │   │   ├── update_memory.py    # Update conversation state
 │   │   └── update_scene_memory.py # Update scene memory
 │   ├── observability/
@@ -173,38 +176,46 @@ backend/
 │   │   └── builder.py          # LLM prompt construction
 │   ├── retrieval/
 │   │   └── retriever.py        # Canonical/semantic/playbook retrieval
-│   └── services/
-│       ├── concierge.py        # Orchestrates chat turns via LangGraph
-│       ├── context_builder.py  # Builds mall context from data layers
-│       ├── enricher.py         # Semantic enrichment of entities
-│       ├── feedback_normalizer.py     # Normalizes feedback signals
-│       ├── feedback_service.py        # Feedback lifecycle management
-│       ├── implicit_feedback_detector.py # Detects implicit feedback
-│       ├── knowledge_gap_analyzer.py  # Playbook/knowledge gap analysis
-│       ├── normalizer.py       # Canonical data normalization
-│       ├── playbook_engine.py  # Playbook matching and ranking
-│       ├── session_store.py    # In-memory session storage
-│       ├── session_tuning_engine.py   # Feedback-based session tuning
-│       ├── tenant_params.py    # Tenant config loading/merging
-│       ├── tenant_parameter_tuner.py  # Tenant-level feedback aggregation
-│       └── tenant_runtime.py   # Tenant runtime management
+│   ├── services/
+│   │   ├── clean_context.py    # Contamination-free per-turn context assembly
+│   │   ├── concierge.py        # Orchestrates chat turns via LangGraph
+│   │   ├── context_builder.py  # Builds mall context from data layers
+│   │   ├── enricher.py         # Semantic enrichment of entities
+│   │   ├── feedback_normalizer.py     # Normalizes feedback signals
+│   │   ├── feedback_service.py        # Feedback lifecycle management
+│   │   ├── implicit_feedback_detector.py # Detects implicit feedback
+│   │   ├── knowledge_gap_analyzer.py  # Playbook/knowledge gap analysis
+│   │   ├── normalizer.py       # Canonical data normalization
+│   │   ├── playbook_engine.py  # Playbook matching and ranking
+│   │   ├── session_store.py    # In-memory session storage
+│   │   ├── session_tuning_engine.py   # Feedback-based session tuning
+│   │   ├── tenant_params.py    # Tenant config loading/merging
+│   │   ├── tenant_parameter_tuner.py  # Tenant-level feedback aggregation
+│   │   └── tenant_runtime.py   # Tenant runtime management
+│   └── utils/
+│       └── ids.py              # Session, message, and feedback ID generation
 ├── data/
 │   ├── canonical/
-│   │   └── cenomi_mall_01.json # Normalized store/restaurant/service records
+│   │   └── al_nakheel_plaza_28.json # Normalized store/restaurant/service records
 │   ├── context_packs/
-│   │   └── global_context.json # Global context pack
+│   │   └── al_nakheel_plaza_28_context.json # Pre-assembled context bundle
 │   ├── examples/
-│   │   └── example_turn_state.json # Example state for reference
+│   │   ├── example_turn_state.json   # Example state for reference
+│   │   ├── mall_profile.json         # Sample mall profile structure
+│   │   ├── playbooks_sample.json     # Sample playbook definitions
+│   │   ├── semantic_entries_sample.json # Sample semantic entries
+│   │   ├── tenant_params_sample.json # Sample tenant parameter schema
+│   │   └── tenants_sample.json       # Sample tenant records
 │   ├── feedback/
 │   │   ├── implicit/           # Implicit feedback signals (auto-generated)
 │   │   └── normalized/         # Normalized feedback data
 │   ├── playbooks/
-│   │   └── cenomi_mall_01.json # Scenario playbooks
+│   │   └── al_nakheel_plaza_28.json # Scenario playbooks
 │   ├── semantic/
-│   │   └── cenomi_mall_01.json # Semantic intelligence data
+│   │   └── al_nakheel_plaza_28.json # Semantic intelligence data
 │   └── tenant_config/
-│       ├── cenomi_mall_01.json # Mall-specific tenant config
-│       └── tenant_defaults.json # Default tenant parameters
+│       ├── al_nakheel_plaza_28.json # Mall-specific tenant config
+│       └── tenant_defaults.json     # Default tenant parameters
 ├── scripts/
 │   └── run_dev.sh              # Dev server startup script
 ├── tests/
@@ -237,8 +248,8 @@ cp .env.example .env
 | `BACKEND_DEBUG`                | `true`                   | No       | Enable debug mode                        |
 | `BACKEND_LOG_LEVEL`            | `debug`                  | No       | Logging level (debug/info/warning/error) |
 | `BACKEND_FRONTEND_ORIGIN`      | `http://localhost:5173`  | No       | Allowed CORS origin for the frontend     |
-| `BACKEND_MALL_ID`              | `cenomi_mall_01`         | No       | Active mall identifier                   |
-| `BACKEND_MALL_NAME`            | `Cenomi Mall`            | No       | Display name for the mall                |
+| `BACKEND_MALL_ID`              | `al_nakheel_plaza_28`    | No       | Active mall identifier                   |
+| `BACKEND_MALL_NAME`            | `Al Nakheel Plaza`       | No       | Display name for the mall                |
 | `BACKEND_VECTOR_STORE_TYPE`    | `chroma`                 | No       | Vector store backend type                |
 | `BACKEND_EMBEDDING_MODEL`      | `text-embedding-3-small` | No       | Embedding model name                     |
 | `BACKEND_ENABLE_TRACING`       | `false`                  | No       | Enable LangSmith tracing                 |
@@ -258,8 +269,8 @@ BACKEND_ENV=development
 BACKEND_LOG_LEVEL=debug
 BACKEND_DEBUG=true
 BACKEND_FRONTEND_ORIGIN=http://localhost:5173
-BACKEND_MALL_ID=cenomi_mall_01
-BACKEND_MALL_NAME=Cenomi Mall
+BACKEND_MALL_ID=al_nakheel_plaza_28
+BACKEND_MALL_NAME=Al Nakheel Plaza
 BACKEND_FEEDBACK_STORAGE=local
 ```
 
@@ -303,26 +314,31 @@ The backend starts at **http://localhost:8000**. On startup, the lifespan handle
 
 ### LangGraph Pipeline
 
-The chat engine is a **LangGraph StateGraph** compiled from 11 sequential nodes. Each node reads from and writes to a shared `TurnState`:
+The chat engine is a **LangGraph StateGraph** compiled from 12 nodes with conditional routing. Each node reads from and writes to a shared `ConciergeState`:
 
 ```
 load_session
     → interpret_turn
-        → update_scene_memory
-            → resolve_playbooks
-                → choose_strategy
-                    → compose_context
-                        → decide_retrieval
-                            → fetch_exact_facts
-                                → generate_response
-                                    → update_memory
-                                        → emit_debug_payload
+        ├─── (small talk) ──────────────────► smalltalk ──┐
+        │                                                   │
+        └─── (normal) ──► update_scene_memory              │
+                              → resolve_playbooks           │
+                                  → choose_strategy         │
+                                      → compose_context     │
+                                          → decide_retrieval│
+                                              ├─ (needed) → fetch_exact_facts
+                                              └─ (skip)  ──┤
+                                                           ▼
+                                                    generate_response ◄──┘
+                                                        → update_memory
+                                                            → emit_debug_payload
 ```
 
 | Node                  | Responsibility                                              |
 |-----------------------|-------------------------------------------------------------|
 | `load_session`        | Load session, tenant config, normalize the incoming message |
-| `interpret_turn`      | Classify intent (domain, sub-intent, message kind)          |
+| `interpret_turn`      | Classify intent (domain, sub-intent, message kind); detect small talk |
+| `smalltalk`           | Fast-path handler for greetings and casual messages (no LLM, steers back to mall) |
 | `update_scene_memory` | Update the scene memory with new context                    |
 | `resolve_playbooks`   | Match the turn against scenario playbooks                   |
 | `choose_strategy`     | Select the response strategy and confidence level           |
@@ -338,6 +354,7 @@ load_session
 | Service                       | Description                                               |
 |-------------------------------|-----------------------------------------------------------|
 | `concierge`                   | Orchestrates chat turns by invoking the LangGraph pipeline |
+| `clean_context`               | Assembles contamination-free per-turn context (no prior LLM history) |
 | `context_builder`             | Builds mall context from canonical, semantic, and playbook data |
 | `session_store`               | In-memory session storage (Redis-ready for production)     |
 | `feedback_service`            | Manages the full feedback lifecycle                        |
@@ -355,15 +372,15 @@ load_session
 
 Located in `backend/data/`, all data is stored as JSON:
 
-| Directory        | File(s)                  | Description                                    |
-|------------------|--------------------------|------------------------------------------------|
-| `canonical/`     | `cenomi_mall_01.json`    | Normalized tenant records (stores, restaurants) |
-| `semantic/`      | `cenomi_mall_01.json`    | Derived facts, spatial relationships           |
-| `playbooks/`     | `cenomi_mall_01.json`    | Pre-built scenario response strategies          |
-| `context_packs/` | `global_context.json`    | Global context pack                            |
-| `tenant_config/` | `tenant_defaults.json`, `cenomi_mall_01.json` | Tenant parameters and overrides |
-| `examples/`      | `example_turn_state.json`| Reference state object for development         |
-| `feedback/`      | `implicit/`, `normalized/` | Auto-generated feedback data                 |
+| Directory        | File(s)                                | Description                                    |
+|------------------|----------------------------------------|------------------------------------------------|
+| `canonical/`     | `al_nakheel_plaza_28.json`             | Normalized tenant records (stores, restaurants) |
+| `semantic/`      | `al_nakheel_plaza_28.json`             | Derived facts, semantic tags, audience fit     |
+| `playbooks/`     | `al_nakheel_plaza_28.json`             | Pre-built scenario response strategies          |
+| `context_packs/` | `al_nakheel_plaza_28_context.json`     | Pre-assembled context bundle for the mall      |
+| `tenant_config/` | `tenant_defaults.json`, `al_nakheel_plaza_28.json` | Tenant parameters and overrides |
+| `examples/`      | `example_turn_state.json`, `mall_profile.json`, `playbooks_sample.json`, `semantic_entries_sample.json`, `tenant_params_sample.json`, `tenants_sample.json` | Reference data for development |
+| `feedback/`      | `implicit/`, `normalized/`             | Auto-generated and normalized feedback data    |
 
 ### Backend Testing
 
@@ -424,6 +441,7 @@ frontend/
 │   │   ├── SuggestedChips.tsx    # Clickable suggestion chips
 │   │   ├── FeedbackControls.tsx  # Thumbs up/down with reasons and comments
 │   │   ├── DebugPanel.tsx        # Debug sidebar with turn inspector
+│   │   ├── TurnInspector.tsx     # Per-turn pipeline inspector (intent, strategy, context, retrieval)
 │   │   ├── RawDrawer.tsx         # Collapsible raw JSON viewer (trace, state, prompt)
 │   │   ├── StrategyCard.tsx      # Playbook, confidence, strategy display
 │   │   ├── RetrievalCard.tsx     # Retrieval status, reason, targets, results
@@ -505,6 +523,7 @@ The frontend starts at **http://localhost:5173** and automatically proxies `/api
 | `SuggestedChips`    | Row of clickable suggestion chips for quick prompts                  |
 | `FeedbackControls`  | Thumbs up/down buttons with optional negative feedback reasons and a comment field |
 | `DebugPanel`        | Collapsible sidebar showing the pipeline inspector per turn          |
+| `TurnInspector`     | Detailed per-turn view of intent, strategy, context blocks, and retrieval cards |
 | `RawDrawer`         | Expandable raw JSON viewer for trace, state, and prompt data with copy functionality |
 | `StrategyCard`      | Displays the selected playbook, confidence score, strategy, and response shape |
 | `RetrievalCard`     | Shows retrieval status, reasoning, targets, and result count         |
@@ -624,14 +643,17 @@ git remote set-url origin git@github.com:<your-username>/cenomi-chatbot.git
 
 ## Project Status
 
-**Iteration 1 — Scaffolding complete.** Core structure is in place. Components are being implemented incrementally.
+**Iteration 1 — Core pipeline implemented.** The full LangGraph concierge pipeline is operational against live mall data.
 
-- Single mall knowledge layer
-- Tenant parameter system
-- LangGraph state and node contracts
+- Single mall knowledge layer (Al Nakheel Plaza 28)
+- 12-node LangGraph pipeline with smalltalk fast-path and conditional retrieval routing
+- Semantic mall model with tag-based enrichment
+- Tenant parameter system with feedback-driven tuning
+- Clean context builder (contamination-free per-turn context)
+- Anti-hallucination architecture (grounded prompts + post-generation guard)
 - Single-mall concierge runtime
-- Chatbot testing UI
-- Feedback system
+- Chatbot testing UI with full debug inspector
+- Feedback system (explicit + implicit)
 
 ---
 
