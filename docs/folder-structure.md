@@ -4,13 +4,23 @@
 
 ```
 cenomi-chatbot/
-├── backend/                 Python concierge engine
-├── frontend/                React testing console
-├── docs/                    Architecture and planning docs
-├── .env.example             Root-level environment template
-├── .gitignore               Git ignore rules
-└── README.md                Project overview
+├── backend/                   Python concierge engine
+├── frontend/                  React testing console
+├── docs/                      Architecture and planning docs
+├── data/                      Raw API source files for the ETL script
+│   ├── sample.json            Output schema contract (target shape)
+│   ├── mall_and_movie.json    API: mall metadata + movie listings
+│   ├── services.json          API: mall services (pre-filtered for mall 28)
+│   ├── engagements.json       API: promotions and offers
+│   └── brands.json            API: brand/tenant records
+├── transform_mall_data.py     ETL script: ./data/ → output_mall_28.json
+├── output_mall_28.json        Transformed output (→ feeds backend/data/canonical/)
+├── .env.example               Root-level environment template
+├── .gitignore                 Git ignore rules
+└── README.md                  Project overview
 ```
+
+See [`docs/data-pipeline.md`](data-pipeline.md) for full documentation on the source files, the transform script, and the context-building pipeline.
 
 ## Backend
 
