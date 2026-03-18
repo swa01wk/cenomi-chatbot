@@ -59,6 +59,11 @@ _FACTUAL_SUB_INTENTS: frozenset[str] = frozenset({
     "prayer_room",
     "parking_info",
     "cross_mall_search",
+    "brand_availability",    # "do you have H&M?" / "is Nike here?" → exact presence check
+    "overview",              # "tell me about the mall" → factual mall data
+    "facilities_summary",    # "what facilities does this mall have?"
+    "family_friendliness",   # "is this mall family friendly?"
+    "what_is_available",     # "what does this mall have?"
 })
 
 # Keywords that signal a direct factual lookup regardless of domain
@@ -131,6 +136,11 @@ def _detect_flow_type_candidate(
             "prayer_room": ("service_lookup", "facility"),
             "parking_info": ("service_lookup", "parking"),
             "cross_mall_search": ("cross_mall_availability", "brand"),
+            "brand_availability": ("brand_availability", "store"),
+            "overview": ("mall_fact", "mall"),
+            "facilities_summary": ("mall_fact", "mall"),
+            "family_friendliness": ("mall_fact", "mall"),
+            "what_is_available": ("mall_fact", "mall"),
         }
         scope_info = _SUB_INTENT_SCOPE.get(sub_intent, ("", ""))
         return "factual", scope_info[0], scope_info[1]
@@ -172,6 +182,7 @@ _PRIMARY_INTENT_MAP: dict[str, str] = {
     "shopping/jewelry_shopping": "shopping_recommendation",
     "shopping/accessories_shopping": "shopping_recommendation",
     "shopping/offer_details": "offer_lookup",
+    "shopping/brand_availability": "brand_availability",
     "dining/general_dining": "dining_recommendation",
     "dining/family_dining": "dining_recommendation",
     "dining/romantic_dining": "dining_recommendation",
@@ -203,7 +214,10 @@ _SECONDARY_INTENT_SIGNALS: list[tuple[tuple[str, ...], str]] = [
     (("before the movie", "before movie"), "before_movie_constraint"),
     (("after the movie", "after movie"), "after_movie_constraint"),
     (("and coffee", "coffee after", "coffee before"), "add_coffee_step"),
-    (("and dinner", "dinner after", "dinner before"), "add_dining_step"),
+    (("and dinner", "dinner after", "dinner before",
+      "and food", "and eat", "and then eat", "grab food",
+      "grab a bite", "grab dinner", "and lunch",
+      "food and", "movies and food", "movies and eat"), "add_dining_step"),
     (("near cinema", "near the cinema", "closer to cinema",
       "close to cinema", "next to cinema"), "proximity_filter"),
     (("not expensive", "not too expensive", "affordable",
@@ -312,6 +326,7 @@ VALID_SUB_INTENTS = {
     "cafe_recommendation", "dessert_recommendation",
     "general_shopping", "gift_recommendation", "fashion_shopping",
     "perfume_shopping", "jewelry_shopping", "accessories_shopping",
+    "brand_availability",
     "general_entertainment", "movie_showtime",
     "store_hours", "parking_info", "location_query", "service_info",
     "prayer_room", "event_schedule", "offer_details", "loyalty_info",
@@ -342,7 +357,7 @@ DOMAINS AND SUB-INTENTS:
 - mall_info: overview ("tell me about the mall", "what is this place"), facilities_summary ("what facilities"), opening_hours ("mall opening hours"), family_friendliness ("is this mall family friendly", "can I come with kids"), what_is_available ("what shops are in the mall")
 - exploration: open_exploration (vague "what can I do", "what's here"), activity_suggestion ("suggest something fun"), first_visit_guide ("first time here")
 - dining: general_dining, romantic_dining, quick_bite, family_dining, cafe_recommendation, dessert_recommendation
-- shopping: general_shopping, gift_recommendation, fashion_shopping, perfume_shopping, jewelry_shopping, accessories_shopping, offer_details
+- shopping: general_shopping, gift_recommendation, fashion_shopping, perfume_shopping, jewelry_shopping, accessories_shopping, offer_details, brand_availability ("do you have H&M?", "is Nike here?", "do you carry Zara?")
 - entertainment: general_entertainment, movie_showtime
 - services: store_hours, parking_info, service_info, prayer_room, event_schedule, loyalty_info
 - navigation: location_query
@@ -467,7 +482,9 @@ async def interpret_turn(state: ConciergeState) -> dict:
     }
 
     # ── Pre-flight: detect unsupported / random inputs ────────────────
-    if is_likely_unsupported(raw_msg) and history_len <= 1:
+    # Context-setting messages always win — never flag as unsupported
+    is_context_setting_msg = _is_context_setting(raw_msg, history_len)
+    if not is_context_setting_msg and is_likely_unsupported(raw_msg) and history_len <= 1:
         # Don't lock into a false domain — return low-confidence general inquiry
         intent = InterpretedIntent(
             domain="general",
@@ -940,6 +957,54 @@ _CONTEXT_SETTING_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"best\s+man|parent)\b",
         re.I,
     ),
+    # ── NEW: Group / family / occasion openers ─────────────────────────
+    # "we're a big family", "we are a family", "we're a family of 8"
+    re.compile(r"^we\s*('re|are)\s+(a\s+)?(big\s+|large\s+)?family\b", re.I),
+    # "we're a bridal party", "we're a wedding party", "we're a corporate team"
+    # NOTE: "group of N" intentionally excluded — too broad; captures casual groups
+    # like "5 teens hanging out" which should stay as exploration queries.
+    re.compile(
+        r"^we\s*('re|are)\s+a\s+(bridal\s+party|wedding\s+party|corporate\s+team)\b",
+        re.I,
+    ),
+    # ── NEW: Planning openers ──────────────────────────────────────────
+    # "i'm planning a team outing", "i'm planning my daughter's birthday"
+    re.compile(
+        r"^i\s*('m|am)\s+planning\s+(a\s+|my\s+)?"
+        r"(wedding|birthday|anniversary|team\s+outing|corporate|bridal|"
+        r"daughter'?s?|son'?s?)",
+        re.I,
+    ),
+    # ── NEW: Luxury / VIP profile ─────────────────────────────────────
+    # "money is not a concern", "budget isn't a concern"
+    re.compile(r"money\s+(is|isn'?t|is\s+not)\s+(a\s+)?concern", re.I),
+    # "looking for a premium experience", "i'm looking for a luxury day"
+    re.compile(
+        r"(looking|searching)\s+for\s+a\s+(premium|luxury|vip|high.end)\s+(experience|day|visit)",
+        re.I,
+    ),
+    # ── NEW: Wellness / fitness profile ───────────────────────────────
+    # "i'm really into fitness", "i'm into healthy eating"
+    re.compile(
+        r"^i\s*('m|am)\s+(really\s+)?into\s+(fitness|healthy\s+eating|health\s+and\s+wellness|working\s+out)",
+        re.I,
+    ),
+    # ── NEW: Back-to-school context ────────────────────────────────────
+    # "school is starting next week", "school starts this week"
+    re.compile(r"school\s+(is\s+)?(starting|starts)\s+(next\s+|this\s+)?week", re.I),
+    # "i need to shop for three kids" / "shopping for three kids"
+    re.compile(
+        r"(i\s+need\s+to\s+)?shop(ping)?\s+for\s+(three|two|four|five|all\s+(three|four|five))\s+kids?",
+        re.I,
+    ),
+    # ── NEW: Tourist with apostrophe ──────────────────────────────────
+    # "i'm a tourist visiting", "i'm visiting Saudi Arabia for the first time"
+    re.compile(r"^i\s*('m|am)\s+a\s+tourist\b", re.I),
+    re.compile(r"^i\s*('m|am)\s+visiting\s+\w+\s+for\s+the\s+first\s+time", re.I),
+    # ── NEW: Anniversary / celebration openers ────────────────────────
+    # "it's our wedding anniversary tonight", "our anniversary is today"
+    re.compile(r"\b(wedding|golden|silver|diamond)\s+anniversary\b", re.I),
+    re.compile(r"\bit'?s\s+our\s+anniversary\b", re.I),
 )
 
 _CONTEXT_SETTING_SUBSTRINGS: tuple[str, ...] = (
@@ -986,6 +1051,69 @@ _CONTEXT_SETTING_SUBSTRINGS: tuple[str, ...] = (
     "looking for something for my",
     "it's my first time",
     "this is my first visit",
+    # ── Apostrophe variants ───────────────────────────────────────────────
+    "i'm a tourist",
+    "i'm a first time visitor",
+    "i'm the groom",
+    "i'm the bride",
+    "i'm a bridesmaid",
+    # ── Group / family / occasion openers ─────────────────────────────────
+    "we're a bridal party",
+    "we are a bridal party",
+    "we're a big family",
+    "we're a family of",
+    "we are a big family",
+    "we are a family of",
+    "we're a team",
+    "we are a team",
+    # Group visit openers (re-added to support best_effort_shortlist routing via
+    # embedded-exploration check in resolve_response_mode)
+    "we're a group of",
+    "we are a group of",
+    # ── Planning openers ──────────────────────────────────────────────────
+    "i'm planning a team outing",
+    "i am planning a team outing",
+    "planning a team outing",
+    "i'm planning my daughter's",
+    "i'm planning my son's",
+    "i'm planning a birthday",
+    "i am planning a birthday",
+    "planning my daughter's",
+    "planning my son's",
+    "planning a birthday",
+    # ── Luxury / VIP profile ──────────────────────────────────────────────
+    "money is not a concern",
+    "budget is not a concern",
+    "money isn't a concern",
+    "looking for a premium experience",
+    "i'm looking for a premium",
+    "i am looking for a premium",
+    # ── Wellness / fitness profile ────────────────────────────────────────
+    "i'm really into fitness",
+    "i am really into fitness",
+    "i'm into fitness",
+    "i am into fitness",
+    "i'm into healthy",
+    "i am into healthy",
+    # ── Back-to-school context ────────────────────────────────────────────
+    "school is starting",
+    "school starts next week",
+    "school starts",
+    "back to school shopping",
+    "shopping for school",
+    "shop for three kids",
+    "shop for my kids",
+    # ── Group outing context ──────────────────────────────────────────────
+    "team outing for",
+    "planning an outing for",
+    "planning a corporate",
+    # ── Anniversary / celebration openers ─────────────────────────────────
+    "our wedding anniversary",
+    "it's our anniversary",
+    "wedding anniversary tonight",
+    "it's our wedding anniversary",
+    "wedding anniversary",
+    "our anniversary",
 )
 
 

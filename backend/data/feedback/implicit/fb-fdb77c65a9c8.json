@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-fdb77c65a9c8",
+  "session_id": "cx-s3-d9bcaf65",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-3733c9029ed4",
+  "user_message": "is Arabic coffee sold anywhere here? i want to take some home",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-18 15:14:06.743613"
+}

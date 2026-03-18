@@ -23,7 +23,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from app.models.state import ConciergeState, DebugEnrichment, SceneMemory
+from app.models.state import ConciergeState, DebugEnrichment, SceneMemory, ShoppingTask
 from app.nodes._tracing import traced_node
 
 # ── Age pattern ──────────────────────────────────────────────────────────
@@ -278,6 +278,200 @@ _STYLE_INTENT_SIGNALS: list[tuple[tuple[str, ...], list[str]]] = [
 ]
 
 
+# ── Shopping task signals ─────────────────────────────────────────────────
+# Maps keyword lists → (product_type, base_category)
+_PRODUCT_TYPE_SIGNALS: list[tuple[tuple[str, ...], str, str]] = [
+    (("jacket", "jackets"), "jacket", "outerwear"),
+    (("coat", "coats", "overcoat"), "coat", "outerwear"),
+    (("shoes", "shoe", "sneakers", "sneaker", "boots", "boot", "footwear", "sandals"), "shoes", "footwear"),
+    (("dress", "dresses", "gown", "gowns"), "dress", "womenswear"),
+    (("shirt", "shirts", "blouse", "blouses", "top", "tops"), "shirt", "topwear"),
+    (("pants", "trousers", "jeans", "chinos"), "pants", "bottomwear"),
+    (("bag", "bags", "handbag", "handbags", "purse", "tote"), "bag", "accessories"),
+    (("perfume", "fragrance", "cologne", "oud", "bakhoor"), "perfume", "fragrance"),
+    (("watch", "watches"), "watch", "accessories"),
+    (("jewelry", "jewellery", "necklace", "ring", "bracelet", "earrings"), "jewelry", "jewelry"),
+    (("toy", "toys", "game", "games"), "toy", "toys"),
+    (("makeup", "cosmetics", "skincare", "lipstick", "foundation"), "beauty", "beauty"),
+    (("sportswear", "sports wear", "athletic", "workout gear"), "sportswear", "sportswear"),
+    (("abaya", "abayas"), "abaya", "modest_fashion"),
+    (("hijab", "hijabs", "scarf", "scarves"), "headwear", "modest_fashion"),
+]
+
+# Signals that advance the shopping stage
+_SHOPPING_STAGE_SIGNALS: list[tuple[tuple[str, ...], str]] = [
+    (("price", "how much", "cost", "costs", "how much does", "what does it cost"), "price_guidance"),
+    (("affordable", "cheap", "cheaper", "budget", "less expensive", "not too expensive", "not expensive"), "budget_refinement"),
+    (("for my", "for him", "for her", "for the", "for a", "as a gift", "year old", "years old"), "refinement"),
+    (("buy", "get", "purchase", "looking for", "want to get", "find", "need"), "discovery"),
+]
+
+# Stage progression order (can only advance, never retreat)
+_STAGE_ORDER: list[str] = ["discovery", "refinement", "price_guidance", "budget_refinement"]
+
+# Gender indicators for children (used in shopping task)
+_BOY_SIGNALS: tuple[str, ...] = ("son", "boy", "his", " he ")
+_GIRL_SIGNALS: tuple[str, ...] = ("daughter", "girl", "her", " she ")
+
+# Message kinds that should preserve existing topic/scenario continuity
+_CONTINUITY_PRESERVING_KINDS: frozenset[str] = frozenset({
+    "followup", "refinement", "constraint_refinement", "context_setting",
+})
+
+
+def _should_preserve_topic_continuity(intent, msg: str) -> bool:
+    """
+    Return True when the current turn should preserve existing topic / scenario.
+
+    Continuity is preserved for:
+    - Any follow-up / refinement / constraint_refinement message kind
+    - Context-setting messages (they add scene context, never reset topic)
+    - Short messages (≤ 4 words) that are not fresh requests
+    """
+    if intent.message_kind == "topic_switch":
+        return False
+    if intent.message_kind in _CONTINUITY_PRESERVING_KINDS:
+        return True
+    words = msg.strip().split()
+    if len(words) <= 4 and intent.message_kind not in ("fresh_request",):
+        return True
+    return False
+
+
+def _extract_shopping_task(
+    msg: str,
+    scene: SceneMemory,
+    intent,
+    changes: list[str],
+    scene_notes: list[str],
+) -> list[str]:
+    """
+    Extract and update the structured shopping_task object from the current message.
+
+    Activates when the scene has a shopping goal or an existing shopping_task,
+    or the message contains an explicit product word.  Safe to call on any
+    message kind — purely additive.
+
+    Returns list of field names that were updated.
+    """
+    task = scene.shopping_task
+    updates: list[str] = []
+
+    # Determine whether shopping task context is relevant
+    is_shopping_context = (
+        scene.goal in ("shopping", "gift_shopping")
+        or scene.active_topic in ("shopping",)
+        or bool(task.product_type)          # already active from a prior turn
+        or any(                              # explicit product word in message
+            any(kw in msg for kw in kws)
+            for kws, _, _ in _PRODUCT_TYPE_SIGNALS
+        )
+    )
+    if not is_shopping_context:
+        return updates
+
+    # ── 1. Detect product type (only if not already set) ─────────────
+    if not task.product_type:
+        for keywords, prod_type, category in _PRODUCT_TYPE_SIGNALS:
+            if any(kw in msg for kw in keywords):
+                task.product_type = prod_type
+                task.product_category = category
+                if not task.shopping_stage:
+                    task.shopping_stage = "discovery"
+                updates.extend([f"product_type={prod_type}", f"product_category={category}"])
+                changes.append(f"shopping_task.product_type={prod_type}")
+                scene_notes.append(
+                    f"ShoppingTask: product_type='{prod_type}' category='{category}'"
+                )
+                break
+
+    # ── 2. Detect age and derive target_person / gender / category upgrade ──
+    age_match = _AGE_PATTERN.search(msg)
+    if age_match:
+        age = int(age_match.group(1))
+        task.target_age = age
+        updates.append(f"target_age={age}")
+        changes.append(f"shopping_task.target_age={age}")
+
+        # Infer gender
+        if any(s in msg for s in _BOY_SIGNALS):
+            task.target_gender = "boy"
+            if not task.target_person:
+                task.target_person = "son"
+            updates.extend(["target_gender=boy"])
+            changes.append("shopping_task.target_gender=boy")
+        elif any(s in msg for s in _GIRL_SIGNALS):
+            task.target_gender = "girl"
+            if not task.target_person:
+                task.target_person = "daughter"
+            updates.extend(["target_gender=girl"])
+            changes.append("shopping_task.target_gender=girl")
+
+        # Upgrade product category to kids variant when age < 14
+        if age < 14 and task.product_category and not task.product_category.startswith("kids_"):
+            task.product_category = f"kids_{task.product_category}"
+            updates.append(f"product_category={task.product_category}")
+            changes.append(f"shopping_task.product_category={task.product_category}")
+            scene_notes.append(
+                f"ShoppingTask: upgraded category to '{task.product_category}' "
+                f"(child age {age})"
+            )
+
+        scene_notes.append(
+            f"ShoppingTask: target_age={age} target_person={task.target_person}"
+        )
+
+    # ── 3. Target person — explicit signals without age ───────────────
+    if not task.target_person:
+        if "son" in msg:
+            task.target_person = "son"
+            task.target_gender = task.target_gender or "boy"
+            updates.append("target_person=son")
+            changes.append("shopping_task.target_person=son")
+        elif "daughter" in msg:
+            task.target_person = "daughter"
+            task.target_gender = task.target_gender or "girl"
+            updates.append("target_person=daughter")
+            changes.append("shopping_task.target_person=daughter")
+        else:
+            for signal, person in _TARGET_PERSON_SIGNALS.items():
+                if signal in msg and person not in ("child",):
+                    task.target_person = person
+                    updates.append(f"target_person={person}")
+                    changes.append(f"shopping_task.target_person={person}")
+                    break
+
+    # ── 4. Budget preference ──────────────────────────────────────────
+    budget_signals: list[tuple[tuple[str, ...], str]] = [
+        (("affordable", "cheap", "budget", "value", "not expensive", "not too expensive",
+          "not pricey", "less expensive", "inexpensive", "low price"), "affordable"),
+        (("mid range", "moderate", "reasonable", "middle price"), "mid_range"),
+        (("premium", "luxury", "high end", "designer", "expensive"), "premium"),
+    ]
+    for signals, budget_val in budget_signals:
+        if any(s in msg for s in signals):
+            if task.budget_preference != budget_val:
+                task.budget_preference = budget_val
+                updates.append(f"budget_preference={budget_val}")
+                changes.append(f"shopping_task.budget_preference={budget_val}")
+            break
+
+    # ── 5. Shopping stage (advance only, never retreat) ───────────────
+    for stage_triggers, stage in _SHOPPING_STAGE_SIGNALS:
+        if any(t in msg for t in stage_triggers):
+            cur_idx = _STAGE_ORDER.index(task.shopping_stage) if task.shopping_stage in _STAGE_ORDER else -1
+            new_idx = _STAGE_ORDER.index(stage) if stage in _STAGE_ORDER else -1
+            if new_idx > cur_idx:
+                task.shopping_stage = stage
+                updates.append(f"shopping_stage={stage}")
+                changes.append(f"shopping_task.shopping_stage={stage}")
+            break
+
+    # Update the scene's shopping_task in place
+    scene.shopping_task = task
+    return updates
+
+
 def _extract_user_role(
     msg: str,
     scene: SceneMemory,
@@ -439,11 +633,15 @@ async def update_scene_memory(state: ConciergeState) -> dict:
         _infer_audience(msg, scene, changes, scene_notes)
         _infer_target_person(msg, scene, changes)
         _extract_visit_constraints(msg, scene, changes, scene_notes)
+        # Shopping task is also updated on factual turns (e.g. product refinements)
+        _extract_shopping_task(msg, scene, intent, changes, scene_notes)
 
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
                 inferred_scene_notes=["factual_flow:light_scene_update"] + scene_notes,
+                scene_update_reason="factual_light",
+                continuity_preserved=True,
             ),
             "_trace_summary": (
                 f"SceneMemory[factual]: light + companion update — "
@@ -451,16 +649,33 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             ),
         }
 
-    # ── Constraint refinement: preserve scene, only add constraints ──────
+    # ── Constraint refinement: preserve scene, add constraints + refine task ─
     if intent.message_kind == "constraint_refinement":
+        # Always extract visit constraints
         _extract_visit_constraints(msg, scene, changes, scene_notes)
-        # Record what refinement was applied
+
+        # Also run extractions that constraint_refinement turns commonly carry:
+        # age ("for my 5 year old son"), companion, target_person, budget.
+        # These must NOT be skipped just because message_kind == constraint_refinement.
+        _extract_child_age(msg, scene, changes, scene_notes)
+        _extract_hybrid_companions(msg, scene, changes, scene_notes)
+        _infer_target_person(msg, scene, changes)
+        _infer_audience(msg, scene, changes, scene_notes)
+        _infer_budget(msg, scene, changes)
+
+        # Shopping task refinement — the primary fix for "for my 5 year old son"
+        shopping_updates = _extract_shopping_task(msg, scene, intent, changes, scene_notes)
+
         new_constraints = [c for c in scene.visit_constraints if c not in state.scene.visit_constraints]
-        refinement_note = f"Constraint refinement applied: {new_constraints}" if new_constraints else "Constraint refinement (no new constraints detected)"
+        refinement_note = (
+            f"Constraint refinement applied: constraints={new_constraints} "
+            f"shopping_task_updates={shopping_updates}"
+            if new_constraints or shopping_updates
+            else "Constraint refinement: no changes"
+        )
         scene_notes.append(refinement_note)
         scene.inferred_scene_notes = (scene.inferred_scene_notes or []) + scene_notes
 
-        # Update current_need but keep everything else
         if scene.current_need:
             scene.previous_need = scene.current_need
         scene.current_need = state.normalized_user_message
@@ -470,12 +685,23 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             "debug_enrichment": DebugEnrichment(
                 inferred_scene_notes=scene_notes,
                 last_refinement_applied=refinement_note,
+                shopping_task_updates=shopping_updates,
+                continuity_preserved=True,
+                scene_update_reason="constraint_refinement",
+                scenario_persisted=bool(scene.scenario),
+                topic_switch_detected=False,
             ),
-            "_trace_summary": f"Constraint refinement: {', '.join(changes) if changes else 'no changes'}",
+            "_trace_summary": (
+                f"Constraint refinement: {', '.join(changes) if changes else 'no changes'}"
+            ),
         }
 
     # ── Topic management ──────────────────────────────────────────────
+    topic_switch_detected = False
+    continuity_preserved = False
+
     if intent.message_kind == "topic_switch":
+        topic_switch_detected = True
         scene.previous_topic = scene.active_topic
         scene.active_topic = intent.domain
         scene.active_shortlist = []
@@ -485,7 +711,12 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     elif intent.message_kind == "correction":
         changes.append("correction: strongly overriding scene")
     else:
-        if intent.domain and intent.domain != scene.active_topic:
+        preserve = _should_preserve_topic_continuity(intent, msg)
+        if preserve and scene.active_topic:
+            # Keep current topic — this is a refinement / follow-up / context-setting turn
+            continuity_preserved = True
+            changes.append(f"topic preserved: {scene.active_topic} (continuity turn)")
+        elif intent.domain and intent.domain != scene.active_topic:
             scene.previous_topic = scene.active_topic
             scene.active_topic = intent.domain
             changes.append(f"topic → {intent.domain}")
@@ -515,11 +746,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             changes.append(f"+companion:{companion}")
 
     # ── Budget detection ──────────────────────────────────────────────
-    for signal, budget in _BUDGET_SIGNALS.items():
-        if signal in msg:
-            scene.budget = budget
-            changes.append(f"budget={budget}")
-            break
+    _infer_budget(msg, scene, changes)
 
     # ── Occasion detection ────────────────────────────────────────────
     for signal, occasion in _OCCASION_SIGNALS.items():
@@ -552,6 +779,9 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     # ── Visit constraint extraction ───────────────────────────────────
     _extract_visit_constraints(msg, scene, changes, scene_notes)
 
+    # ── Shopping task extraction (runs in concierge flow for all kinds) ──
+    shopping_updates = _extract_shopping_task(msg, scene, intent, changes, scene_notes)
+
     # ── Sequential query detection ────────────────────────────────────
     _handle_sequential_query(msg, scene, intent, changes)
 
@@ -568,8 +798,15 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     # ── Persist inferred notes ────────────────────────────────────────
     scene.inferred_scene_notes = (scene.inferred_scene_notes or []) + scene_notes
 
+    scenario_persisted = bool(scene.scenario and not topic_switch_detected)
+
     debug = DebugEnrichment(
         inferred_scene_notes=scene_notes,
+        scene_update_reason=intent.message_kind,
+        continuity_preserved=continuity_preserved,
+        shopping_task_updates=shopping_updates,
+        scenario_persisted=scenario_persisted,
+        topic_switch_detected=topic_switch_detected,
     )
 
     return {
@@ -783,6 +1020,19 @@ def _infer_pace(msg: str, scene: SceneMemory, changes: list[str]) -> None:
         # Default for family/couple visits
         scene.pace = "moderate"
         changes.append("pace=moderate (default)")
+
+
+# ── Budget inference ────────────────────────────────────────────────────────
+
+
+def _infer_budget(msg: str, scene: SceneMemory, changes: list[str]) -> None:
+    """Extract budget preference from message into scene.budget."""
+    for signal, budget in _BUDGET_SIGNALS.items():
+        if signal in msg:
+            if scene.budget != budget:
+                scene.budget = budget
+                changes.append(f"budget={budget}")
+            break
 
 
 # ── Goal inference ──────────────────────────────────────────────────────────

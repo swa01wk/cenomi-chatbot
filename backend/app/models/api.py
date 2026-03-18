@@ -64,6 +64,13 @@ class DebugPayload(BaseModel):
     total_latency_ms: float = 0.0
     node_count: int = 0
 
+    # Response Mode Resolver fields
+    response_mode: str = ""
+    confidence_level: str = ""
+    response_mode_reason: str = ""
+    fallback_applied: bool = False
+    flow_type: str = ""
+
     warnings: list[str] = Field(default_factory=list)
     node_trace: list[dict[str, Any]] = Field(default_factory=list)
 

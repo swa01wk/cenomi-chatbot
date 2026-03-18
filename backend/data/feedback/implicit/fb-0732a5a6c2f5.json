@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-0732a5a6c2f5",
+  "session_id": "cx-s8-4c06ccff",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-dbed866e2bec",
+  "user_message": "where can i find good activewear \u2014 not just one brand, I want a few choices",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-18 12:48:33.019452"
+}

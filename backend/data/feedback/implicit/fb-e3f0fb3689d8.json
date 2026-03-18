@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-e3f0fb3689d8",
+  "session_id": "cx-s8-7f82decc",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-0e151ca5e6fb",
+  "user_message": "what's the best approach if i want to do a 'clean' meal before a workout session?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-18 14:30:29.148023"
+}

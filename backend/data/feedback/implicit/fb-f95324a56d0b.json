@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-f95324a56d0b",
+  "session_id": "cx-s5-91f23f6b",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-10dbca2841e7",
+  "user_message": "what activities work for kids ranging from 2 to 10?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 13:51:08.417641"
+}

@@ -36,6 +36,7 @@ from typing import Any
 
 from app.models.state import ConciergeState, ContextComposition, ResponsePlan
 from app.nodes._tracing import traced_node
+from app.services.response_mode_resolver import resolve_response_mode
 
 logger = logging.getLogger(__name__)
 
@@ -282,9 +283,30 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
         or "romantic_filter" in secondary_intents
     )
 
+    # ── Response Mode Resolver (factual path) ─────────────────────────
+    # The factual path skips choose_strategy, so resolve_response_mode must
+    # be called here to ensure debug_enrichment and response_plan carry the
+    # correct response_mode and confidence_level labels.
+    # IMPORTANT: planning / hybrid checks inside resolve_response_mode run
+    # BEFORE the factual-flow guard, so planning queries (e.g. "can we fit in
+    # movies, food, and one activity in 3 hours?") correctly return hybrid_plan
+    # even when the factual path was taken.
+    rm, confidence_level, rm_reason, rm_fallback = resolve_response_mode(state)
+
+    # Propagate into response_plan so generate_response and emit_debug_payload
+    # both see the correct values.
+    # NOTE: We do NOT update debug_enrichment here because generate_response
+    # also returns debug_enrichment, and returning it from two sequential nodes
+    # triggers INVALID_CONCURRENT_GRAPH_UPDATE in LangGraph 1.x.
+    # emit_debug_payload already falls back to state.response_plan.response_mode
+    # when debug_enrichment.response_mode is empty.
+    updated_plan.response_mode = rm
+    updated_plan.confidence_level = confidence_level
+
     logger.info(
-        "compose_fact_response_context: scope=%s strategy=%s entities=%d succeeded=%s",
-        scope, strategy, len(extracted_entities), retrieval_succeeded,
+        "compose_fact_response_context: scope=%s strategy=%s entities=%d "
+        "succeeded=%s response_mode=%s confidence=%s",
+        scope, strategy, len(extracted_entities), retrieval_succeeded, rm, confidence_level,
     )
 
     return {
@@ -294,7 +316,8 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
         "_trace_summary": (
             f"FactContext: scope={scope} | strategy={strategy} | "
             f"entities={len(extracted_entities)} | "
-            f"retrieval={'ok' if retrieval_succeeded else 'empty'}"
+            f"retrieval={'ok' if retrieval_succeeded else 'empty'} | "
+            f"mode={rm} [{confidence_level}]"
         ),
     }
 

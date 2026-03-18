@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-7075df1392d0",
+  "session_id": "cx-s1-072aef19",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-203c384d3596",
+  "user_message": "what's a good movie for couples?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 12:43:46.353919"
+}

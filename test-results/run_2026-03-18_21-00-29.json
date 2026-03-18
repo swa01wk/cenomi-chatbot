@@ -1,0 +1,383 @@
+{
+  "run_timestamp": "2026-03-18 21:00:29 UTC",
+  "run_id": "7cffc6e9",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 61,
+    "passed": 0,
+    "failed": 0,
+    "errors": 61,
+    "pass_pct": 0,
+    "avg_latency_ms": 0
+  },
+  "smoke_tests": [
+    {
+      "id": "S-01",
+      "query": "what movies are showing?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-02",
+      "query": "i am here with my kids",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-03",
+      "query": "where can we eat?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-04",
+      "query": "food and movies",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-05",
+      "query": "anything interesting here?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-06",
+      "query": "where is the prayer room?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-07",
+      "query": "i am a bridesmaid",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-08",
+      "query": "something nice for my son",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-09",
+      "query": "asdf",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "S-10a",
+      "query": "with kid",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    }
+  ],
+  "scenario_tests": [
+    {
+      "id": "1.1",
+      "query": "what movies are showing?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "1.2",
+      "query": "show me movies",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "1.4",
+      "query": "now showing",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "1.5",
+      "query": "what's playing at the cinema?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "1.6",
+      "query": "any kids movies today?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.1",
+      "query": "i am here with my family",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.2",
+      "query": "i am here with my kids",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.3",
+      "query": "where can we eat?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.4",
+      "query": "any activities for the kids?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.5",
+      "query": "what movies are there?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "2.7",
+      "query": "something quick for lunch",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "3.1",
+      "query": "i want to buy a gift",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "3.2",
+      "query": "i want to buy jackets",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "3.3",
+      "query": "for my 5 year old son",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "3.5",
+      "query": "something affordable",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "3.6",
+      "query": "gift for my girlfriend",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "4.1",
+      "query": "i am here with my girlfriend",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "4.2",
+      "query": "suggest a nice dinner",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "4.3",
+      "query": "we want to catch a movie and then eat",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "4.6",
+      "query": "any romantic options here?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "5.1",
+      "query": "something quick to eat",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "5.2",
+      "query": "we are in a hurry",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "5.4",
+      "query": "something quick before the movie",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "6.1",
+      "query": "food and movies",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "6.3",
+      "query": "where can we eat after the movie?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "6.5",
+      "query": "we want to watch a movie and grab dinner",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "7.1",
+      "query": "anything interesting here?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "7.3",
+      "query": "i'm bored",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "7.4",
+      "query": "it's my first time here",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "7.7",
+      "query": "surprise me",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "8.1",
+      "query": "asdf",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "8.3",
+      "query": "what's the weather like?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "8.4",
+      "query": "tell me a joke",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "8.6",
+      "query": "a",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "9.1",
+      "query": "where is Zara?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "9.2",
+      "query": "where is the prayer room?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "9.4",
+      "query": "what are the mall opening hours?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "9.7",
+      "query": "is Starbucks here?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "10.1",
+      "query": "suggest some restaurants",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "10.2",
+      "query": "something cheaper",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "10.6",
+      "query": "suggest some stores for fashion",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "10.7",
+      "query": "something more affordable",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "11.1",
+      "query": "i am a bridesmaid",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "11.2",
+      "query": "i am a bridesmaid shopping for the wedding",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "11.3",
+      "query": "i need something elegant",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "11.6",
+      "query": "i am here for a wedding — i am the groom",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "12.1",
+      "query": "do you have H&M?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "12.2",
+      "query": "is Nike here?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "13.1",
+      "query": "tell me about the mall",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "13.2",
+      "query": "what does this mall have?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    },
+    {
+      "id": "13.3",
+      "query": "is this mall family friendly?",
+      "status": "ERROR",
+      "error": "[Errno 61] Connection refused"
+    }
+  ]
+}

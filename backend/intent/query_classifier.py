@@ -367,6 +367,15 @@ _KEYWORD_RULES: list[_KeywordRule] = [
         r"|what facilities)\b", re.I),
      IntentClass.MALL_INFO, ["facilities_summary"], 0.92),
 
+    # ── Brand / store presence check — "do you have X?", "is Nike here?" ──────
+    # Must appear before general SHOPPING rules to get the right sub_tag.
+    (re.compile(
+        r"\b(do\s+you\s+(have|carry|stock|sell)\s+\w"
+        r"|is\s+\w.{1,30}\s+(here|available|in\s+this\s+mall)"
+        r"|is\s+there\s+a?\s*\w.{1,30}\s+here"
+        r"|do\s+you\s+have\s+\w)\b", re.I),
+     IntentClass.TENANT_LOOKUP, ["brand_availability"], 0.90),
+
     # ── Tenant / store-specific look-ups ──────────────────────────────
     (re.compile(r"\b(store hours?|opening hours?|when (?:does|do) .+ open)\b", re.I),
      IntentClass.TENANT_LOOKUP, ["store_hours"], 0.90),
@@ -440,6 +449,18 @@ _KEYWORD_RULES: list[_KeywordRule] = [
     # ── Experience / exploration ──────────────────────────────────────
     (re.compile(r"\b(kids?|child|children|play area|kids zone)\b", re.I),
      IntentClass.EXPERIENCE, ["family", "kids"], 0.85),
+    # Specific dining / shopping suggestion requests — must precede the generic
+    # "suggest|recommend" exploration rule so they get the correct intent class.
+    # Tags MUST use values that exist as keys in _SUB_TAG_TO_SUB_INTENT.
+    (re.compile(
+        r"\b(suggest|recommend|find\s+me)\b.{0,30}"
+        r"\b(restaurant|restaurants|dining|cafe|cafes|coffee\s+shop|food\s+place|places?\s+to\s+eat|"
+        r"place\s+for\s+(?:lunch|dinner|breakfast))\b", re.I),
+     IntentClass.DINING, ["food"], 0.92),
+    (re.compile(
+        r"\b(suggest|recommend|find\s+me)\b.{0,30}"
+        r"\b(store|stores|shop|shops|brand|brands|fashion\s+store|clothing\s+store)\b", re.I),
+     IntentClass.SHOPPING, ["general"], 0.92),
     (re.compile(r"\b(what can i do|what('s| is) here|things to do|suggest|recommend)\b", re.I),
      IntentClass.EXPERIENCE, ["exploration"], 0.80),
     (re.compile(r"\b(bored|explore|first time|show me around)\b", re.I),
@@ -495,7 +516,7 @@ _SUB_TAG_TO_SUB_INTENT: dict[str, str] = {
     "event":           "event_schedule",
     "exploration":     "open_exploration",
     "activity":        "activity_suggestion",
-    "family":          "family_dining",
+    "family":          "activity_suggestion",   # companion/outing context, not specifically dining
     "kids":            "activity_suggestion",
     "location":        "location_query",
     "floor_info":      "location_query",
@@ -682,6 +703,17 @@ def is_likely_unsupported(query: str) -> bool:
         unique_ratio = len(set(chars)) / len(chars)
         if unique_ratio < _MIN_UNIQUE_CHAR_RATIO:
             return True
+
+    # Explicit off-topic signals — valid English but clearly outside the
+    # mall concierge domain.  Return True so the caller routes to graceful_recovery.
+    _OFF_TOPIC_SIGNALS: frozenset[str] = frozenset({
+        "weather", "forecast", "temperature", "rain", "sunny", "humidity",
+        "tell me a joke", "tell me joke", "a joke", "riddle", "pun", "funny",
+        "news", "headlines", "politics", "stock price", "bitcoin", "crypto",
+        "sports score", "horoscope", "translate", "recipe", "cooking",
+    })
+    if any(sig in stripped.lower() for sig in _OFF_TOPIC_SIGNALS):
+        return True
 
     return False
 

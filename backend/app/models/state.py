@@ -102,6 +102,35 @@ class InterpretedIntent(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Shopping Task
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class ShoppingTask(BaseModel):
+    """
+    Structured product-shopping task — persists across turns.
+
+    Created when the user expresses a specific shopping intent (e.g. "I want
+    to buy jackets") and refined on subsequent turns ("for my 5 year old son",
+    "something affordable"). Drives task-scoped retrieval in compose_context
+    and ranking bias in rank_and_dedupe.
+
+    shopping_stage progression:
+      discovery → refinement → price_guidance → budget_refinement
+    """
+
+    product_type: str = ""          # e.g. "jacket", "shoes", "perfume"
+    product_category: str = ""      # e.g. "outerwear", "kids_outerwear", "fragrance"
+    target_person: str = ""         # e.g. "son", "daughter", "girlfriend", "self"
+    target_age: int | None = None   # e.g. 5 (when shopping for a child)
+    target_gender: str = ""         # "boy" | "girl" | "male" | "female"
+    budget_preference: str = ""     # "affordable" | "mid_range" | "premium"
+    style_preference: list[str] = Field(default_factory=list)
+    use_case: str = ""              # e.g. "birthday_gift", "casual_wear"
+    shopping_stage: str = ""        # discovery | refinement | price_guidance | budget_refinement
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Scene Memory
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -186,6 +215,9 @@ class SceneMemory(BaseModel):
         default="",
         description="Which step of visit_plan is currently being addressed",
     )
+
+    # ── Structured shopping task (persists across turns) ─────────────
+    shopping_task: ShoppingTask = Field(default_factory=ShoppingTask)
 
     # ── Topic lock — prevents drift on follow-up turns ────────────────
     # topic_lock: the locked active topic (e.g. "movies", "dining", "mall_info")
@@ -321,6 +353,20 @@ class ResponsePlan(BaseModel):
     dominant_context_type: str = ""   # e.g. "cinema_and_movies", "shopping", "gifting"
     fact_first: bool = False           # True: lead with facts, add context tail
     concierge_tail_allowed: bool = True  # Allow brief concierge suggestion after facts
+    # ── Response Mode Resolver fields ────────────────────────────────
+    # response_mode: behavioural mode selected by the response mode resolver.
+    # Sits above playbooks and strategies; governs HOW to respond.
+    response_mode: str = Field(
+        default="",
+        description=(
+            "Behavioural response mode: direct_factual | guided_recommendation | "
+            "hybrid_plan | best_effort_shortlist | context_acknowledgement | graceful_recovery"
+        ),
+    )
+    confidence_level: str = Field(
+        default="",
+        description="Interpretation confidence classification: high | medium | low",
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -392,6 +438,31 @@ class DebugEnrichment(BaseModel):
     # ── Playbook selection observability (extended) ────────────────────
     suppressed_playbooks: list[str] = Field(default_factory=list)
     selection_reason: str = ""
+
+    # ── Scene memory patch debug (set by update_scene_memory) ──────────
+    scene_update_reason: str = ""
+    continuity_preserved: bool = False
+    shopping_task_updates: list[str] = Field(default_factory=list)
+    scenario_persisted: bool = False
+    topic_switch_detected: bool = False
+
+    # ── Compose context patch debug (set by compose_context) ───────────
+    dominant_context_reason: str = ""
+    candidate_scope: str = ""
+    off_topic_entities_suppressed: int = 0
+    shopping_scope_applied: bool = False
+    overview_followup_preserved: bool = False
+
+    # ── Rank-and-dedupe patch debug (set by rank_and_dedupe) ───────────
+    ranking_scope: str = ""
+    suppressed_off_topic_count: int = 0
+    strongest_surviving_entity_reason: str = ""
+
+    # ── Response Mode Resolver debug (set by choose_strategy) ──────────
+    response_mode: str = ""
+    confidence_level: str = ""
+    response_mode_reason: str = ""
+    fallback_applied: bool = False
 
 
 # ═══════════════════════════════════════════════════════════════════════════

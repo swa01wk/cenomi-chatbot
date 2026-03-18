@@ -23,7 +23,7 @@ import logging
 import re
 from typing import Any
 
-from app.models.state import ConciergeState, ContextComposition
+from app.models.state import ConciergeState, ContextComposition, DebugEnrichment
 from app.nodes._tracing import traced_node
 from app.retrieval.retriever import (
     detect_category_from_intent,
@@ -92,13 +92,143 @@ _OFFER_INTENTS: set[str] = {
 }
 
 
+# ── Shopping-task → retrieval category mapping ────────────────────────────
+# Maps product_category values (set by update_scene_memory) to entity
+# category keys understood by mall_ctx.get_entities_by_category().
+_PRODUCT_CATEGORY_TO_ENTITY_CATEGORY: dict[str, str] = {
+    "outerwear": "clothing",
+    "kids_outerwear": "kids",
+    "footwear": "fashion",
+    "kids_footwear": "kids",
+    "womenswear": "fashion",
+    "menswear": "fashion",
+    "topwear": "fashion",
+    "bottomwear": "fashion",
+    "kids_fashion": "kids",
+    "kids_womenswear": "kids",
+    "kids_menswear": "kids",
+    "kids_topwear": "kids",
+    "kids_bottomwear": "kids",
+    "modest_fashion": "fashion",
+    "accessories": "accessories",
+    "kids_accessories": "kids",
+    "fragrance": "perfume",
+    "kids_fragrance": "kids",
+    "jewelry": "jewelry",
+    "toys": "kids",
+    "kids_toys": "kids",
+    "gifts": "gift",
+    "beauty": "beauty",
+    "sportswear": "sportswear",
+    "home": "home",
+}
+
+# Entity types that must be suppressed when a specific product shopping task is active
+_SUPPRESS_ENTITY_TYPES_FOR_SHOPPING: frozenset[str] = frozenset({
+    "dining", "restaurant", "cafe", "coffee", "dessert", "food", "bakery",
+    "quick_service", "fast_food",
+})
+
+# Product categories broad enough that we DON'T apply entity suppression
+# (they could include gifting contexts where anything might be relevant)
+_BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
+    "gifts", "fashion", "", "all_stores",
+})
+
+
+def _resolve_shopping_task_category(scene) -> str | None:
+    """
+    If an active shopping_task has a specific product category, return the
+    corresponding entity retrieval category key.  Returns None when the task
+    is absent or too broad to constrain retrieval.
+    """
+    task = getattr(scene, "shopping_task", None)
+    if not task or not task.product_type:
+        return None
+    cat = (task.product_category or "").lower()
+    if cat in _BROAD_SHOPPING_CATEGORIES:
+        return None
+    return _PRODUCT_CATEGORY_TO_ENTITY_CATEGORY.get(cat)
+
+
+def _suppress_dining_for_shopping(entities: list[dict]) -> tuple[list[dict], int]:
+    """Remove dining/cafe entities from a shopping task context."""
+    kept: list[dict] = []
+    suppressed = 0
+    for e in entities:
+        if e.get("entity_type", "").lower() in _SUPPRESS_ENTITY_TYPES_FOR_SHOPPING:
+            suppressed += 1
+        else:
+            kept.append(e)
+    # Never leave fewer than 2 entities after suppression
+    return (kept if len(kept) >= 2 else entities), suppressed
+
+
+def _is_mall_overview_followup(state: ConciergeState) -> bool:
+    """
+    True when the current turn is a follow-up within a mall_info/mall_overview context.
+
+    Ensures that "more about the mall" / "what else" / "tell me more" stays
+    locked in mall_overview and does NOT reopen shopping/dining entities.
+    """
+    scene = state.scene
+    intent = state.intent
+    msg = (state.normalized_user_message or "").lower().strip()
+
+    was_in_overview = (
+        scene.active_topic in ("mall_info", "mall_overview")
+        or scene.active_primary_intent in ("mall_overview", "mall_info_lookup", "mall_info")
+        or scene.topic_lock in ("mall_info", "mall_overview")
+    )
+    if not was_in_overview:
+        return False
+
+    is_followup_kind = intent.message_kind in (
+        "followup", "refinement", "constraint_refinement",
+    )
+    followup_phrases = (
+        "more", "what else", "tell me more", "go on", "continue",
+        "more about", "more detail", "anything else",
+    )
+    has_followup_phrase = any(ph in msg for ph in followup_phrases)
+
+    return is_followup_kind or has_followup_phrase
+
+
+def _is_movie_context_followup(state: ConciergeState) -> bool:
+    """
+    True when the current turn is a follow-up within a movie/cinema lookup context.
+
+    Ensures that "with kid", "any action?", "any other ones?" stay in the
+    cinema/movie context and do NOT switch to dining or family-shopping.
+    """
+    scene = state.scene
+    intent = state.intent
+
+    was_in_movie = (
+        scene.active_primary_intent in ("movie_lookup", "cinema_lookup")
+        or scene.active_fact_scope in ("movie_schedule", "cinema_lookup")
+        or scene.topic_lock in ("entertainment", "movies")
+        or scene.active_topic in ("entertainment",)
+    )
+    if not was_in_movie:
+        return False
+
+    if intent.message_kind == "topic_switch":
+        return False
+
+    return intent.message_kind in (
+        "followup", "refinement", "constraint_refinement",
+    )
+
+
 @traced_node("compose_context")
 async def compose_context(state: ConciergeState) -> dict:
     intent = state.intent
     scene = state.scene
     playbook = state.playbook
 
-    # ── Factual flow guard: this node is concierge-only ───────────────
+    # ── Factual flow guard: this node is concierge-only ────────────────
     # Factual flow uses compose_fact_response_context instead.
     # If somehow we end up here in factual mode, return a minimal empty context
     # so downstream nodes don't get semantic pollution.
@@ -148,6 +278,76 @@ async def compose_context(state: ConciergeState) -> dict:
     mall_ctx = get_mall_context(state.mall_id)
     warnings: list[str] = []
 
+    # ── Continuity-protection flags ────────────────────────────────────
+    _overview_followup = _is_mall_overview_followup(state)
+    _movie_followup = _is_movie_context_followup(state)
+
+    # Dominant context debug tracking
+    _dominant_context_reason = "standard"
+    _candidate_scope = "full"
+    _off_topic_suppressed = 0
+    _shopping_scope_applied = False
+    _overview_followup_preserved = False
+
+    # ── Mall overview follow-up: lock to mall_overview only ────────────
+    if _overview_followup:
+        _overview_followup_preserved = True
+        _dominant_context_reason = "mall_overview_followup_locked"
+        _candidate_scope = "mall_overview"
+        topic_names = ["mall_overview"]
+        overview_block = mall_ctx.get_topic_block("mall_overview")
+        if not overview_block:
+            topic_names = ["services"]
+            warnings.append("mall_overview block not available — falling back")
+        # Return immediately with mall_overview context only — no shopping entities
+        signals: list[str] = list(scene.audience)
+        notes: list[str] = [
+            "MALL OVERVIEW CONTINUITY: follow-up locked to mall overview context. "
+            "Do NOT introduce shopping/dining entities.",
+            f"Dominant context: {_dominant_context_reason}",
+        ]
+        return {
+            "context": ContextComposition(
+                selected_topic_blocks=topic_names,
+                selected_entities=[],
+                selected_semantic_signals=signals,
+                ranking_notes=notes,
+            ),
+            "debug_enrichment": DebugEnrichment(
+                dominant_context_reason=_dominant_context_reason,
+                candidate_scope=_candidate_scope,
+                overview_followup_preserved=True,
+            ),
+            "_trace_summary": "compose_context: mall_overview follow-up locked",
+        }
+
+    # ── Movie context follow-up: stay in entertainment/cinema ──────────
+    if _movie_followup:
+        _dominant_context_reason = "movie_context_followup_locked"
+        _candidate_scope = "entertainment"
+        topic_names = ["movie", "entertainment"]
+        signals = list(scene.audience) + ["movie", "cinema"]
+        notes = [
+            "MOVIE CONTINUITY: follow-up locked to cinema/movie context. "
+            "Do NOT switch to dining or family-shopping.",
+            f"Dominant context: {_dominant_context_reason}",
+        ]
+        if scene.companions:
+            notes.append(f"Companions (filter only): {scene.companions}")
+        return {
+            "context": ContextComposition(
+                selected_topic_blocks=topic_names,
+                selected_entities=[],
+                selected_semantic_signals=signals,
+                ranking_notes=notes,
+            ),
+            "debug_enrichment": DebugEnrichment(
+                dominant_context_reason=_dominant_context_reason,
+                candidate_scope=_candidate_scope,
+            ),
+            "_trace_summary": "compose_context: movie follow-up locked",
+        }
+
     # ── Topic blocks (use expanded_query for richer matching) ────────
     retrieval_query = state.expanded_query or state.normalized_user_message
     if intent.domain == "exploration":
@@ -190,7 +390,16 @@ async def compose_context(state: ConciergeState) -> dict:
     # ── Category-based structured retrieval ────────────────────────────
     # For tenant-lookup queries, bypass topic-block sampling and retrieve
     # ALL entities matching the canonical category.
+    # If a shopping_task is active with a specific product category, override
+    # the category key to match the task scope (narrower, more precise).
     category_key = _resolve_category_key(state)
+    task_category_key = _resolve_shopping_task_category(scene)
+    if task_category_key and not category_key:
+        # Shopping task scope takes priority over generic query-based detection
+        category_key = task_category_key
+        _shopping_scope_applied = True
+        _dominant_context_reason = f"shopping_task_scoped:{scene.shopping_task.product_category}"
+        _candidate_scope = f"shopping_task:{scene.shopping_task.product_type}"
     category_entities: list[dict[str, Any]] = []
     discovery_expanded = False
     if category_key:
@@ -299,6 +508,23 @@ async def compose_context(state: ConciergeState) -> dict:
     if entities and not category_entities:
         entities = _filter_entities_by_intent_domain(entities, intent.domain)
 
+    # ── Shopping task: suppress off-topic entities ─────────────────────
+    # When a specific product shopping task is active (e.g. "kids jacket"),
+    # remove dining/cafe entities that were pulled in by broad retrieval.
+    task = getattr(scene, "shopping_task", None)
+    if (
+        task
+        and task.product_type
+        and (task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+        and not category_key  # category retrieval already scoped; only suppress in fallback path
+    ):
+        entities, _off_topic_suppressed = _suppress_dining_for_shopping(entities)
+        if _off_topic_suppressed:
+            warnings.append(
+                f"Shopping task '{task.product_type}': suppressed "
+                f"{_off_topic_suppressed} off-topic dining entities"
+            )
+
     # ── Apply tenant ranking biases ───────────────────────────────────
     if state.active_tenant_parameters and entities:
         try:
@@ -370,6 +596,27 @@ async def compose_context(state: ConciergeState) -> dict:
     if state.dominant_context_type:
         notes.append(f"Dominant context type: {state.dominant_context_type}")
 
+    # Context-setting: signal to LLM to provide broad, multi-direction guidance
+    if intent.message_kind == "context_setting":
+        notes.append(
+            "CONTEXT-SETTING TURN: user is providing situation context, not asking a question. "
+            "Acknowledge warmly and offer a few relevant directions. "
+            "Do NOT collapse immediately into one narrow recommendation."
+        )
+
+    if _shopping_scope_applied:
+        notes.append(
+            f"SHOPPING TASK SCOPE: product='{task.product_type}' "
+            f"category='{task.product_category}'. "
+            f"Retrieve only relevant stores — suppress perfumes/beauty/unrelated gifts."
+        )
+
+    if _off_topic_suppressed:
+        notes.append(
+            f"Off-topic suppression: {_off_topic_suppressed} dining entities removed "
+            "from shopping task context."
+        )
+
     composition = ContextComposition(
         selected_topic_blocks=topic_names,
         selected_entities=entities,
@@ -379,10 +626,18 @@ async def compose_context(state: ConciergeState) -> dict:
 
     result: dict[str, Any] = {
         "context": composition,
+        "debug_enrichment": DebugEnrichment(
+            dominant_context_reason=_dominant_context_reason,
+            candidate_scope=_candidate_scope,
+            off_topic_entities_suppressed=_off_topic_suppressed,
+            shopping_scope_applied=_shopping_scope_applied,
+            overview_followup_preserved=_overview_followup_preserved,
+        ),
         "_trace_summary": (
             f"Context: {len(topic_names)} topics, "
             f"{len(signals)} signals, {len(entities)} entities"
             + (f" [category={category_key}]" if category_key else "")
+            + (f" [shopping_scope={_candidate_scope}]" if _shopping_scope_applied else "")
         ),
     }
     if warnings:

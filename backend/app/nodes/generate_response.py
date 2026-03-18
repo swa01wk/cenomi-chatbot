@@ -1234,9 +1234,11 @@ async def generate_response(state: ConciergeState) -> dict:
     experience_mode = ""
 
     # ── Early exit: unsupported / gibberish inputs ────────────────────
+    # Also catches graceful_recovery mode for non-unsupported low-confidence turns.
     is_unsupported = (
         state.intent.primary_intent == "unsupported"
         or state.intent.raw_signals.get("unsupported", False)
+        or state.response_plan.response_mode == "graceful_recovery"
     )
     if is_unsupported:
         final_text = _build_unsupported_recovery_response(state)
@@ -1375,6 +1377,9 @@ async def generate_response(state: ConciergeState) -> dict:
         # ── Hybrid intent instruction for concierge path ──────────────
         hybrid_concierge_instruction = _build_hybrid_concierge_instruction(state)
 
+        # ── Response mode instruction (behaviour layer) ───────────────
+        response_mode_instruction = _build_response_mode_instruction(state)
+
         # ── CTA instruction ───────────────────────────────────────────
         cta_instruction = ""
         if not is_category_turn and not is_offer_query:
@@ -1388,6 +1393,7 @@ async def generate_response(state: ConciergeState) -> dict:
             f"Relevant tenants:\n{retrieval_results}\n\n"
             f"{category_instruction}"
             f"{hybrid_concierge_instruction}"
+            f"{response_mode_instruction}"
             f"{experience_instruction}"
             f"{cta_instruction}"
             "Generate a helpful concierge response. "
@@ -1423,6 +1429,8 @@ async def generate_response(state: ConciergeState) -> dict:
 
     debug_summary = (
         f"strategy={state.response_plan.chosen_strategy} | "
+        f"response_mode={state.response_plan.response_mode or 'n/a'} | "
+        f"confidence_level={state.response_plan.confidence_level or 'n/a'} | "
         f"experience_mode={experience_mode} | "
         f"playbook={state.playbook.selected_playbook or 'none'} | "
         f"topics={state.context.selected_topic_blocks} | "
@@ -1691,6 +1699,90 @@ def _build_hybrid_filter_instruction(fact_ctx: dict, state: ConciergeState) -> s
         "Secondary filter hints are modifiers only — they do NOT replace the answer.\n"
     )
     return "\n".join(lines) + "\n"
+
+
+def _build_response_mode_instruction(state: ConciergeState) -> str:
+    """
+    Translate the resolved response_mode into concrete LLM-prompt guidance.
+
+    This is a LIGHT-TOUCH overlay — it reinforces the existing experience/
+    strategy instructions; it never silences them.  Modes already fully
+    handled upstream (context_setting, unsupported) return an empty string.
+    """
+    mode = state.response_plan.response_mode
+    confidence = state.response_plan.confidence_level
+
+    if not mode:
+        return ""
+
+    # ── graceful_recovery (low-confidence, non-unsupported) ───────────
+    # The `is_unsupported` early-exit in generate_response already catches
+    # intent.primary_intent == "unsupported".  This branch handles low-
+    # confidence queries that still reached the concierge path.
+    if mode == "graceful_recovery":
+        return (
+            "RESPONSE MODE — GRACEFUL RECOVERY:\n"
+            "The visitor's query is unclear or outside supported topics. "
+            "Rules:\n"
+            "  1. Do NOT hallucinate stores, services, or details.\n"
+            "  2. Offer 3–4 supported directions "
+            "(e.g. dining, shopping, movies, services).\n"
+            "  3. Ask ONE short, focused clarifying question if it would help.\n"
+            "  4. Never claim information you don't have.\n\n"
+        )
+
+    # ── context_acknowledgement ───────────────────────────────────────
+    # Already handled in detail by _build_conversation_context(); just echo.
+    if mode == "context_acknowledgement":
+        return ""
+
+    # ── hybrid_plan ───────────────────────────────────────────────────
+    if mode == "hybrid_plan":
+        return (
+            "RESPONSE MODE — HYBRID PLAN:\n"
+            "The visitor's query spans more than one goal (e.g. food AND movies). "
+            "Rules:\n"
+            "  1. Produce ONE unified answer — NOT two disconnected lists.\n"
+            "  2. Lead with the dominant intent; weave the secondary goal in naturally.\n"
+            "  3. Use a structured mini-plan format (2–3 steps max).\n"
+            "  4. Example: 'Here's a plan: catch a movie at [Cinema], "
+            "then grab dinner at [Restaurant] nearby.'\n\n"
+        )
+
+    # ── best_effort_shortlist ─────────────────────────────────────────
+    if mode == "best_effort_shortlist":
+        return (
+            "RESPONSE MODE — BEST EFFORT SHORTLIST:\n"
+            "The query is broad or partially clear. Rules:\n"
+            "  1. Offer 3–5 strong, relevant options.\n"
+            "  2. Lightly acknowledge any ambiguity "
+            "(e.g. 'Since you didn't mention a preference...').\n"
+            "  3. Do NOT claim constraints or specifics you cannot verify.\n"
+            "  4. End with ONE short, focused follow-up question if it would help "
+            "narrow the choice.\n\n"
+        )
+
+    # ── direct_factual ────────────────────────────────────────────────
+    if mode == "direct_factual":
+        return (
+            "RESPONSE MODE — DIRECT FACTUAL:\n"
+            "Give a concise, structured answer grounded in the provided data. "
+            "Lead with the key fact. No padding or speculation.\n\n"
+        )
+
+    # ── guided_recommendation ─────────────────────────────────────────
+    if mode == "guided_recommendation":
+        if confidence == "medium":
+            return (
+                "RESPONSE MODE — GUIDED RECOMMENDATION:\n"
+                "Present a focused shortlist (3–5 options) with a brief reason "
+                "why each one fits the visitor. "
+                "Acknowledge any scenario or companion context naturally.\n\n"
+            )
+        # high confidence — minimal overlay; experience layer already handles it
+        return ""
+
+    return ""
 
 
 def _build_hybrid_concierge_instruction(state: ConciergeState) -> str:

@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-13f8ceae1e12",
+  "session_id": "cx-s6-ca71cd5f",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-0386464c7bb6",
+  "user_message": "for the 6-year-old I need something durable \u2014 he destroys shoes in a month",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-18 18:00:05.429504"
+}

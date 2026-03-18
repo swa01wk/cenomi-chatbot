@@ -197,6 +197,11 @@ def _build_debug_payload(state: ConciergeState, total_elapsed_ms: float) -> Debu
         latency_by_node=latency_map,
         total_latency_ms=round(total_elapsed_ms, 2),
         node_count=len(state.node_trace),
+        response_mode=state.evaluator_stub.get("response_mode", ""),
+        confidence_level=state.evaluator_stub.get("confidence_level", ""),
+        response_mode_reason=state.evaluator_stub.get("response_mode_reason", ""),
+        fallback_applied=bool(state.evaluator_stub.get("fallback_applied", False)),
+        flow_type=state.evaluator_stub.get("flow_type", state.flow_type or ""),
         warnings=list(state.warnings),
         node_trace=trace_list,
     )

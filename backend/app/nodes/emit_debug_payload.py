@@ -93,6 +93,17 @@ async def emit_debug_payload(state: ConciergeState) -> dict:
         f"constraints={state.scene.visit_constraints}"
     )
 
+    # ── Response Mode Resolver debug lines ───────────────────────────
+    if de.response_mode or state.response_plan.response_mode:
+        rm = de.response_mode or state.response_plan.response_mode
+        cl = de.confidence_level or state.response_plan.confidence_level
+        debug_lines.extend([
+            f"response_mode: {rm}",
+            f"confidence_level: {cl or 'n/a'}",
+            f"response_mode_reason: {de.response_mode_reason or 'n/a'}",
+            f"fallback_applied: {de.fallback_applied}",
+        ])
+
     # ── Experience layer debug lines ──────────────────────────────────
     debug_lines.extend([
         f"experience_mode: {de.response_experience_mode or 'n/a'}",
@@ -129,6 +140,26 @@ async def emit_debug_payload(state: ConciergeState) -> dict:
         "flow_type": state.flow_type or "concierge",
         "flow_routing_reason": state.flow_routing_reason or "",
         "retrieval_priority": state.retrieval_priority or "",
+        # ── Response Mode Resolver fields ─────────────────────────────
+        # For factual flow, choose_strategy is not called; infer mode from flow_type.
+        "response_mode": (
+            de.response_mode
+            or state.response_plan.response_mode
+            or ("direct_factual" if state.flow_type == "factual" else "")
+        ),
+        "confidence_level": (
+            de.confidence_level
+            or state.response_plan.confidence_level
+            or (
+                "high" if state.intent.confidence >= 0.75 else
+                "medium" if state.intent.confidence >= 0.45 else
+                "low"
+            )
+        ),
+        "response_mode_reason": de.response_mode_reason or (
+            "factual flow — direct_factual inferred" if state.flow_type == "factual" else ""
+        ),
+        "fallback_applied": de.fallback_applied,
         # ── Experience Layer fields ───────────────────────────────────
         "response_experience_mode": de.response_experience_mode or "",
         # Domain lock + response strategy (hybrid-intent system)

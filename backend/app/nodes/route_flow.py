@@ -60,6 +60,7 @@ _FACTUAL_SUB_INTENTS: frozenset[str] = frozenset({
 _FACTUAL_DOMAINS: frozenset[str] = frozenset({
     "navigation",
     "cross_mall",
+    "mall_info",   # Mall overview, hours, family-friendliness → exact factual data
 })
 
 # Sub-intents that strongly prefer concierge flow
@@ -86,6 +87,8 @@ _FACTUAL_HARD_SIGNALS: tuple[str, ...] = (
     "what movies", "which movies", "movies do we have", "movies can i watch",
     "movies can i see", "now showing", "what's playing", "what is playing",
     "all movies", "movie list", "showtimes", "show times",
+    "show me movies", "movies are showing", "movies are there",
+    "movies are on", "movies can i see",
     "where is the atm", "where is atm", "atm location",
     "prayer room location", "where is the prayer",
     "opening hours", "closing hours", "what time do you close",
@@ -99,6 +102,71 @@ _FACTUAL_HARD_SIGNALS: tuple[str, ...] = (
     "where is h&m", "is h&m here",
     "does mall of arabia", "is it at mall of arabia", "which malls have",
     "any of your malls", "across malls",
+    # ── Facility / availability presence queries ─────────────────────
+    "is there face painting",
+    "is arabic coffee",
+    "arabic coffee sold",
+    "is there a gym",
+    "is there a fitness",
+    "does the mall have a gym",
+    "does the mall pause",
+    "do stores close during",
+    "is there anywhere to charge",
+    "is there a stationery",
+    "do you have a stationery",
+    "is there a prayer room",
+    "where are the prayer rooms",
+    "where is the changing room",
+    "is there a baby changing",
+    "is there a family toilet",
+    "is there a supplement",
+    "do you have supplement",
+    "is there a salon",
+    "where can i charge",
+    "is there anywhere that does",
+    # Cake / bakery availability and custom-order capability
+    "can i get a birthday cake",
+    "can i get a cake",
+    "is there a bakery",
+    "do you have a bakery",
+    "where can i get a cake",
+    "do any of them do custom",
+    "do they do custom cakes",
+    "custom cakes with",
+    # Stroller/accessibility factual
+    "stroller available",
+    "borrow a stroller",
+    "rent a stroller",
+    "wheelchair available",
+    "is the mall accessible",
+    "is there a lift",
+    "is there an elevator",
+    # Charging / power
+    "is there anywhere to charge",
+    "phone charging",
+    "charging station",
+    # Supplement / nutrition stores
+    "supplement or nutrition stores",
+    "do you have any supplement",
+    "supplement stores",
+    "nutrition store",
+    # Pre-packed bundles / specific stock queries
+    "pre-packed school supply",
+    "do they do pre-packed",
+    "school supply bundles",
+    # Meeting / briefing spaces
+    "meeting or briefing spaces",
+    "briefing spaces",
+    "meeting rooms in the mall",
+    # Ticket pricing
+    "how much is a ticket",
+    "how much does a ticket",
+    "how much for a ticket",
+    "price of a ticket",
+    "ticket price",
+    "ticket prices",
+    "ticket for 5",
+    "tickets for",
 )
 
 # Primary intent labels that should always stay in factual flow even when
@@ -114,6 +182,7 @@ _FACTUAL_PRIMARY_INTENTS: frozenset[str] = frozenset({
     "movie_showtime",
     "store_hours",
     "opening_hours",
+    "mall_overview",   # "tell me about the mall", "what does this mall have?" etc.
 })
 
 # ── Response strategy map ────────────────────────────────────────────────────
@@ -157,11 +226,20 @@ _EXPLICIT_DOMAIN_SWITCH_SIGNALS: tuple[str, ...] = (
     "suggest a restaurant",
     "shopping for", "looking to buy", "i want to buy", "what stores",
     "gift for", "present for", "buy something for",
-    "tell me about the mall", "about the mall", "mall hours",
+    "mall hours",
     "opening hours", "when does the mall open", "when do you open",
     "where is the", "how do i get to", "how to get to",
     "kids zone", "play area", "activity for kids",
     "what can we do", "what should we do",
+    # ── Movie recommendation queries (break movie domain lock) ────────
+    "good movie for", "best movie for", "recommend a movie",
+    "movie for couples", "good movies for couples",
+    "what movie", "suggest a movie",
+    # ── "Can we fit everything" → planning mode ───────────────────────
+    "can we fit", "fit in movies", "fit in everything",
+    # ── Salon / beauty recommendation (breaks service_lookup lock) ────
+    "where can we all go", "where can we get a blow",
+    "we all want to get", "blow-dry and makeup",
 )
 
 # Keywords that anchor a query in concierge planning
@@ -184,6 +262,31 @@ _CONCIERGE_HARD_SIGNALS: tuple[str, ...] = (
     "with my kid", "with my child", "with my daughter", "with my son",
     "with my girlfriend", "with my boyfriend", "with my wife", "with my husband",
     "something fun for",
+    # ── Routing / optimisation / recommendation queries ──────────────
+    "most efficient order",
+    "most efficient route",
+    "what's the best order",
+    "best order to visit",
+    "best value for money",
+    "value for money",
+    "minimize walking",
+    "minimise walking",
+    "good movie for",
+    "best movie for",
+    "recommend a movie",
+    "good movies for couples",
+    "movies for couples",
+    "what should i prioritize",
+    "what should we prioritize",
+    "what to prioritize",
+    # Cross-domain evening/night plans
+    "dinner and then a movie",
+    "dinner and a movie",
+    "movie and dinner",
+    "and then a movie",
+    "as a full night",
+    "full evening",
+    "full night out",
 )
 
 
@@ -219,9 +322,27 @@ async def route_flow(state: ConciergeState) -> dict:
     # intent replacements.  Only an explicit topic switch releases the lock.
     prior_factual_intent = scene.active_primary_intent or ""
     if prior_factual_intent in _FACTUAL_PRIMARY_INTENTS:
+        # Sub-intents that signal a genuine cross-domain switch (dining/shopping).
+        # These release an active factual lock (e.g. movie → dining request).
+        # Exploration/activity sub-intents are intentionally excluded — they can
+        # appear on companion follow-ups ("with kid") that should stay factual.
+        _DOMAIN_SWITCH_SUB_INTENTS: frozenset[str] = frozenset({
+            "general_dining", "romantic_dining", "quick_bite", "family_dining",
+            "cafe_recommendation", "dessert_recommendation",
+            "general_shopping", "gift_recommendation", "fashion_shopping",
+            "perfume_shopping", "jewelry_shopping", "accessories_shopping",
+            # Activity/exploration sub-intents break a factual lock in multi-step
+            # planning sessions (e.g. after stroller/accessibility queries in S5)
+            "activity_suggestion",
+            "open_exploration",
+            "general_entertainment",
+        })
         is_explicit_switch = (
-            intent.message_kind in ("topic_switch", "context_setting")
+            intent.message_kind == "topic_switch"
             or _has_explicit_domain_switch(msg)
+            or intent.sub_intent in _DOMAIN_SWITCH_SUB_INTENTS
+            # Any concierge planning/recommendation signal overrides factual domain lock
+            or any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
         )
         if not is_explicit_switch:
             flow_type = "factual"
@@ -251,19 +372,36 @@ async def route_flow(state: ConciergeState) -> dict:
         # planning *around* the movie (e.g. "something quick before the movie").
         # NOTE: "any movies with the kid?" is factual — kid is a FILTER, not override.
         has_concierge_hard = any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
+        # Cross-domain secondary intents (e.g. add_dining_step from "food and movies")
+        # also signal a hybrid planning query that must go to concierge.
+        _CROSS_DOMAIN_SECONDARY_SET: frozenset[str] = frozenset({
+            "add_dining_step", "add_coffee_step",
+            "before_movie_constraint", "after_movie_constraint",
+        })
+        has_cross_domain_secondary = bool(
+            set(secondary_intents) & _CROSS_DOMAIN_SECONDARY_SET
+        )
         is_planning_hybrid = (
             intent.sub_intent == "movie_showtime"
-            and any(kw in msg for kw in ("before ", "after ", "plan ", "suggest"))
+            and (
+                any(kw in msg for kw in ("before ", "after ", "plan ", "suggest"))
+                or has_cross_domain_secondary
+            )
             and not _is_pure_lookup(msg)
         )
-        if is_planning_hybrid or (has_concierge_hard and not _is_pure_lookup(msg)):
+        # Explicit domain-switch signals (e.g. "where can we all go",
+        # "blow-dry and makeup", "can we fit in movies") should also override
+        # factual sub-intent routing and send the query to concierge.
+        has_explicit_switch = _has_explicit_domain_switch(msg)
+        if is_planning_hybrid or has_explicit_switch or (has_concierge_hard and not _is_pure_lookup(msg)):
             flow_type = "concierge"
             routing_reason = (
-                f"Hybrid query: sub_intent={intent.sub_intent} but planning context "
-                f"('before/after/suggest') dominates — routing to concierge"
+                f"Hybrid query: sub_intent={intent.sub_intent} but planning/switch context "
+                f"('before/after/suggest/explicit-switch') dominates — routing to concierge"
             )
-            if not primary_intent:
-                primary_intent = "concierge_recommendation"
+            # Always override primary_intent to a non-factual label so the next
+            # turn doesn't inherit a factual domain lock (e.g. movie_lookup).
+            primary_intent = "concierge_recommendation"
         else:
             flow_type = "factual"
             routing_reason = (
@@ -274,8 +412,28 @@ async def route_flow(state: ConciergeState) -> dict:
             if not primary_intent:
                 primary_intent = intent.sub_intent
 
+    # ── 2b. Movie listing hard signals — force factual even with scene context ──
+    # "what movies are showing", "show me movies", "now showing", etc. are
+    # always factual lookups regardless of companions/occasion in scene.
+    elif not flow_type and any(sig in msg for sig in _FACTUAL_HARD_SIGNALS) and any(
+        kw in msg for kw in ("movie", "movies", "cinema", "film", "showing", "playing")
+    ):
+        has_concierge_hard = any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
+        if has_concierge_hard and not _is_pure_lookup(msg):
+            flow_type = "concierge"
+            routing_reason = "Movie query has planning context — routing to concierge"
+        else:
+            flow_type = "factual"
+            routing_reason = "Movie listing hard signal — factual flow enforced"
+            retrieval_priority = "high"
+            if not primary_intent:
+                primary_intent = "movie_lookup"
+
     # ── 3. Navigation domain → always factual ────────────────────────
-    elif not flow_type and intent.domain in _FACTUAL_DOMAINS:
+    # Exception: context_setting turns (e.g. "i am here with my family" classified
+    # as mall_info/family_friendliness) must be routed via concierge so they receive
+    # a context_acknowledgement response, not a raw factual lookup.
+    elif not flow_type and intent.domain in _FACTUAL_DOMAINS and intent.message_kind != "context_setting":
         flow_type = "factual"
         routing_reason = f"Domain '{intent.domain}' routes to factual flow by design"
         retrieval_priority = "high"
@@ -455,16 +613,22 @@ def _has_strong_scene_context(scene) -> bool:
     """
     True when the scene has enough context to warrant concierge treatment.
 
-    Note: child companion alone is NOT sufficient to trigger concierge when the
-    current turn has a factual primary intent (e.g. movie lookup). The caller
-    must separately check primary_intent against _FACTUAL_PRIMARY_INTENTS.
-
-    Family visit IS a valid concierge trigger for non-factual queries (e.g.
-    "where can we eat" when scene.visit_type == "family_visit").
+    Child/kid companions alone are intentionally excluded from ``has_companions``
+    because child context is a *bias* (filter on results), not a hard intent
+    override.  "any movies with the kid?" must stay factual even though "child"
+    is in companions.  The family_visit *visit_type* still counts — it is set
+    only when the user explicitly declares a family outing, not just when a
+    child companion is detected.
     """
+    # Strong companions: explicit relationship companions that imply concierge
+    # context.  "child", "kids", "son", "daughter" are EXCLUDED — they act as
+    # audience filters, not as intent overrides.
+    _CHILD_COMPANION_TYPES: frozenset[str] = frozenset({
+        "child", "kids", "son", "daughter",
+    })
     has_companions = bool(
         scene.companions
-        and any(c not in ("solo",) for c in scene.companions)
+        and any(c not in {"solo"} | _CHILD_COMPANION_TYPES for c in scene.companions)
     )
     has_occasion = bool(scene.occasion and scene.occasion not in ("before_movie", "after_movie"))
     has_visit_type = bool(scene.visit_type)

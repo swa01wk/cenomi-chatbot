@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-c5763e2fbe1e",
+  "session_id": "cx-s10-5fd353ee",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-a5987de6ada3",
+  "user_message": "budget for accessories is about 200 SAR per bridesmaid",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 19:35:59.105664"
+}

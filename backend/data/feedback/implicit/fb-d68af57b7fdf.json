@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-d68af57b7fdf",
+  "session_id": "cx-s4-4c06ccff",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-1df935a92b3e",
+  "user_message": "budget around 150 SAR for the gift",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 12:44:27.569815"
+}

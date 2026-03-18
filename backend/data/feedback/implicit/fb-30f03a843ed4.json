@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-30f03a843ed4",
+  "session_id": "cx-s9-9b2a1c68",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-617276e8afb6",
+  "user_message": "what's the most fun thing for that budget?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 19:17:21.364539"
+}

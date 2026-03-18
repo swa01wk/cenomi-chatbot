@@ -16,8 +16,9 @@ CONTRACT
 
 from __future__ import annotations
 
-from app.models.state import ConciergeState, ResponsePlan
+from app.models.state import ConciergeState, DebugEnrichment, ResponsePlan
 from app.nodes._tracing import traced_node
+from app.services.response_mode_resolver import resolve_response_mode
 from app.services.tenant_runtime import TenantRuntime
 
 _STRATEGY_RULES: list[tuple[str, dict]] = [
@@ -266,6 +267,14 @@ async def choose_strategy(state: ConciergeState) -> dict:
     if has_child and chosen in ("guided_plan", "mini_itinerary", "family_plan"):
         anchor_type = "entertainment"
 
+    # ── Response Mode Resolver ────────────────────────────────────────
+    # Lightweight behavioural decision layer: determines HOW to respond
+    # based on confidence, message_kind, intent clarity, and topic lock.
+    # Runs after strategy selection so both pieces of information are available.
+    response_mode, confidence_level, rm_reason, fallback_applied = (
+        resolve_response_mode(state)
+    )
+
     plan = ResponsePlan(
         chosen_strategy=chosen,
         response_shape_hint=shape,
@@ -275,11 +284,26 @@ async def choose_strategy(state: ConciergeState) -> dict:
         entity_cap=entity_cap,
         must_acknowledge_scene=must_acknowledge,
         must_include_anchor_type=anchor_type,
+        response_mode=response_mode,
+        confidence_level=confidence_level,
     )
+
+    # Merge response-mode debug into existing debug_enrichment (preserve prior fields)
+    existing_de: DebugEnrichment = state.debug_enrichment
+    updated_de = existing_de.model_copy(update={
+        "response_mode": response_mode,
+        "confidence_level": confidence_level,
+        "response_mode_reason": rm_reason,
+        "fallback_applied": fallback_applied,
+    })
 
     return {
         "response_plan": plan,
-        "_trace_summary": f"Strategy: {chosen} | shape: {shape} | reason: {strategy_reason}",
+        "debug_enrichment": updated_de,
+        "_trace_summary": (
+            f"Strategy: {chosen} | shape: {shape} | reason: {strategy_reason} | "
+            f"response_mode: {response_mode} [{confidence_level}]"
+        ),
     }
 
 
@@ -337,6 +361,11 @@ def _choose_factual_strategy(state: ConciergeState) -> dict:
     if modifiers:
         constraints.append(f"modifiers:{','.join(modifiers)}")
 
+    # ── Response Mode Resolver (factual path) ────────────────────────
+    response_mode, confidence_level, rm_reason, fallback_applied = (
+        resolve_response_mode(state)
+    )
+
     plan = ResponsePlan(
         chosen_strategy=chosen,
         response_shape_hint=shape,
@@ -347,12 +376,24 @@ def _choose_factual_strategy(state: ConciergeState) -> dict:
         must_acknowledge_scene=False,
         must_include_anchor_type="",
         secondary_filters=list(secondary_intents),
+        response_mode=response_mode,
+        confidence_level=confidence_level,
     )
+
+    existing_de: DebugEnrichment = state.debug_enrichment
+    updated_de = existing_de.model_copy(update={
+        "response_mode": response_mode,
+        "confidence_level": confidence_level,
+        "response_mode_reason": rm_reason,
+        "fallback_applied": fallback_applied,
+    })
 
     return {
         "response_plan": plan,
+        "debug_enrichment": updated_de,
         "_trace_summary": (
-            f"Strategy[factual]: {chosen} | shape: {shape} | reason: {reason}"
+            f"Strategy[factual]: {chosen} | shape: {shape} | reason: {reason} | "
+            f"response_mode: {response_mode} [{confidence_level}]"
         ),
     }
 

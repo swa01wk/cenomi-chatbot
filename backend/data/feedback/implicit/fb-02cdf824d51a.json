@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-02cdf824d51a",
+  "session_id": "cx-s6-7ea9ce67",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-8de8366d7b52",
+  "user_message": "my budget is 500 SAR for everything \u2014 is that realistic?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-18 20:39:34.200900"
+}

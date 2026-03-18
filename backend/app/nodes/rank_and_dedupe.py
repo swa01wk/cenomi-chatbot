@@ -203,8 +203,20 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
                         f"Collapsed duplicate id={eid!r} name={name!r}"
                     )
                     continue
+                # Strict name-clash check: collapse variants with different entity_ids
+                # but the same normalized name (e.g. "Season Accessorize" vs
+                # "season accessorize" registered under two IDs).
+                if (name_key and name_key in seen_name_keys) or (
+                    canonical_key and canonical_key in seen_name_keys
+                ):
+                    collapsed_count += 1
+                    normalization_notes.append(
+                        f"Collapsed name-clash id={eid!r} name={name!r} "
+                        f"key={name_key!r} (different id, same normalized name)"
+                    )
+                    continue
                 seen_ids.add(eid)
-                # Also register the name key so aliases don't duplicate
+                # Register name keys so further aliases are also caught
                 if name_key:
                     seen_name_keys.add(name_key)
                 if canonical_key:
@@ -252,6 +264,8 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         )
         audience_set = set(scene.audience)
         constraint_set = set(scene.visit_constraints)
+        shopping_task = getattr(scene, "shopping_task", None)
+        is_context_setting = state.intent.message_kind == "context_setting"
 
         # Playbook biases: tag → weight
         playbook_biases: dict[str, float] = {}
@@ -271,6 +285,7 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         # ── 4. Score each entity ──────────────────────────────────────
         type_counts: dict[str, int] = {}
         scored_entities: list[tuple[float, dict[str, Any]]] = []
+        suppressed_off_topic = 0
 
         for entity in deduped:
             score = _score_entity(
@@ -282,6 +297,15 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
                 intent_domain=intent.domain,
                 intent_sub=intent.sub_intent,
             )
+            # Apply shopping task boost / suppression if a specific product task is active
+            if shopping_task and shopping_task.product_type and (
+                shopping_task.product_category or ""
+            ).lower() not in ("", "fashion", "gifts", "all_stores"):
+                score, was_suppressed = _apply_shopping_task_score_adjustment(
+                    score, entity, shopping_task
+                )
+                if was_suppressed:
+                    suppressed_off_topic += 1
             scored_entities.append((score, entity))
 
         # Sort by score descending
@@ -327,14 +351,37 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
 
         final_count = len(capped)
 
+        # Determine ranking scope label for debug
+        if shopping_task and shopping_task.product_type:
+            ranking_scope = f"shopping_task:{shopping_task.product_type}"
+        elif is_context_setting:
+            ranking_scope = "context_setting:broad"
+        else:
+            ranking_scope = f"standard:{intent.domain}"
+
+        # Best entity reason
+        strongest_reason = ""
+        if capped:
+            top = capped[0]
+            top_tags = set(top.get("semantic_tags", []))
+            if has_child and top_tags & _CHILD_RELIEF_TAGS:
+                strongest_reason = f"{top.get('name', '')} selected as child-relief anchor"
+            elif top.get("score", 0) >= 0.8:
+                strongest_reason = f"{top.get('name', '')} highest score={top.get('score', 0):.2f}"
+            else:
+                strongest_reason = f"{top.get('name', '')} top-ranked by {ranking_scope}"
+
         debug = DebugEnrichment(
             candidate_count_before_dedupe=candidate_count,
             deduped_entity_count=deduped_count,
             final_entity_count=final_count,
             ranking_explanations=ranking_explanations,
-            dedupe_key_used="entity_id|canonical_name(normalized)",
+            dedupe_key_used="entity_id|canonical_name(normalized)|name_clash_check",
             duplicate_entities_collapsed=collapsed_count,
             canonical_name_normalization_notes=normalization_notes[:10],
+            ranking_scope=ranking_scope,
+            suppressed_off_topic_count=suppressed_off_topic,
+            strongest_surviving_entity_reason=strongest_reason,
         )
 
         return {
@@ -357,6 +404,63 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
             ),
             "_trace_warnings": [f"rank_and_dedupe error: {exc}"],
         }
+
+
+# Entity types to suppress / boost for shopping tasks
+_SUPPRESS_ENTITY_TYPES_SHOPPING: frozenset[str] = frozenset({
+    "dining", "restaurant", "cafe", "coffee", "dessert", "food",
+    "bakery", "quick_service", "fast_food",
+})
+
+_KIDS_BOOST_TAGS: frozenset[str] = frozenset({
+    "kid_friendly", "kids", "children", "family_friendly",
+    "has_kids_menu", "family_dining", "kids_entertainment",
+})
+
+
+def _apply_shopping_task_score_adjustment(
+    score: float,
+    entity: dict[str, Any],
+    task,  # ShoppingTask
+) -> tuple[float, bool]:
+    """
+    Adjust score based on active shopping task relevance.
+
+    Returns (adjusted_score, was_suppressed).
+    Suppression is a strong negative adjustment, not removal — the entity
+    can still survive if there are very few alternatives.
+    """
+    entity_type = entity.get("entity_type", "").lower()
+    entity_tags = set(entity.get("semantic_tags", []))
+    cat = (task.product_category or "").lower()
+
+    # Suppress dining entities from product shopping shortlists
+    if entity_type in _SUPPRESS_ENTITY_TYPES_SHOPPING:
+        return max(0.0, score - 0.40), True
+
+    # Boost entities that match kids category
+    if cat.startswith("kids_") or (task.target_age is not None and task.target_age < 14):
+        if entity_type in ("store", "shop") and entity_tags & _KIDS_BOOST_TAGS:
+            score = min(1.0, score + 0.20)
+        elif entity_type in ("store", "shop") and (
+            "fashion" in entity_tags
+            or "clothing" in entity_tags
+            or "kids" in entity_tags
+        ):
+            score = min(1.0, score + 0.10)
+
+    # Boost entities that match budget preference
+    budget = (task.budget_preference or "").lower()
+    if budget in ("affordable", "budget"):
+        if "value_shopping" in entity_tags or "budget" in entity_tags or "mid_range" in entity_tags:
+            score = min(1.0, score + 0.10)
+        if "luxury" in entity_tags or "premium" in entity_tags:
+            score = max(0.0, score - 0.10)
+    elif budget == "premium":
+        if "luxury" in entity_tags or "premium" in entity_tags:
+            score = min(1.0, score + 0.10)
+
+    return score, False
 
 
 def _score_entity(
