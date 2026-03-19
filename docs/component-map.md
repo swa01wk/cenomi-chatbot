@@ -97,6 +97,7 @@ This document maps every implemented component to its location in the codebase a
 | `services/session_tuning_engine.py` | Applies feedback-based parameter tuning per session |
 | `services/tenant_parameter_tuner.py` | Aggregates feedback across sessions to tune tenant-level weights |
 | `services/knowledge_gap_analyzer.py` | Identifies gaps in playbook coverage and canonical data |
+| `services/response_mode_resolver.py` | Determines `response_mode` (`direct_factual`, `guided_recommendation`, `graceful_recovery`, `hybrid_plan`, `best_effort_shortlist`, `context_acknowledgement`) and `confidence_level` (`high`/`medium`/`low`) from intent, scene, and raw message signals. Applies priority-ordered pattern matching, factual-flow recommendation overrides, and calibrated confidence rules for budget declarations, broad category openers, and vague constraint refinements. |
 
 ### Observability (`app/observability/`)
 

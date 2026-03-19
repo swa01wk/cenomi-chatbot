@@ -1233,12 +1233,14 @@ async def generate_response(state: ConciergeState) -> dict:
     warnings: list[str] = []
     experience_mode = ""
 
-    # ── Early exit: unsupported / gibberish inputs ────────────────────
-    # Also catches graceful_recovery mode for non-unsupported low-confidence turns.
+    # ── Early exit: unsupported / gibberish / clarification-needed inputs ──
+    # Handles graceful_recovery (out-of-scope, low-confidence) and
+    # clarification_request (unsupported capability, unintelligible input).
     is_unsupported = (
         state.intent.primary_intent == "unsupported"
         or state.intent.raw_signals.get("unsupported", False)
         or state.response_plan.response_mode == "graceful_recovery"
+        or state.response_plan.response_mode == "clarification_request"
     )
     if is_unsupported:
         final_text = _build_unsupported_recovery_response(state)
@@ -1714,6 +1716,20 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
 
     if not mode:
         return ""
+
+    # ── clarification_request ─────────────────────────────────────────
+    # Handled by is_unsupported early-exit; this fallback catches any that
+    # slip through to the overlay stage.
+    if mode == "clarification_request":
+        return (
+            "RESPONSE MODE — CLARIFICATION REQUEST:\n"
+            "The visitor asked for something outside the bot's capabilities, "
+            "or the input was unclear. Rules:\n"
+            "  1. Politely acknowledge that this isn't something the bot can do.\n"
+            "  2. Briefly redirect to what the bot CAN help with.\n"
+            "  3. Do NOT pretend to attempt the unsupported action.\n"
+            "  4. Keep it friendly and brief — one or two sentences max.\n\n"
+        )
 
     # ── graceful_recovery (low-confidence, non-unsupported) ───────────
     # The `is_unsupported` early-exit in generate_response already catches

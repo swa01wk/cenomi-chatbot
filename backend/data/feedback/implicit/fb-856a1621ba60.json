@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-856a1621ba60",
+  "session_id": "brk-s05-d10673da",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-fdfca5ad917c",
+  "user_message": "i am here with my family",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bwith\\s+(?:my|the)\\s+(?:kids|children|family)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-19 14:44:45.471485"
+}

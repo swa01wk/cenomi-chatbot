@@ -1039,8 +1039,11 @@ def _infer_budget(msg: str, scene: SceneMemory, changes: list[str]) -> None:
 
 
 def _infer_goal(msg: str, scene: SceneMemory, changes: list[str]) -> None:
+    import re as _re
     for signal, goal in _GOAL_SIGNALS.items():
-        if signal in msg:
+        # Use word boundaries to prevent substring false positives:
+        # e.g. "eat" matching inside "weather", "fun" inside "function", etc.
+        if _re.search(r'\b' + _re.escape(signal) + r'\b', msg):
             if scene.goal != goal:
                 scene.goal = goal
                 changes.append(f"goal={goal}")

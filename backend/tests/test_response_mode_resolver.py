@@ -24,6 +24,7 @@ from app.models.state import (
 )
 from app.services.response_mode_resolver import (
     BEST_EFFORT_SHORTLIST,
+    CLARIFICATION_REQUEST,
     CONTEXT_ACKNOWLEDGEMENT,
     DIRECT_FACTUAL,
     GRACEFUL_RECOVERY,
@@ -339,7 +340,7 @@ class TestPartialQuery:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestBrokenInput:
-    """AC-5: 'asdf' → graceful_recovery"""
+    """AC-5: 'asdf' → clarification_request (graceful handling of gibberish)"""
 
     def test_gibberish_asdf(self):
         state = _make_state(
@@ -351,8 +352,8 @@ class TestBrokenInput:
             raw_signals={"unsupported": True},
         )
         mode, conf, reason, fallback = resolve_response_mode(state)
-        assert mode == GRACEFUL_RECOVERY, (
-            f"Expected graceful_recovery, got: {mode} (reason={reason})"
+        assert mode == CLARIFICATION_REQUEST, (
+            f"Expected clarification_request for gibberish, got: {mode} (reason={reason})"
         )
         assert fallback is True
 
@@ -378,7 +379,7 @@ class TestBrokenInput:
             raw_signals={"unsupported": True},
         )
         mode, _, _, _ = resolve_response_mode(state)
-        assert mode == GRACEFUL_RECOVERY
+        assert mode == CLARIFICATION_REQUEST
 
     def test_confidence_level_is_low_for_broken(self):
         state = _make_state(
@@ -482,8 +483,8 @@ class TestFollowUpResolution:
 class TestHighConfidenceClearIntent:
     """AC-2A: Clear intent + high confidence → direct_factual or guided_recommendation."""
 
-    def test_show_me_movies_direct_factual(self):
-        """'show me movies' factual flow → direct_factual."""
+    def test_show_me_movies_guided_recommendation(self):
+        """'show me movies' → guided_recommendation (display films, offer to filter)."""
         state = _make_state(
             raw_msg="show me movies",
             domain="entertainment",
@@ -493,7 +494,7 @@ class TestHighConfidenceClearIntent:
             confidence=0.90,
         )
         mode, conf, _, _ = resolve_response_mode(state)
-        assert mode == DIRECT_FACTUAL
+        assert mode == GUIDED_RECOMMENDATION
         assert conf == "high"
 
     def test_where_is_zara_direct_factual(self):
@@ -652,13 +653,14 @@ class TestDebugFields:
         assert isinstance(fallback, bool)
 
     def test_graceful_recovery_always_has_fallback_true(self):
+        """Unsupported/gibberish input → clarification_request with fallback=True."""
         state = _make_state(
             primary_intent="unsupported",
             confidence=0.10,
             raw_signals={"unsupported": True},
         )
         mode, _, _, fallback = resolve_response_mode(state)
-        assert mode == GRACEFUL_RECOVERY
+        assert mode == CLARIFICATION_REQUEST
         assert fallback is True
 
     def test_context_acknowledgement_fallback_false(self):

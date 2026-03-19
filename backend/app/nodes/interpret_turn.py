@@ -483,8 +483,9 @@ async def interpret_turn(state: ConciergeState) -> dict:
 
     # ── Pre-flight: detect unsupported / random inputs ────────────────
     # Context-setting messages always win — never flag as unsupported
+    # Gibberish (e.g. "asdf") detected on any turn → clarification_request
     is_context_setting_msg = _is_context_setting(raw_msg, history_len)
-    if not is_context_setting_msg and is_likely_unsupported(raw_msg) and history_len <= 1:
+    if not is_context_setting_msg and is_likely_unsupported(raw_msg):
         # Don't lock into a false domain — return low-confidence general inquiry
         intent = InterpretedIntent(
             domain="general",
@@ -1005,6 +1006,19 @@ _CONTEXT_SETTING_PATTERNS: tuple[re.Pattern[str], ...] = (
     # "it's our wedding anniversary tonight", "our anniversary is today"
     re.compile(r"\b(wedding|golden|silver|diamond)\s+anniversary\b", re.I),
     re.compile(r"\bit'?s\s+our\s+anniversary\b", re.I),
+    # ── NEW: Event / occasion announcements ───────────────────────────
+    # "i have a dinner event tonight", "i have a formal event today"
+    re.compile(r"^i\s+have\s+a\s+\w+\s+event\b", re.I),
+    re.compile(
+        r"^i\s+have\s+an?\s+(formal|important|work|corporate|dinner|lunch|wedding|gala)\s+",
+        re.I,
+    ),
+    # ── NEW: Vague gift/recipient openers ─────────────────────────────
+    # "something nice not too much maybe for kid"
+    re.compile(
+        r"\b(something\s+(nice|good|cute|fun)|get\s+something)\s+(not\s+too\s+much\s+)?maybe\s+for\b",
+        re.I,
+    ),
 )
 
 _CONTEXT_SETTING_SUBSTRINGS: tuple[str, ...] = (
@@ -1114,6 +1128,37 @@ _CONTEXT_SETTING_SUBSTRINGS: tuple[str, ...] = (
     "it's our wedding anniversary",
     "wedding anniversary",
     "our anniversary",
+    # ── Informal role declarations ─────────────────────────────────────────
+    "im bridesmaid",
+    "im a bridesmaid",
+    "im the bridesmaid",
+    "im here as bridesmaid",
+    # ── Gift / recipient context openers ──────────────────────────────────
+    "i want to get something for my",
+    "i want to buy something for my",
+    "i want to find something for my",
+    "looking for something for a",
+    "looking for something for my",
+    "i'm looking for something for my",
+    "i am looking for something for my",
+    "i'm looking for something for a",
+    "i am looking for something for a",
+    "need to get something for my",
+    "need to buy something for my",
+    # ── Event / occasion openers ───────────────────────────────────────────
+    "i have a dinner event",
+    "i have a lunch event",
+    "i have a work event",
+    "i have an event tonight",
+    "i have an event today",
+    "i have a wedding event",
+    "i have a formal event",
+    "i have an important event",
+    # ── Vague multi-fragment gift/recipient openers ────────────────────────
+    "something nice not too much maybe for",
+    "not too much maybe for kid",
+    "maybe for kid",
+    "something for the kids maybe",
 )
 
 
@@ -1228,6 +1273,14 @@ _CONSTRAINT_REFINEMENT_CUES: tuple[str, ...] = (
 
 
 def _detect_message_kind(msg: str, history_len: int, state: ConciergeState) -> str:
+    # "With kid" / "with kids" as filter in movie/entertainment context → followup, NOT context_setting
+    # (user is adding audience filter to movie list, not declaring companions for general planning)
+    _KID_FILTER_IN_ENTERTAINMENT: tuple[str, ...] = ("with kid", "with kids")
+    if any(p in msg for p in _KID_FILTER_IN_ENTERTAINMENT) and history_len >= 2:
+        topic = (state.scene.active_topic or state.scene.topic_lock or "").lower()
+        if any(t in topic for t in ("movie", "movies", "entertainment", "cinema")):
+            return "followup"
+
     # Context-setting always takes priority regardless of history length
     if _is_context_setting(msg, history_len):
         return "context_setting"

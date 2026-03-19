@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-924d523c1d83",
+  "session_id": "brk-s11-60d3eb21",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-c8937170a79f",
+  "user_message": "i need school clothes for my kids",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-19 12:17:14.362607"
+}

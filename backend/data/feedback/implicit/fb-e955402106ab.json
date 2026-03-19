@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-e955402106ab",
+  "session_id": "cx-s9-c811ad99",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-286be97ab7b7",
+  "user_message": "we want something to eat but nothing too expensive \u2014 decent food for around 50\u201360 SAR each",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\btoo\\s+(?:expensive|pricey|costly)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-19 17:08:13.934737"
+}

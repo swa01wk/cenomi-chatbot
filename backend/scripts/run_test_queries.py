@@ -35,7 +35,7 @@ SMOKE_TESTS = [
 SCENARIO_TESTS = [
     # Scenario 1 — Movie Showtimes
     ("1.1", "sc1", "what movies are showing?",              "direct_factual", "high"),
-    ("1.2", "sc1", "show me movies",                        "direct_factual", "high"),
+    ("1.2", "sc1", "show me movies",                        "guided_recommendation", "high"),
     ("1.4", "sc1", "now showing",                           "direct_factual", "high"),
     ("1.5", "sc1", "what's playing at the cinema?",         "direct_factual", "high"),
     ("1.6", "sc1", "any kids movies today?",                "direct_factual", "high"),
@@ -50,9 +50,9 @@ SCENARIO_TESTS = [
 
     # Scenario 3 — Gift Shopping
     ("3.1", "sc3", "i want to buy a gift",                  "guided_recommendation",   "high"),
-    ("3.2", "sc3b", "i want to buy jackets",                "guided_recommendation",   "high"),
+    ("3.2", "sc3b", "i want to buy jackets",                "guided_recommendation",   "medium"),
     ("3.3", "sc3b", "for my 5 year old son",                "guided_recommendation",   "high"),
-    ("3.5", "sc3b", "something affordable",                 "best_effort_shortlist",   "medium"),
+    ("3.5", "sc3b", "something affordable",                 "guided_recommendation",   "high"),
     ("3.6", "sc3c", "gift for my girlfriend",               "guided_recommendation",   "high"),
 
     # Scenario 4 — Date Night

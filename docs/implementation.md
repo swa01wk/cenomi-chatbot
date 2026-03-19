@@ -67,7 +67,7 @@
 - Keyword patterns match domain + sub_intent for mid-length queries
 - LLM invoked only when rule confidence falls below threshold
 - **Query normalization** (`normalize_query_with_pattern`): semantically equivalent variants ("now showing", "what's playing", "what can i watch") are mapped to a canonical form before classification; also emits a `canonical_query_pattern` label (e.g., `"movie_lookup"`) for debug tracing
-- **Unsupported input detection** (`is_likely_unsupported`): gibberish, keyboard mashing (e.g., `"asdf"`), and high-consonant/low-vowel strings are detected early; the node sets `is_unsupported=True` and bypasses the LLM path entirely
+- **Unsupported input detection** (`is_likely_unsupported`): gibberish, keyboard mashing (e.g., `"asdf"`), and high-consonant/low-vowel strings are detected early; the node sets `is_unsupported=True` and bypasses the LLM path entirely. **Important:** The character-diversity check (`_MIN_UNIQUE_CHAR_RATIO`) only fires on inputs with ≤ 4 tokens — natural English sentences always have low unique-char ratios (~0.25–0.35) due to repeated common letters, so applying the check to longer text causes false positives on valid multi-word queries.
 - **Brand misspelling correction** (`maybe_correct_brand`): fuzzy-matches common brand misspellings (e.g., `"nkie"` → `"Nike"`) and injects a correction hint into the debug payload
 - Outputs: `domain`, `sub_intent`, `message_kind` (fresh_request, correction, refinement, followup, topic_switch, **context_setting**)
 - **Interpretation contract** emitted on every turn (stored in `debug_enrichment`):
@@ -92,6 +92,7 @@
 - Tracks: companions, occasion, budget, audience, current area, active topic
 - Persists across turns for personalization
 - Scene signals feed directly into playbook resolution and entity ranking
+- **`_infer_goal` uses word-boundary matching** (`\bsignal\b` regex) when checking `_GOAL_SIGNALS`. Bare substring matching was causing false positives (e.g. `"eat"` matching inside `"weather"`, setting `scene.goal = "dining"` on an off-topic first turn). Word boundaries prevent these contamination cases.
 
 ### 4. `resolve_playbooks`
 - Matches the turn against pre-defined scenario playbooks using `trigger_domains`, `trigger_sub_intents`, and `required_scene_signals`
@@ -427,6 +428,8 @@ When `is_likely_unsupported` detects random input (keyboard mashing, high conson
 - A deterministic fallback response is returned with suggested valid query patterns
 - If `maybe_correct_brand` finds a likely match, the correction is surfaced directly
 
+**Guard calibration:** The character-diversity check is restricted to queries with **≤ 4 tokens**. Multi-turn queries containing 5+ words are common natural English and must not be classified as unsupported regardless of their unique-character ratio. Only short inputs — single-word mashing, two/three-character nonsense, etc. — are evaluated by the diversity heuristic.
+
 ### Defense Layer 7: Offer Honesty Guard
 
 When `sub_intent == "offer_details"`, the LLM prompt contains an explicit constraint:
@@ -713,6 +716,7 @@ Every query is routed to one of two execution flows before `compose_context` run
 | Rule | Trigger | Result |
 |------|---------|--------|
 | 0 — Domain lock | Previous turn was factual + no explicit topic switch | Stay factual (continuity) |
+| 0b — Near-cinema dining | Dining intent + proximity phrase ("near cinema", "near the food court") | Concierge — proximity acts as a location modifier, not a cinema intent override |
 | 1 — Cross-mall | `cross_mall` domain or `cross_mall_search` sub-intent | Always factual |
 | 2 — Factual sub-intent | `sub_intent` ∈ `_FACTUAL_SUB_INTENTS` | Factual — unless clear planning overlay |
 | 3 — Factual domain | `domain` ∈ `navigation`, `cross_mall` | Factual |

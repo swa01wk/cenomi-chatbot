@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-20f265a983df",
+  "session_id": "cx-s3-05317f01",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-89692914f7aa",
+  "user_message": "i want to buy souvenirs \u2014 traditional Saudi items, not generic tourist stuff",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-19 17:56:19.214082"
+}

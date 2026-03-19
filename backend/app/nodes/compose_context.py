@@ -129,10 +129,79 @@ _SUPPRESS_ENTITY_TYPES_FOR_SHOPPING: frozenset[str] = frozenset({
     "quick_service", "fast_food",
 })
 
+# Additional entity types suppressed for apparel/clothing/footwear/accessories tasks.
+# Perfumes, jewelry, beauty, home-decor, electronics are irrelevant to a jacket search.
+_SUPPRESS_ENTITY_TYPES_FOR_APPAREL: frozenset[str] = frozenset({
+    "dining", "restaurant", "cafe", "coffee", "dessert", "food", "bakery",
+    "quick_service", "fast_food",
+    "perfume", "fragrance", "beauty", "cosmetics",
+    "jewelry", "watches", "watch",
+    "home", "home_decor", "furniture",
+    "electronics", "digital", "tech",
+    "gift",  # gift-only stores are not relevant for targeted apparel shopping
+})
+
+# Product categories that are apparel/clothing-oriented and warrant stricter suppression
+_APPAREL_PRODUCT_CATEGORIES: frozenset[str] = frozenset({
+    "outerwear", "kids_outerwear",
+    "footwear", "kids_footwear",
+    "womenswear", "menswear",
+    "topwear", "bottomwear",
+    "kids_fashion", "kids_womenswear", "kids_menswear",
+    "kids_topwear", "kids_bottomwear",
+    "modest_fashion", "sportswear",
+    "accessories", "kids_accessories",
+})
+
 # Product categories broad enough that we DON'T apply entity suppression
 # (they could include gifting contexts where anything might be relevant)
 _BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
     "gifts", "fashion", "", "all_stores",
+})
+
+# ── Shopping task → allowed topic blocks ──────────────────────────────────
+# When a specific shopping task is active, only topic blocks relevant to that
+# task should be opened.  All others are suppressed to prevent drift.
+_SHOPPING_TASK_ALLOWED_TOPIC_BLOCKS: dict[str, list[str]] = {
+    # Apparel / clothing / outerwear
+    "outerwear":         ["shopping", "fashion", "family"],
+    "kids_outerwear":    ["shopping", "family", "kidswear"],
+    "footwear":          ["shopping", "fashion"],
+    "kids_footwear":     ["shopping", "family", "kidswear"],
+    "womenswear":        ["shopping", "fashion"],
+    "menswear":          ["shopping", "fashion"],
+    "topwear":           ["shopping", "fashion"],
+    "bottomwear":        ["shopping", "fashion"],
+    "kids_fashion":      ["shopping", "family", "kidswear"],
+    "kids_womenswear":   ["shopping", "family", "kidswear"],
+    "kids_menswear":     ["shopping", "family", "kidswear"],
+    "kids_topwear":      ["shopping", "family", "kidswear"],
+    "kids_bottomwear":   ["shopping", "family", "kidswear"],
+    "modest_fashion":    ["shopping", "fashion"],
+    "sportswear":        ["shopping", "fashion"],
+    # Accessories / fragrance / beauty
+    "accessories":       ["shopping", "fashion", "gift"],
+    "kids_accessories":  ["shopping", "family", "kidswear"],
+    "fragrance":         ["shopping", "perfume", "gift"],
+    "kids_fragrance":    ["shopping", "family", "kidswear"],
+    "jewelry":           ["shopping", "jewelry", "gift"],
+    "beauty":            ["shopping", "beauty"],
+    # Toys / gifts
+    "toys":              ["shopping", "family", "kidswear", "gift"],
+    "kids_toys":         ["shopping", "family", "kidswear", "gift"],
+    "gifts":             ["shopping", "gift"],
+    # Home / tech
+    "home":              ["shopping", "home"],
+}
+
+# Topic blocks that are ALWAYS disallowed for specific product shopping tasks
+_TOPIC_BLOCKS_ALWAYS_SUPPRESSED_FOR_SHOPPING: frozenset[str] = frozenset({
+    "mall_overview",
+    "services_and_facilities",
+    "services",
+    "cinema_and_movies",
+    "movie",
+    "entertainment",
 })
 
 
@@ -162,6 +231,72 @@ def _suppress_dining_for_shopping(entities: list[dict]) -> tuple[list[dict], int
             kept.append(e)
     # Never leave fewer than 2 entities after suppression
     return (kept if len(kept) >= 2 else entities), suppressed
+
+
+def _suppress_off_topic_for_task(
+    entities: list[dict], task,
+) -> tuple[list[dict], int, list[str]]:
+    """
+    Remove off-topic entities for a specific product shopping task.
+
+    For apparel/clothing tasks, also removes perfume, jewelry, beauty, home,
+    electronics entities — these are irrelevant to a jacket / shoe / kids-wear search.
+
+    Returns (kept_entities, suppressed_count, suppressed_names).
+    """
+    cat = (task.product_category or "").lower()
+    suppress_set = (
+        _SUPPRESS_ENTITY_TYPES_FOR_APPAREL
+        if cat in _APPAREL_PRODUCT_CATEGORIES
+        else _SUPPRESS_ENTITY_TYPES_FOR_SHOPPING
+    )
+    kept: list[dict] = []
+    suppressed = 0
+    suppressed_names: list[str] = []
+    for e in entities:
+        if e.get("entity_type", "").lower() in suppress_set:
+            suppressed += 1
+            suppressed_names.append(e.get("name", ""))
+        else:
+            kept.append(e)
+    # Never leave fewer than 2 entities after suppression
+    if len(kept) < 2:
+        return entities, 0, []
+    return kept, suppressed, suppressed_names
+
+
+def _filter_topic_blocks_for_shopping_task(
+    topic_names: list[str], task,
+) -> tuple[list[str], list[str]]:
+    """
+    Narrow the candidate topic block list to those relevant for the active
+    shopping task.  Returns (allowed_blocks, suppressed_blocks).
+    """
+    cat = (task.product_category or "").lower()
+    allowed_for_cat = _SHOPPING_TASK_ALLOWED_TOPIC_BLOCKS.get(cat)
+
+    suppressed: list[str] = []
+    if not allowed_for_cat:
+        # Unknown category — only suppress the always-disallowed blocks
+        kept = [t for t in topic_names if t not in _TOPIC_BLOCKS_ALWAYS_SUPPRESSED_FOR_SHOPPING]
+        suppressed = [t for t in topic_names if t in _TOPIC_BLOCKS_ALWAYS_SUPPRESSED_FOR_SHOPPING]
+        return kept, suppressed
+
+    # Keep blocks that are either in the allowed list OR not in the always-suppressed set
+    kept = []
+    for t in topic_names:
+        if t in _TOPIC_BLOCKS_ALWAYS_SUPPRESSED_FOR_SHOPPING:
+            suppressed.append(t)
+        elif t in allowed_for_cat:
+            kept.append(t)
+        else:
+            # Not in allowed list but also not always-suppressed — suppress it
+            suppressed.append(t)
+
+    # Fall back to the full list if filtering removed everything
+    if not kept:
+        return topic_names, []
+    return kept, suppressed
 
 
 def _is_mall_overview_followup(state: ConciergeState) -> bool:
@@ -286,8 +421,20 @@ async def compose_context(state: ConciergeState) -> dict:
     _dominant_context_reason = "standard"
     _candidate_scope = "full"
     _off_topic_suppressed = 0
+    _off_topic_names_suppressed: list[str] = []
+    _topic_blocks_suppressed: list[str] = []
     _shopping_scope_applied = False
     _overview_followup_preserved = False
+    _candidate_scope_reason = ""
+
+    # Continuity resolved topic — inherited from resolve_playbooks if set
+    _continuity_resolved_topic = (
+        state.continuity_resolved_topic
+        or scene.active_topic
+        or intent.domain
+        or ""
+    )
+    _dominant_task_scope = state.dominant_task_scope or ""
 
     # ── Mall overview follow-up: lock to mall_overview only ────────────
     if _overview_followup:
@@ -350,6 +497,15 @@ async def compose_context(state: ConciergeState) -> dict:
 
     # ── Topic blocks (use expanded_query for richer matching) ────────
     retrieval_query = state.expanded_query or state.normalized_user_message
+
+    # Determine if a specific shopping task should narrow topic blocks
+    _task_for_topics = getattr(scene, "shopping_task", None)
+    _has_specific_task_for_topics = bool(
+        _task_for_topics
+        and _task_for_topics.product_type
+        and (_task_for_topics.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+    )
+
     if intent.domain == "exploration":
         topic_names = _exploration_topic_blocks(mall_ctx)
     elif intent.domain == "mall_info":
@@ -365,6 +521,19 @@ async def compose_context(state: ConciergeState) -> dict:
         if not topic_names:
             topic_names = ["dining", "services"]
             warnings.append("No topic blocks matched — using defaults")
+
+    # ── Shopping task: filter topic blocks to task-relevant ones ──────
+    # When a specific product shopping task is active, suppress off-topic
+    # topic blocks (gift_shopping, mall_overview, services, etc.).
+    if _has_specific_task_for_topics and intent.domain not in ("mall_info", "exploration"):
+        topic_names, _topic_blocks_suppressed = _filter_topic_blocks_for_shopping_task(
+            topic_names, _task_for_topics,
+        )
+        if _topic_blocks_suppressed:
+            warnings.append(
+                f"Shopping task '{_task_for_topics.product_type}': "
+                f"suppressed off-topic topic blocks: {_topic_blocks_suppressed}"
+            )
 
     # ── Semantic signals from scene + hybrid modifiers ────────────────
     signals: list[str] = list(scene.audience)
@@ -400,6 +569,12 @@ async def compose_context(state: ConciergeState) -> dict:
         _shopping_scope_applied = True
         _dominant_context_reason = f"shopping_task_scoped:{scene.shopping_task.product_category}"
         _candidate_scope = f"shopping_task:{scene.shopping_task.product_type}"
+        _candidate_scope_reason = (
+            f"active shopping_task product_category="
+            f"{scene.shopping_task.product_category}"
+        )
+        if not _dominant_task_scope:
+            _dominant_task_scope = scene.shopping_task.product_category or scene.shopping_task.product_type
     category_entities: list[dict[str, Any]] = []
     discovery_expanded = False
     if category_key:
@@ -508,21 +683,28 @@ async def compose_context(state: ConciergeState) -> dict:
     if entities and not category_entities:
         entities = _filter_entities_by_intent_domain(entities, intent.domain)
 
-    # ── Shopping task: suppress off-topic entities ─────────────────────
+    # ── Shopping task: suppress off-topic entities ────────────────────
     # When a specific product shopping task is active (e.g. "kids jacket"),
-    # remove dining/cafe entities that were pulled in by broad retrieval.
+    # remove irrelevant entities (dining, perfume, jewelry, beauty, etc.)
+    # that were pulled in by broad retrieval OR by semantic audience enrichment.
+    #
+    # This suppression is ALWAYS applied when a specific task is active —
+    # not gated on the retrieval path, so semantic enrichment cannot reintroduce
+    # off-topic entities after category retrieval scoped the primary list.
     task = getattr(scene, "shopping_task", None)
     if (
         task
         and task.product_type
         and (task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
-        and not category_key  # category retrieval already scoped; only suppress in fallback path
     ):
-        entities, _off_topic_suppressed = _suppress_dining_for_shopping(entities)
+        entities, _off_topic_suppressed, _off_topic_names_suppressed = (
+            _suppress_off_topic_for_task(entities, task)
+        )
         if _off_topic_suppressed:
             warnings.append(
                 f"Shopping task '{task.product_type}': suppressed "
-                f"{_off_topic_suppressed} off-topic dining entities"
+                f"{_off_topic_suppressed} off-topic entities"
+                + (f": {_off_topic_names_suppressed[:5]}" if _off_topic_names_suppressed else "")
             )
 
     # ── Apply tenant ranking biases ───────────────────────────────────
@@ -608,14 +790,33 @@ async def compose_context(state: ConciergeState) -> dict:
         notes.append(
             f"SHOPPING TASK SCOPE: product='{task.product_type}' "
             f"category='{task.product_category}'. "
-            f"Retrieve only relevant stores — suppress perfumes/beauty/unrelated gifts."
+            f"Retrieve only relevant stores — suppress perfumes/beauty/jewelry/"
+            f"home/unrelated gifts."
+        )
+
+    if _topic_blocks_suppressed:
+        notes.append(
+            f"TOPIC BLOCK SUPPRESSION: removed off-topic blocks "
+            f"{_topic_blocks_suppressed} for shopping task "
+            f"'{task.product_type if task else '?'}'."
         )
 
     if _off_topic_suppressed:
+        names_str = ", ".join(_off_topic_names_suppressed[:5])
         notes.append(
-            f"Off-topic suppression: {_off_topic_suppressed} dining entities removed "
-            "from shopping task context."
+            f"Off-topic suppression: {_off_topic_suppressed} entities removed "
+            f"from shopping task context"
+            + (f" ({names_str})" if names_str else "") + "."
         )
+
+    if _dominant_task_scope:
+        notes.append(
+            f"DOMINANT TASK SCOPE: {_dominant_task_scope} — "
+            f"all retrieval and ranking must stay inside this scope."
+        )
+
+    if _continuity_resolved_topic:
+        notes.append(f"CONTINUITY TOPIC: {_continuity_resolved_topic}")
 
     composition = ContextComposition(
         selected_topic_blocks=topic_names,
@@ -630,14 +831,26 @@ async def compose_context(state: ConciergeState) -> dict:
             dominant_context_reason=_dominant_context_reason,
             candidate_scope=_candidate_scope,
             off_topic_entities_suppressed=_off_topic_suppressed,
+            off_topic_entity_names_suppressed=_off_topic_names_suppressed[:10],
             shopping_scope_applied=_shopping_scope_applied,
             overview_followup_preserved=_overview_followup_preserved,
+            topic_blocks_suppressed=_topic_blocks_suppressed,
+            candidate_scope_reason=_candidate_scope_reason,
+            dominant_task_scope=_dominant_task_scope,
+            continuity_resolved_topic=_continuity_resolved_topic,
+            shopping_task_active=bool(
+                task and task.product_type
+                and (task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+            ),
         ),
+        "dominant_task_scope": _dominant_task_scope,
+        "continuity_resolved_topic": _continuity_resolved_topic,
         "_trace_summary": (
             f"Context: {len(topic_names)} topics, "
             f"{len(signals)} signals, {len(entities)} entities"
             + (f" [category={category_key}]" if category_key else "")
             + (f" [shopping_scope={_candidate_scope}]" if _shopping_scope_applied else "")
+            + (f" [suppressed_blocks={len(_topic_blocks_suppressed)}]" if _topic_blocks_suppressed else "")
         ),
     }
     if warnings:

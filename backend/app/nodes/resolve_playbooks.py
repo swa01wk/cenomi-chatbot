@@ -60,6 +60,20 @@ _FACTUAL_FLOW_BLOCKED_PLAYBOOKS: frozenset[str] = frozenset({
 
 _CONFIDENCE_THRESHOLD = 0.25
 
+# Product categories that are broad/generic enough that family override is still
+# appropriate (no specific product task has been created).
+_BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
+    "gifts", "fashion", "", "all_stores",
+})
+
+# Playbooks that are appropriate for a specific product shopping task.
+# When one of these is selected, family/child context acts as a BIAS, not override.
+_PRODUCT_TASK_PLAYBOOKS: list[str] = [
+    "pb-category-shopping",
+    "pb-quick-errand",
+    "pb-child-activity-parents-shop",
+]
+
 
 # Playbooks that only make sense when the user explicitly asks for a gift/present.
 # They must NOT be selected for general activity, date-idea, or exploration queries.
@@ -243,15 +257,34 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
                     ),
                 }
 
-    # ── Family shopping override ──────────────────────────────────────
-    # A parent + child shopping query must NEVER default to luxury/adult playbooks.
+    # ── Detect whether a specific product shopping task is active ────
+    # A specific task (e.g. "jacket", "kids_outerwear") must NOT be overridden
+    # by family/child presence.  Family context becomes a bias only.
     has_child = bool(_CHILD_COMPANIONS & set(scene.companions)) or any(
         d.get("type") == "child" for d in scene.companion_details
     )
+    _shopping_task = getattr(scene, "shopping_task", None)
+    has_specific_shopping_task = bool(
+        _shopping_task
+        and _shopping_task.product_type
+        and (_shopping_task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+    )
+
     is_shopping_domain = intent.domain == "shopping"
     is_family_or_exploration = intent.domain in ("shopping", "exploration", "entertainment", "dining")
 
-    if has_child and is_family_or_exploration:
+    # ── Family shopping override ──────────────────────────────────────
+    # Rule: family/child context overrides ONLY when there is no specific product
+    # shopping task active.  When a task is active (e.g. "buy jackets for my 5 yr
+    # old"), the task scope dominates; family signals are injected as ranking bias.
+    #
+    # Priority order:
+    #   1. explicit product task / fact scope  (has_specific_shopping_task)
+    #   2. primary intent / domain
+    #   3. scenario
+    #   4. modifiers
+    #   5. family/child bias  ← only reaches force-select when no task above
+    if has_child and is_family_or_exploration and not has_specific_shopping_task:
         for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
             family_pb = mall_ctx.match_playbook(
                 intent=pb_id,
@@ -268,6 +301,8 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
                 debug = DebugEnrichment(
                     playbook_rejection_reasons=rejections,
                     semantic_match_explanations=explanations,
+                    family_override_applied=True,
+                    playbook_bias_applied=[],
                 )
                 return {
                     "playbook": resolution,
@@ -277,6 +312,19 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
                         f"({len(ranked_entities)} entities)"
                     ),
                 }
+    elif has_child and has_specific_shopping_task:
+        # Child present + specific product task: inject family bias into signals
+        # so ranking favours kid-friendly stores, but DON'T force-select family playbook.
+        _family_bias_signals = ["kid_friendly", "family_friendly", "kids", "child"]
+        for sig in _family_bias_signals:
+            if sig not in all_signals:
+                all_signals.append(sig)
+        rejections.append(
+            f"Family override suppressed: active shopping_task "
+            f"product_type={_shopping_task.product_type!r} "
+            f"category={_shopping_task.product_category!r} "
+            "takes priority — family signals injected as ranking bias only"
+        )
 
     # ── Normal playbook matching ──────────────────────────────────────
     matched_pb = mall_ctx.match_playbook(
@@ -309,14 +357,29 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
             f"{matched_pb.playbook_id} rejected: luxury playbook inappropriate "
             f"when child companions are present"
         )
-        # Try family playbook instead
-        for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
-            family_pb = mall_ctx.match_playbook(pb_id, all_signals)
-            if family_pb:
-                matched_pb = family_pb
-                break
-        else:
+        if has_specific_shopping_task:
+            # Specific product task active — reject luxury but don't redirect to
+            # family; let normal matching/fallback find the right task playbook.
             matched_pb = None
+        else:
+            # No specific task — family playbook is the right fallback
+            for pb_id in _FAMILY_SHOPPING_PLAYBOOKS:
+                family_pb = mall_ctx.match_playbook(pb_id, all_signals)
+                if family_pb:
+                    matched_pb = family_pb
+                    break
+            else:
+                matched_pb = None
+
+    # ── Compute continuity / dominant task scope for downstream nodes ─
+    _dominant_task_scope = ""
+    _continuity_resolved_topic = scene.active_topic or intent.domain or ""
+    _playbook_bias_applied: list[str] = []
+    if has_specific_shopping_task and _shopping_task:
+        _dominant_task_scope = _shopping_task.product_category or _shopping_task.product_type
+        _continuity_resolved_topic = "shopping"
+        if has_child:
+            _playbook_bias_applied.append("family_filter")
 
     if matched_pb:
         ranked_entities = mall_ctx.rank_for_playbook(matched_pb)
@@ -336,10 +399,17 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
             semantic_match_explanations=explanations,
             selected_playbook_id=matched_pb.playbook_id,
             selected_playbook_reason=selection_reason,
+            family_override_applied=False,
+            playbook_bias_applied=_playbook_bias_applied,
+            dominant_task_scope=_dominant_task_scope,
+            continuity_resolved_topic=_continuity_resolved_topic,
+            shopping_task_active=has_specific_shopping_task,
         )
         return {
             "playbook": resolution,
             "debug_enrichment": debug,
+            "dominant_task_scope": _dominant_task_scope,
+            "continuity_resolved_topic": _continuity_resolved_topic,
             "_trace_summary": (
                 f"Playbook: {matched_pb.playbook_id} "
                 f"({entity_count} ranked entities)"
@@ -347,7 +417,7 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
         }
 
     # ── Fallback scoring ─────────────────────────────────────────────
-    scored = _score_fallback(intent, scene, semantic_signals)
+    scored = _score_fallback(intent, scene, semantic_signals, has_specific_shopping_task)
     matched = [pb_id for pb_id, _ in scored]
     selected = scored[0][0] if scored else ""
     confidence = scored[0][1] if scored else 0.0
@@ -370,11 +440,18 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
         selected_playbook_id=selected,
         selected_playbook_reason=selection_reason,
         playbook_suppressed=[r.split(" ")[0] for r in rejections if r],
+        family_override_applied=False,
+        playbook_bias_applied=_playbook_bias_applied,
+        dominant_task_scope=_dominant_task_scope,
+        continuity_resolved_topic=_continuity_resolved_topic,
+        shopping_task_active=has_specific_shopping_task,
     )
 
     return {
         "playbook": resolution,
         "debug_enrichment": debug,
+        "dominant_task_scope": _dominant_task_scope,
+        "continuity_resolved_topic": _continuity_resolved_topic,
         "_trace_summary": f"Playbook: {selected or 'none'} (conf={confidence})",
     }
 
@@ -491,8 +568,17 @@ _FALLBACK_TRIGGERS: dict[str, dict] = {
 }
 
 
+_FAMILY_FALLBACK_PLAYBOOKS: frozenset[str] = frozenset({
+    "pb-family-shopping",
+    "pb-family-visit",
+})
+
+
 def _score_fallback(
-    intent, scene, semantic_signals: list[str],
+    intent,
+    scene,
+    semantic_signals: list[str],
+    has_specific_shopping_task: bool = False,
 ) -> list[tuple[str, float]]:
     scene_tokens: set[str] = set()
     scene_tokens.update(scene.companions)
@@ -514,6 +600,12 @@ def _score_fallback(
         overlap = scene_tokens & triggers["scene_signals"]
         if overlap:
             score += 0.3 * (len(overlap) / max(len(triggers["scene_signals"]), 1))
+
+        # When a specific product task is active, heavily downweight generic
+        # family/broad shopping playbooks so the task-specific path wins.
+        if has_specific_shopping_task and pb_id in _FAMILY_FALLBACK_PLAYBOOKS:
+            score *= 0.25
+
         if score >= _CONFIDENCE_THRESHOLD:
             scored.append((pb_id, round(score, 3)))
 

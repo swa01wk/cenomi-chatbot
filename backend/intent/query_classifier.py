@@ -32,9 +32,12 @@ logger = logging.getLogger(__name__)
 # Value: canonical form that the classifier handles well
 
 _NORMALIZATION_TABLE: list[tuple[re.Pattern[str], str]] = [
-    # Movie lookups — all variants → canonical "what movies are showing"
+    # Movie lookups — factual variants → canonical "what movies are showing"
+    # NOTE: "show me movies" intentionally excluded — it reads as a recommendation
+    # request ("show me options"), not a raw listing. It should not be normalized
+    # to the factual "what movies are showing" form.
     (re.compile(
-        r"^(show\s+me\s+movies?|movies?\??|what\s+movies?\s*(do\s+we\s+have|are\s+there|are\s+showing|"
+        r"^(movies?\??|what\s+movies?\s*(do\s+we\s+have|are\s+there|are\s+showing|"
         r"can\s+i\s+watch|can\s+i\s+see|are\s+on|are\s+available)?|which\s+movies?|"
         r"movie\s+list|list\s+of\s+movies?|movies?\s+available|all\s+movies?|"
         r"now\s+showing|what'?s?\s+(?:playing|on)|what\s+is\s+playing|"
@@ -698,8 +701,12 @@ def is_likely_unsupported(query: str) -> bool:
             return True
 
     # Low character diversity across the whole query
+    # NOTE: Only valid for short inputs (≤4 words). Natural English sentences always
+    # have a low unique-char ratio (~0.25–0.35) because common letters (e, t, a, o, n)
+    # repeat heavily — applying this check to longer text causes false positives on
+    # perfectly valid multi-word queries.
     chars = [c for c in stripped.lower() if c.isalpha()]
-    if len(chars) >= 6:
+    if len(chars) >= 6 and len(tokens) <= 4:
         unique_ratio = len(set(chars)) / len(chars)
         if unique_ratio < _MIN_UNIQUE_CHAR_RATIO:
             return True

@@ -20,7 +20,7 @@ it describes _what the response must do_, not the exact wording.
 | # | Query | response_mode | confidence_level | Expected Response |
 |---|-------|--------------|-----------------|-------------------|
 | 1.1 | `what movies are showing?` | `direct_factual` | high | Must list currently showing movies with titles, genres, durations, and showtimes. Must NOT suggest restaurants or activities instead. |
-| 1.2 | `show me movies` | `direct_factual` | high | Same as 1.1. Must produce identical content to query 1.3 (normalization check). |
+| 1.2 | `show me movies` | `guided_recommendation` | high | Must display currently showing films. Must NOT ask for genre before showing any. Should offer to filter by genre/age after listing. |
 | 1.3 | `what movies do we have` | `direct_factual` | high | Same as 1.2. Both queries normalize to the same canonical form. |
 | 1.4 | `now showing` | `direct_factual` | high | Must return movie schedule without asking a clarifying question. Showtimes must be visible. |
 | 1.5 | `what's playing at the cinema?` | `direct_factual` | high | Must list all movies currently showing. Format: title · genre · duration · showtimes. |
@@ -54,10 +54,10 @@ it describes _what the response must do_, not the exact wording.
 | # | Query | response_mode | confidence_level | Expected Response |
 |---|-------|--------------|-----------------|-------------------|
 | 3.1 | `i want to buy a gift` | `guided_recommendation` | high | Must ask or assume context and present gift-oriented stores. `shopping_task.product_type` should not yet be set to something specific. |
-| 3.2 | `i want to buy jackets` | `guided_recommendation` | high | Must suggest fashion/outerwear stores. `shopping_task.product_type = jacket`, `product_category = outerwear`. |
+| 3.2 | `i want to buy jackets` | `guided_recommendation` | medium | Must ask a clarifying question (who for, what style?) before listing stores. `shopping_task.product_type = jacket`. Must NOT immediately dump all fashion stores — this is a broad opener. |
 | 3.3 | *(after 3.2)* `for my 5 year old son` | `guided_recommendation` | high | Must refine to kids outerwear stores. `shopping_task.target_age = 5`, `product_category = kids_outerwear`. Must NOT reset the jacket context. |
 | 3.4 | *(after 3.3)* `what's the price range?` | `guided_recommendation` | high | Must move `shopping_stage` to `price_guidance`. Should give a general price guidance or direct the visitor to in-store pricing. Must NOT hallucinate specific prices. |
-| 3.5 | *(after 3.3)* `something affordable` | `best_effort_shortlist` | medium | Must set `budget_preference = affordable`. Must return or refine toward budget-friendly kids fashion stores. Must NOT present luxury options. |
+| 3.5 | *(after 3.3)* `something affordable` | `guided_recommendation` | high | Must set `budget_preference = affordable`. Must return or refine toward budget-friendly kids fashion stores. Must NOT present luxury options. |
 | 3.6 | `gift for my girlfriend` | `guided_recommendation` | high | Must suggest gift-appropriate stores (beauty, accessories, fashion) with a romantic/couple framing. Must NOT suggest kids stores. |
 | 3.7 | *(after 3.6)* `something elegant` | `guided_recommendation` | high | Must refine to elegant / premium options. `style_intent` should include `elegant`. Must maintain the girlfriend gift context. |
 

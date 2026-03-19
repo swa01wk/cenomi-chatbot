@@ -1,0 +1,17 @@
+{
+  "signal_id": "fb-f7d363512d56",
+  "source_event_id": "fb-2e55d7b94153",
+  "source_type": "implicit",
+  "session_id": "brk-s16-0bce269d",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "signal_type": "poor_recommendation_quality",
+  "severity": 0.5599999999999999,
+  "strategy_used": "",
+  "playbook_used": "",
+  "entity_types_involved": [],
+  "semantic_tags_involved": [],
+  "intent_domain": "",
+  "context": {},
+  "timestamp": "2026-03-19 09:27:59.522895"
+}

@@ -1,0 +1,26 @@
+{
+  "event_id": "fb-1922e2a66e06",
+  "session_id": "brk-s12-f519a66a",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-fc69a8d9f55e",
+  "user_message": "i want to eat near the cinema",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "wrong_context",
+    "location_correction",
+    "preference_override"
+  ],
+  "correction_details": {
+    "wrong_context": {
+      "matched_pattern": "\\bnear\\s+the\\b",
+      "confidence": 0.75
+    },
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-19 16:04:35.800762"
+}

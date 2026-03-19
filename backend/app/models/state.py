@@ -360,7 +360,8 @@ class ResponsePlan(BaseModel):
         default="",
         description=(
             "Behavioural response mode: direct_factual | guided_recommendation | "
-            "hybrid_plan | best_effort_shortlist | context_acknowledgement | graceful_recovery"
+            "hybrid_plan | best_effort_shortlist | context_acknowledgement | "
+            "graceful_recovery | clarification_request"
         ),
     )
     confidence_level: str = Field(
@@ -452,11 +453,21 @@ class DebugEnrichment(BaseModel):
     off_topic_entities_suppressed: int = 0
     shopping_scope_applied: bool = False
     overview_followup_preserved: bool = False
+    topic_blocks_suppressed: list[str] = Field(default_factory=list)
+    off_topic_entity_names_suppressed: list[str] = Field(default_factory=list)
+    candidate_scope_reason: str = ""
 
     # ── Rank-and-dedupe patch debug (set by rank_and_dedupe) ───────────
     ranking_scope: str = ""
     suppressed_off_topic_count: int = 0
     strongest_surviving_entity_reason: str = ""
+
+    # ── Continuity / dominant task scope debug ─────────────────────────
+    dominant_task_scope: str = ""
+    shopping_task_active: bool = False
+    family_override_applied: bool = False
+    playbook_bias_applied: list[str] = Field(default_factory=list)
+    continuity_resolved_topic: str = ""
 
     # ── Response Mode Resolver debug (set by choose_strategy) ──────────
     response_mode: str = ""
@@ -518,6 +529,11 @@ class ConciergeState(BaseModel):
     secondary_intents: list[str] = Field(default_factory=list)
     modifiers: list[str] = Field(default_factory=list)
     dominant_context_type: str = ""
+    # ── 1f. Continuity contract — shared between nodes ────────────────
+    # dominant_task_scope: the current active task scope (e.g. "kids_outerwear")
+    # Used by resolve_playbooks, compose_context, rank_and_dedupe to stay consistent.
+    dominant_task_scope: str = ""
+    continuity_resolved_topic: str = ""
     # ── 1e. Domain lock + response strategy (set by route_flow) ──────
     domain_locked: bool = False          # True when prior factual intent is locked
     response_strategy: str = ""          # Resolved strategy name (e.g. filtered_factual_list)

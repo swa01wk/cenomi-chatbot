@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-5447dafef7cd",
+  "session_id": "cx-s8-7fe2465b",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-0b4b533421a4",
+  "user_message": "is there a gym or fitness studio in or near the mall?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "wrong_context",
+    "location_correction"
+  ],
+  "correction_details": {
+    "wrong_context": {
+      "matched_pattern": "\\bnear\\s+the\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-19 17:29:58.660836"
+}

@@ -330,8 +330,18 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         capped = [e for _, e in diversified[:entity_cap]]
 
         # ── 7. Child-relief anchor injection ─────────────────────────
+        # Skip child-relief injection when a specific product shopping task is
+        # active — the task scope already governs what should be included, and
+        # injecting an entertainment/activity entity would break the shopping
+        # task scope. (e.g. "buy jackets for my 5 yr old" should NOT get a
+        # cinema injected just because a child is present.)
         must_include_anchor = response_plan.must_include_anchor_type
-        if has_child or "kid_friendly" in audience_set or "kid_friendly_required" in constraint_set:
+        _skip_child_relief = (
+            shopping_task is not None
+            and bool(shopping_task.product_type)
+            and (shopping_task.product_category or "").lower() not in _BROAD_TASK_CATEGORIES
+        )
+        if (has_child or "kid_friendly" in audience_set or "kid_friendly_required" in constraint_set) and not _skip_child_relief:
             capped = _ensure_child_relief_anchor(
                 capped, deduped, entity_cap,
             )
@@ -352,8 +362,14 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         final_count = len(capped)
 
         # Determine ranking scope label for debug
+        _dominant_task_scope_rank = state.dominant_task_scope or ""
+        _continuity_topic_rank = state.continuity_resolved_topic or ""
         if shopping_task and shopping_task.product_type:
             ranking_scope = f"shopping_task:{shopping_task.product_type}"
+            if not _dominant_task_scope_rank:
+                _dominant_task_scope_rank = (
+                    shopping_task.product_category or shopping_task.product_type
+                )
         elif is_context_setting:
             ranking_scope = "context_setting:broad"
         else:
@@ -382,6 +398,11 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
             ranking_scope=ranking_scope,
             suppressed_off_topic_count=suppressed_off_topic,
             strongest_surviving_entity_reason=strongest_reason,
+            dominant_task_scope=_dominant_task_scope_rank,
+            continuity_resolved_topic=_continuity_topic_rank,
+            shopping_task_active=not _skip_child_relief and bool(
+                shopping_task and shopping_task.product_type
+            ),
         )
 
         return {
@@ -412,6 +433,35 @@ _SUPPRESS_ENTITY_TYPES_SHOPPING: frozenset[str] = frozenset({
     "bakery", "quick_service", "fast_food",
 })
 
+# Expanded suppression for apparel / clothing / outerwear tasks.
+# Perfumes, jewelry, beauty, home, electronics are irrelevant to a jacket search.
+_SUPPRESS_ENTITY_TYPES_APPAREL: frozenset[str] = frozenset({
+    "dining", "restaurant", "cafe", "coffee", "dessert", "food",
+    "bakery", "quick_service", "fast_food",
+    "perfume", "fragrance", "beauty", "cosmetics",
+    "jewelry", "watches", "watch",
+    "home", "home_decor", "furniture",
+    "electronics", "digital", "tech",
+    "gift",
+})
+
+# Product categories that are apparel-oriented (warrant stricter ranking suppression)
+_APPAREL_RANK_CATEGORIES: frozenset[str] = frozenset({
+    "outerwear", "kids_outerwear",
+    "footwear", "kids_footwear",
+    "womenswear", "menswear",
+    "topwear", "bottomwear",
+    "kids_fashion", "kids_womenswear", "kids_menswear",
+    "kids_topwear", "kids_bottomwear",
+    "modest_fashion", "sportswear",
+    "accessories", "kids_accessories",
+})
+
+# Product categories that are too broad for strict task-scoped ranking
+_BROAD_TASK_CATEGORIES: frozenset[str] = frozenset({
+    "gifts", "fashion", "", "all_stores",
+})
+
 _KIDS_BOOST_TAGS: frozenset[str] = frozenset({
     "kid_friendly", "kids", "children", "family_friendly",
     "has_kids_menu", "family_dining", "kids_entertainment",
@@ -429,13 +479,23 @@ def _apply_shopping_task_score_adjustment(
     Returns (adjusted_score, was_suppressed).
     Suppression is a strong negative adjustment, not removal — the entity
     can still survive if there are very few alternatives.
+
+    For apparel/clothing categories, suppression extends to perfume, jewelry,
+    beauty, home, electronics — not just dining.
     """
     entity_type = entity.get("entity_type", "").lower()
     entity_tags = set(entity.get("semantic_tags", []))
     cat = (task.product_category or "").lower()
 
-    # Suppress dining entities from product shopping shortlists
-    if entity_type in _SUPPRESS_ENTITY_TYPES_SHOPPING:
+    # Determine which suppression set to use based on task category
+    suppress_set = (
+        _SUPPRESS_ENTITY_TYPES_APPAREL
+        if cat in _APPAREL_RANK_CATEGORIES
+        else _SUPPRESS_ENTITY_TYPES_SHOPPING
+    )
+
+    # Suppress off-topic entities from product shopping shortlists
+    if entity_type in suppress_set:
         return max(0.0, score - 0.40), True
 
     # Boost entities that match kids category

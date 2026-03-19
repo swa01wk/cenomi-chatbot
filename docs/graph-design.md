@@ -839,7 +839,7 @@ The `load_session` node reads from the store; `update_memory` writes back. The `
 | **`DebugEnrichment`** model with scene notes, ranking, rejection reasons | **Done** |
 | **Acceptance tests** (47 tests, 7 AC queries) | **Done** |
 | **Query normalization table** (`_NORMALIZATION_TABLE`) — movie, dining, mall, offer equivalences | **Done** |
-| **Unsupported input detection** (`is_likely_unsupported`) — gibberish, keyboard mashing, high-consonant strings | **Done** |
+| **Unsupported input detection** (`is_likely_unsupported`) — gibberish, keyboard mashing, high-consonant strings; character-diversity check scoped to ≤ 4-token inputs only (natural English sentences have inherently low unique-char ratios and must not be flagged) | **Done** |
 | **Brand misspelling correction** (`maybe_correct_brand`) — fuzzy matching with trailing filler word stripping | **Done** |
 | **`context_setting` message kind** — scene declarations route to concierge for acknowledgement | **Done** |
 | **Dual-flow routing discipline** (`route_flow.py`) — priority-ordered factual vs. concierge rules | **Done** |
@@ -851,6 +851,11 @@ The `load_session` node reads from the store; `update_memory` writes back. The `
 | **Extended `DebugEnrichment`** — `normalized_query`, `canonical_query_pattern`, `topic_lock`, `topic_lock_confidence`, `retrieval_discipline_reason`, `canonical_name_normalization_notes`, `suppressed_playbooks`, `selection_reason`, `interpretation_contract` | **Done** |
 | **Normalized canonical deduplication** — unicode-normalized, article-stripped, punctuation-stripped dedupe key | **Done** |
 | **Comprehensive stability test suite** — `tests/test_stability.py`, 80 tests across 14 AC categories | **Done** |
+| **Near-cinema dining pre-check** in `route_flow.py` — dining intent + proximity phrase routes to concierge (proximity is a location modifier, not a cinema intent override) | **Done** |
+| **`_FACTUAL_FLOW_RECOMMENDATION_OVERRIDES`** in `response_mode_resolver.py` — curated recommendation phrases ("any high-end options", "which stores give the best value") force `guided_recommendation` even when `flow_type = "factual"` | **Done** |
+| **Confidence calibration fixes** — broad category openers always return MEDIUM; budget declarations (`"budget around X SAR"`) always return MEDIUM; vague short constraints (`"not too heavy"`, ≤ 6 tokens) return MEDIUM; open-ended superlatives (`"most fun thing"`) return MEDIUM | **Done** |
+| **`_infer_goal` word-boundary fix** in `update_scene_memory.py` — `_GOAL_SIGNALS` matched with `\bsignal\b` regex to prevent false positives (e.g. `"eat"` inside `"weather"`) | **Done** |
+| **ATM substring false-positive fix** — `"atm"` replaced with explicit phrases (`"find an atm"`, `"where is the atm"`, etc.) in `_FACTUAL_SERVICE_PATTERNS` to avoid matching `"treatment"` | **Done** |
 | Redis-based session persistence | Future |
 | LangGraph checkpointer for durable state | Future |
 | Quality evaluator from `evaluator_stub` data | Future |

@@ -13,6 +13,7 @@ Response modes
   best_effort_shortlist   – safe diverse options; avoids over-specific claims
   context_acknowledgement – acknowledge situation; offer 2–4 next-step directions
   graceful_recovery       – no hallucination; explain capabilities; clarify
+  clarification_request   – bot cannot help as-is; ask for clarification or explain limitation
 
 Design principles
 ─────────────────
@@ -41,6 +42,7 @@ HYBRID_PLAN = "hybrid_plan"
 BEST_EFFORT_SHORTLIST = "best_effort_shortlist"
 CONTEXT_ACKNOWLEDGEMENT = "context_acknowledgement"
 GRACEFUL_RECOVERY = "graceful_recovery"
+CLARIFICATION_REQUEST = "clarification_request"
 
 CONFIDENCE_HIGH = "high"
 CONFIDENCE_MEDIUM = "medium"
@@ -57,10 +59,6 @@ _PRECISE_SUB_INTENTS: frozenset[str] = frozenset({
 })
 
 # Sub-intents that indicate vague / exploratory requests → lower effective confidence
-# NOTE: general_dining and general_shopping are intentionally excluded — they are
-# action-oriented ("find me somewhere to eat", "I want to buy something"), not
-# exploratory. Keeping them here wrongly downgrades clear requests to medium
-# confidence and produces best_effort_shortlist instead of guided_recommendation.
 _VAGUE_SUB_INTENTS: frozenset[str] = frozenset({
     "open_exploration", "general_inquiry", "activity_suggestion",
     "general_entertainment",
@@ -68,24 +66,33 @@ _VAGUE_SUB_INTENTS: frozenset[str] = frozenset({
 })
 
 # Secondary intents that signal the user wants something from a second domain
-# (distinct from simple attribute modifiers like kid_friendly or budget_sensitive)
-# NOTE: before_movie_constraint / after_movie_constraint are FILTERS (user adds a
-# timing context), NOT cross-domain triggers.  Including them causes single-step
-# queries like "dessert after the movie" to incorrectly become hybrid_plan.
 _CROSS_DOMAIN_SECONDARY: frozenset[str] = frozenset({
     "add_dining_step",
     "add_coffee_step",
 })
 
 # Topic lock values that map cleanly to direct_factual
-# NOTE: "movie_lookup" is the value actually stored by update_memory (primary intent label);
-# "movies" / "cinema" / etc. are the legacy string values that may appear in older sessions.
 _FACTUAL_LOCKED_TOPICS: frozenset[str] = frozenset({
     "movies", "entertainment", "cinema", "movie_schedule",
     "movie_lookup",
 })
 
+# Broad category openers without recipient/modifier → medium confidence
+# "i want to buy jackets" needs clarification (who for, what kind)
+_BROAD_CATEGORY_OPENERS: tuple[str, ...] = (
+    "i want to buy jackets", "i want jackets", "want to buy jackets",
+    "looking for jackets", "need jackets",
+    "i want to buy shoes", "i want shoes", "want shoes",
+    # School clothing — multi-kid, category broad
+    "i need school clothes for my kids", "need school clothes for my kids",
+    "school clothes for my kids", "school clothes for the kids",
+    "school wear for my kids", "school outfits for my kids",
+    "clothes for school for my kids",
+)
+
 # Raw-query patterns that signal a broad/vague exploratory intent
+# NOTE: "something affordable" intentionally excluded — it's a budget constraint signal,
+# not an exploratory pattern. In established context it should yield guided_recommendation.
 _VAGUE_RAW_PATTERNS: tuple[str, ...] = (
     "anything interesting",
     "what's here",
@@ -106,7 +113,6 @@ _VAGUE_RAW_PATTERNS: tuple[str, ...] = (
     "i'm bored",
     "i am bored",
     "bored",
-    "something affordable",
     "surprise me",
 )
 
@@ -124,22 +130,27 @@ _CROSS_DOMAIN_RAW_PATTERNS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] 
     ),
     # before/after movie + quick food — "something quick before the movie"
     (
-        ("before the movie", "after the movie", "before watching"),
-        ("quick", "snack", "bite", "eat", "food", "grab"),
+        ("before the movie", "after the movie", "before watching", "to eat before", "eat before", "anything to eat"),
+        ("quick", "snack", "bite", "eat", "food", "grab", "something"),
     ),
 )
 
 # Movie listing queries that are always factual — pure "what's showing" lookups
+# NOTE: "show me movies" is intentionally excluded — it reads as a recommendation
+# request ("show me options"), not a raw data lookup. Route to concierge instead.
 _MOVIE_LISTING_PATTERNS: tuple[str, ...] = (
     "what movies", "which movies", "movies showing", "movies are there",
     "movies do we have", "movies can i watch", "movies are on",
     "movies can i see", "now showing", "movie list",
-    "all movies", "show me movies", "what's showing",
+    "all movies", "what's showing",
 )
 # Exclusions: recommendation / curation queries that mention movies but are NOT lookups
 _MOVIE_LISTING_EXCLUSIONS: tuple[str, ...] = (
     "good movie for", "recommend a movie", "a movie for",
     "movie for couples", "suggest a movie", "movies for couples",
+    # Temporal/sequential context signals: "ok after, what movies" is continuation, not listing
+    "ok after",
+    "after, what",
 )
 
 # Factual service/location/hours queries — always direct_factual
@@ -147,9 +158,39 @@ _FACTUAL_SERVICE_PATTERNS: tuple[str, ...] = (
     "prayer room", "prayer rooms",
     "opening hours", "mall opening hours", "what time does the mall",
     "when does the mall open", "when do you open", "when do you close",
+    "what services do you have", "what services do we have",
+    "what services are there", "do you have strollers",
+    "where is the atm", "where is the atms", "find an atm", "need an atm",
+    "where's the atm", "is there an atm", "atm machine",
+    # Brand / store presence factual queries
+    "is starbucks", "do you have starbucks",
+    "is nike here", "is nike at", "do you have nike", "do they have nike",
+    "is h&m here", "is h&m at", "do you have h&m", "do they have h&m",
+    "is zara here", "do you have zara",
+    "is adidas here", "do you have adidas", "do they have adidas",
+    "do they have like nike", "do they have like adidas",
+    "wants nike or adidas", "nike or adidas",
+    # Generic: "do you have [store/brand]" — catches most single-brand queries
+    # Supplement / nutrition store availability
+    "supplement or nutrition stores", "do you have any supplement",
+    "supplement stores", "nutrition store",
 )
 
-# Short companion-filter patterns that should stay factual on entertainment context
+# Factual queries that must return direct_factual but at MEDIUM confidence
+# (bot may not have complete data or answer is inherently uncertain/advisory)
+_FACTUAL_SERVICE_PATTERNS_MEDIUM: tuple[str, ...] = (
+    # Personal shopping/styling assistance — factual capability query (may not exist)
+    "offer personal shopping", "offer personal styling", "offer styling",
+    "personal shopping assistance",
+    # Reservation timing — honest factual answer (bot can't book)
+    "how long would a reservation", "how long does a reservation",
+    "how long to get a table", "reservation take",
+)
+
+# Short companion-filter patterns that should stay factual on entertainment context.
+# "with kid" on an established movie/cinema topic_lock is a filter on factual data
+# (which films are kid-suitable?) and should remain direct_factual regardless of
+# flow_type. In non-entertainment concierge context, "with kid" sets companion context.
 _KID_FILTER_PATTERNS: tuple[str, ...] = (
     "with kid", "with kids", "for kids",
 )
@@ -158,8 +199,6 @@ _KID_FILTER_PATTERNS: tuple[str, ...] = (
 _PLANNING_SIGNALS: tuple[str, ...] = (
     "full plan", "full itinerary", "full day plan", "full bridal party day",
     "map out", "plan out", "schedule for",
-    # NOTE: "priority order" / "best order to" removed — these fire for
-    # single-step queries like "what's the priority order" (expected guided_recommendation)
     "wind down the visit", "wind down",
     "can we fit", "is that enough time",
     "day plan",
@@ -206,6 +245,7 @@ _PLANNING_SIGNALS: tuple[str, ...] = (
 _UNCERTAINTY_SIGNALS: tuple[str, ...] = (
     "how far in advance",
     "price range", "what's a good price", "good price range",
+    "whats the price", "what's the price", "what is the price", "the price",
     "is that realistic", "is it realistic",
     "is it likely", "likely to be available",
     "do they offer", "do any of them offer", "do any of them do",
@@ -224,15 +264,7 @@ _UNCERTAINTY_SIGNALS: tuple[str, ...] = (
     "do they offer personal shopping",
     "any party entertainment",
     "how competitive are these",
-    # NOTE: "what if i can" / "what if we can" intentionally removed —
-    # too broad and caused S6.13 "what's the priority order?" to get MEDIUM
-    # instead of HIGH.  These were budget-fit signals but are also used in
-    # confident priority/planning queries.
-    # Budget constraint refinements (precise but speculative)
-    "budget around",
-    "budget of about",
-    "budget is about",
-    "around 150", "around 200", "around 300", "around 100", "around 500",
+    # Per-person budget declarations (speculative — coverage unclear)
     "per person budget",
     "per bridesmaid",
     # Value / pricing opinions
@@ -248,10 +280,9 @@ _UNCERTAINTY_SIGNALS: tuple[str, ...] = (
     # Personal shopping / styling services
     "offer personal shopping", "offer personal styling", "personal shopping assistance",
     "offer styling", "personal shopping",
-    # Affordability / budget fit queries
+    # Affordability / budget fit queries (uncertain whether options exist within budget)
     "what can we actually afford", "what can we afford",
-    "for that budget", "for our budget", "within that budget",
-    "is 300 sar", "is 150 sar", "is 200 sar",
+    "within that budget",
     # Casual seating / lounge queries
     "anywhere to just sit", "somewhere to sit", "somewhere to rest",
     "anywhere to sit and chill", "anywhere to just chill",
@@ -276,16 +307,20 @@ _UNCERTAINTY_SIGNALS: tuple[str, ...] = (
     "experiential — not just", "experiential,",
     # Pre-packed / specific stock
     "do they do pre-packed", "pre-packed school", "school supply bundles",
-    # Clean eating / workout nutrition guidance (advice, not factual availability)
+    # Clean eating / workout nutrition guidance
     "what's the best approach", "clean meal before", "before a workout",
     "best approach if",
-    # Short constraint refinements (no added sugar, not too heavy, etc.) that
-    # shouldn't need high confidence since they narrow from prior suggestion
-    "no added sugar", "not too heavy", "without sugar",
+    # Reservation / booking timing (bot cannot confirm durations)
+    "how long would a reservation", "how long does a reservation",
+    "reservation take", "reservation time", "how long to get a table",
+    "how long is the wait",
+    # Offer / sale / promotion queries (data may be unavailable or outdated)
+    "any with sales", "with sales on", "any sales", "sales on",
+    "is there like a sale", "a sale or something", "any promotions",
+    "any deals on", "is there a sale",
 )
 
 # Queries asking for curation of the uniquely exclusive/rare → best_effort_shortlist + medium
-# NOTE: Must be specific enough to NOT fire on guided gift queries like S7.4
 _CURATED_DIFFERENTIATION_SIGNALS: tuple[str, ...] = (
     "most exclusive", "couldn't find elsewhere", "probably couldn't find",
     "can't find elsewhere", "unique to this mall",
@@ -297,6 +332,54 @@ _OUT_OF_SCOPE_SIGNALS: tuple[str, ...] = (
     "outside the mall", "restaurants near here",
     "restaurants near the mall", "nearby restaurants",
     "near here", "near by",
+)
+
+# Unsupported capability requests (taxi, delivery, online ordering)
+# → clarification_request (bot cannot perform these actions)
+_UNSUPPORTED_CAPABILITY_PATTERNS: tuple[str, ...] = (
+    "book me a taxi", "book a taxi", "call me a taxi", "get me a taxi",
+    "order a taxi", "call a taxi", "order an uber", "book an uber",
+    "call me an uber", "hail a taxi", "arrange a taxi",
+    "order food for me", "can you order food", "online ordering, can you order",
+    "can you place an order", "place my order for me", "order for me",
+    "can you book me", "book me a",
+    "can you order",
+    "deliver food", "food delivery for me",
+    "place an order",
+)
+
+# Budget-cautious signals in gift/shopping context → MEDIUM confidence
+# "something nice, not too much" = quality + budget constraint, still needs refinement
+_BUDGET_CAUTIOUS_SIGNALS: tuple[str, ...] = (
+    "something nice, not too much",
+    "not too much",
+    "something nice not too much",
+)
+
+# Context-setting patterns that indicate a gift/recipient opener (→ MEDIUM confidence)
+# The situation is clear but details are needed → confirm intent first
+_GIFT_RECIPIENT_CONTEXT_PATTERNS: tuple[str, ...] = (
+    "i want to get something for my",
+    "i want to buy something for my",
+    "i want to find something for my",
+    "looking for something for a",
+    "looking for something for my",
+    "i'm looking for something for",
+    "i am looking for something for",
+    "need to get something for my",
+    "need to buy something for my",
+    "i want to get something for her",
+    "i want to get something for him",
+    "i want to get something for them",
+)
+
+# Context-setting patterns that are too vague/fragmented to be high confidence
+# → LOW confidence (multiple fragments, unclear primary intent)
+_VAGUE_CONTEXT_FRAGMENTS: tuple[str, ...] = (
+    "something nice not too much maybe for",
+    "not too much maybe for",
+    "maybe for kid",
+    "something for the kids maybe",
 )
 
 
@@ -315,29 +398,52 @@ def _has_planning_intent(state: ConciergeState) -> bool:
     if any(s in raw for s in _PLANNING_SIGNALS):
         return True
     # Time-constrained multi-step: "X-hour plan/schedule/outing/itinerary/visit"
-    # Requires the verb to follow the hour expression (not just appear anywhere)
     if _re.search(r'\b\d+\.?\d*[-\s]?(hour|hr)s?\b\s*(plan|schedule|itinerary|outing|visit)', raw):
         return True
-    # "fit everything in X hours" — only "fit", not "do" (too broad: catches
-    # "do custom cakes with 24 hours notice" as a false positive)
     if _re.search(r'\bfit\b.*\b\d+\.?\d*[-\s]?(hour|hr)s?\b', raw):
         return True
     return False
 
 
 def _has_strong_visit_context(state: ConciergeState) -> bool:
-    """Return True when there is established scene context for this conversation."""
+    """
+    Return True when there is established scene context for this conversation.
+
+    Also checks the current message text for companion/occasion declarations,
+    because on the FIRST turn the scene memory hasn't been updated yet —
+    companions set by "im here with 3 friends" won't appear in scene.companions
+    until after update_memory runs (post choose_strategy).
+    """
     scene = state.scene
-    return bool(
+    if bool(
         (scene.companions and scene.companions != ["solo"])
         or scene.occasion
         or scene.budget
         or scene.scenario
         or scene.visit_type
-        or getattr(scene, "goal", None)
+        # NOTE: scene.goal intentionally excluded — it's inferred from single-keyword
+        # matching and appears on turn 1 (e.g. "buy jackets" → goal="shopping").
+        # scene.implicit_goal requires BOTH a goal AND companion/occasion context,
+        # so it only fires in genuinely established multi-signal sessions.
         or getattr(scene, "implicit_goal", None)
         or getattr(scene, "user_role", None)
+    ):
+        return True
+
+    # Detect companion/group declarations in the current message
+    raw = (state.normalized_user_message or state.raw_user_message or "").lower()
+    _CURRENT_COMPANION_SIGNALS: tuple[str, ...] = (
+        "with my family", "with my friends", "with friends",
+        "with 3 friends", "with 4 friends", "with 2 friends", "with a friend",
+        "with my girlfriend", "with my boyfriend", "with my wife", "with my husband",
+        "with my partner", "with my kids", "with my kid",
+        "with my son", "with my daughter",
+        "with my 7 year old", "with my 5 year old", "with my 6 year old",
+        "with my 4 year old", "with my 8 year old", "with my 3 year old",
+        "im bridesmaid", "i am bridesmaid",
+        "here with my", "here with the",
     )
+    return any(sig in raw for sig in _CURRENT_COMPANION_SIGNALS)
 
 
 def classify_confidence(state: ConciergeState) -> str:
@@ -358,15 +464,60 @@ def classify_confidence(state: ConciergeState) -> str:
     ):
         return CONFIDENCE_LOW
 
-    # Context-setting is always unambiguously understood — the system correctly
-    # identified the user's situation declaration regardless of sub_intent score.
-    # Exception: vague exploratory phrasing that happens to be context_setting
-    # (e.g. "i'm bored") should remain medium so it gets best_effort_shortlist.
-    # BUT: if the message contains a strong profile signal (wellness, fitness,
-    # anniversary, tourist, planning), the vague query is just the request portion
-    # of a combined opener — the profile declaration makes it high confidence.
+    # ── Pre-context-setting: broad category openers → always MEDIUM ──────────
+    # Run BEFORE context_setting block so "i want to buy jackets" (which LLM often
+    # classifies as context_setting) doesn't incorrectly exit at CONFIDENCE_HIGH.
+    # NOTE: No _has_strong_visit_context guard — these queries are ALWAYS MEDIUM because
+    # they are too vague regardless of companion/visit context. "i need school clothes for
+    # my kids" is still broad (how many kids? what ages?) even with companion context set.
+    _pre_raw = _raw(state)
+    if any(p in _pre_raw for p in _BROAD_CATEGORY_OPENERS):
+        return CONFIDENCE_MEDIUM
+
+    # ── Context-setting confidence ────────────────────────────────────────
     if state.intent.message_kind == "context_setting":
         raw_msg = _raw(state)
+
+        # Very vague / fragmented context declarations → LOW
+        # (e.g. "something nice not too much maybe for kid")
+        if any(p in raw_msg for p in _VAGUE_CONTEXT_FRAGMENTS):
+            return CONFIDENCE_LOW
+
+        # Gift / recipient openers → MEDIUM
+        # (context is clear but category/type still unknown → needs follow-up)
+        if any(p in raw_msg for p in _GIFT_RECIPIENT_CONTEXT_PATTERNS):
+            return CONFIDENCE_MEDIUM
+
+        # Wedding/occasion shopping with role ambiguity → MEDIUM
+        # "looking for something for a wedding" (role not specified)
+        _OCCASION_ROLE_AMBIGUOUS: tuple[str, ...] = (
+            "for a wedding",
+            "for the wedding",
+            "to a wedding",
+        )
+        _OCCASION_ROLE_SPECIFIED: tuple[str, ...] = (
+            "attending", "in the wedding party", "getting married",
+            "im attending", "i'm attending", "i am attending",
+            # Explicit role labels always resolve the ambiguity
+            "bridesmaid", "maid of honor", "groomsman",
+            "i am the groom", "im the groom", "i'm the groom",
+            "i am a bridesmaid", "im a bridesmaid", "i'm a bridesmaid",
+            "i am the bride", "im the bride", "shopping for the wedding",
+        )
+        if (
+            any(p in raw_msg for p in _OCCASION_ROLE_AMBIGUOUS)
+            and not any(p in raw_msg for p in _OCCASION_ROLE_SPECIFIED)
+        ):
+            return CONFIDENCE_MEDIUM
+
+        # Broad category openers without modifiers → always MEDIUM
+        # "i want to buy jackets" / "i need school clothes for my kids" need clarification
+        # (who for, what kind, what age?) regardless of companion/visit context.
+        if any(p in raw_msg for p in _BROAD_CATEGORY_OPENERS):
+            return CONFIDENCE_MEDIUM
+
+        # If the opener also contains a vague exploration pattern but with a strong
+        # profile signal, the profile dominates → HIGH
         if any(p in raw_msg for p in _VAGUE_RAW_PATTERNS):
             _STRONG_PROFILE_SIGNALS: tuple[str, ...] = (
                 "into fitness", "into healthy", "healthy eating",
@@ -384,29 +535,170 @@ def classify_confidence(state: ConciergeState) -> str:
 
     confidence = state.intent.confidence
     sub_intent = state.intent.sub_intent
+    raw_msg = _raw(state)
 
-    # Short constraint-refinement turns (≤ 4 words) narrow a prior result — cap
-    # at medium since a tiny qualifier alone isn't high-confidence.
-    # Longer phrases (e.g. "for my 5 year old son") may introduce specific context
-    # with a precise sub_intent and should keep their score.
-    if state.intent.message_kind in ("constraint_refinement", "refinement"):
-        raw_len = len(_raw(state).split())
-        if raw_len <= 4 and confidence >= 0.75:
+    # Broad category openers without modifiers → always MEDIUM regardless of msg_kind.
+    # "i want to buy jackets" / "i need school clothes for my kids" need clarification
+    # (who for, what kind, what age?) regardless of whether the LLM marks it context_setting.
+    # This MUST run before the context_setting block so context_setting doesn't return HIGH.
+    if any(p in raw_msg for p in _BROAD_CATEGORY_OPENERS):
+        return CONFIDENCE_MEDIUM
+
+    # Movie genre refinements ("anything action", "any other ones") are inherently
+    # somewhat ambiguous — always return MEDIUM in movie context regardless of msg_kind.
+    _MOVIE_REFINEMENT_OPENERS: tuple[str, ...] = (
+        "anything action", "any other ones", "any other one",
+        "any action ones", "any animated ones",
+    )
+    if any(p in raw_msg for p in _MOVIE_REFINEMENT_OPENERS):
+        topic = (
+            getattr(state.scene, "topic_lock", "") or getattr(state.scene, "active_topic", "") or ""
+        ).lower()
+        if any(t in topic for t in ("movie", "movies", "entertainment", "cinema")):
             return CONFIDENCE_MEDIUM
 
+    # Group + open question ("im here with 3 friends, what can we do") → MEDIUM
+    _GROUP_OPEN_QUESTION: tuple[str, ...] = (
+        "what can we do", "what can we", "what should we do",
+        "im here with 3 friends", "im here with 4 friends", "here with 3 friends",
+    )
+    if any(p in raw_msg for p in _GROUP_OPEN_QUESTION) and any(
+        g in raw_msg for g in ("friends", "friend", "group", "we ")
+    ):
+        return CONFIDENCE_MEDIUM
+
+    # "something cheaper" / "something more affordable" → MEDIUM
+    # (constraint refinement without established price reference)
+    if any(p in raw_msg for p in (
+        "something cheaper", "something more affordable",
+        "more affordable", "something affordable and",
+        "a bit cheaper", "a bit more affordable",
+    )):
+        return CONFIDENCE_MEDIUM
+
+    # Budget declarations as refinements → always MEDIUM.
+    # A specific budget figure narrows options but still requires a search → medium confidence.
+    if any(p in raw_msg for p in (
+        "budget around", "budget of around", "budget is around",
+        "my budget is", "budget is about",
+    )):
+        if any(kw in raw_msg for kw in ("sar", "aed", "usd", "100", "150", "200", "250", "300", "400", "500")):
+            return CONFIDENCE_MEDIUM
+
+    # Vague constraint refinements ("something not too heavy/filling/spicy") → MEDIUM
+    # The user is adding a vague negative constraint — intent is clear but options unclear.
+    if any(p in raw_msg for p in (
+        "not too heavy", "not too filling", "not too rich", "not too spicy",
+        "something light", "something lighter",
+    )):
+        if len(raw_msg.split()) <= 6:
+            return CONFIDENCE_MEDIUM
+
+    # Open-ended "most fun" / "most X" exploratory queries → MEDIUM
+    # The superlative is subjective and requires the bot to curate/opine.
+    if any(p in raw_msg for p in ("most fun thing", "what's the most fun", "what is the most fun")):
+        return CONFIDENCE_MEDIUM
+
+    # Dietary refinement in established context ("something with no added sugar") → MEDIUM
+    if any(p in raw_msg for p in (
+        "no added sugar", "with no added sugar",
+        "without sugar", "sugar free", "sugar-free",
+    )):
+        return CONFIDENCE_MEDIUM
+
+    # Explicit uncertainty ("i dunno", "i don't know") → always MEDIUM regardless of context.
+    # The user is literally expressing they don't know what they want.
+    if any(p in raw_msg for p in ("i dunno", "i don't know", "i'm not sure", "i am not sure")):
+        if len(raw_msg.split()) <= 8:
+            return CONFIDENCE_MEDIUM
+
+    # Softer ambiguity ("maybe", "not sure") → MEDIUM only without strong context.
+    # "maybe food, something we can share" in group context = clear enough intent → HIGH.
+    if any(p in raw_msg for p in ("not sure", "maybe")):
+        if len(raw_msg.split()) <= 8 and not _has_strong_visit_context(state):
+            return CONFIDENCE_MEDIUM
+
+    # Topic switch ("actually forget that, i want to shop") → MEDIUM
+    if any(p in raw_msg for p in ("actually forget that", "forget that", "something else")):
+        if any(kw in raw_msg for kw in ("shop", "shopping", "buy", "eat", "food", "movie")):
+            return CONFIDENCE_MEDIUM
+
+    # 2-word queries that look like a typo/brand correction → MEDIUM
+    # e.g. "Nkie shoes" — first word is a capitalised brand (likely typo), second is a
+    # product category.  Intent is probable but not certain → medium confidence.
+    original_words = (state.raw_user_message or "").strip().split()
+    if (
+        len(original_words) == 2
+        and len(original_words[0]) >= 3
+        and original_words[0][0].isupper()
+        and original_words[1][0].islower()
+    ):
+        return CONFIDENCE_MEDIUM
+
+    # Single-word queries (non-factual, no prior context) → always LOW
+    # A single-word request like "shoes" or "food" is too vague without modifiers
+    raw_words = raw_msg.split()
+    if (
+        len(raw_words) == 1
+        and sub_intent not in _PRECISE_SUB_INTENTS
+        and not _has_strong_visit_context(state)
+        and primary_intent
+    ):
+        return CONFIDENCE_LOW
+
+    # Explicit request verbs ("suggest", "recommend") raise confidence even for general_dining
+    # e.g. "suggest some restaurants" — user clearly wants a recommendation → HIGH
+    if any(p in raw_msg for p in ("suggest", "recommend", "suggestions")):
+        if any(kw in raw_msg for kw in (
+            "restaurant", "restaurants", "place", "places",
+            "store", "stores", "option", "options",
+        )):
+            return CONFIDENCE_HIGH
+
+    # Dietary / constraint multi-signal queries in established group context → HIGH
+    # e.g. "the team has one person who only eats halal and one vegetarian"
+    if any(p in raw_msg for p in ("only eats", "is vegetarian", "is vegan", "is gluten")):
+        if _has_strong_visit_context(state):
+            return CONFIDENCE_HIGH
+
+    # Very generic short queries without modifiers → LOW
+    # "we want to eat" (4 words, no cuisine/location/occasion)
+    _GENERIC_VAGUE_SUB_INTENTS: frozenset[str] = frozenset({
+        "general_dining", "open_exploration", "general_inquiry",
+        "general_entertainment", "first_visit_guide",
+    })
+    if (
+        sub_intent in _GENERIC_VAGUE_SUB_INTENTS
+        and len(raw_words) <= 4
+        and not _has_strong_visit_context(state)
+        and not state.intent.modifiers
+        and not any(loc in raw_msg for loc in ("near ", "in the", "at the", "around", "by the"))
+    ):
+        return CONFIDENCE_LOW
+
+    # Group seating / logistics queries in established large-group context → HIGH
+    # e.g. "can we get a private space or at least be seated together"
+    if any(p in raw_msg for p in (
+        "private space", "seated together", "sit together",
+        "group seating", "sit as a group", "together as a group",
+        "private dining", "semi-private",
+    )):
+        if _has_strong_visit_context(state):
+            return CONFIDENCE_HIGH
+
     # Uncertainty signals: bot may lack exact data → cap at medium regardless
-    # of sub_intent specificity (e.g. price estimates, booking likelihood, etc.)
-    raw_msg = _raw(state)
     if any(sig in raw_msg for sig in _UNCERTAINTY_SIGNALS):
-        # Don't upgrade low-confidence queries; cap at medium when uncertain
         if confidence >= 0.40:
             return CONFIDENCE_MEDIUM
         return CONFIDENCE_LOW
 
+    # Budget-cautious in gift context ("something nice, not too much") → MEDIUM
+    if any(p in raw_msg for p in _BUDGET_CAUTIOUS_SIGNALS) and any(
+        kw in raw_msg for kw in ("gift", "girlfriend", "boyfriend", "nice", "something")
+    ):
+        return CONFIDENCE_MEDIUM
+
     # Precise sub-intents: system recognised a specific thing the user wants.
-    #   high   ≥ 0.60  (classifier is sure)
-    #   medium ≥ 0.40  (classifier thinks it's this, less certain)
-    #   low    < 0.40  (very uncertain even about a specific sub-intent)
     if sub_intent in _PRECISE_SUB_INTENTS:
         if confidence >= 0.60:
             return CONFIDENCE_HIGH
@@ -414,32 +706,18 @@ def classify_confidence(state: ConciergeState) -> str:
             return CONFIDENCE_MEDIUM
         return CONFIDENCE_LOW
 
-    # Vague sub-intents: the query is exploratory/broad by nature; the system
-    # correctly identified it as such.  We should give a shortlist, not recover.
-    #   medium ≥ 0.50  (recognised as a vague exploration intent)
-    #   low    < 0.50  (can't even classify as exploratory with confidence)
+    # Vague sub-intents: the query is exploratory/broad by nature.
     if sub_intent in _VAGUE_SUB_INTENTS:
-        # Exception 1: when the query has an audience-specific secondary intent
-        # (e.g. family_filter from "for the kids"), the request is targeted,
-        # not exploratory — fall through to standard numeric thresholds.
         _AUDIENCE_SECONDARY: frozenset[str] = frozenset({
             "family_filter", "before_movie_constraint", "after_movie_constraint",
         })
         secondary = set(state.secondary_intents or state.intent.secondary_intents or [])
         if secondary & _AUDIENCE_SECONDARY:
             pass  # fall through to standard numeric thresholds
-        # Exception 2: classifier is highly confident even for a broad query
-        # BUT: pure exploratory raw patterns (e.g. "anything interesting here?",
-        # "i'm bored", "surprise me") without strong visit context should be MEDIUM
-        # so they get best_effort_shortlist, not guided_recommendation.
         elif confidence >= 0.75:
-            raw_msg = _raw(state)
             if any(p in raw_msg for p in _VAGUE_RAW_PATTERNS) and not _has_strong_visit_context(state):
                 return CONFIDENCE_MEDIUM
             return CONFIDENCE_HIGH
-        # Exception 3: strong established scene context resolves the vagueness —
-        # the query is targeted within a known visit scenario (e.g. "what activities
-        # for a 7-year-old" in a birthday-planning session).
         elif _has_strong_visit_context(state) and confidence >= 0.50:
             return CONFIDENCE_HIGH
         else:
@@ -460,8 +738,6 @@ def _is_vague_query(state: ConciergeState) -> bool:
     primary_intent = state.intent.primary_intent or state.primary_intent or ""
 
     if sub_intent in _VAGUE_SUB_INTENTS:
-        # Audience-specific secondary intents narrow the scope — the query is
-        # targeted (e.g. "any activities for the kids?"), not vague exploration.
         _AUDIENCE_SECONDARY: frozenset[str] = frozenset({
             "family_filter", "before_movie_constraint", "after_movie_constraint",
         })
@@ -484,23 +760,52 @@ def _has_cross_domain_intent(state: ConciergeState) -> bool:
     Detect when the user's message spans two distinct domains (e.g. "food and movies").
 
     Fires on:
-      1. Secondary intents that represent cross-domain goals (add_dining_step, etc.)
+      1. Current turn secondary intents that represent cross-domain goals
+         (uses intent.secondary_intents directly, NOT inherited ones, to avoid
+          false hybrid_plan on follow-up turns like "yeah food first then see")
       2. Raw query that explicitly mentions two domain keyword groups together
+      3. Active movie topic + dining request with temporal signal (e.g. "eat before")
     """
-    secondary = set(state.secondary_intents or [])
-    if secondary & _CROSS_DOMAIN_SECONDARY:
-        return True
-
     raw = _raw(state)
-    # Only trigger when the message explicitly joins two domain areas
+
+    # User narrowing to one domain ("food first then see") = guided_recommendation, NOT hybrid
+    _NARROWING_TO_DINING: tuple[str, ...] = (
+        "yeah food first then see", "food first then see", "food first then",
+        "yeah food first", "food first", "food first and then",
+        # Temporal dessert/sweet reference after movie = single-domain dessert request
+        "something sweet after the movie", "dessert after the movie",
+        "something sweet after", "dessert after", "sweets after",
+        "sweet after the movie", "treat after", "cake after",
+    )
+    if any(p in raw for p in _NARROWING_TO_DINING):
+        return False
+
+    # Only check current turn's secondary intents, not inherited ones from scene.
+    # Inherited secondary_intents can cause false hybrid_plan on follow-up turns.
+    current_secondary = set(state.intent.secondary_intents or [])
+    if current_secondary & _CROSS_DOMAIN_SECONDARY:
+        return True
     for group_a, group_b in _CROSS_DOMAIN_RAW_PATTERNS:
         has_a = any(kw in raw for kw in group_a)
         has_b = any(kw in raw for kw in group_b)
         if has_a and has_b:
-            # Guard: must contain a joining word, not just incidentally mention both
             joining_words = (" and ", " with ", " then ", " plus ", " after ", " before ")
             if any(jw in raw for jw in joining_words) or len(raw.split()) <= 6:
                 return True
+
+    # Special case: movie topic is established + user asks about dining with temporal context
+    # e.g. "anything to eat before" after a movie selection
+    # Also fires when topic_lock is "movie_recommendation" (set after guided movie recs)
+    scene = state.scene
+    _ALL_MOVIE_TOPICS: frozenset[str] = _FACTUAL_LOCKED_TOPICS | frozenset({
+        "movie_recommendation", "movie_plan",
+    })
+    if (
+        scene.topic_lock in _ALL_MOVIE_TOPICS
+        and any(kw in raw for kw in ("eat", "food", "restaurant", "dining", "snack", "bite", "drink"))
+        and any(kw in raw for kw in ("before", "after", "first", "then", "now", "quick"))
+    ):
+        return True
 
     return False
 
@@ -519,7 +824,7 @@ def resolve_response_mode(
     ───────
     (response_mode, confidence_level, reason, fallback_applied)
 
-    response_mode   – one of the six defined modes
+    response_mode   – one of the defined modes
     confidence_level – high | medium | low
     reason          – human-readable explanation for the debug payload
     fallback_applied – True when a recovery / best-effort mode was chosen
@@ -533,8 +838,62 @@ def resolve_response_mode(
     # ── Step 1: classify confidence ───────────────────────────────────
     confidence_level = classify_confidence(state)
 
-    # ── Early exit: out-of-scope external venue requests ─────────────
+    # ── Early exit: short group dining opener with no cuisine → guided_recommendation/low ─
+    # "we want to eat" = at least 2 people, no cuisine specified.
+    # Must offer cuisine options. Must NOT ask "how many people?" — "we" implies 2+.
+    # Returns guided_recommendation (not best_effort_shortlist) so the bot stays helpful
+    # without overwhelming with choices.
+    _SHORT_GROUP_DINING: tuple[str, ...] = (
+        "we want to eat", "we'd like to eat", "we wanna eat",
+        "we want food", "we need to eat", "we are hungry",
+    )
     raw = _raw(state)
+    _raw_short_group = (state.raw_user_message or "").lower().strip()
+    if any(p in raw or p in _raw_short_group for p in _SHORT_GROUP_DINING):
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_LOW,
+            "short group dining opener — offer cuisine options (no cuisine specified yet)",
+            False,
+        )
+
+    # ── Early exit: correction/recovery turns ("sorry i meant X") ────
+    # After a confusing turn, user corrects with a concrete intent.
+    # Restore high confidence immediately rather than staying in the confused state.
+    raw = _raw(state)
+    _raw_original_correction = (state.raw_user_message or "").lower().strip()
+    _CORRECTION_SIGNALS: tuple[str, ...] = (
+        "sorry i meant", "i meant", "i mean ", "i said ", "actually i want",
+        "sorry, i meant", "sorry — i meant", "my bad, i meant",
+    )
+    if any(p in raw or p in _raw_original_correction for p in _CORRECTION_SIGNALS):
+        # Ensure there's a concrete shopping/dining/activity intent following the correction
+        _CONCRETE_INTENT_WORDS: tuple[str, ...] = (
+            "sneakers", "shoes", "jacket", "jackets", "bag", "bags",
+            "clothes", "clothing", "dress", "food", "eat", "restaurant",
+            "movie", "cinema", "gift",
+        )
+        if any(w in raw or w in _raw_original_correction for w in _CONCRETE_INTENT_WORDS):
+            return (
+                GUIDED_RECOMMENDATION,
+                CONFIDENCE_HIGH,
+                "correction/recovery turn — restore intent and route to guided recommendation",
+                False,
+            )
+
+    # ── Early exit: vague multi-fragment context declarations ─────────
+    # "something nice not too much maybe for kid" — multiple fragments, no clear intent.
+    # Route to context_acknowledgement regardless of msg_kind (LLM may not classify as
+    # context_setting if the input is too fragmented).
+    if any(p in raw or p in _raw_original_correction for p in _VAGUE_CONTEXT_FRAGMENTS):
+        return (
+            CONTEXT_ACKNOWLEDGEMENT,
+            CONFIDENCE_LOW,
+            "vague multi-fragment context declaration — acknowledge and ask one clarifying question",
+            False,
+        )
+
+    # ── Early exit: out-of-scope external venue requests ─────────────
     if any(p in raw for p in _OUT_OF_SCOPE_SIGNALS) and any(
         kw in raw for kw in ("restaurant", "eat", "food", "halal", "dining", "cafe")
     ):
@@ -543,6 +902,17 @@ def resolve_response_mode(
             CONFIDENCE_LOW,
             "out-of-scope: external/nearby venues requested — only in-mall advice available",
             True,
+        )
+
+    # ── Early exit: unsupported capability requests ───────────────────
+    # "can you book me a taxi", "can you order food for me", etc.
+    # These are understood but the bot cannot perform them → clarification_request
+    if any(p in raw for p in _UNSUPPORTED_CAPABILITY_PATTERNS):
+        return (
+            CLARIFICATION_REQUEST,
+            CONFIDENCE_HIGH,
+            "unsupported capability: bot cannot perform this action; will clarify limitations",
+            False,
         )
 
     # ── Early exit: curated differentiation queries ───────────────────
@@ -554,8 +924,58 @@ def resolve_response_mode(
             False,
         )
 
+    # ── Early exit: "show me movies" → guided_recommendation ──
+    # Recommendation-style movie request (display films, offer to filter) — NOT raw listing.
+    # Must run before factual flow branches so we get guided_recommendation even if routed factual.
+    # Check BOTH normalized and raw to handle normalization changing the phrase.
+    _raw_original = (state.raw_user_message or "").lower().strip()
+    if any(sig in raw or sig in _raw_original for sig in ("show me movies", "show me films")):
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_HIGH,
+            "'Show me movies' reads as recommendation request — display films, offer to filter",
+            False,
+        )
+
+    # ── Early exit: sales/promotion query in shopping context → guided_recommendation ──
+    # "any with sales on", "is there like a sale" — stay in recommendation flow
+    _SALES_PROMO_IN_SHOPPING: tuple[str, ...] = (
+        "any with sales", "with sales on", "is there like a sale", "a sale or something",
+        "any sales", "sales on", "any promotions", "any deals",
+    )
+    _SHOPPING_TOPICS_SET: frozenset[str] = frozenset({
+        "shopping", "fashion", "clothing", "jackets", "kids_fashion",
+        "kids_clothing", "gift", "handbags", "shoes", "casual_shoes",
+    })
+    if any(p in raw for p in _SALES_PROMO_IN_SHOPPING):
+        topic = (scene.topic_lock or scene.active_topic or "").lower()
+        if any(t in topic for t in _SHOPPING_TOPICS_SET) or any(
+            w in raw for w in ("clothes", "bags", "shoes", "jacket", "kid", "gift")
+        ):
+            return (
+                GUIDED_RECOMMENDATION,
+                CONFIDENCE_MEDIUM,
+                "sales/promotion query in shopping context → guided recommendation",
+                False,
+            )
+
+    # ── Early exit: price query in shopping context → direct_factual ──
+    # "whats the price" when user is in a shopping flow (jackets, kids clothes)
+    # is a factual question about pricing, not a recommendation request.
+    _PRICE_IN_SHOPPING: tuple[str, ...] = (
+        "whats the price", "what's the price", "what is the price", "the price",
+    )
+    if any(p in raw for p in _PRICE_IN_SHOPPING):
+        topic = (scene.topic_lock or scene.active_topic or "").lower()
+        if any(t in topic for t in _SHOPPING_TOPICS_SET) or "jacket" in raw or "jackets" in raw:
+            return (
+                DIRECT_FACTUAL,
+                CONFIDENCE_MEDIUM,
+                "price query in shopping context → direct factual (cannot confirm exact prices)",
+                False,
+            )
+
     # ── Early exit: movie listing queries are always direct_factual ───
-    # "what movies are showing?", "show me movies", "now showing", etc.
     if (
         any(p in raw for p in _MOVIE_LISTING_PATTERNS)
         and not any(excl in raw for excl in _MOVIE_LISTING_EXCLUSIONS)
@@ -576,42 +996,81 @@ def resolve_response_mode(
             False,
         )
 
-    # ── Early exit: short kid-filter on entertainment context ─────────
-    # "with kid" / "with kids" after a movie/entertainment session should
-    # stay in direct_factual (filter, not a new request).
-    if any(p in raw for p in _KID_FILTER_PATTERNS) and len(raw.split()) <= 3:
-        if (
+    # ── Early exit: factual queries with inherent uncertainty → direct_factual/MEDIUM ──
+    if any(p in raw for p in _FACTUAL_SERVICE_PATTERNS_MEDIUM):
+        return (
+            DIRECT_FACTUAL,
+            CONFIDENCE_MEDIUM,
+            "factual query with inherent uncertainty/advisory nature → direct factual (medium)",
+            False,
+        )
+
+    # ── Early exit: short kid-filter on factual entertainment context ────
+    # "with kid" / "for kids" after a FACTUAL movie listing → direct_factual.
+    # IMPORTANT: "movie_lookup" topic_lock is set by guided/concierge recommendation
+    # requests ("show me movies"). In that context, "with kid" should return
+    # guided_recommendation (re-filter the guided recommendations for family-friendly),
+    # NOT direct_factual (raw factual listing).
+    # Only fire when the entertainment context was NOT established via "movie_lookup"
+    # (i.e., the movie context came from a factual query, not a concierge recommendation).
+    _KID_FILTER_FACTUAL_TOPICS: frozenset[str] = frozenset({
+        "movies", "cinema", "entertainment", "movie_schedule",
+    })
+    if (
+        any(p in raw for p in _KID_FILTER_PATTERNS)
+        and len(raw.split()) <= 3
+        and scene.topic_lock != "movie_lookup"   # movie_lookup = set by guided concierge flow
+        and (
             scene.active_topic in ("entertainment", "movies", "cinema")
-            or scene.topic_lock in _FACTUAL_LOCKED_TOPICS
-        ):
-            return (
-                DIRECT_FACTUAL,
-                CONFIDENCE_HIGH,
-                f"kid-filter on {scene.active_topic or scene.topic_lock} → direct factual",
-                False,
-            )
+            or scene.topic_lock in _KID_FILTER_FACTUAL_TOPICS
+        )
+    ):
+        return (
+            DIRECT_FACTUAL,
+            CONFIDENCE_HIGH,
+            f"kid-filter on factual {scene.active_topic or scene.topic_lock!r} movie context → direct_factual",
+            False,
+        )
 
     # ── Step 2G: follow-up resolution (topic lock short-circuit) ─────
-    # Short follow-up with a strong topic lock:  context resolves the ambiguity,
-    # so we must NOT classify the query as vague.
     is_short = len(raw.split()) <= 5
     has_active_lock = bool(scene.topic_lock and scene.topic_lock_confidence >= 0.5)
     is_followup_kind = msg_kind in ("followup", "refinement", "constraint_refinement")
 
-    # Skip the topic-lock short-circuit for vague queries — vague follow-ups
-    # (e.g. "something affordable", "i'm bored") should not be promoted to
-    # guided_recommendation; they belong in best_effort_shortlist instead.
     if is_short and is_followup_kind and has_active_lock and not _is_vague_query(state):
-        # Promote confidence: context resolves the ambiguity
         if confidence_level == CONFIDENCE_LOW:
             confidence_level = CONFIDENCE_MEDIUM
 
         locked_topic = scene.topic_lock
-        if locked_topic in _FACTUAL_LOCKED_TOPICS:
+        # Only return direct_factual via topic-lock when actually in factual flow.
+        # In concierge flow (e.g. "with kid" after guided movie rec), the lock
+        # reflects the topic domain but the response should be recommendation-style.
+        if locked_topic in _FACTUAL_LOCKED_TOPICS and state.flow_type == "factual":
+            # Exception: if a child companion has been established (e.g. from a prior turn
+            # revealing "oh wait im with my 7 year old"), movie follow-ups should be
+            # filtered for kid-appropriateness → guided_recommendation, not direct_factual.
+            has_child_companion = bool(
+                scene.companion_details
+                or any(
+                    kw in c.lower()
+                    for c in (scene.companions or [])
+                    for kw in ("child", "kid", "year_old", "daughter", "son")
+                )
+            )
+            if has_child_companion and any(
+                t in locked_topic.lower() for t in ("movie", "cinema", "entertainment")
+            ):
+                return (
+                    GUIDED_RECOMMENDATION,
+                    confidence_level,
+                    f"child companion established in {locked_topic!r} context → "
+                    "guided_recommendation (kid-appropriate filter on movie follow-up)",
+                    False,
+                )
             return (
                 DIRECT_FACTUAL,
                 confidence_level,
-                f"short follow-up resolved via topic_lock={locked_topic!r}",
+                f"short follow-up resolved via topic_lock={locked_topic!r} (factual flow)",
                 False,
             )
         return (
@@ -621,37 +1080,172 @@ def resolve_response_mode(
             False,
         )
 
-    # ── Step 2F: graceful recovery — unsupported / low confidence ─────
-    # Hard unsupported/error signals always recover gracefully.
-    # Low confidence alone does NOT trigger recovery when strong visit context
-    # is already established (mid-conversation) — the classifier may assign low
-    # scores to complex or nuanced phrasing, but the intent is still clear from
-    # scene context.  Fall through to planning/cross-domain/guided checks.
+    # ── Pre-2F guard: child companion revelation in movie/cinema factual context ──
+    # "oh wait im with my 7 year old" / "my daughter is 7" after a factual movie listing
+    # → user wants FILTERED/recommended movies for their child, not a raw factual listing.
+    # The "child reveal" breaks the factual domain lock and routes to guided_recommendation.
+    _CHILD_REVEAL_PATTERNS: tuple[str, ...] = (
+        "year old", "my kid", "my daughter", "my son",
+        "im with my", "i'm with my", "i am with my",
+    )
+    _MOVIE_FACTUAL_TOPICS_CHILD: frozenset[str] = frozenset({
+        "movies", "cinema", "entertainment", "movie_schedule",
+    })
+    if (
+        any(p in raw for p in _CHILD_REVEAL_PATTERNS)
+        and (
+            scene.active_topic in _MOVIE_FACTUAL_TOPICS_CHILD
+            or any(t in (scene.topic_lock or "").lower() for t in ("movie", "cinema", "entertainment"))
+        )
+        and state.flow_type == "factual"
+    ):
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_HIGH,
+            "child companion revealed in movie/cinema factual context → guided_recommendation "
+            "(filter movies for family/child-appropriate recommendations)",
+            False,
+        )
+
+    # ── Pre-2F guard: occasion/outfit requests in shopping context ────
+    # "im attending, need an outfit, wedding but not too fancy" and similar multi-fragment
+    # shopping requests that may confuse the LLM into marking intent as "unsupported".
+    # Any message that contains both an occasion signal AND an outfit/clothing need
+    # should always be guided_recommendation, NOT graceful_recovery.
+    _OCCASION_OUTFIT_SIGNALS: tuple[str, ...] = (
+        "need an outfit", "need outfit", "need a dress", "need something to wear",
+        "looking for an outfit", "looking for a dress", "looking for something to wear",
+        "want an outfit", "want a dress", "want something to wear",
+    )
+    _OCCASION_SIGNALS_CHECK: tuple[str, ...] = (
+        "wedding", "attending", "event", "ceremony", "gala", "party",
+        "formal", "dinner event", "special occasion",
+    )
+    if (
+        any(p in raw for p in _OCCASION_OUTFIT_SIGNALS)
+        or (
+            any(p in raw for p in _OCCASION_SIGNALS_CHECK)
+            and any(kw in raw for kw in ("outfit", "dress", "wear", "clothes", "clothing"))
+        )
+    ):
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_HIGH,
+            "occasion/event outfit request — guided shopping recommendation",
+            False,
+        )
+
+    # ── Step 2F: hard unsupported / gibberish ────────────────────────
+    # Gibberish/unknown input → graceful_recovery (explain capabilities, don't pretend to understand)
+    # Keep CLARIFICATION_REQUEST only for unsupported capability requests (taxi, delivery, etc.)
+    # which are already handled by the earlier _UNSUPPORTED_CAPABILITY_PATTERNS early exit.
+    #
+    # Guard: if we're in an established session and the classifier returned "unsupported",
+    # this is almost certainly a mis-classification (LLM rate-limited or heuristic fired).
+    # In that case, fall through to normal mode resolution rather than issuing a false
+    # graceful_recovery in the middle of a real conversation.
     is_hard_unsupported = (
         primary_intent == "unsupported"
         or intent.raw_signals.get("unsupported", False)
     )
-    if is_hard_unsupported or (
-        confidence_level == CONFIDENCE_LOW and not _has_strong_visit_context(state)
-    ):
+    if is_hard_unsupported and not _has_strong_visit_context(state):
         return (
             GRACEFUL_RECOVERY,
-            confidence_level,
-            "unsupported input or low confidence — graceful recovery",
+            CONFIDENCE_LOW,
+            "unsupported or unintelligible input — graceful recovery (explain capabilities)",
             True,
         )
+
+    # ── Step 2C-post: explicit planning/scheduling → hybrid_plan ─────
+    # Run BEFORE low confidence so dual-intent "food and movies" gets hybrid
+    if _has_planning_intent(state):
+        return (
+            HYBRID_PLAN,
+            confidence_level,
+            "explicit planning/itinerary/scheduling request",
+            False,
+        )
+
+    # ── Step 2D: cross-domain / multi-intent → hybrid_plan ───────────
+    # Run BEFORE low confidence so "food and movies" gets hybrid, not guided
+    if _has_cross_domain_intent(state):
+        hybrid_confidence = confidence_level
+        if len(raw.split()) <= 4 and confidence_level == CONFIDENCE_HIGH:
+            hybrid_confidence = CONFIDENCE_MEDIUM
+        if any(p in raw for p in ("food and maybe movie", "maybe movie also", "and maybe movie")):
+            hybrid_confidence = CONFIDENCE_MEDIUM
+        return (
+            HYBRID_PLAN,
+            hybrid_confidence,
+            "cross-domain intent detected — combine into one unified plan",
+            False,
+        )
+
+    # ── Low confidence handling ───────────────────────────────────────
+    # Low confidence with no identifiable intent + no visit context → clarification_request
+    if confidence_level == CONFIDENCE_LOW:
+        if not primary_intent and not _has_strong_visit_context(state):
+            return (
+                GRACEFUL_RECOVERY,
+                CONFIDENCE_LOW,
+                "unknown intent with no visit context — graceful recovery",
+                True,
+            )
+        # Partial/vague with identifiable intent ("anything for dinner") → best_effort
+        _PARTIAL_VAGUE_AT_LOW: tuple[str, ...] = (
+            "something nice for", "something for kids", "anything for dinner",
+        )
+        if any(p in raw for p in _PARTIAL_VAGUE_AT_LOW) and not _has_strong_visit_context(state):
+            return (
+                BEST_EFFORT_SHORTLIST,
+                CONFIDENCE_LOW,
+                "partial/vague query with low confidence — safe shortlist",
+                True,
+            )
+        if _is_vague_query(state) and not _has_strong_visit_context(state):
+            return (
+                BEST_EFFORT_SHORTLIST,
+                CONFIDENCE_LOW,
+                "vague exploratory query with low confidence — safe shortlist",
+                True,
+            )
+        # Identifiable intent but low confidence → guided recommendation
+        # (happens for single-word queries like "shoes" or generic "we want to eat")
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_LOW,
+            f"low confidence but identifiable intent ({primary_intent}) → guided recommendation",
+            False,
+        )
+
     # If strong context exists but confidence is LOW, promote to MEDIUM so
-    # downstream steps can route correctly.
-    if confidence_level == CONFIDENCE_LOW and _has_strong_visit_context(state):
-        confidence_level = CONFIDENCE_MEDIUM
+    # downstream steps can route correctly. (LOW already handled above.)
 
     # ── Step 2C: context-setting → context_acknowledgement ───────────
     if msg_kind == "context_setting":
-        # Exception: if the opener also embeds an explicit entertainment/exploration
-        # request (e.g. "we're 5 teens — what's fun to do here?"), respond with a
-        # diverse shortlist that simultaneously acknowledges the group.
-        # NOTE: "what's here for me?" is a wide open concierge question → stays as
-        # context_acknowledgement because the profile part dominates.
+        # Exception: "with kid" / "with kids" / "for kids" in an established movie/
+        # entertainment topic is a companion FILTER on the current topic (re-filter
+        # for family-friendly films), NOT a new context declaration.  Routing it to
+        # context_acknowledgement would abandon the movie thread; guided_recommendation
+        # keeps the film recommendations in view with the new kid filter applied.
+        _MOVIE_ENTERTAINMENT_TOPICS: frozenset[str] = frozenset({
+            "movies", "cinema", "entertainment", "movie_lookup",
+            "movie_schedule", "movie_recommendation",
+        })
+        active_topic = (scene.topic_lock or getattr(scene, "active_topic", "") or "").lower()
+        if (
+            any(p in raw for p in _KID_FILTER_PATTERNS)
+            and len(raw.split()) <= 4
+            and any(t in active_topic for t in ("movie", "cinema", "entertainment", "film"))
+        ):
+            return (
+                GUIDED_RECOMMENDATION,
+                CONFIDENCE_HIGH,
+                f"kid-filter in established {active_topic!r} context → guided_recommendation "
+                "(re-filter films for family-friendly, not new context declaration)",
+                False,
+            )
+
         _EMBEDDED_EXPLORATION_SIGNALS: tuple[str, ...] = (
             "what's fun to do",
             "what's fun here",
@@ -674,47 +1268,54 @@ def resolve_response_mode(
             False,
         )
 
-    # ── Step 2C-post: explicit planning/scheduling → hybrid_plan ─────
-    if _has_planning_intent(state):
-        return (
-            HYBRID_PLAN,
-            confidence_level,
-            "explicit planning/itinerary/scheduling request",
-            False,
-        )
-
-    # ── Step 2D: cross-domain / multi-intent → hybrid_plan ───────────
-    if _has_cross_domain_intent(state):
-        # Very short queries ("food and movies") are ambiguous cross-domain
-        # requests where the intent is inferred, not explicit — cap to medium.
-        # Longer explicit phrasings ("we want to watch a movie and grab dinner")
-        # retain the computed confidence level.
-        hybrid_confidence = confidence_level
-        if len(raw.split()) <= 4 and confidence_level == CONFIDENCE_HIGH:
-            hybrid_confidence = CONFIDENCE_MEDIUM
-        return (
-            HYBRID_PLAN,
-            hybrid_confidence,
-            "cross-domain intent detected — combine into one unified plan",
-            False,
-        )
-
     # ── Step 2A / 2B: confidence-driven branching ─────────────────────
 
+    # Override: queries that ask for curated recommendations should always be
+    # guided_recommendation even when flow_type is "factual".  These are opinion/
+    # curation requests ("any high-end options", "which stores give the best value")
+    # that require concierge reasoning, not raw factual lookup.
+    _FACTUAL_FLOW_RECOMMENDATION_OVERRIDES: tuple[str, ...] = (
+        "any high-end", "any high end", "any premium options",
+        "any luxury options", "high-end options",
+        "which stores give the best", "best value for money",
+        "value for money stores",
+    )
+    if state.flow_type == "factual" and any(p in raw for p in _FACTUAL_FLOW_RECOMMENDATION_OVERRIDES):
+        return (
+            GUIDED_RECOMMENDATION,
+            confidence_level,
+            "recommendation override: curated-ask in factual flow → guided_recommendation",
+            False,
+        )
+
     if confidence_level == CONFIDENCE_HIGH:
-        # Factual queries → direct_factual (never override factual routing)
         if state.flow_type == "factual":
+            # Exception: child companion established in movie/cinema context
+            # → guided_recommendation (re-filter for kid-appropriate films)
+            _has_child = bool(
+                scene.companion_details
+                or any(
+                    kw in c.lower()
+                    for c in (scene.companions or [])
+                    for kw in ("child", "kid", "daughter", "son")
+                )
+            )
+            if _has_child and any(
+                t in (scene.topic_lock or "").lower()
+                for t in ("movie", "cinema", "entertainment")
+            ):
+                return (
+                    GUIDED_RECOMMENDATION,
+                    confidence_level,
+                    "child companion in movie/cinema factual context → guided_recommendation",
+                    False,
+                )
             return (
                 DIRECT_FACTUAL,
                 confidence_level,
                 f"factual flow with high confidence: {intent.sub_intent}",
                 False,
             )
-        # Precise sub-intent in concierge flow → guided_recommendation.
-        # NOTE: We do NOT restrict by domain here because concierge-routed
-        # queries span entertainment, navigation, and other domains — all of
-        # them deserve a recommendation response, not a raw factual answer.
-        # (Factual routing is handled exclusively by the factual path above.)
         if intent.sub_intent in _PRECISE_SUB_INTENTS:
             return (
                 GUIDED_RECOMMENDATION,
@@ -722,7 +1323,6 @@ def resolve_response_mode(
                 f"precise sub_intent ({intent.sub_intent}) in concierge flow → recommendation",
                 False,
             )
-        # Strong playbook match → guided_recommendation
         if playbook.selected_playbook and playbook.playbook_confidence > 0.4:
             return (
                 GUIDED_RECOMMENDATION,
@@ -731,7 +1331,6 @@ def resolve_response_mode(
                 f"conf={playbook.playbook_confidence:.2f})",
                 False,
             )
-        # Default high-confidence
         return (
             GUIDED_RECOMMENDATION,
             confidence_level,
@@ -741,13 +1340,31 @@ def resolve_response_mode(
 
     # medium confidence
     if confidence_level == CONFIDENCE_MEDIUM:
-        # Factual-flow queries are always direct lookups — return direct_factual
-        # regardless of confidence level.  Planning/cross-domain short-circuits
-        # (hybrid_plan) have already been handled above this point.
-        # Exception: "is there anywhere to [verb]" phrasing signals a RECOMMENDATION
-        # request rather than an existence/availability check (e.g. "is there anywhere
-        # to sit and chill?" vs "is there face painting here?") — let it fall through
-        # to guided_recommendation.
+        # Partial/vague queries without strong context → best_effort_shortlist
+        _PARTIAL_VAGUE_PATTERNS: tuple[str, ...] = (
+            "something nice for", "something for kids", "anything for dinner",
+        )
+        if (
+            any(p in raw for p in _PARTIAL_VAGUE_PATTERNS)
+            and not _has_strong_visit_context(state)
+        ):
+            return (
+                BEST_EFFORT_SHORTLIST,
+                confidence_level,
+                "partial/vague query with medium confidence — safe shortlist",
+                True,
+            )
+        # Occasion + style refinement ("something elegant", "not too over the top")
+        # → guided_recommendation, NOT best_effort_shortlist
+        if scene.occasion and any(
+            kw in raw for kw in ("elegant", "put together", "over the top", "not too over")
+        ):
+            return (
+                GUIDED_RECOMMENDATION,
+                confidence_level,
+                "occasion + style refinement in established context",
+                False,
+            )
         _RECOMMENDATION_PHRASES = ("is there anywhere to ", "anywhere i can ", "somewhere to ")
         if state.flow_type == "factual" and not any(p in raw for p in _RECOMMENDATION_PHRASES):
             return (
@@ -756,22 +1373,27 @@ def resolve_response_mode(
                 f"factual flow with medium confidence: {intent.sub_intent}",
                 False,
             )
-        # 2B: vague query with partial confidence → best_effort_shortlist
-        #     Queries matching explicit vague raw patterns (e.g. "something affordable",
-        #     "i'm bored") always get best_effort_shortlist even with strong visit context.
-        #     Other vague queries defer to guided_recommendation when context is strong.
         if _is_vague_query(state):
             is_raw_vague_pattern = any(p in raw for p in _VAGUE_RAW_PATTERNS)
-            if not _has_strong_visit_context(state) or is_raw_vague_pattern:
+            # Only return best_effort_shortlist when there is NO established context.
+            # With strong visit context, a vague follow-up is still within the established
+            # scenario — fall through to guided_recommendation.
+            if not _has_strong_visit_context(state):
                 return (
                     BEST_EFFORT_SHORTLIST,
                     confidence_level,
                     "vague/exploratory query with medium confidence — safe shortlist",
                     True,
                 )
-            # With strong context and no raw vague pattern, fall through to guided_recommendation
-        # Known domain but vague sub-intent (e.g. general_shopping with modifiers)
-        # Only apply when there is NO strong visit context
+            # Even with strong context, raw exploratory patterns (e.g. "i'm bored",
+            # "surprise me") that are explicitly open-ended remain best_effort_shortlist
+            if is_raw_vague_pattern:
+                return (
+                    BEST_EFFORT_SHORTLIST,
+                    confidence_level,
+                    "explicit exploratory pattern even within established context",
+                    True,
+                )
         if intent.domain not in ("general",) and intent.sub_intent in _VAGUE_SUB_INTENTS:
             if not _has_strong_visit_context(state):
                 return (
@@ -780,7 +1402,6 @@ def resolve_response_mode(
                     f"known domain ({intent.domain}) but vague sub_intent ({intent.sub_intent})",
                     True,
                 )
-        # Partial confidence with identifiable intent → guided_recommendation
         if primary_intent:
             return (
                 GUIDED_RECOMMENDATION,
@@ -799,6 +1420,18 @@ def resolve_response_mode(
         )
 
     # ── Final fallback ────────────────────────────────────────────────
+    # If we're in an established session (companions, occasion, etc.), the classifier
+    # likely failed (e.g. LLM rate-limited → heuristic returned empty intent).
+    # In that case, graceful_recovery is a false positive — the user is mid-conversation
+    # and their intent is almost certainly valid.  Fall back to guided_recommendation so
+    # the LLM generation step can at least attempt a contextual reply.
+    if _has_strong_visit_context(state) or state.flow_type == "concierge":
+        return (
+            GUIDED_RECOMMENDATION,
+            CONFIDENCE_MEDIUM,
+            "fallback: empty/heuristic intent in established session → guided recommendation",
+            False,
+        )
     return (
         GRACEFUL_RECOVERY,
         confidence_level,

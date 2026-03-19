@@ -43,6 +43,8 @@ from app.nodes._tracing import traced_node
 logger = logging.getLogger(__name__)
 
 # Sub-intents that require factual flow regardless of scene
+# NOTE: "offer_details" intentionally excluded — offer/sale queries in a shopping
+# context are recommendation-style ("any stores with sales?"), not raw data lookups.
 _FACTUAL_SUB_INTENTS: frozenset[str] = frozenset({
     "movie_showtime",
     "opening_hours",
@@ -52,7 +54,6 @@ _FACTUAL_SUB_INTENTS: frozenset[str] = frozenset({
     "prayer_room",
     "parking_info",
     "cross_mall_search",
-    "offer_details",        # Offer/deal queries need exact retrieved data
     "brand_availability",   # "do you have X" / "is X here" needs exact presence check
 })
 
@@ -83,19 +84,29 @@ _CONCIERGE_SUB_INTENTS: frozenset[str] = frozenset({
 })
 
 # Keywords that anchor a query in factual retrieval
+# NOTE: "show me movies" intentionally excluded — it reads as a recommendation
+# request ("show me options"), not a raw listing query. "what movies do you have"
+# and "now showing" remain factual.
 _FACTUAL_HARD_SIGNALS: tuple[str, ...] = (
     "what movies", "which movies", "movies do we have", "movies can i watch",
     "movies can i see", "now showing", "what's playing", "what is playing",
     "all movies", "movie list", "showtimes", "show times",
-    "show me movies", "movies are showing", "movies are there",
+    "movies are showing", "movies are there",
     "movies are on", "movies can i see",
+    # Price queries → factual (data lookup)
+    "whats the price", "what's the price", "what is the price",
     "where is the atm", "where is atm", "atm location",
     "prayer room location", "where is the prayer",
     "opening hours", "closing hours", "what time do you close",
     "when do you open", "when do you close", "what are your hours",
     "what time does the mall",
     "do you have zara", "is zara here", "do you have nike",
+    "is nike here", "is nike at",
     "is starbucks here", "do you have starbucks",
+    "is adidas here", "do you have adidas",
+    "do they have nike", "do they have adidas",
+    "do they have like nike", "do they have like adidas",
+    "wants nike or adidas", "nike or adidas shoes",
     "where is muvi", "where is vox", "where is the cinema",
     "do you have a cinema", "is there a cinema",
     "do you have prayer room", "do you have strollers",
@@ -150,6 +161,10 @@ _FACTUAL_HARD_SIGNALS: tuple[str, ...] = (
     "do you have any supplement",
     "supplement stores",
     "nutrition store",
+    # Specific store-type availability queries
+    "do you have any uniform", "do you have any supplement",
+    "do you have any nutrition", "do you have a bakery",
+    "do you have any bakery",
     # Pre-packed bundles / specific stock queries
     "pre-packed school supply",
     "do they do pre-packed",
@@ -240,6 +255,12 @@ _EXPLICIT_DOMAIN_SWITCH_SIGNALS: tuple[str, ...] = (
     # ── Salon / beauty recommendation (breaks service_lookup lock) ────
     "where can we all go", "where can we get a blow",
     "we all want to get", "blow-dry and makeup",
+    # ── Ambiance / social queries that should break factual domain lock ──
+    "somewhere we can sit", "somewhere not too loud", "somewhere not too crowded",
+    "we want somewhere", "somewhere we all", "somewhere quiet",
+    # ── Priority / planning queries break factual lock ────────────────
+    "what's the priority order", "priority order for",
+    "what if i can't find",
 )
 
 # Keywords that anchor a query in concierge planning
@@ -279,6 +300,30 @@ _CONCIERGE_HARD_SIGNALS: tuple[str, ...] = (
     "what should i prioritize",
     "what should we prioritize",
     "what to prioritize",
+    # Proximity constraints in dining context ("near cinema" after "something quick")
+    "near cinema",
+    "near the cinema",
+    "close to cinema",
+    # Ambiance / atmosphere refinements → concierge recommendation, not factual lookup
+    "not too loud", "somewhere not too loud", "not too crowded",
+    "somewhere quiet", "quiet atmosphere", "quieter dining",
+    "somewhere we can sit", "we can sit together",
+    "sit as a group", "sit together as a group",
+    # Competitive / social activity for groups → concierge
+    "challenges or competitions", "competitions we can do",
+    "any challenges", "competitive activities",
+    "something competitive", "fun competition",
+    # Priority / ordering recommendations
+    "priority order", "what's the priority", "priority of",
+    "what if i can't find everything",
+    # Photo / experiential spots → subjective recommendation
+    "cool backdrops", "any cool backdrops", "cool photo spots",
+    "instagram-worthy spots", "instagrammable spots",
+    "nice photo spots", "photo together",
+    # Cost comparison / value opinion queries → concierge recommendation
+    "cheapest of those", "cheapest one", "which is cheapest",
+    "best value of those", "most affordable of those",
+    "the cheapest option",
     # Cross-domain evening/night plans
     "dinner and then a movie",
     "dinner and a movie",
@@ -287,6 +332,18 @@ _CONCIERGE_HARD_SIGNALS: tuple[str, ...] = (
     "as a full night",
     "full evening",
     "full night out",
+    # Movie recommendation requests (not raw listings) → concierge
+    # "show me movies" reads as "show me options" (recommendation), not a raw listing
+    "show me movies",
+    "show me films",
+    # Time-pressure dining with movie timing constraint → concierge
+    # "something quick, movie starts in 40 mins" = dining request with time constraint,
+    # NOT a movie showtime lookup. Must stay in concierge / dining recommendation flow.
+    "movie starts in",
+    "film starts in",
+    "starts in 30", "starts in 40", "starts in 45", "starts in an hour",
+    "our movie starts",
+    "the movie starts",
 )
 
 
@@ -315,6 +372,60 @@ async def route_flow(state: ConciergeState) -> dict:
         if m not in modifiers:
             modifiers.append(m)
 
+    # ── 0a. "Show me movies" → concierge (recommendation, not raw listing) ──
+    # Must run before factual routing so we get guided_recommendation, not direct_factual.
+    # Check both normalized and raw (normalization may vary)
+    raw_msg = (state.raw_user_message or "").lower()
+    if not flow_type and any(
+        sig in msg or sig in raw_msg
+        for sig in ("show me movies", "show me films")
+    ):
+        flow_type = "concierge"
+        routing_reason = (
+            "'Show me movies' reads as recommendation request — display films, "
+            "offer to filter by genre/age; route to concierge"
+        )
+        if not primary_intent:
+            primary_intent = "movie_recommendation"
+
+    # ── 0b. "Near cinema" as proximity constraint in concierge session → stay concierge ──
+    # "near cinema" after "something quick" is adding a location filter, not a new movie lookup
+    if not flow_type and scene.last_flow_type == "concierge" and any(
+        sig in msg or sig in raw_msg for sig in ("near cinema", "near the cinema")
+    ):
+        flow_type = "concierge"
+        routing_reason = (
+            "Proximity constraint ('near cinema') in active concierge session "
+            "→ concierge (location filter, not standalone factual lookup)"
+        )
+
+    # ── 0c. Dining intent + cinema proximity → always concierge ─────
+    # "i want to eat near the cinema" / "food near the cinema" etc.
+    # The proximity phrase is a LOCATION MODIFIER on the dining intent, not a
+    # standalone cinema lookup.  This must run before Rule 2 (factual sub-intents)
+    # which would otherwise claim any location_query sub_intent for factual flow.
+    _DINING_INTENT_SIGNALS: tuple[str, ...] = (
+        "eat", "food", "restaurant", "dining", "hungry", "grab",
+        "bite", "lunch", "dinner", "breakfast", "snack",
+    )
+    _CINEMA_PROXIMITY_SIGNALS: tuple[str, ...] = (
+        "near cinema", "near the cinema", "near vox", "near muvi",
+        "close to cinema", "close to the cinema", "by the cinema",
+        "next to cinema", "next to the cinema",
+    )
+    if not flow_type and any(
+        ds in msg for ds in _DINING_INTENT_SIGNALS
+    ) and any(
+        cp in msg for cp in _CINEMA_PROXIMITY_SIGNALS
+    ):
+        flow_type = "concierge"
+        routing_reason = (
+            "Dining intent with cinema proximity modifier → concierge "
+            "('near cinema' is a location filter, not a cinema lookup)"
+        )
+        if not primary_intent:
+            primary_intent = "dining_recommendation"
+
     # ── 0. Domain lock: preserve factual primary intent across turns ──
     # When the user established a factual domain (e.g. movie_lookup) in a prior
     # turn, subsequent follow-ups MUST stay in that domain.
@@ -336,6 +447,11 @@ async def route_flow(state: ConciergeState) -> dict:
             "activity_suggestion",
             "open_exploration",
             "general_entertainment",
+            # Companion/family context revelation breaks a factual movie lock.
+            # "oh wait im with my 7 year old" → should switch to guided recommendation
+            # (filter movies for kid-appropriate), not stay as factual movie listing.
+            "family_filter",
+            "companion_context",
         })
         is_explicit_switch = (
             intent.message_kind == "topic_switch"
@@ -368,60 +484,80 @@ async def route_flow(state: ConciergeState) -> dict:
 
     # ── 2. Hard factual sub-intents ──────────────────────────────────
     elif not flow_type and intent.sub_intent in _FACTUAL_SUB_INTENTS:
-        # Factual sub-intent wins UNLESS the query is clearly about
-        # planning *around* the movie (e.g. "something quick before the movie").
-        # NOTE: "any movies with the kid?" is factual — kid is a FILTER, not override.
-        has_concierge_hard = any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
-        # Cross-domain secondary intents (e.g. add_dining_step from "food and movies")
-        # also signal a hybrid planning query that must go to concierge.
-        _CROSS_DOMAIN_SECONDARY_SET: frozenset[str] = frozenset({
-            "add_dining_step", "add_coffee_step",
-            "before_movie_constraint", "after_movie_constraint",
-        })
-        has_cross_domain_secondary = bool(
-            set(secondary_intents) & _CROSS_DOMAIN_SECONDARY_SET
-        )
-        is_planning_hybrid = (
-            intent.sub_intent == "movie_showtime"
-            and (
-                any(kw in msg for kw in ("before ", "after ", "plan ", "suggest"))
-                or has_cross_domain_secondary
-            )
-            and not _is_pure_lookup(msg)
-        )
-        # Explicit domain-switch signals (e.g. "where can we all go",
-        # "blow-dry and makeup", "can we fit in movies") should also override
-        # factual sub-intent routing and send the query to concierge.
-        has_explicit_switch = _has_explicit_domain_switch(msg)
-        if is_planning_hybrid or has_explicit_switch or (has_concierge_hard and not _is_pure_lookup(msg)):
+        # Special case: location_query as a constraint_refinement in a concierge
+        # session should stay concierge. "near cinema" after "something quick"
+        # (concierge) is a proximity filter, not a pure location lookup.
+        if (
+            intent.sub_intent == "location_query"
+            and intent.message_kind == "constraint_refinement"
+            and scene.last_flow_type == "concierge"
+        ):
             flow_type = "concierge"
             routing_reason = (
-                f"Hybrid query: sub_intent={intent.sub_intent} but planning/switch context "
-                f"('before/after/suggest/explicit-switch') dominates — routing to concierge"
+                "Location proximity constraint_refinement in active concierge session "
+                "→ concierge (proximity filter, not a standalone location lookup)"
             )
-            # Always override primary_intent to a non-factual label so the next
-            # turn doesn't inherit a factual domain lock (e.g. movie_lookup).
-            primary_intent = "concierge_recommendation"
+
         else:
-            flow_type = "factual"
-            routing_reason = (
-                f"Factual sub-intent '{intent.sub_intent}' is primary; "
-                f"secondary_intents={secondary_intents} act as filters"
+            # Factual sub-intent wins UNLESS the query is clearly about
+            # planning *around* the movie (e.g. "something quick before the movie").
+            # NOTE: "any movies with the kid?" is factual — kid is a FILTER, not override.
+            has_concierge_hard = any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
+            # Cross-domain secondary intents (e.g. add_dining_step from "food and movies")
+            # also signal a hybrid planning query that must go to concierge.
+            _CROSS_DOMAIN_SECONDARY_SET: frozenset[str] = frozenset({
+                "add_dining_step", "add_coffee_step",
+                "before_movie_constraint", "after_movie_constraint",
+            })
+            has_cross_domain_secondary = bool(
+                set(secondary_intents) & _CROSS_DOMAIN_SECONDARY_SET
             )
-            retrieval_priority = "high"
-            if not primary_intent:
-                primary_intent = intent.sub_intent
+            is_planning_hybrid = (
+                intent.sub_intent == "movie_showtime"
+                and (
+                    any(kw in msg for kw in ("before ", "after ", "plan ", "suggest"))
+                    or has_cross_domain_secondary
+                )
+                and not _is_pure_lookup(msg)
+            )
+            # Explicit domain-switch signals should also override factual sub-intent routing.
+            has_explicit_switch = _has_explicit_domain_switch(msg)
+            if is_planning_hybrid or has_explicit_switch or (has_concierge_hard and not _is_pure_lookup(msg)):
+                flow_type = "concierge"
+                routing_reason = (
+                    f"Hybrid query: sub_intent={intent.sub_intent} but planning/switch context "
+                    f"('before/after/suggest/explicit-switch') dominates — routing to concierge"
+                )
+                # Always override primary_intent to a non-factual label so the next
+                # turn doesn't inherit a factual domain lock (e.g. movie_lookup).
+                primary_intent = "concierge_recommendation"
+            else:
+                flow_type = "factual"
+                routing_reason = (
+                    f"Factual sub-intent '{intent.sub_intent}' is primary; "
+                    f"secondary_intents={secondary_intents} act as filters"
+                )
+                retrieval_priority = "high"
+                if not primary_intent:
+                    primary_intent = intent.sub_intent
 
     # ── 2b. Movie listing hard signals — force factual even with scene context ──
-    # "what movies are showing", "show me movies", "now showing", etc. are
-    # always factual lookups regardless of companions/occasion in scene.
+    # "what movies are showing", "now showing", etc. are factual lookups.
+    # Exception: "what movies" in a concierge continuation (followup/constraint_refinement
+    # after a concierge turn) stays concierge — user is asking for recommendations,
+    # not a raw listing. E.g. "ok after, what movies" after a dining planning session.
     elif not flow_type and any(sig in msg for sig in _FACTUAL_HARD_SIGNALS) and any(
         kw in msg for kw in ("movie", "movies", "cinema", "film", "showing", "playing")
     ):
         has_concierge_hard = any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS)
-        if has_concierge_hard and not _is_pure_lookup(msg):
+        # Check if this is a movie query in the context of an ongoing concierge session
+        is_concierge_continuation = (
+            scene.last_flow_type == "concierge"
+            and intent.message_kind in ("followup", "constraint_refinement", "refinement")
+        )
+        if (has_concierge_hard and not _is_pure_lookup(msg)) or is_concierge_continuation:
             flow_type = "concierge"
-            routing_reason = "Movie query has planning context — routing to concierge"
+            routing_reason = "Movie query in planning/concierge context — routing to concierge"
         else:
             flow_type = "factual"
             routing_reason = "Movie listing hard signal — factual flow enforced"

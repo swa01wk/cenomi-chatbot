@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-41c2abde61e5",
+  "session_id": "cx-s6-b8b5c5f5",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-2cd4a4f15e4c",
+  "user_message": "i also need to grab a quick lunch mid-shop \u2014 something i can eat on the go",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-19 17:45:29.918860"
+}

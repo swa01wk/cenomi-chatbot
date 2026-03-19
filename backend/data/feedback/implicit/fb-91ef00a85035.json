@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-91ef00a85035",
+  "session_id": "cx-s7-c1ab3679",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-63ae184b0db3",
+  "user_message": "after lunch i want a beauty or grooming treatment \u2014 any high-end options?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-19 16:11:33.988866"
+}

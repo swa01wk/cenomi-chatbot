@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-4f0029a870a8",
+  "session_id": "brk-s17-0bce269d",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-9c4bc6d035bb",
+  "user_message": "we want something quick, not crowded",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-03-19 09:28:05.073731"
+}
