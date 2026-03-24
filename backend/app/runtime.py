@@ -9,25 +9,35 @@ Usage in any node / service:
     from app.runtime import get_mall_context, get_session_store
     ctx = get_mall_context("al_nakheel_plaza_28")
     store = get_session_store()
+
+Session store selection (controlled by BACKEND_REDIS_URL):
+    - Empty / unset  →  in-memory SessionStore (development default)
+    - Redis URL set  →  RedisSessionStore with 30-min TTL
+
+LangGraph checkpointer (controlled by BACKEND_ENABLE_CHECKPOINTER):
+    - False (default)        →  no checkpointer; graph is stateless between turns
+    - True + no Redis URL    →  MemorySaver (in-process snapshots for dev/replay)
+    - True + Redis URL set   →  AsyncRedisSaver (durable cross-process snapshots)
 """
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from app.context.mall_context import MallContextLoader
     from app.services.feedback_normalizer import FeedbackNormalizer
     from app.services.feedback_service import FeedbackService
     from app.services.implicit_feedback_detector import ImplicitFeedbackDetector
-    from app.services.session_store import SessionStore
+    from app.services.session_store import AbstractSessionStore
     from app.services.session_tuning_engine import SessionTuningEngine
 
 logger = logging.getLogger(__name__)
 
 _mall_contexts: dict[str, MallContextLoader] = {}
-_session_store: SessionStore | None = None
+_session_store: AbstractSessionStore | None = None
+_checkpointer: Any | None = None
 _feedback_service: FeedbackService | None = None
 _implicit_detector: ImplicitFeedbackDetector | None = None
 _feedback_normalizer: FeedbackNormalizer | None = None
@@ -37,18 +47,55 @@ _initialized: bool = False
 
 async def initialize(mall_ids: list[str]) -> None:
     """Load mall intelligence for each mall ID and prepare shared services."""
-    global _mall_contexts, _session_store, _initialized
+    global _mall_contexts, _session_store, _checkpointer, _initialized
     global _feedback_service, _implicit_detector, _feedback_normalizer, _session_tuning_engine
 
+    from app.config.settings import get_settings
     from app.context.mall_context import MallContextLoader
     from app.services.feedback_normalizer import FeedbackNormalizer
     from app.services.feedback_service import FeedbackService
     from app.services.implicit_feedback_detector import ImplicitFeedbackDetector
-    from app.services.session_store import SessionStore
     from app.services.session_tuning_engine import SessionTuningEngine
 
-    _session_store = SessionStore()
+    settings = get_settings()
 
+    # ── Session store ─────────────────────────────────────────────────────
+    if settings.redis_url:
+        from app.services.session_store import RedisSessionStore
+        _session_store = RedisSessionStore(
+            redis_url=settings.redis_url,
+            ttl=settings.redis_session_ttl,
+        )
+        logger.info("Session store: Redis (%s, TTL=%ds)", settings.redis_url, settings.redis_session_ttl)
+    else:
+        from app.services.session_store import SessionStore
+        _session_store = SessionStore()
+        logger.info("Session store: in-memory LRU")
+
+    # ── LangGraph checkpointer ────────────────────────────────────────────
+    if settings.enable_checkpointer:
+        if settings.redis_url:
+            try:
+                from langgraph.checkpoint.redis.aio import AsyncRedisSaver
+                _checkpointer = AsyncRedisSaver.from_conn_string(settings.redis_url)
+                logger.info("Checkpointer: AsyncRedisSaver")
+            except ImportError:
+                logger.warning(
+                    "langgraph-checkpoint-redis not installed; falling back to MemorySaver. "
+                    "Install with: pip install langgraph-checkpoint-redis"
+                )
+                from langgraph.checkpoint.memory import MemorySaver
+                _checkpointer = MemorySaver()
+                logger.info("Checkpointer: MemorySaver (fallback)")
+        else:
+            from langgraph.checkpoint.memory import MemorySaver
+            _checkpointer = MemorySaver()
+            logger.info("Checkpointer: MemorySaver (dev)")
+    else:
+        _checkpointer = None
+        logger.info("Checkpointer: disabled")
+
+    # ── Mall contexts ─────────────────────────────────────────────────────
     for mall_id in mall_ids:
         ctx = MallContextLoader(mall_id)
         await ctx.load()
@@ -141,10 +188,21 @@ def get_all_mall_canonical_for_guard() -> dict:
     return merged
 
 
-def get_session_store() -> SessionStore:
+def get_session_store() -> AbstractSessionStore:
     if _session_store is None:
         raise RuntimeError("Runtime not initialized — call runtime.initialize() first")
     return _session_store
+
+
+def get_checkpointer() -> Any | None:
+    """
+    Return the active LangGraph checkpointer, or None if disabled.
+
+    Pass the result to build_concierge_graph(checkpointer=...).
+    When not None, callers must also pass a thread_id in the invoke config:
+        config={"configurable": {"thread_id": "<session_id>:<turn_id>"}}
+    """
+    return _checkpointer
 
 
 def get_feedback_service() -> FeedbackService:
@@ -169,6 +227,15 @@ def get_session_tuning_engine() -> SessionTuningEngine:
     if _session_tuning_engine is None:
         raise RuntimeError("Runtime not initialized — call runtime.initialize() first")
     return _session_tuning_engine
+
+
+async def shutdown() -> None:
+    """Gracefully close any open connections (Redis, etc.)."""
+    if _session_store is not None:
+        close = getattr(_session_store, "close", None)
+        if callable(close):
+            await close()
+            logger.info("Session store connection closed")
 
 
 def is_initialized() -> bool:

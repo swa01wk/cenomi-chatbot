@@ -48,6 +48,11 @@ logger = logging.getLogger(__name__)
 
 _llm: ChatOpenAI | None = None
 
+# Child companion identifiers used by the cross-domain continuity block.
+_CHILD_COMPANIONS_CONTEXT: frozenset[str] = frozenset({
+    "child", "kids", "son", "daughter",
+})
+
 
 def _get_llm() -> ChatOpenAI:
     global _llm
@@ -65,6 +70,57 @@ def _get_llm() -> ChatOpenAI:
             max_tokens=1024,
         )
     return _llm
+
+
+# Explicit tone instructions keyed by playbook scenario name.
+# These map the abstract scenario to concrete LLM behavioural guidance so the
+# model doesn't have to infer tone from a scenario label alone.
+_PLAYBOOK_TONE_MAP: dict[str, str] = {
+    "family_day": (
+        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
+        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+    ),
+    "family_outing": (
+        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
+        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+    ),
+    "family_shopping": (
+        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
+        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+    ),
+    "date_night": (
+        "TONE: Warm, slightly romantic. Confident recommendations — no hesitation. "
+        "Suggest premium or special-occasion options. Frame as an experience."
+    ),
+    "gift_hunt": (
+        "TONE: Helpful and decisive. One clear recommendation, one strong alternative. "
+        "Explain gift-suitability in one sentence. Do not overwhelm with options."
+    ),
+    "gift_shopping": (
+        "TONE: Helpful and decisive. One clear recommendation, one strong alternative. "
+        "Explain gift-suitability in one sentence. Do not overwhelm with options."
+    ),
+    "quick_visit": (
+        "TONE: Efficient and direct. No fluff. Get to the point immediately. "
+        "Prioritise nearby, fast options. Respect the visitor's time constraint."
+    ),
+    "solo_explorer": (
+        "TONE: Curious and encouraging. Highlight discovery. "
+        "Suggest a mix of familiar and new options."
+    ),
+    "luxury_vip": (
+        "TONE: Refined, premium. Lean toward exclusive, high-end options. "
+        "Frame recommendations as curated, not generic."
+    ),
+    "budget_conscious": (
+        "TONE: Practical and reassuring. Lead with value-for-money picks. "
+        "Never suggest premium options for a budget query."
+    ),
+    "wedding_related": (
+        "TONE: Elegant, occasion-appropriate. Emphasise quality and style. "
+        "Frame as helping with a special event."
+    ),
+}
 
 
 def _format_playbook(state: ConciergeState) -> str:
@@ -97,6 +153,19 @@ def _format_playbook(state: ConciergeState) -> str:
                 parts.append(f"Next step hint: {playbook_obj.next_step_hint}")
     except Exception:
         pass
+
+    # Append tone guidance from _PLAYBOOK_TONE_MAP when available.
+    # Check both the selected_playbook id and the scenario field for a match.
+    playbook_key = pb.selected_playbook.lower().replace("-", "_").replace(" ", "_")
+    tone = _PLAYBOOK_TONE_MAP.get(playbook_key, "")
+    if not tone:
+        # Try partial match (e.g. "family" matches "family_day")
+        for key, t in _PLAYBOOK_TONE_MAP.items():
+            if key in playbook_key or playbook_key in key:
+                tone = t
+                break
+    if tone:
+        parts.append(f"\n{tone}")
 
     return "\n".join(parts)
 
@@ -309,6 +378,61 @@ def _build_conversation_context(state: ConciergeState) -> str:
             frame_block += (
                 "This is a FOLLOW-UP query. Interpret it in the context of the "
                 "previous conversation. Do NOT treat it as a standalone question.\n\n"
+            )
+
+    # ── Cross-domain continuity block ────────────────────────────────
+    # When topic_history spans more than one domain AND companions are set,
+    # the visitor's audience requirements must carry into the new domain.
+    # This makes the constraint explicit rather than relying on the LLM to
+    # infer it from the companion list alone.
+    if (
+        len(state.scene.topic_history) >= 2
+        and state.scene.companions
+        and state.intent.domain
+        and state.intent.domain != state.scene.topic_history[-2]
+    ):
+        current_domain = state.intent.domain
+        companions_str = ", ".join(state.scene.companions)
+        has_child_cross = bool(
+            _CHILD_COMPANIONS_CONTEXT & set(state.scene.companions)
+            or any(d.get("type") == "child" for d in state.scene.companion_details)
+        )
+
+        cross_domain_constraints: list[str] = []
+
+        if has_child_cross:
+            if current_domain == "dining":
+                cross_domain_constraints.append(
+                    "food options MUST be kid-friendly (kids menus, family seating, "
+                    "casual pace) — NOT fine-dining or adult-only venues"
+                )
+            elif current_domain == "entertainment":
+                cross_domain_constraints.append(
+                    "entertainment MUST be suitable for children — "
+                    "family-rated movies or kid-friendly activities"
+                )
+            elif current_domain == "shopping":
+                cross_domain_constraints.append(
+                    "shopping suggestions should include child-appropriate options "
+                    "or stores the family can browse together"
+                )
+
+        budget = state.scene.budget or (
+            state.scene.shopping_task.budget_preference
+            if state.scene.shopping_task else ""
+        )
+        if budget in ("budget", "affordable") and current_domain == "dining":
+            cross_domain_constraints.append(
+                "dining options MUST be budget-friendly / casual — "
+                "NOT premium restaurants or fine-dining"
+            )
+
+        if cross_domain_constraints:
+            frame_block += (
+                f"CROSS-DOMAIN CONTINUITY: You are now helping with {current_domain}. "
+                f"The visitor is still with {companions_str}. "
+                f"This means: {'; '.join(cross_domain_constraints)}. "
+                "Apply these constraints to ALL recommendations in this response.\n\n"
             )
 
     # ── Context-setting directive ─────────────────────────────────────
@@ -1382,6 +1506,9 @@ async def generate_response(state: ConciergeState) -> dict:
         # ── Response mode instruction (behaviour layer) ───────────────
         response_mode_instruction = _build_response_mode_instruction(state)
 
+        # ── Decision response directive (adaptive concierge engine) ───
+        decision_directive = _build_decision_response_directive(state)
+
         # ── CTA instruction ───────────────────────────────────────────
         cta_instruction = ""
         if not is_category_turn and not is_offer_query:
@@ -1396,6 +1523,7 @@ async def generate_response(state: ConciergeState) -> dict:
             f"{category_instruction}"
             f"{hybrid_concierge_instruction}"
             f"{response_mode_instruction}"
+            f"{decision_directive}"
             f"{experience_instruction}"
             f"{cta_instruction}"
             "Generate a helpful concierge response. "
@@ -1701,6 +1829,81 @@ def _build_hybrid_filter_instruction(fact_ctx: dict, state: ConciergeState) -> s
         "Secondary filter hints are modifiers only — they do NOT replace the answer.\n"
     )
     return "\n".join(lines) + "\n"
+
+
+def _build_decision_response_directive(state: ConciergeState) -> str:
+    """
+    Inject a 4-part decision structure when the response is a guided recommendation.
+
+    Activates for guided recommendation queries that are NOT:
+    - category dumps (full tenant list)
+    - offer queries
+    - factual lookups
+    - context-acknowledgement turns (user is just setting scene, not requesting action)
+    - clarification / graceful_recovery modes
+
+    The 4-part structure is:
+      1. PRIMARY RECOMMENDATION — best single option + 1-line why
+      2. SECONDARY OPTION       — one solid fallback + 1-line why
+      3. ACTION PLAN            — where to go first, what to do next
+      4. OPTIONAL FOLLOW-UP     — only if genuinely helpful
+
+    Also injects the scene_sufficient no-clarification directive when the scene
+    already has enough context (companions / budget / target_person / etc).
+    """
+    mode = state.response_plan.response_mode
+    message_kind = state.intent.message_kind
+
+    # Only activate for guided recommendation responses
+    is_guided = mode in ("guided_recommendation", "hybrid_plan", "")
+    is_action_needed = message_kind not in (
+        "context_setting", "greeting", "smalltalk",
+    )
+    is_category_turn = any(
+        e.get("source", "").startswith("category/")
+        for e in state.context.selected_entities
+    )
+    is_offer_query = state.intent.sub_intent == "offer_details"
+    is_recovery = mode in ("graceful_recovery", "clarification_request")
+
+    if not is_guided or not is_action_needed or is_category_turn or is_offer_query or is_recovery:
+        return ""
+
+    parts: list[str] = []
+
+    # ── Scene sufficient → block clarification questions ──────────────
+    scene_sufficient = getattr(state.debug_enrichment, "scene_sufficient", False)
+    if scene_sufficient:
+        parts.append(
+            "SCENE CONTEXT IS SUFFICIENT: The visitor's context (companions, budget, "
+            "target person, or occasion) is already known. "
+            "DO NOT ask a clarifying question. Infer any remaining details and "
+            "respond directly with a recommendation.\n"
+        )
+
+    # ── 4-part decision structure ──────────────────────────────────────
+    # Activated for guided/concierge recommendation turns only.
+    # Category list turns and factual lookups keep their own structure.
+    if state.response_plan.chosen_strategy not in (
+        "mall_overview", "exploration_overview", "direct_fact",
+        "structured_fact_list", "direct_lookup", "schedule_answer",
+    ):
+        parts.append(
+            "DECISION STRUCTURE — shape your response as follows:\n"
+            "  1. PRIMARY RECOMMENDATION: Your single best pick. "
+            "One sentence explaining exactly why it fits this visitor.\n"
+            "  2. SECONDARY OPTION: One solid alternative / fallback. "
+            "One sentence on the tradeoff vs. the primary.\n"
+            "  3. ACTION PLAN: Tell the visitor what to do next — "
+            "where to go first, what to look for.\n"
+            "  4. OPTIONAL FOLLOW-UP: Add ONE short question ONLY if it would "
+            "meaningfully improve the next recommendation. Omit entirely if the "
+            "plan is already clear.\n"
+            "HARD RULES: Max 2–3 stores total. Max 2 lines per item. "
+            "No generic brand descriptions. No catalog-style lists.\n"
+        )
+
+    return "\n".join(parts) + "\n" if parts else ""
 
 
 def _build_response_mode_instruction(state: ConciergeState) -> str:

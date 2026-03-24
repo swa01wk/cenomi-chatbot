@@ -36,6 +36,23 @@ class Settings(BaseSettings):
     vector_store_type: str = "chroma"
     embedding_model: str = "text-embedding-3-small"
 
+    # --- Redis ---
+    # Set to a valid Redis URL (e.g. "redis://localhost:6379/0") to enable
+    # Redis-backed session persistence. Empty string = in-memory LRU store.
+    redis_url: str = ""
+    # TTL in seconds for Redis session keys (default: 30 minutes).
+    redis_session_ttl: int = 1800
+
+    # --- LangGraph Checkpointer ---
+    # When True, each graph turn is snapshot-persisted for replay/debugging.
+    # Uses MemorySaver in dev; AsyncRedisSaver when redis_url is also set.
+    enable_checkpointer: bool = False
+
+    # --- Quality Evaluator ---
+    # When True, an async LLM-as-judge scorer fires after every chat turn.
+    # Results are written to backend/data/evaluations/. Never blocks responses.
+    enable_evaluator: bool = False
+
     # --- Observability ---
     enable_tracing: bool = False
     langsmith_api_key: str = ""

@@ -39,7 +39,7 @@ SCENARIOS = [
         "turns": [
             ("1.1", "i want to buy jackets",
              "guided_recommendation", "medium",
-             "Must ask clarifying question (who for, what kind?). Must NOT list all jacket stores. Must NOT assume gender/age."),
+             "Must infer defaults (target=self, budget=mid_range, use_case=casual) and provide a direct recommendation. Must NOT ask a clarifying question. Must NOT list all jacket stores without reasoning."),
             ("1.2", "for my 5 year old son",
              "guided_recommendation", "high",
              "Must update context: category=kids_fashion, age=5, gender=boy. Must suggest stores with children's sections. Must NOT suggest adult fashion brands only."),

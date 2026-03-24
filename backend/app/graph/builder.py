@@ -117,20 +117,33 @@ def _route_after_retrieval_decision(state: ConciergeState) -> str:
     return "generate_response"
 
 
-def build_concierge_graph():
+def build_concierge_graph(checkpointer=None):
     """
     Build and compile the dual-flow concierge LangGraph pipeline.
+
+    Args:
+        checkpointer: Optional LangGraph checkpointer (MemorySaver,
+            AsyncRedisSaver, etc.). When provided, every turn is
+            snapshot-persisted under thread_id for replay and debugging.
+            Pass None (default) to run without checkpointing.
 
     Returns a compiled graph that accepts ConciergeState and produces
     the full state including response and debug payload.
 
-    Usage:
+    Usage (no checkpointer):
         graph = build_concierge_graph()
         result = await graph.ainvoke({
             "session_id": "...",
             "mall_id": "al_nakheel_plaza_28",
             "raw_user_message": "What movies do you have?",
         })
+
+    Usage (with checkpointer):
+        graph = build_concierge_graph(checkpointer=MemorySaver())
+        result = await graph.ainvoke(
+            {"session_id": "...", "raw_user_message": "..."},
+            config={"configurable": {"thread_id": "session-abc:turn-001"}},
+        )
     """
     graph = StateGraph(ConciergeState)
 
@@ -223,7 +236,7 @@ def build_concierge_graph():
     graph.add_edge("update_memory", "emit_debug_payload")
     graph.add_edge("emit_debug_payload", END)
 
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
 def _route_after_fetch(state: ConciergeState) -> str:

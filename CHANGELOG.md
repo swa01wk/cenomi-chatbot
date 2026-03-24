@@ -6,6 +6,86 @@ Format: `## [vX.Y] — YYYY-MM-DD` with sections Added / Changed / Fixed.
 
 ---
 
+## [v1.3] — 2026-03-23
+
+### Added
+
+**Redis session persistence**
+
+Sessions are now stored durably in Redis instead of an in-memory dict. This means sessions survive backend restarts and can be shared across multiple backend workers.
+
+- `AbstractSessionStore` protocol introduced in `session_store.py` — both `SessionStore` (in-memory fallback) and `RedisSessionStore` (async Redis) implement the same `async def get / get_or_create / save_turn / reset / delete` interface.
+- `runtime.py` selects the store at startup: if `BACKEND_REDIS_URL` is set a `RedisSessionStore` is created; otherwise the existing in-memory store is used. Zero code change required at call sites.
+- `SessionData.from_dict` classmethod added for safe JSON deserialization.
+- Session TTL configurable via `BACKEND_REDIS_SESSION_TTL` (default 1 800 s / 30 min).
+- `redis[asyncio] >= 5.0` added as an optional dependency group in `pyproject.toml`.
+
+**LangGraph turn checkpointing**
+
+When enabled, every graph invocation is snapshotted to a persistent checkpointer so any turn can be replayed or inspected offline.
+
+- `builder.py` `build_concierge_graph(checkpointer=None)` — the compiled graph now accepts an injected checkpointer.
+- `runtime.py` initialises either `AsyncRedisSaver` (when Redis is available and `BACKEND_ENABLE_CHECKPOINTER=true`) or `MemorySaver` as the graph's checkpointer.
+- `runtime.get_checkpointer()` exposes the active checkpointer to both the regular and streaming pipelines.
+- Each turn is keyed by `{session_id}:{time.time_ns()}` so individual turns are independently replayable.
+
+**Asynchronous quality evaluator (LLM-as-judge)**
+
+After each turn the concierge silently scores its own response on four dimensions using a secondary GPT-4o call. The evaluation runs in a background `asyncio.Task` and never blocks the user-facing response.
+
+- `app/services/quality_evaluator.py` (new) — evaluates `intent_alignment`, `constraint_adherence`, `honesty`, and `conciseness`; each score 0–10 with a brief rationale.
+- Results are written to `backend/data/evaluations/{session_id}-{turn_id}.json`.
+- Feature-flagged via `BACKEND_ENABLE_EVALUATOR=true` (off by default).
+- Integrated into both the blocking `/api/chat` endpoint and the new streaming endpoint.
+
+**SSE streaming endpoint**
+
+A new `POST /api/chat/stream` endpoint streams the LLM response token-by-token using Server-Sent Events, making the concierge feel significantly more responsive on long answers.
+
+- `app/api/stream.py` (new) — full pipeline mirror of the blocking endpoint. Hooks into `graph.astream_events(version="v2")` and forwards every `on_chat_model_stream` event from the `generate_response` node as an `event: token` SSE message.
+- Three SSE event types:
+  - `event: token` — `{"text": "<chunk>"}` for each arriving token
+  - `event: done` — `{"session_id", "session_state", "debug"}` when the stream completes
+  - `event: error` — `{"detail": "<message>"}` on failure
+- Session persistence, quality evaluation, and implicit feedback detection run as post-stream side effects — they never delay the first token.
+- Nginx buffering disabled via `X-Accel-Buffering: no` header.
+- Existing `POST /api/chat` blocking endpoint unchanged; all existing clients continue to work without modification.
+- Registered in `main.py` under the `/api` prefix.
+
+**Frontend streaming UI**
+
+The React chat interface now renders responses token-by-token in real time.
+
+- `src/api/client.ts` — `streamMessage(req)` async generator parses the SSE stream and yields typed `token / done / error` events. Uses native `fetch` + `ReadableStream` (no `EventSource`) since the request is a POST with a JSON body.
+- `src/hooks/useChat.ts` — `send()` drives the streaming loop. On the first token an assistant message bubble is added immediately with `isStreaming: true`; subsequent tokens are appended in-place so the component never re-mounts. The `done` event attaches the session ID, debug payload, and feedback controls. Errors mid-stream cleanly finalise the bubble rather than leaving it in a streaming state.
+- `src/types/chat.ts` — `ChatMessage` gains an optional `isStreaming?: boolean` field.
+- `src/components/ChatMessage.tsx` — renders a blinking 2 px cursor `|` at the end of the text while `isStreaming` is true.
+- `src/pages/ChatPage.tsx` — the "Thinking…" typing indicator hides as soon as the first token arrives (i.e. when any message has `isStreaming: true`), replaced by the live text bubble.
+- `src/styles/index.css` — `@keyframes cursor-blink` and `.streaming-cursor` added.
+
+**Docker / Docker Compose deployment**
+
+The backend can now be run in a fully self-contained Docker environment with a single command.
+
+- `backend/Dockerfile` — multi-stage build. The `builder` stage installs all dependencies (including the `redis` optional group) into a virtual environment. The lean `runtime` stage copies only the venv and application code, keeping the final image under 300 MB.
+- `docker-compose.yml` — two services:
+  - `redis` — `redis:7-alpine` with AOF persistence, `allkeys-lru` eviction, healthcheck.
+  - `backend` — built from `./backend/Dockerfile`, depends on Redis being healthy, mounts `./backend/data` for persisted evaluation/feedback files, injects `BACKEND_REDIS_URL` pointing at the `redis` service.
+- `backend/.dockerignore` — excludes `__pycache__`, `.env`, test fixtures, and IDE files.
+
+**New environment variables**
+
+| Variable | Default | Description |
+|---|---|---|
+| `BACKEND_REDIS_URL` | `""` | Redis connection string. Empty = in-memory fallback. |
+| `BACKEND_REDIS_SESSION_TTL` | `1800` | Session idle timeout in seconds. |
+| `BACKEND_ENABLE_CHECKPOINTER` | `false` | Enable LangGraph turn checkpointing to Redis. |
+| `BACKEND_ENABLE_EVALUATOR` | `false` | Enable async LLM-as-judge quality scoring. |
+
+**Files changed:** `backend/app/config/settings.py`, `backend/app/services/session_store.py`, `backend/app/runtime.py`, `backend/app/graph/builder.py`, `backend/app/services/concierge.py`, `backend/app/api/session.py`, `backend/app/api/stream.py` *(new)*, `backend/app/services/quality_evaluator.py` *(new)*, `backend/app/main.py`, `backend/pyproject.toml`, `backend/Dockerfile` *(new)*, `backend/.dockerignore` *(new)*, `backend/.env`, `backend/.env.example`, `docker-compose.yml` *(new)*, `frontend/src/api/client.ts`, `frontend/src/hooks/useChat.ts`, `frontend/src/types/chat.ts`, `frontend/src/components/ChatMessage.tsx`, `frontend/src/pages/ChatPage.tsx`, `frontend/src/styles/index.css`
+
+---
+
 ## [v1.2] — 2026-03-17
 
 ### Added

@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-8ec8c322eea0",
+  "session_id": "session-8eb0e97c40b74ef5",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-09fcc642d04b",
+  "user_message": "I am here with my 5 yearold kid and girlfriend. I want the jacket for him",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-23 20:25:16.631622"
+}

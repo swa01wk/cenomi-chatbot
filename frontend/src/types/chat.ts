@@ -20,6 +20,8 @@ export interface ChatMessage {
   suggestions?: string[];
   debug?: DebugPayload | null;
   feedback?: MessageFeedback;
+  /** True while tokens are still arriving from the SSE stream. */
+  isStreaming?: boolean;
 }
 
 export interface DebugPayload {

@@ -58,7 +58,9 @@ export default function ChatPage({
                 />
               ))}
 
-              {isLoading && <TypingIndicator />}
+              {isLoading && !messages.some((m) => m.isStreaming) && (
+                <TypingIndicator />
+              )}
 
               {!isLoading && showInlineSuggestions && (
                 <div className="pl-10">

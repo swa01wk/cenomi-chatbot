@@ -78,3 +78,18 @@
 .animate-pulse-dot:nth-child(3) {
   animation-delay: 0.4s;
 }
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  vertical-align: text-bottom;
+  background-color: currentColor;
+  border-radius: 1px;
+  animation: cursor-blink 0.8s step-start infinite;
+}

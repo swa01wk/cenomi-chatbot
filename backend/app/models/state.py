@@ -446,6 +446,8 @@ class DebugEnrichment(BaseModel):
     shopping_task_updates: list[str] = Field(default_factory=list)
     scenario_persisted: bool = False
     topic_switch_detected: bool = False
+    # True when scene context is rich enough that the LLM must NOT ask a clarifying question.
+    scene_sufficient: bool = False
 
     # ── Compose context patch debug (set by compose_context) ───────────
     dominant_context_reason: str = ""

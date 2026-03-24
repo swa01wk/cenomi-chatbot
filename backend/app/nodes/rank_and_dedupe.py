@@ -78,11 +78,15 @@ def _dedupe_key(name: str) -> str:
         tokens = tokens[1:]
     return " ".join(tokens)
 
-# Weights for the scoring formula
+# Weights for the scoring formula.
+# Audience fit is raised to 0.30 (was 0.15) so that target_person / companion
+# context dominates the ranking — a kid context will reliably surface
+# family-friendly stores above premium adult-only options.
+# Semantic and playbook weights are trimmed to compensate; total still sums to 1.0.
 _WEIGHT_INTENT = 0.20
-_WEIGHT_SEMANTIC = 0.20
-_WEIGHT_AUDIENCE = 0.15
-_WEIGHT_PLAYBOOK = 0.20
+_WEIGHT_SEMANTIC = 0.15   # was 0.20
+_WEIGHT_AUDIENCE = 0.30   # was 0.15
+_WEIGHT_PLAYBOOK = 0.10   # was 0.20
 _WEIGHT_CONSTRAINT = 0.15
 _WEIGHT_DIVERSITY = 0.10
 
@@ -267,6 +271,16 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         shopping_task = getattr(scene, "shopping_task", None)
         is_context_setting = state.intent.message_kind == "context_setting"
 
+        # Determine whether an active audience requirement is in force.
+        # When True, entities that do not match audience_fit receive a hard
+        # score multiplier (0.2×) to push them below appropriate alternatives.
+        _active_audience_requirement = bool(
+            audience_set
+            or has_child
+            or (shopping_task and getattr(shopping_task, "target_person", "") not in ("", "self"))
+            or (shopping_task and (getattr(shopping_task, "budget_preference", "") == "affordable"))
+        )
+
         # Playbook biases: tag → weight
         playbook_biases: dict[str, float] = {}
         try:
@@ -306,6 +320,24 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
                 )
                 if was_suppressed:
                     suppressed_off_topic += 1
+
+            # Hard audience mismatch penalty: when an active audience requirement
+            # exists and this entity's audience_fit score is very low (< 0.2),
+            # multiply the score by 0.2 to push it far below appropriate alternatives.
+            # This prevents premium/adult-only stores from outranking family-friendly
+            # options purely on semantic tag strength.
+            if _active_audience_requirement:
+                entity_audience = set(entity.get("audience_fit", []))
+                if audience_set and entity_audience:
+                    aud_overlap = len(entity_audience & audience_set)
+                    raw_aud_fit = aud_overlap / max(len(audience_set), 1)
+                else:
+                    raw_aud_fit = 0.4  # same neutral baseline as _score_entity
+
+                # Apply penalty for clear audience mismatch
+                if raw_aud_fit < 0.2:
+                    score = score * 0.2
+
             scored_entities.append((score, entity))
 
         # Sort by score descending

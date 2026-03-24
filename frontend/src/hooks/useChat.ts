@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { sendMessage, submitFeedback, resetSession } from "../api/client";
+import { streamMessage, submitFeedback, resetSession } from "../api/client";
 import { getMockResponse } from "../mock/responses";
 import { DEFAULT_TENANT_ID, DEFAULT_MALL_ID } from "../lib/constants";
 import type { ChatMessage, DebugPayload, MessageFeedback } from "../types/chat";
@@ -31,56 +31,133 @@ export function useChat() {
       setMessages((prev) => [...prev, userMsg]);
       setIsLoading(true);
 
-      try {
-        let response;
-
-        if (USE_MOCK) {
+      // Mock path (unchanged)
+      if (USE_MOCK) {
+        try {
           await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
-          response = getMockResponse(text);
-        } else {
-          response = await sendMessage({
-            message: text,
-            session_id: sessionId ?? undefined,
-            tenant_id: tenantId,
-            mall_id: mallId,
-            debug: debugMode,
-          });
+          const response = getMockResponse(text);
+          setSessionId(response.session_id);
+          turnCountRef.current += 1;
+          const assistantMsg: ChatMessage = {
+            id: generateId(),
+            role: "assistant",
+            content: response.message,
+            timestamp: Date.now(),
+            sources: response.sources?.map((s) => ({
+              source: s.source,
+              content: s.content,
+              score: s.score,
+            })),
+            suggestions: response.suggestions,
+            debug: (response.debug as DebugPayload) ?? null,
+            feedback: { rating: null, tags: [], comment: "", submitted: false },
+          };
+          setMessages((prev) => [...prev, assistantMsg]);
+          setSelectedTurnId(assistantMsg.id);
+        } catch {
+          setMessages((prev) => [
+            ...prev,
+            { id: generateId(), role: "assistant", content: "Something went wrong.", timestamp: Date.now() },
+          ]);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // Streaming path
+      const assistantId = generateId();
+      let firstToken = true;
+
+      try {
+        for await (const event of streamMessage({
+          message: text,
+          session_id: sessionId ?? undefined,
+          tenant_id: tenantId,
+          mall_id: mallId,
+          debug: debugMode,
+        })) {
+          if (event.type === "token") {
+            if (firstToken) {
+              // Add the assistant message bubble on the very first token
+              firstToken = false;
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: assistantId,
+                  role: "assistant",
+                  content: event.text,
+                  timestamp: Date.now(),
+                  isStreaming: true,
+                },
+              ]);
+            } else {
+              // Append subsequent tokens in-place
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId
+                    ? { ...m, content: m.content + event.text }
+                    : m,
+                ),
+              );
+            }
+          } else if (event.type === "done") {
+            setSessionId(event.sessionId);
+            turnCountRef.current += 1;
+            // Finalise the message: mark not streaming, attach debug/feedback
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? {
+                      ...m,
+                      isStreaming: false,
+                      sources: [],
+                      suggestions: [],
+                      debug: (event.debug as DebugPayload) ?? null,
+                      feedback: { rating: null, tags: [], comment: "", submitted: false },
+                    }
+                  : m,
+              ),
+            );
+            setSelectedTurnId(assistantId);
+          } else if (event.type === "error") {
+            throw new Error(event.detail);
+          }
         }
 
-        setSessionId(response.session_id);
-        turnCountRef.current += 1;
-
-        const assistantMsg: ChatMessage = {
-          id: generateId(),
-          role: "assistant",
-          content: response.message,
-          timestamp: Date.now(),
-          sources: response.sources?.map((s) => ({
-            source: s.source,
-            content: s.content,
-            score: s.score,
-          })),
-          suggestions: response.suggestions,
-          debug: (response.debug as DebugPayload) ?? null,
-          feedback: {
-            rating: null,
-            tags: [],
-            comment: "",
-            submitted: false,
-          },
-        };
-
-        setMessages((prev) => [...prev, assistantMsg]);
-        setSelectedTurnId(assistantMsg.id);
-        return response;
+        // Guard: if we never got any tokens, show a fallback
+        if (firstToken) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: assistantId,
+              role: "assistant",
+              content: "Sorry, I didn't receive a response. Please try again.",
+              timestamp: Date.now(),
+            },
+          ]);
+        }
       } catch {
-        const errorMsg: ChatMessage = {
-          id: generateId(),
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => [...prev, errorMsg]);
+        if (!firstToken) {
+          // We were mid-stream — mark it as done so the cursor disappears
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId
+                ? { ...m, isStreaming: false, content: m.content || "Something went wrong." }
+                : m,
+            ),
+          );
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: generateId(),
+              role: "assistant",
+              content: "Sorry, something went wrong. Please try again.",
+              timestamp: Date.now(),
+            },
+          ]);
+        }
       } finally {
         setIsLoading(false);
       }

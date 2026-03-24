@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-012d9f45259c",
+  "session_id": "brk-s11-d7c44daa",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-f068742a8bdf",
+  "user_message": "something affordable, back to school budget",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-23 16:37:35.434042"
+}

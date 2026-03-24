@@ -10,6 +10,10 @@ AI-powered multi-mall concierge chatbot platform. Answers visitor questions abou
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Repository Setup](#repository-setup)
+- [Docker & Redis](#docker--redis)
+  - [Running with Docker Compose](#running-with-docker-compose)
+  - [Session Persistence — Redis vs In-Memory](#session-persistence--redis-vs-in-memory)
+  - [Docker Build Details](#docker-build-details)
 - [Backend](#backend)
   - [Backend Structure](#backend-structure)
   - [Backend Environment Variables](#backend-environment-variables)
@@ -27,7 +31,7 @@ AI-powered multi-mall concierge chatbot platform. Answers visitor questions abou
   - [Frontend Components](#frontend-components)
   - [Frontend Build](#frontend-build)
   - [Frontend Linting](#frontend-linting)
-- [Running the Full Stack](#running-the-full-stack)
+- [Running the Full Stack (Local)](#running-the-full-stack-local)
 - [Pushing to GitHub](#pushing-to-github)
 - [Project Status](#project-status)
 - [License](#license)
@@ -89,27 +93,30 @@ Mall information is transformed into three first-class layers:
 
 ## Tech Stack
 
-| Layer    | Technology                                     |
-|----------|------------------------------------------------|
-| Backend  | Python 3.11+, FastAPI, LangGraph, Pydantic v2  |
-| Frontend | React 19, Vite 7, TypeScript 5.9, Tailwind v4  |
-| LLM      | OpenAI GPT-4o (configurable)                   |
-| State    | LangGraph StateGraph (in-memory sessions)       |
-| Icons    | Lucide React                                    |
-| Linting  | Ruff (backend), ESLint (frontend)               |
-| Testing  | Pytest + pytest-asyncio (backend)               |
+| Layer         | Technology                                                        |
+|---------------|-------------------------------------------------------------------|
+| Backend       | Python 3.11+, FastAPI, LangGraph, Pydantic v2                     |
+| Frontend      | React 19, Vite 7, TypeScript 5.9, Tailwind v4                     |
+| LLM           | OpenAI GPT-4o (configurable)                                      |
+| Session state | In-memory LRU (dev) / Redis 7 via `redis[asyncio]` (production)   |
+| Containers    | Docker (multi-stage build) + Docker Compose                       |
+| Icons         | Lucide React                                                      |
+| Linting       | Ruff (backend), ESLint (frontend)                                 |
+| Testing       | Pytest + pytest-asyncio (backend)                                 |
 
 ---
 
 ## Prerequisites
 
-| Tool       | Minimum Version | Installation                                  |
-|------------|-----------------|-----------------------------------------------|
-| Python     | 3.11+           | https://www.python.org/downloads/             |
-| Node.js    | 18+             | https://nodejs.org/ (LTS recommended)          |
-| npm        | 9+              | Bundled with Node.js                           |
-| Git        | 2.30+           | https://git-scm.com/                           |
-| OpenAI Key | —               | https://platform.openai.com/api-keys           |
+| Tool            | Minimum Version | Notes                                                       |
+|-----------------|-----------------|-------------------------------------------------------------|
+| Python          | 3.11+           | https://www.python.org/downloads/                          |
+| Node.js         | 18+             | https://nodejs.org/ (LTS recommended)                      |
+| npm             | 9+              | Bundled with Node.js                                       |
+| Git             | 2.30+           | https://git-scm.com/                                       |
+| Docker          | 24+             | https://docs.docker.com/get-docker/ — required for Compose |
+| Docker Compose  | 2.20+           | Bundled with Docker Desktop                                |
+| OpenAI API Key  | —               | https://platform.openai.com/api-keys                       |
 
 ---
 
@@ -119,6 +126,118 @@ Mall information is transformed into three first-class layers:
 # Clone the repository
 git clone https://github.com/<your-username>/cenomi-chatbot.git
 cd cenomi-chatbot
+```
+
+---
+
+## Docker & Redis
+
+### Running with Docker Compose
+
+The recommended way to run the full backend stack. Docker Compose brings up two services:
+
+| Service          | Container          | Port   | Description                              |
+|------------------|--------------------|--------|------------------------------------------|
+| `backend`        | `cenomi_backend`   | `8000` | FastAPI concierge engine (auto-restarts) |
+| `redis`          | `cenomi_redis`     | `6379` | Session persistence store                |
+
+**Steps:**
+
+```bash
+# 1. Copy the backend env template and add your OpenAI key
+cp backend/.env.example backend/.env
+# Edit backend/.env → set BACKEND_OPENAI_API_KEY=sk-...
+
+# 2. Build and start both services (detached)
+docker compose up --build -d
+
+# 3. Tail logs (optional)
+docker compose logs -f backend
+
+# 4. Stop everything
+docker compose down
+```
+
+The backend is healthy when `/api/health` returns `"status": "ok"`:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+> **Note:** The `backend/.env` file is mounted at startup via `env_file`. `BACKEND_REDIS_URL` is automatically overridden inside Compose to `redis://redis:6379/0` so the backend connects to the Redis container by its service name.
+
+**Data persistence:** The `backend/data/` directory is bind-mounted into the container, so feedback records, evaluation results, and mall data survive container restarts without being baked into the image.
+
+---
+
+### Session Persistence — Redis vs In-Memory
+
+The session store is selected automatically at startup based on `BACKEND_REDIS_URL`:
+
+| `BACKEND_REDIS_URL` | Store used           | When to use                              |
+|---------------------|----------------------|------------------------------------------|
+| _(empty)_           | `SessionStore`       | Local development, single-process server |
+| `redis://...`       | `RedisSessionStore`  | Docker Compose, staging, production      |
+
+Both implementations share the same `AbstractSessionStore` interface and are fully interchangeable without any code changes.
+
+**`SessionStore` (in-memory, default)**
+- LRU eviction at 1 000 sessions
+- No external dependency — zero configuration
+- State is lost on process restart
+
+**`RedisSessionStore` (production)**
+- Keys: `cenomi:session:{session_id}` stored as JSON
+- TTL: 30 minutes by default, refreshed on every turn (`BACKEND_REDIS_SESSION_TTL`)
+- Survives backend restarts and scales across multiple processes
+- Requires `redis[asyncio]>=5.0` (included in the Docker image via the `[redis]` extra)
+
+**Redis configuration (Docker Compose defaults):**
+
+| Setting            | Value           | Description                              |
+|--------------------|-----------------|------------------------------------------|
+| Image              | `redis:7-alpine`| Minimal Alpine-based Redis 7             |
+| Persistence        | AOF (`appendonly yes`) | Writes synced every second        |
+| Max memory         | `256 mb`        | Hard cap with LRU eviction               |
+| Eviction policy    | `allkeys-lru`   | Evicts least-recently-used keys at limit |
+| Health check       | `redis-cli ping`| Polled every 10 s; backend waits for it  |
+
+**Enabling Redis locally (without Docker Compose):**
+
+```bash
+# Start a local Redis instance (requires Redis installed)
+redis-server
+
+# Then set the URL in backend/.env
+BACKEND_REDIS_URL=redis://localhost:6379/0
+```
+
+---
+
+### Docker Build Details
+
+The `backend/Dockerfile` uses a **two-stage build** to produce a lean runtime image:
+
+```
+Stage 1 — builder (python:3.11-slim)
+  └─ Installs build tools (gcc, build-essential)
+  └─ Installs all Python dependencies into /opt/venv
+     (includes redis[asyncio] via the [redis] extra)
+
+Stage 2 — runtime (python:3.11-slim)
+  └─ Copies /opt/venv from builder (no build tools in final image)
+  └─ Copies app source (app/, llm/, guardrails/, data/, ...)
+  └─ Exposes port 8000
+  └─ HEALTHCHECK: polls /api/health every 30 s (60 s startup grace)
+  └─ CMD: uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+To build the image standalone (without Compose):
+
+```bash
+cd backend
+docker build -t cenomi-backend .
+docker run -p 8000:8000 --env-file .env cenomi-backend
 ```
 
 ---
@@ -237,25 +356,28 @@ cd backend
 cp .env.example .env
 ```
 
-| Variable                       | Default                  | Required | Description                              |
-|--------------------------------|--------------------------|----------|------------------------------------------|
-| `BACKEND_OPENAI_API_KEY`       | `""`                     | **Yes**  | Your OpenAI API key                      |
-| `BACKEND_OPENAI_MODEL`         | `gpt-4o`                | No       | OpenAI model name                        |
-| `BACKEND_OPENAI_TEMPERATURE`   | `0.3`                    | No       | LLM temperature (0.0–2.0)               |
-| `BACKEND_HOST`                 | `0.0.0.0`               | No       | Server bind host                         |
-| `BACKEND_PORT`                 | `8000`                   | No       | Server bind port                         |
-| `BACKEND_ENV`                  | `development`            | No       | Environment name                         |
-| `BACKEND_DEBUG`                | `true`                   | No       | Enable debug mode                        |
-| `BACKEND_LOG_LEVEL`            | `debug`                  | No       | Logging level (debug/info/warning/error) |
-| `BACKEND_FRONTEND_ORIGIN`      | `http://localhost:5173`  | No       | Allowed CORS origin for the frontend     |
-| `BACKEND_MALL_ID`              | `al_nakheel_plaza_28`    | No       | Active mall identifier                   |
-| `BACKEND_MALL_NAME`            | `Al Nakheel Plaza`       | No       | Display name for the mall                |
-| `BACKEND_VECTOR_STORE_TYPE`    | `chroma`                 | No       | Vector store backend type                |
-| `BACKEND_EMBEDDING_MODEL`      | `text-embedding-3-small` | No       | Embedding model name                     |
-| `BACKEND_ENABLE_TRACING`       | `false`                  | No       | Enable LangSmith tracing                 |
-| `BACKEND_LANGSMITH_API_KEY`    | `""`                     | No       | LangSmith API key (if tracing enabled)   |
-| `BACKEND_LANGSMITH_PROJECT`    | `cenomi-concierge`       | No       | LangSmith project name                   |
-| `BACKEND_FEEDBACK_STORAGE`     | `local`                  | No       | Feedback storage backend (`local`)       |
+| Variable                        | Default                  | Required | Description                                                                 |
+|---------------------------------|--------------------------|----------|-----------------------------------------------------------------------------|
+| `BACKEND_OPENAI_API_KEY`        | `""`                     | **Yes**  | Your OpenAI API key                                                         |
+| `BACKEND_OPENAI_MODEL`          | `gpt-4o`                 | No       | OpenAI model name                                                           |
+| `BACKEND_OPENAI_TEMPERATURE`    | `0.3`                    | No       | LLM temperature (0.0–2.0)                                                  |
+| `BACKEND_HOST`                  | `0.0.0.0`                | No       | Server bind host                                                            |
+| `BACKEND_PORT`                  | `8000`                   | No       | Server bind port                                                            |
+| `BACKEND_ENV`                   | `development`            | No       | Environment name                                                            |
+| `BACKEND_DEBUG`                 | `true`                   | No       | Enable debug mode                                                           |
+| `BACKEND_LOG_LEVEL`             | `debug`                  | No       | Logging level (`debug` / `info` / `warning` / `error`)                     |
+| `BACKEND_FRONTEND_ORIGIN`       | `http://localhost:5173`  | No       | Allowed CORS origin for the frontend                                        |
+| `BACKEND_MALL_IDS`              | `al_nakheel_plaza_28`    | No       | Comma-separated mall IDs to load at startup (e.g. `id1,id2`)              |
+| `BACKEND_REDIS_URL`             | `""`                     | No       | Redis connection URL. Empty = in-memory store. Set to `redis://localhost:6379/0` for local Redis or `redis://redis:6379/0` inside Docker Compose |
+| `BACKEND_REDIS_SESSION_TTL`     | `1800`                   | No       | Redis session TTL in seconds (default: 30 minutes). Refreshed on every turn |
+| `BACKEND_ENABLE_CHECKPOINTER`   | `false`                  | No       | Snapshot every LangGraph turn for replay/debugging. Uses `MemorySaver` when Redis URL is empty; `AsyncRedisSaver` when Redis is set |
+| `BACKEND_ENABLE_EVALUATOR`      | `false`                  | No       | Fire-and-forget LLM-as-judge scoring after every turn. Results written to `backend/data/evaluations/`. Never blocks responses |
+| `BACKEND_VECTOR_STORE_TYPE`     | `chroma`                 | No       | Vector store backend type                                                   |
+| `BACKEND_EMBEDDING_MODEL`       | `text-embedding-3-small` | No       | Embedding model name                                                        |
+| `BACKEND_ENABLE_TRACING`        | `false`                  | No       | Enable LangSmith tracing                                                    |
+| `BACKEND_LANGSMITH_API_KEY`     | `""`                     | No       | LangSmith API key (if tracing enabled)                                      |
+| `BACKEND_LANGSMITH_PROJECT`     | `cenomi-concierge`       | No       | LangSmith project name                                                      |
+| `BACKEND_FEEDBACK_STORAGE`      | `local`                  | No       | Feedback storage backend (`local`)                                          |
 
 **Example `.env` file:**
 
@@ -269,8 +391,16 @@ BACKEND_ENV=development
 BACKEND_LOG_LEVEL=debug
 BACKEND_DEBUG=true
 BACKEND_FRONTEND_ORIGIN=http://localhost:5173
-BACKEND_MALL_ID=al_nakheel_plaza_28
-BACKEND_MALL_NAME=Al Nakheel Plaza
+BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13
+
+# Redis — leave empty for in-memory (dev), set URL for production
+BACKEND_REDIS_URL=
+BACKEND_REDIS_SESSION_TTL=1800
+
+# Optional features (disabled by default)
+BACKEND_ENABLE_CHECKPOINTER=false
+BACKEND_ENABLE_EVALUATOR=false
+
 BACKEND_FEEDBACK_STORAGE=local
 ```
 
@@ -356,7 +486,7 @@ load_session
 | `concierge`                   | Orchestrates chat turns by invoking the LangGraph pipeline |
 | `clean_context`               | Assembles contamination-free per-turn context (no prior LLM history) |
 | `context_builder`             | Builds mall context from canonical, semantic, and playbook data |
-| `session_store`               | In-memory session storage (Redis-ready for production)     |
+| `session_store`               | Dual-implementation session store: `SessionStore` (in-memory LRU, default) and `RedisSessionStore` (Redis-backed, selected automatically when `BACKEND_REDIS_URL` is set) |
 | `feedback_service`            | Manages the full feedback lifecycle                        |
 | `feedback_normalizer`         | Normalizes feedback into actionable signals                |
 | `implicit_feedback_detector`  | Detects implicit feedback (e.g., user corrections)         |
@@ -555,9 +685,29 @@ npm run lint
 
 ---
 
-## Running the Full Stack
+## Running the Full Stack (Local)
 
-Open **two terminals** and run the backend and frontend simultaneously:
+### Option A — Docker Compose (recommended)
+
+Starts Redis + backend together. All you need is Docker.
+
+```bash
+# 1. Copy and configure the env file
+cp backend/.env.example backend/.env
+# Edit backend/.env → set BACKEND_OPENAI_API_KEY=sk-...
+
+# 2. Build and start backend + Redis
+docker compose up --build -d
+
+# 3. Start the frontend dev server (separate terminal)
+cd frontend && npm install && npm run dev
+```
+
+Then open **http://localhost:5173**. The frontend proxies `/api` to the backend at port 8000. Redis is available at `localhost:6379`.
+
+---
+
+### Option B — Manual (two terminals + optional Redis)
 
 **Terminal 1 — Backend:**
 
@@ -567,6 +717,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env
 # Edit .env → set BACKEND_OPENAI_API_KEY
+# Leave BACKEND_REDIS_URL empty to use the in-memory session store
 uvicorn app.main:app --reload
 ```
 
@@ -579,6 +730,8 @@ npm run dev
 ```
 
 Then open **http://localhost:5173** in your browser. The frontend proxies API requests to the backend at port 8000.
+
+> To use Redis in local mode, start a Redis server (`redis-server`) and set `BACKEND_REDIS_URL=redis://localhost:6379/0` in `backend/.env`.
 
 ---
 
@@ -643,11 +796,25 @@ git remote set-url origin git@github.com:<your-username>/cenomi-chatbot.git
 
 ## Project Status
 
-**v1.2 — Multi-mall platform with cross-mall brand search.**
+**v1.4 — Adaptive Concierge Decision Engine.**
 
 See [CHANGELOG.md](CHANGELOG.md) for full release history.
 
-### v1.2 — Cross-mall brand search (current)
+### v1.4 — Adaptive concierge decision engine (current)
+- Scene completion: infers `target_person`, `budget`, `use_case` defaults instead of asking clarifying questions
+- Constraint-aware ranking: audience fit weight raised to 0.30 with hard mismatch penalty for mismatched audience
+- Structured response format: 4-part PRIMARY / SECONDARY / ACTION PLAN / FOLLOW-UP template, max 2–3 picks per guided query
+- Playbook tone mapping and cross-domain continuity (companions and budget constraints carry across topic switches)
+
+### v1.3 — Redis session persistence + Docker
+- Redis-backed `RedisSessionStore` with 30-minute TTL, automatic selection via `BACKEND_REDIS_URL`
+- Multi-stage `Dockerfile` (builder + lean runtime, Python 3.11-slim)
+- `docker-compose.yml` orchestrating `cenomi_backend` + `cenomi_redis` with health checks and data volume
+- LangGraph checkpointer support (`BACKEND_ENABLE_CHECKPOINTER`): `MemorySaver` in dev, `AsyncRedisSaver` with Redis
+- Async LLM-as-judge quality evaluator (`BACKEND_ENABLE_EVALUATOR`, fire-and-forget, never blocks responses)
+- SSE streaming endpoint for token-level response delivery
+
+### v1.2 — Cross-mall brand search
 - Inline awareness: visitor anchored to home mall, but can ask about brands across all Cenomi malls
 - `cross_mall` intent with 0.97-confidence rule-based detection
 - Home mall results surfaced first; hallucination guard extended to merged canonical

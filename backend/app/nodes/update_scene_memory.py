@@ -467,9 +467,47 @@ def _extract_shopping_task(
                 changes.append(f"shopping_task.shopping_stage={stage}")
             break
 
+    # ── 6. Fill defaults for unspecified fields ───────────────────────
+    # Only applied when the shopping task is active (product_type set) and
+    # the field has not been explicitly set this turn or in a prior turn.
+    # Defaults represent the most neutral assumptions: shopping for yourself,
+    # mid-range budget, casual everyday use.
+    _fill_shopping_task_defaults(task, updates, changes)
+
     # Update the scene's shopping_task in place
     scene.shopping_task = task
     return updates
+
+
+def _fill_shopping_task_defaults(
+    task,  # ShoppingTask
+    updates: list[str],
+    changes: list[str],
+) -> None:
+    """
+    Apply neutral defaults to unspecified ShoppingTask fields.
+
+    Only fires when product_type is already set (i.e. a real shopping task
+    is active).  Fields that were explicitly set — either this turn or in a
+    prior turn — are never overwritten.
+    """
+    if not task.product_type:
+        return  # No active shopping task — do not infer defaults
+
+    if not task.target_person:
+        task.target_person = "self"
+        updates.append("target_person=self(default)")
+        changes.append("shopping_task.target_person=self(default)")
+
+    if not task.budget_preference:
+        task.budget_preference = "mid_range"
+        updates.append("budget_preference=mid_range(default)")
+        changes.append("shopping_task.budget_preference=mid_range(default)")
+
+    if not task.use_case:
+        task.use_case = "casual"
+        updates.append("use_case=casual(default)")
+        changes.append("shopping_task.use_case=casual(default)")
 
 
 def _extract_user_role(
@@ -690,6 +728,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
                 scene_update_reason="constraint_refinement",
                 scenario_persisted=bool(scene.scenario),
                 topic_switch_detected=False,
+                scene_sufficient=_is_scene_sufficient(scene),
             ),
             "_trace_summary": (
                 f"Constraint refinement: {', '.join(changes) if changes else 'no changes'}"
@@ -800,6 +839,10 @@ async def update_scene_memory(state: ConciergeState) -> dict:
 
     scenario_persisted = bool(scene.scenario and not topic_switch_detected)
 
+    # Emit scene_sufficient: True when enough context has accumulated that
+    # the LLM should infer rather than asking a clarifying question.
+    scene_sufficient = _is_scene_sufficient(scene)
+
     debug = DebugEnrichment(
         inferred_scene_notes=scene_notes,
         scene_update_reason=intent.message_kind,
@@ -807,6 +850,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
         shopping_task_updates=shopping_updates,
         scenario_persisted=scenario_persisted,
         topic_switch_detected=topic_switch_detected,
+        scene_sufficient=scene_sufficient,
     )
 
     return {
@@ -814,6 +858,31 @@ async def update_scene_memory(state: ConciergeState) -> dict:
         "debug_enrichment": debug,
         "_trace_summary": f"Scene: {', '.join(changes) if changes else 'no changes'}",
     }
+
+
+def _is_scene_sufficient(scene: "SceneMemory") -> bool:
+    """
+    Return True when the scene holds enough context to infer a response
+    without asking the visitor a clarifying question.
+
+    A scene is considered sufficient when ANY of the following are true:
+    - Companions are known (family, kid, couple, etc.)
+    - Budget is stated
+    - Target person is explicitly set
+    - Occasion is set
+    - A specific scenario has been established (e.g. family_outing, date)
+    - A shopping task with a product type is active
+    - The visitor has declared a user role (bridesmaid, tourist, etc.)
+    """
+    return bool(
+        scene.companions
+        or scene.budget
+        or (scene.target_person and scene.target_person != "self")
+        or scene.occasion
+        or scene.scenario
+        or (scene.shopping_task.product_type and scene.shopping_task.target_person)
+        or scene.user_role
+    )
 
 
 # ── Age extraction ──────────────────────────────────────────────────────────

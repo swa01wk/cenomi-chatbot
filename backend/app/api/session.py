@@ -20,10 +20,10 @@ router = APIRouter()
 @router.post("/session/reset", response_model=SessionResetResponse)
 async def reset_session(request: SessionResetRequest):
     store = get_session_store()
-    was_reset = store.reset(request.session_id)
+    was_reset = await store.reset(request.session_id)
 
     if not was_reset:
-        store.get_or_create(request.session_id, request.mall_id)
+        await store.get_or_create(request.session_id, request.mall_id)
 
     return SessionResetResponse(
         session_id=request.session_id,
@@ -34,7 +34,7 @@ async def reset_session(request: SessionResetRequest):
 @router.get("/session/{session_id}", response_model=SessionDetailResponse)
 async def get_session(session_id: str):
     store = get_session_store()
-    session = store.get(session_id)
+    session = await store.get(session_id)
 
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")

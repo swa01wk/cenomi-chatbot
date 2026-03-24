@@ -8,6 +8,7 @@ and response extraction.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from functools import lru_cache
@@ -22,11 +23,12 @@ from app.models.api import (
 from app.models.state import ConciergeState
 from app.models.tenant import TenantConfig
 from app.runtime import (
-    get_mall_context,
-    get_session_store,
+    get_checkpointer,
     get_feedback_normalizer,
     get_feedback_service,
     get_implicit_detector,
+    get_mall_context,
+    get_session_store,
     get_session_tuning_engine,
 )
 from app.services.clean_context import clean_context_builder
@@ -39,9 +41,20 @@ _graph = None
 
 
 def _get_graph():
+    """Return the compiled graph, building it once and caching it.
+
+    The graph is rebuilt whenever the checkpointer state changes (i.e. on
+    first call after startup). In practice the graph is built exactly once
+    per process because the checkpointer is set during runtime.initialize().
+    """
     global _graph
     if _graph is None:
-        _graph = build_concierge_graph()
+        checkpointer = get_checkpointer()
+        _graph = build_concierge_graph(checkpointer=checkpointer)
+        if checkpointer is not None:
+            logger.info("Graph compiled with checkpointer: %s", type(checkpointer).__name__)
+        else:
+            logger.info("Graph compiled without checkpointer")
     return _graph
 
 
@@ -66,7 +79,7 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     mall_ctx = get_mall_context(request.mall_id)
 
     session_id = request.session_id or generate_session_id()
-    session = store.get_or_create(session_id, request.mall_id)
+    session = await store.get_or_create(session_id, request.mall_id)
 
     base_config = _cached_tenant_config(request.mall_id)
     session_overrides = getattr(request, "session_overrides", None) or {}
@@ -96,18 +109,45 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     )
 
     graph = _get_graph()
-    raw_result = await graph.ainvoke(initial_state)
+
+    # ── Build invoke config (adds thread_id when checkpointer is active) ──
+    invoke_config: dict = {}
+    checkpointer = get_checkpointer()
+    if checkpointer is not None:
+        # turn_id is generated inside load_session, so we snapshot under a
+        # unique per-turn key derived from session_id + wall-clock nanoseconds.
+        # This keeps every turn as an independent replay snapshot.
+        turn_thread_id = f"{session_id}:{time.time_ns()}"
+        invoke_config = {"configurable": {"thread_id": turn_thread_id}}
+
+    raw_result = await graph.ainvoke(initial_state, config=invoke_config or None)
 
     result = _to_state(raw_result)
 
-    store.save_turn(
+    await store.save_turn(
         session_id=session_id,
         scene=result.scene,
         last_intent=result.intent.domain,
         conversation_mode=result.intent.message_kind,
     )
 
-    # ── implicit feedback detection (non-blocking) ────────────────
+    # ── Async quality evaluator (fire-and-forget, never blocks response) ──
+    from app.config.settings import get_settings
+    if get_settings().enable_evaluator:
+        try:
+            from app.services.quality_evaluator import evaluate_turn
+            asyncio.create_task(
+                evaluate_turn(
+                    evaluator_stub=result.evaluator_stub,
+                    response_text=result.final_response_text,
+                    session_id=session_id,
+                    turn_id=result.turn_id,
+                )
+            )
+        except Exception:
+            logger.warning("Failed to schedule quality evaluation task", exc_info=True)
+
+    # ── implicit feedback detection (non-blocking) ────────────────────────
     try:
         detector = get_implicit_detector()
         implicit_event = detector.detect(

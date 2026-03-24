@@ -8,6 +8,7 @@ interface ChatMessageProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onFeedback: (id: string, update: Partial<MessageFeedback>) => void;
+  isStreaming?: boolean;
 }
 
 function formatContent(text: string) {
@@ -37,6 +38,7 @@ export default function ChatMessage({
   onSelect,
   onFeedback,
 }: ChatMessageProps) {
+  const streaming = message.isStreaming ?? false;
   const isUser = message.role === "user";
 
   return (
@@ -68,7 +70,12 @@ export default function ChatMessage({
                 } ${isSelected ? "ring-2 ring-blue-400" : ""}`
           }`}
         >
-          <div className="whitespace-pre-wrap">{formatContent(message.content)}</div>
+          <div className="whitespace-pre-wrap">
+            {formatContent(message.content)}
+            {streaming && (
+              <span className="streaming-cursor ml-px inline-block" aria-hidden="true" />
+            )}
+          </div>
 
           {message.sources && message.sources.length > 0 && (
             <div className="mt-3 border-t border-gray-100 pt-2">

@@ -1,0 +1,38 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Development / test artefacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+scripts/
+
+# Secrets and local config — never bake into the image
+.env
+.env.*
+
+# Data that is volume-mounted at runtime — exclude from image layers
+data/feedback/
+data/evaluations/
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
