@@ -856,7 +856,9 @@ The `load_session` node reads from the store; `update_memory` writes back. The `
 | **Confidence calibration fixes** — broad category openers always return MEDIUM; budget declarations (`"budget around X SAR"`) always return MEDIUM; vague short constraints (`"not too heavy"`, ≤ 6 tokens) return MEDIUM; open-ended superlatives (`"most fun thing"`) return MEDIUM | **Done** |
 | **`_infer_goal` word-boundary fix** in `update_scene_memory.py` — `_GOAL_SIGNALS` matched with `\bsignal\b` regex to prevent false positives (e.g. `"eat"` inside `"weather"`) | **Done** |
 | **ATM substring false-positive fix** — `"atm"` replaced with explicit phrases (`"find an atm"`, `"where is the atm"`, etc.) in `_FACTUAL_SERVICE_PATTERNS` to avoid matching `"treatment"` | **Done** |
-| Redis-based session persistence | Future |
-| LangGraph checkpointer for durable state | Future |
-| Quality evaluator from `evaluator_stub` data | Future |
-| Streaming responses (SSE) | Future |
+| **Vector store + Chroma ingestion** — `VectorStoreService` (`services/vector_store.py`) + `ingest_vectors.py`; two per-mall Chroma collections live (`al_nakheel_plaza_28`: 104 vectors, `al_nakheel_plaza_13`: 54 vectors); three-tier caching (Redis → Chroma → OpenAI embed) | **Done** |
+| **Contextual query augmentation** — `build_scene_prefix(scene)` prepends occasion, companions, visit_type, budget to the vector query before embedding; applied in `compose_context` vector fallback and via `MallRetriever.search_semantic(scene=None)` for direct call sites | **Done** |
+| **Redis-based session persistence** — `RedisSessionStore` in `services/session_store.py`; activates when `BACKEND_REDIS_URL` is set, falls back to in-memory LRU | **Done** |
+| **LangGraph checkpointer for durable state** — `runtime.py` wires `MemorySaver` (dev) or `AsyncRedisSaver` (when Redis URL set); controlled by `BACKEND_ENABLE_CHECKPOINTER`; `build_concierge_graph(checkpointer=...)` accepts it | **Done** |
+| **Quality evaluator from `evaluator_stub` data** — `services/quality_evaluator.py` LLM-as-judge scorer; fires fire-and-forget after every turn in both `concierge.py` and `stream.py`; persists to `data/evaluations/`; controlled by `BACKEND_ENABLE_EVALUATOR` | **Done** |
+| **Streaming responses (SSE)** — `app/api/stream.py` implements `POST /api/chat/stream` with token-by-token SSE; blocking `POST /api/chat` endpoint unaffected | **Done** |

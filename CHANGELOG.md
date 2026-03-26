@@ -6,6 +6,94 @@ Format: `## [vX.Y] — YYYY-MM-DD` with sections Added / Changed / Fixed.
 
 ---
 
+## [v1.4.1] — 2026-03-24
+
+### Changed
+
+**Contextual Query Augmentation — Vector Search (Gap 2)**
+
+The vector search fallback now embeds scene-aware queries instead of the bare user message. `SceneMemory` signals (`occasion`, `companions`, `visit_type`, `budget`) are prepended to the query before embedding so contextually different sessions produce different vectors — returning entities that match the visitor's actual situation rather than the generic query alone.
+
+- `backend/app/retrieval/retriever.py` — new `build_scene_prefix(scene) -> str` function. Reads `occasion`, `companions` (up to 3), `visit_type`, and `budget` from `SceneMemory`; normalises underscores to spaces; deduplicates; returns a compact keyword prefix.
+- `backend/app/nodes/compose_context.py` — `vector_query` is now augmented with `build_scene_prefix(scene)` before the `_vector_search_fallback` call. An `if scene_prefix` guard ensures bare sessions (no context accumulated yet) produce an unchanged query — no regression risk for fresh sessions and no unnecessary cache disruption.
+
+**Example:**
+```
+# Same bare query, two different sessions:
+# Session A (anniversary couple):  embed "anniversary partner date something for dinner"
+# Session B (family with kids):    embed "kids family outing something for dinner"
+# Session C (no context set yet):  embed "something for dinner"  ← unchanged
+```
+
+**Impact:** Zero regressions across all 204 test cases (test-queries.md, test-queries-broken.md, test-queries-complex.md — 100% pass). The change affects only the last-resort vector fallback path, which fires after all routing decisions are already made.
+
+**Files changed:** `backend/app/retrieval/retriever.py`, `backend/app/nodes/compose_context.py`
+
+**Test results:** `test-results/EVALUATION_REPORT_2026-03-24_post_gap2.md` — 204/204 (100%)
+
+---
+
+## [v1.4] — 2026-03-24
+
+### Added
+
+**Semantic / Vector Retrieval**
+
+Mall entity descriptions (stores, dining, events) are now embedded and stored in a per-mall Chroma collection, enabling vector similarity search alongside the existing rule-based retrieval.
+
+- `backend/app/services/vector_store.py` (new) — `VectorStoreService` wraps Chroma with a Redis-backed result cache (`cenomi:vcache:{mall_id}:{query_hash}`, TTL configurable via `BACKEND_VECTOR_CACHE_TTL`). On cache miss, embeds the query with `text-embedding-3-small`, searches the mall's Chroma collection, and writes the result back to Redis.
+- `backend/scripts/ingest_vectors.py` (new) — offline ingestion script. Builds rich text descriptions for each entity (store profile, dining description, event summary), embeds them, and upserts into per-mall Chroma collections under `data/chroma/`.
+- `backend/app/retrieval/retriever.py` — `search_semantic()` now delegates to `VectorStoreService`; falls back to tag-overlap matching when Chroma is unavailable.
+- `backend/app/nodes/compose_context.py` — vector search fallback branch activated when no category rule matches, no playbook is selected, and intent domain is not `exploration` or `mall_info`.
+- `backend/pyproject.toml` — added `vector` (chromadb ≥ 0.5) and `all` optional dependency groups.
+- `backend/Dockerfile` — install target changed from `.[redis]` to `.[all]`; added `g++` and `cmake` to the builder stage for Chroma's native `hnswlib` dependency.
+- `docker-compose.yml` — added `BACKEND_VECTOR_STORE_TYPE`, `BACKEND_CHROMA_PERSIST_DIR`, `BACKEND_VECTOR_CACHE_TTL`, `BACKEND_MALL_CACHE_SIZE`, `BACKEND_MALL_CTX_REDIS_TTL` environment variables; ensured `backend/data` volume mount covers the Chroma persistence directory.
+
+**Multi-Mall LRU Cache with Three-Tier Resource Design**
+
+The platform now manages up to 20 mall contexts efficiently without loading all of them into RAM simultaneously.
+
+- `runtime.py` — `_mall_contexts` dict replaced with `LRUMallContextRegistry` (capacity configurable via `BACKEND_MALL_CACHE_SIZE`, default 5). Implements three-tier loading:
+  - **Tier 1 (Python RAM)** — LRU cache of active `MallContextLoader` objects; eviction frees RAM.
+  - **Tier 2 (Redis)** — Serialized `MallContextLoader` JSON cached with TTL `BACKEND_MALL_CTX_REDIS_TTL` (default 3600 s). Restoring from Redis is ~50–100× faster than disk + normalization.
+  - **Tier 3 (Disk)** — Cold load from canonical/semantic/playbook JSON files; writes back to Redis on load.
+- `context/mall_context.py` — `serialize()` and `from_serialized()` methods added for Redis-compatible JSON round-trip. Skips disk I/O on deserialization by rebuilding the context pack in memory.
+- `settings.py` — new fields: `chroma_persist_dir`, `mall_cache_size`, `mall_ctx_redis_ttl`, `vector_cache_ttl`.
+
+**Comprehensive Test Runner**
+
+- `backend/scripts/run_all_tests.py` (new) — runs all three test suites (standard, broken, complex) against the live Docker backend, handles multi-turn sessions with consistent session IDs, generates Markdown and JSON reports in `test-results/`.
+
+### Fixed
+
+**Route Flow — Pronoun Reference Handling (`route_flow.py`)**
+
+Queries like `"anything she would like"` were being routed to factual flow and treating the pronoun `"she"` as an entity/brand name to look up. Three interacting bugs were identified and fixed:
+
+1. **`_CONCIERGE_HARD_SIGNALS` missing pronoun patterns** — Added `"anything she"`, `"anything he"`, `"she would"`, `"he would"`, `"for her"`, `"for him"`, etc. to both `route_flow.py`'s `_CONCIERGE_HARD_SIGNALS` and `interpret_turn.py`'s `_CONCIERGE_KEYWORD_SIGNALS`.
+
+2. **Rule 0 domain lock `else` branch missing** — When an explicit domain switch bypassed the lock, `primary_intent` was left unset, causing `update_memory` to keep the stale `movie_lookup` in `scene.active_primary_intent`. The new `else` branch explicitly sets `primary_intent = "concierge_recommendation"` on domain switches.
+
+3. **Rule 3 (`mall_info` domain) had no concierge override** — The LLM occasionally mis-classifies pronoun references as `mall_info/what_is_available`. Rule 3 now checks `_CONCIERGE_HARD_SIGNALS` before forcing factual flow, routing to concierge when strong pronoun/planning language is present.
+
+**Impact:** B8.3 (`"anything she would like"`) now returns `guided_recommendation/high` across 7/7 consecutive stability test runs.
+
+**New environment variables**
+
+| Variable | Default | Description |
+|---|---|---|
+| `BACKEND_VECTOR_STORE_TYPE` | `chroma` | Vector backend: `chroma` (local) or `none` (disabled) |
+| `BACKEND_CHROMA_PERSIST_DIR` | `data/chroma` | Chroma persistence directory (relative to app root) |
+| `BACKEND_VECTOR_CACHE_TTL` | `900` | Redis TTL for vector search result cache (seconds) |
+| `BACKEND_MALL_CACHE_SIZE` | `5` | Max mall contexts held in Python RAM simultaneously |
+| `BACKEND_MALL_CTX_REDIS_TTL` | `3600` | Redis TTL for serialized mall context cache (seconds) |
+
+**Files changed:** `backend/app/config/settings.py`, `backend/app/context/mall_context.py`, `backend/app/runtime.py`, `backend/app/services/vector_store.py` *(new)*, `backend/app/services/concierge.py`, `backend/app/retrieval/retriever.py`, `backend/app/nodes/compose_context.py`, `backend/app/nodes/interpret_turn.py`, `backend/app/nodes/route_flow.py`, `backend/pyproject.toml`, `backend/Dockerfile`, `backend/scripts/ingest_vectors.py` *(new)*, `backend/scripts/run_all_tests.py` *(new)*, `docker-compose.yml`
+
+**Test results:** `test-results/run_2026-03-24_11-33-00.md` — 204/204 (100%)
+
+---
+
 ## [v1.3] — 2026-03-23
 
 ### Added

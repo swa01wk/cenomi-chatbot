@@ -23,6 +23,7 @@ from app.models.api import (
 from app.models.state import ConciergeState
 from app.models.tenant import TenantConfig
 from app.runtime import (
+    ensure_mall_loaded,
     get_checkpointer,
     get_feedback_normalizer,
     get_feedback_service,
@@ -76,6 +77,10 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     """
     t0 = time.perf_counter()
     store = get_session_store()
+    # Ensure the mall is in the LRU RAM cache before any synchronous lookups.
+    # For hot malls this is a no-op (O(1)); for cold malls it triggers disk load here,
+    # not inside graph nodes where latency would be unpredictable.
+    await ensure_mall_loaded(request.mall_id)
     mall_ctx = get_mall_context(request.mall_id)
 
     session_id = request.session_id or generate_session_id()

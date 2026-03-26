@@ -217,13 +217,19 @@ def _build_scene_acknowledgment(state: ConciergeState) -> str:
     if not parts:
         return ""
 
+    situation = ", ".join(parts)
     return (
         "SCENE ACKNOWLEDGMENT REQUIRED:\n"
-        f"The visitor is {', '.join(parts)}.\n"
-        "Your response MUST open with a single natural sentence that acknowledges "
-        "this situation — e.g. 'Since you're shopping with a 5-year-old...' or "
-        "'Since you're looking for a gift for your girlfriend...'\n"
-        "Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Absolutely!', or similar filler.\n\n"
+        f"Visitor situation: {situation}.\n"
+        "Your opening sentence MUST acknowledge this situation naturally — "
+        "but NEVER use 'Since you're...', 'Given you're...', 'As you're...', or 'Because you're...'.\n"
+        "Instead rotate through these opener styles:\n"
+        "  • Lead with the destination:   'Head to Centrepoint — great value kids' jackets on the Ground floor.'\n"
+        "  • Lead with the person/group:  'For your 5-year-old, the best picks are in the Main Gallery.'\n"
+        "  • Lead with the need:          'For an affordable jacket, here are your top three options:'\n"
+        "  • Lead with an action:         'Start at Red Tag for solid budget picks, then swing by Max next door.'\n"
+        "  • Lead with a direct answer:   'Muvi Cinema on the Cinema Level is your best bet for a family film.'\n"
+        "Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Absolutely!', or any filler phrase.\n\n"
     )
 
 
@@ -1680,8 +1686,10 @@ def _build_concierge_experience_instruction(
             f"  2. Give a compact 3–4 step plan (max {entity_cap} stores)\n"
             "  3. Weave store names into a natural narrative — NOT a bullet dump\n"
             "  4. Close with ONE brief offer to extend or refine the plan\n"
-            "Example: 'Since [situation]... Start with [X], then [Y], "
-            "and [Z] for a break. Want me to add a dining stop?'\n\n"
+            "Example openers (vary each time — NEVER repeat the same pattern):\n"
+            "  'Head to [X] first — it's the best fit. Then [Y] for [reason]. Want to add a dining stop?'\n"
+            "  'For [situation], [X] is your strongest option. [Y] is a solid backup. Here's the plan:'\n"
+            "  'Perfect for [situation]: start at [X], then [Y], and wrap up at [Z].'\n\n"
         )
 
     # ── Mode: curated shortlist ───────────────────────────────────────
@@ -1975,7 +1983,7 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
             "The query is broad or partially clear. Rules:\n"
             "  1. Offer 3–5 strong, relevant options.\n"
             "  2. Lightly acknowledge any ambiguity "
-            "(e.g. 'Since you didn't mention a preference...').\n"
+            "(e.g. 'Without a specific preference to go on...' or 'Here's a good starting point:').\n"
             "  3. Do NOT claim constraints or specifics you cannot verify.\n"
             "  4. End with ONE short, focused follow-up question if it would help "
             "narrow the choice.\n\n"

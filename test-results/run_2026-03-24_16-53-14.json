@@ -1,0 +1,113 @@
+{
+  "run_timestamp": "2026-03-24 16:53:14 UTC",
+  "run_id": "10dd2acf",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "errors": 0,
+    "pass_pct": 100,
+    "avg_latency_ms": 4399
+  },
+  "suites": {
+    "session-scenario.json": [
+      {
+        "id": "SS1.2",
+        "query": "I need to buy a jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 4190,
+        "reply_snippet": "Start at Red Tag in the Main Gallery for great value jackets that fit family budgets and styles. Then swing by Centrepoint in the Entertainm"
+      },
+      {
+        "id": "SS1.3",
+        "query": "I am here with my 5 yearold kid and girlfriend. I want the jacket for him",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "context_acknowledgement",
+        "actual_mode": "context_acknowledgement",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 2005,
+        "reply_snippet": "For your 5-year-old, Fun Time in the Entertainment Wing on the Ground floor is the perfect spot to keep him happily engaged while you shop. "
+      },
+      {
+        "id": "SS1.4",
+        "query": "yes",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 5806,
+        "reply_snippet": "For shopping with your girlfriend and keeping your 5-year-old engaged, the Ground floor offers a great mix of family-friendly and couple-app"
+      },
+      {
+        "id": "SS1.5",
+        "query": "I want an affordable jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 5857,
+        "reply_snippet": "Start at Red Tag in the Main Gallery for affordable, stylish jackets that suit a budget and keep things casual for your boyfriend. Then swin"
+      },
+      {
+        "id": "SS1.6",
+        "query": "Okay, cool. Where shall I go grab some food?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "dining_recommendation",
+        "latency_ms": 6607,
+        "reply_snippet": "For a family-friendly and budget-friendly meal, head to the Food Court on the Ground floor. McDonald's is a reliable choice with kid-friendl"
+      },
+      {
+        "id": "SS1.7",
+        "query": "What movie would you suggest?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "dining_recommendation",
+        "latency_ms": 1931,
+        "reply_snippet": "Muvi Cinema on the Cinema Level is your best bet for a family-friendly movie experience that suits your group. While the current showtimes f"
+      }
+    ]
+  }
+}

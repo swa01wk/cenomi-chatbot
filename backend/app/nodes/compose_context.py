@@ -26,11 +26,12 @@ from typing import Any
 from app.models.state import ConciergeState, ContextComposition, DebugEnrichment
 from app.nodes._tracing import traced_node
 from app.retrieval.retriever import (
+    build_scene_prefix,
     detect_category_from_intent,
     detect_category_from_query,
     get_related_categories,
 )
-from app.runtime import get_mall_context, search_brand_across_malls
+from app.runtime import get_mall_context, get_vector_store, search_brand_across_malls
 from app.services.playbook_engine import PlaybookEngine
 from app.services.tenant_runtime import TenantRuntime
 
@@ -218,6 +219,87 @@ def _resolve_shopping_task_category(scene) -> str | None:
     if cat in _BROAD_SHOPPING_CATEGORIES:
         return None
     return _PRODUCT_CATEGORY_TO_ENTITY_CATEGORY.get(cat)
+
+
+async def _vector_search_fallback(
+    query: str,
+    mall_id: str,
+    mall_ctx,
+    top_k: int = 8,
+) -> list[dict]:
+    """
+    Vector similarity search fallback for fuzzy / vibe queries.
+
+    Called when no category rule or playbook matched (e.g. "something trendy
+    for a date night", "romantic spot for anniversary").
+
+    Returns enriched entity dicts ready for context injection, or [] when
+    the vector store is unavailable (graceful degradation — no crash).
+    """
+    vs = get_vector_store()
+    if vs is None or not vs.is_available:
+        return []
+
+    raw_results = await vs.search(query, mall_id=mall_id, top_k=top_k)
+    if not raw_results:
+        return []
+
+    enriched: list[dict] = []
+    canonical = mall_ctx._builder._canonical
+
+    for result in raw_results:
+        entity_id = result["entity_id"]
+        entity_type = result.get("entity_type", "")
+
+        # Hydrate entity object from in-memory canonical dict
+        entity_data: dict | None = None
+        search_types = [entity_type] if entity_type else ["stores", "dining", "cinemas", "services"]
+        for etype in search_types:
+            plural = etype if etype.endswith("s") else etype + "s"
+            for entity in canonical.get(plural, []):
+                if getattr(entity, "entity_id", None) == entity_id:
+                    entity_data = entity.model_dump()
+                    entity_type = etype
+                    break
+            if entity_data:
+                break
+
+        if not entity_data:
+            continue
+
+        profile = mall_ctx.get_semantic_profile(entity_id)
+        name = entity_data.get("name") or entity_data.get("title", "")
+
+        item: dict = {
+            "entity_id": entity_id,
+            "name": name,
+            "entity_type": entity_type,
+            "category": entity_data.get("category", ""),
+            "subcategory": entity_data.get("subcategory", ""),
+            "description": entity_data.get("description", ""),
+            "score": result["score"],
+            "source": "vector",
+        }
+
+        loc = entity_data.get("location")
+        if isinstance(loc, dict):
+            item["floor"] = loc.get("floor", "")
+            item["zone"] = loc.get("zone", "")
+            item["directions_hint"] = loc.get("directions_hint", "")
+
+        if profile:
+            item["concierge_notes"] = profile.concierge_notes
+            item["semantic_tags"] = profile.semantic_tags[:8]
+            item["audience_fit"] = profile.audience_fit
+            item["vibe"] = profile.vibe
+
+        enriched.append(item)
+
+    logger.info(
+        "Vector fallback for query=%r mall=%s → %d entities",
+        query[:40], mall_id, len(enriched),
+    )
+    return enriched
 
 
 def _suppress_dining_for_shopping(entities: list[dict]) -> tuple[list[dict], int]:
@@ -645,6 +727,25 @@ async def compose_context(state: ConciergeState) -> dict:
                         )
                     _add_location_info(entity_data, enriched)
                     entities.append(enriched)
+
+    # ── Vector search: fuzzy / vibe queries with no rule or playbook match ───
+    # Fires when category retrieval AND playbook ranking both returned nothing.
+    # This is the semantic layer: "trendy date night", "romantic anniversary spot",
+    # "something for my mum" — queries with no hardcoded category rule.
+    # Skipped for exploration and mall_info domains which have their own paths.
+    if not entities and not category_key and intent.domain not in ("exploration", "mall_info"):
+        vector_query = state.expanded_query or state.normalized_user_message or state.raw_user_message
+        scene_prefix = build_scene_prefix(scene)
+        if scene_prefix:
+            vector_query = f"{scene_prefix} {vector_query}".strip()
+        vector_entities = await _vector_search_fallback(
+            vector_query,
+            state.mall_id,
+            mall_ctx,
+        )
+        if vector_entities:
+            entities = vector_entities
+            _dominant_context_reason = "vector_search"
 
     # ── Fallback: exploration or domain-based entity lookup ───────────
     if not entities:

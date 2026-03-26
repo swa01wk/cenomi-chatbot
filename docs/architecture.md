@@ -92,6 +92,24 @@ Internal testing console with three concerns:
 - **Semantic** (`semantic_mall_model.py`): tag-based enrichment, audience fit, experience clusters
 - **Playbooks**: pre-built strategies that reduce LLM improvisation
 
+### Why augment the vector query with scene context?
+Vector search embeds the raw user query and finds semantically similar entities. Without augmentation, "something for dinner" produces the same vector regardless of whether the user is celebrating an anniversary or visiting with young children — returning the same entity ranking for both.
+
+`build_scene_prefix(scene)` in `retriever.py` prepends available `SceneMemory` signals (`occasion`, `companions`, `visit_type`, `budget`) to the query before embedding:
+
+```
+Session A (anniversary):  "anniversary partner date something for dinner"
+Session B (family):       "kids family outing something for dinner"
+Session C (no context):   "something for dinner"   ← unchanged
+```
+
+This moves the query to the correct neighbourhood in the embedding space before search — higher-quality entity matches with zero latency cost (prefix construction is pure Python, no extra API calls). An `if scene_prefix` guard preserves existing behaviour for fresh sessions.
+
+The augmentation is applied in two places:
+
+1. **`compose_context.py` vector fallback** (lines 738–740) — the primary pipeline path; the augmented string is passed to `_vector_search_fallback → VectorStoreService.search()`.
+2. **`MallRetriever.search_semantic(scene=None)`** — the method now accepts an optional `scene` parameter and applies the prefix internally, so tests, scripts, and future pipeline nodes that call this method directly also benefit without any extra wiring at the call site.
+
 ### Why tenant parameters?
 - Different tenants may need different treatment (boost, suppress, tone)
 - Feedback can tune these parameters over time via `tenant_parameter_tuner`

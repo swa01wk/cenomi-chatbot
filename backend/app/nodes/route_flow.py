@@ -324,6 +324,12 @@ _CONCIERGE_HARD_SIGNALS: tuple[str, ...] = (
     "cheapest of those", "cheapest one", "which is cheapest",
     "best value of those", "most affordable of those",
     "the cheapest option",
+    # Personal pronoun references — never entity lookup, always recommendation
+    "anything she", "anything he", "anything they",
+    "something she", "something he", "something they",
+    "she would", "he would", "she likes", "he likes",
+    "she wants", "he wants", "she'd", "he'd",
+    "for her", "for him", "for them",
     # Cross-domain evening/night plans
     "dinner and then a movie",
     "dinner and a movie",
@@ -471,6 +477,13 @@ async def route_flow(state: ConciergeState) -> dict:
             if not primary_intent or primary_intent not in _FACTUAL_PRIMARY_INTENTS:
                 primary_intent = prior_factual_intent
             domain_locked = True
+        else:
+            # Explicit domain switch detected — clear the stale factual primary intent
+            # so update_memory writes a non-factual value and the NEXT turn doesn't
+            # re-enter this domain lock (e.g. B8.3 "anything she would like" must not
+            # inherit movie_lookup from B8.1 after B8.2 already switched domain).
+            if not primary_intent or primary_intent in _FACTUAL_PRIMARY_INTENTS:
+                primary_intent = "concierge_recommendation"
 
     # ── 1. Always-factual: cross-mall ────────────────────────────────
     if not flow_type and (
@@ -569,12 +582,27 @@ async def route_flow(state: ConciergeState) -> dict:
     # Exception: context_setting turns (e.g. "i am here with my family" classified
     # as mall_info/family_friendliness) must be routed via concierge so they receive
     # a context_acknowledgement response, not a raw factual lookup.
+    # Exception: strong concierge signals (pronouns, planning language) override even
+    # factual domains — "anything she would like" mis-classified as mall_info must
+    # stay concierge, not get forced to a factual entity lookup.
     elif not flow_type and intent.domain in _FACTUAL_DOMAINS and intent.message_kind != "context_setting":
-        flow_type = "factual"
-        routing_reason = f"Domain '{intent.domain}' routes to factual flow by design"
-        retrieval_priority = "high"
-        if not primary_intent:
-            primary_intent = "location_lookup"
+        _has_concierge_override = (
+            any(sig in msg for sig in _CONCIERGE_HARD_SIGNALS) and not _is_pure_lookup(msg)
+        )
+        if _has_concierge_override:
+            flow_type = "concierge"
+            routing_reason = (
+                f"Domain '{intent.domain}' normally factual but strong concierge signals "
+                "override (pronoun/planning reference — route to recommendation)"
+            )
+            if not primary_intent or primary_intent in _FACTUAL_PRIMARY_INTENTS:
+                primary_intent = "concierge_recommendation"
+        else:
+            flow_type = "factual"
+            routing_reason = f"Domain '{intent.domain}' routes to factual flow by design"
+            retrieval_priority = "high"
+            if not primary_intent:
+                primary_intent = "location_lookup"
 
     # ── 4. Hard factual keyword signals ──────────────────────────────
     elif not flow_type and any(sig in msg for sig in _FACTUAL_HARD_SIGNALS):

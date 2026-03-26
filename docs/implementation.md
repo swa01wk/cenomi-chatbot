@@ -716,16 +716,39 @@ Every query is routed to one of two execution flows before `compose_context` run
 | Rule | Trigger | Result |
 |------|---------|--------|
 | 0 — Domain lock | Previous turn was factual + no explicit topic switch | Stay factual (continuity) |
+| 0 (else) — Domain lock release | Explicit topic switch detected (see switch signals below) | Sets `primary_intent = "concierge_recommendation"` so `update_memory` clears the lock for the next turn |
 | 0b — Near-cinema dining | Dining intent + proximity phrase ("near cinema", "near the food court") | Concierge — proximity acts as a location modifier, not a cinema intent override |
 | 1 — Cross-mall | `cross_mall` domain or `cross_mall_search` sub-intent | Always factual |
 | 2 — Factual sub-intent | `sub_intent` ∈ `_FACTUAL_SUB_INTENTS` | Factual — unless clear planning overlay |
-| 3 — Factual domain | `domain` ∈ `navigation`, `cross_mall` | Factual |
+| 3 — Factual domain | `domain` ∈ `navigation`, `cross_mall`, `mall_info` | Factual — **unless** `_CONCIERGE_HARD_SIGNALS` present (pronoun/planning language overrides) |
 | 4 — Hard factual signals | Keyword match: "now showing", "where is the", "is X here", etc. | Factual |
 | 5 — Strong concierge sub-intent | `sub_intent` ∈ `_CONCIERGE_SUB_INTENTS` | Concierge |
 | 6 — Scene context | Companions/occasion/visit_type present AND primary intent not factual | Concierge |
 | 7 — Concierge hard signals | Planning keywords detected | Concierge (with factual primary intent override) |
 | 7b — Context-setting | `message_kind == "context_setting"` | Concierge (scene acknowledgement) |
 | 8 — Follow-up continuity | Prior turn was factual + `message_kind` is followup/refinement | Stay factual |
+| 9 — Constraint refinement | `message_kind == "constraint_refinement"` | Inherit prior flow |
+
+### Domain Lock — Explicit Switch Signals
+
+Rule 0 bypasses the domain lock when any of the following is true:
+
+- `intent.message_kind == "topic_switch"`
+- `_has_explicit_domain_switch(msg)` — matches `_EXPLICIT_DOMAIN_SWITCH_SIGNALS`
+- `intent.sub_intent ∈ _DOMAIN_SWITCH_SUB_INTENTS` — includes `family_filter`, `companion_context`, dining sub-intents, and activity/exploration intents
+- Any signal in `_CONCIERGE_HARD_SIGNALS` is present in the message — **includes personal pronoun references** (`"anything she"`, `"for her"`, `"she would"`, etc.)
+
+When the lock releases (explicit switch), `primary_intent` is immediately set to `"concierge_recommendation"` so `update_memory` writes a non-factual value and the domain lock cannot re-fire on subsequent turns.
+
+### Concierge Hard Signals (`_CONCIERGE_HARD_SIGNALS`)
+
+These keywords in the user message force concierge routing regardless of domain or sub-intent. Includes:
+
+- Planning language: `"suggest"`, `"before the movie"`, `"after the movie"`, `"date plan"`, `"gift for"`, etc.
+- Companion declarations: `"with my kid"`, `"with my daughter"`, `"with my wife"`, `"with my 7"`, etc.
+- Route/optimisation: `"most efficient order"`, `"best order to visit"`, `"value for money"`, etc.
+- Movie recommendations (not raw listings): `"show me movies"`, `"good movie for"`, `"recommend a movie"`, etc.
+- **Personal pronoun references** *(added v1.4)*: `"anything she"`, `"anything he"`, `"she would"`, `"he would"`, `"for her"`, `"for him"`, `"for them"`, etc. — ensures `"anything she would like"` routes to `guided_recommendation`, not entity lookup.
 
 ### Factual Sub-Intents (`_FACTUAL_SUB_INTENTS`)
 
@@ -821,6 +844,88 @@ When a query contains companion or context signals alongside a factual question 
 
 ---
 
+## Semantic / Vector Retrieval
+
+**Files:** `backend/app/services/vector_store.py`, `backend/scripts/ingest_vectors.py`
+
+Mall entity descriptions are embedded and stored in a per-mall Chroma collection, enabling fuzzy semantic search alongside the existing rule-based retrieval.
+
+### Architecture
+
+```
+Query
+  │
+  ├─ Redis cache hit (cenomi:vcache:{mall_id}:{sha256(query)})
+  │   └─ return cached results immediately
+  │
+  └─ Cache miss
+      ├─ Embed query with text-embedding-3-small (OpenAI)
+      ├─ Search Chroma collection for mall_id (cosine similarity)
+      ├─ Write results to Redis (TTL = BACKEND_VECTOR_CACHE_TTL, default 900 s)
+      └─ Return top-k results
+```
+
+### Ingestion (`ingest_vectors.py`)
+
+Run offline once per mall (or after data updates):
+
+```bash
+python backend/scripts/ingest_vectors.py --mall-id al_nakheel_plaza_28
+```
+
+Builds rich text descriptions for each entity type:
+- **Stores** — name, category, brand description, tags, floor/zone
+- **Dining** — name, cuisine, vibe, seating, price range, concierge notes
+- **Events** — title, description, dates, audience
+
+Each entity is embedded and upserted into a Chroma collection named `cenomi_mall_{mall_id}` under `data/chroma/`.
+
+### Three-Tier Resource Design
+
+| Tier | Storage | What's Cached | Typical Latency |
+|------|---------|---------------|----------------|
+| 1 | Python RAM (LRU) | Active `MallContextLoader` objects | < 1 ms |
+| 2 | Redis | Serialized mall contexts (`cenomi:ctx:{mall_id}`), vector search results (`cenomi:vcache:{mall_id}:{hash}`) | 1–5 ms |
+| 3 | Disk | Chroma DB, canonical/semantic JSON | 50–500 ms |
+
+The `LRUMallContextRegistry` in `runtime.py` manages capacity (`BACKEND_MALL_CACHE_SIZE`, default 5) — evicted malls are restored from Redis before falling back to disk.
+
+### When Vector Search Is Used
+
+In `compose_context.py`, a vector search fallback branch activates when:
+1. No category rule match
+2. No playbook selected
+3. Intent domain is not `exploration` or `mall_info`
+
+This handles fuzzy queries like *"something trendy for a date night"* or *"affordable options for a teen"* where rule-based retrieval returns no results.
+
+### Contextual Query Augmentation
+
+Before the vector search is called, scene signals are prepended to the raw query so the resulting embedding reflects the visitor's actual context:
+
+```python
+# In compose_context.py — vector fallback path
+scene_prefix = build_scene_prefix(scene)   # e.g. "anniversary partner date"
+if scene_prefix:
+    vector_query = f"{scene_prefix} {vector_query}".strip()
+# → embeds "anniversary partner date something for dinner" instead of "something for dinner"
+```
+
+`build_scene_prefix(scene)` in `retriever.py` reads `occasion`, `companions`, `visit_type`, and `budget` from `SceneMemory` and returns a deduplicated keyword string. It returns an empty string when the scene has no signals, preserving existing behaviour for fresh sessions.
+
+`MallRetriever.search_semantic(query, tags=None, top_k=12, scene=None)` now also accepts a `scene` parameter — when provided the prefix is applied internally before passing the query to `vs.search()`. This means any direct call site (tests, scripts, future nodes) automatically gets the augmentation without requiring the caller to pre-augment.
+
+### Live Collection State
+
+| Collection | Stores | Dining | Services | Cinemas | Total |
+|---|---|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+
+Re-run `ingest_vectors.py` after any canonical data refresh.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -828,8 +933,11 @@ When a query contains companion or context signals alongside a factual question 
 | Runtime | Python 3.11+, FastAPI, Uvicorn |
 | Pipeline | LangGraph StateGraph |
 | LLM | OpenAI GPT-4.1 (configurable model, temperature) |
+| Embeddings | OpenAI `text-embedding-3-small` |
+| Vector Store | Chroma (local, persistent) |
 | Models | Pydantic v2 |
-| Sessions | In-memory (LRU, max 1000) |
+| Sessions | In-memory (LRU, max 1000) + Redis (optional) |
+| Cache | Redis — sessions, mall contexts, vector search results |
 | Frontend | React 19, Vite 7, TypeScript 5.9, Tailwind v4 |
 | Data | JSON files (canonical, semantic, playbooks, context_packs, tenant_config) |
 | Data Pipeline | Deterministic ETL (convert_to_canonical.py) + LLM synthesis (generate_mall_data.py) |

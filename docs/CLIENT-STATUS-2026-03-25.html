@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CLIENT-STATUS-2026-03-25</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="cenomi-chatbot-client-status-report">Cenomi Chatbot — Client
+Status Report</h1>
+<p><strong>As of:</strong> Wednesday, 25 March 2026<br />
+<strong>Demo target:</strong> Sunday, 30 March 2026 (5 days)</p>
+<hr />
+<h2 id="where-we-are-on-the-improvisation-what-has-been-implemented">1.
+Where We Are on the Improvisation — What Has Been Implemented</h2>
+<p>The platform has shipped four full versions since the initial build
+on 13 March. Every change has been verified at 100% pass rate across the
+204-query test suite (smoke + adversarial multi-turn + deep complex
+scenarios).</p>
+<h3 id="v1.0-13-march-core-pipeline-single-mall">v1.0 — 13 March: Core
+Pipeline (Single Mall)</h3>
+<ul>
+<li><strong>LangGraph pipeline</strong> — 12-node directed graph
+covering: session load → intent interpretation → scene memory update →
+playbook resolution → strategy selection → context composition →
+retrieval decision → fact fetch → response generation → memory update →
+debug payload emit</li>
+<li><strong>Intent classification</strong> — three-tier hybrid:
+short-circuit rule table (&lt; 1ms) → regex rule-based classifier →
+GPT-4o LLM fallback. Domains: dining, shopping, entertainment, services,
+navigation, exploration, mall_info, general</li>
+<li><strong>Scene memory</strong> — accumulates companions, occasion,
+budget, visit plan, topic lock, active shortlist across every turn;
+resolves terse follow-ups in context</li>
+<li><strong>Playbook engine</strong> — scenario playbooks matched and
+ranked against intent + entity context; tone-mapped outputs (date night
+vs family day vs gift hunt produce structurally different
+responses)</li>
+<li><strong>Anti-hallucination guard</strong> — post-generation
+validation of all LLM output against canonical mall data before
+delivery</li>
+<li><strong>Feedback system</strong> — explicit (thumbs up/down) +
+implicit (auto-detected corrections); session tuning engine applies
+signals in real time during the session</li>
+<li><strong>React testing console</strong> — full debug inspector
+(intent, playbook, entities, retrieval, node trace, latencies), session
+export</li>
+<li><strong>Mall loaded:</strong> Al Nakheel Plaza, Buraidah (mall 28) —
+94 brands, 1 cinema, 6 movies, 10 services</li>
+</ul>
+<h3 id="v1.1-17-march-multi-mall-support">v1.1 — 17 March: Multi-Mall
+Support</h3>
+<ul>
+<li>Runtime now holds a registry of mall contexts instead of a
+singleton</li>
+<li>Mall of Arabia, Jeddah (mall 13) added — full data pipeline run
+(canonical, semantic, playbook, tenant config)</li>
+<li>All pipeline nodes updated to use <code>mall_id</code>-scoped
+context</li>
+<li>Frontend mall selector updated; health endpoint returns
+<code>mall_ids</code> list</li>
+</ul>
+<h3 id="v1.2-17-march-cross-mall-brand-search">v1.2 — 17 March:
+Cross-Mall Brand Search</h3>
+<ul>
+<li>New <code>cross_mall</code> intent domain — fires for queries like
+“Does Mall of Arabia also have Nike?” or “Which Cenomi mall has
+Starbucks?”</li>
+<li><code>search_brand_across_malls()</code> merges canonical data
+across all loaded malls, sorts home mall first</li>
+<li>Dedicated <code>_build_cross_mall_response()</code> with structured
+<code>AT YOUR CURRENT MALL / AT OTHER CENOMI MALLS</code> prompt
+blocks</li>
+<li>Hallucination guard extended to validate against a merged canonical
+index from all loaded malls</li>
+</ul>
+<h3 id="v1.3-23-march-infrastructure-streaming">v1.3 — 23 March:
+Infrastructure &amp; Streaming</h3>
+<ul>
+<li><strong>Redis session persistence</strong> — sessions survive
+backend restarts and are shareable across workers;
+<code>RedisSessionStore</code> with configurable TTL; in-memory fallback
+when Redis is absent</li>
+<li><strong>LangGraph turn checkpointing</strong> — every graph
+invocation snapshot-persisted to Redis
+(<code>BACKEND_ENABLE_CHECKPOINTER=true</code>); each turn is
+independently replayable for debugging and regression testing</li>
+<li><strong>Async quality evaluator</strong> — LLM-as-judge evaluates
+every response on <code>intent_alignment</code>,
+<code>constraint_adherence</code>, <code>honesty</code>, and
+<code>conciseness</code> (0–10); runs in a background task, never blocks
+delivery</li>
+<li><strong>SSE token streaming</strong> —
+<code>POST /api/chat/stream</code> streams response token-by-token;
+React UI renders live blinking cursor; session persistence and quality
+evaluation run post-stream without delaying the first token</li>
+<li><strong>Docker / Docker Compose</strong> — single-command
+deployment; multi-stage Dockerfile under 300 MB; Redis + backend
+services with healthcheck; <code>backend/data</code> volume mount for
+persistence</li>
+</ul>
+<h3 id="v1.4-24-march-semantic-retrieval-multi-mall-scale">v1.4 — 24
+March: Semantic Retrieval + Multi-Mall Scale</h3>
+<ul>
+<li><strong>Three-layer hybrid retrieval:</strong>
+<ul>
+<li><strong>Layer 1 — Category rules:</strong> deterministic lookup,
+100% precision, zero LLM cost (~0ms)</li>
+<li><strong>Layer 2 — Canonical name search:</strong> substring +
+word-boundary match for brand-specific queries</li>
+<li><strong>Layer 3 — Vector similarity search:</strong>
+<code>VectorStoreService</code> (Chroma +
+<code>text-embedding-3-small</code> + Redis result cache); falls back to
+tag-overlap matching when Chroma is unavailable</li>
+</ul></li>
+<li><strong><code>VectorStoreService</code></strong> — Chroma
+PersistentClient (HNSW cosine, 1536-dim); Redis-backed result cache (TTL
+configurable); per-mall collections with zero cross-contamination</li>
+<li><strong>Multi-mall LRU cache (three-tier resource design):</strong>
+<ul>
+<li>Tier 1 (Python RAM) — LRU cache of active
+<code>MallContextLoader</code> objects (default capacity 5); eviction
+frees RAM</li>
+<li>Tier 2 (Redis) — serialized mall context JSON with TTL; restoring
+from Redis is ~50–100× faster than disk</li>
+<li>Tier 3 (Disk) — cold load from canonical/semantic/playbook JSON;
+writes back to Redis on first load</li>
+</ul></li>
+<li><strong>Experience layer</strong>
+(<code>experience_resolver.py</code>) — selects response composition
+mode before the LLM is called: <code>micro_itinerary</code>,
+<code>curated_shortlist</code>, <code>filtered_factual_list</code>,
+<code>guided_plan</code>, <code>structured_overview</code></li>
+<li><strong>Pronoun reference fix</strong> — queries like “anything she
+would like” now correctly route to <code>guided_recommendation</code>
+instead of treating “she” as a brand name</li>
+<li><strong>Comprehensive test runner</strong>
+(<code>run_all_tests.py</code>) — runs all three test suites against the
+live Docker backend; generates Markdown + JSON reports in
+<code>test-results/</code></li>
+</ul>
+<h3 id="v1.4.1-24-march-contextual-query-augmentation">v1.4.1 — 24
+March: Contextual Query Augmentation</h3>
+<ul>
+<li><code>build_scene_prefix(scene)</code> prepends
+<code>SceneMemory</code> signals (occasion, companions, visit_type,
+budget) to the vector query before embedding</li>
+<li>The same bare query from different visitor contexts now produces
+different embedding vectors:
+<ul>
+<li>Anniversary couple → embed
+<code>"anniversary partner date something for dinner"</code></li>
+<li>Family with kids → embed
+<code>"kids family outing something for dinner"</code></li>
+<li>Fresh session → embed <code>"something for dinner"</code> (unchanged
+— no regression risk)</li>
+</ul></li>
+<li><strong>Zero regressions: 204/204 test cases pass
+(100%)</strong></li>
+</ul>
+<hr />
+<h2 id="what-will-be-included-before-the-demo-30.03.26">2. What Will Be
+Included Before the Demo (30.03.26)</h2>
+<p>The demo is in 5 days. Based on the roadmap priorities and effort
+estimates documented in
+<code>docs/COMPETITIVE-ANALYSIS-AI-CORE-RETRIEVAL.md</code> and
+<code>docs/AI-FINDR-COMPARISON.md</code>, the following items are
+<strong>realistic to complete before 30 March:</strong></p>
+<h3 id="retrieval-improvements-can-be-done-before-demo">Retrieval
+Improvements (can be done before demo)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Effort</th>
+<th>Impact</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BM25 entity name index + RRF fusion</strong></td>
+<td>1–2 days</td>
+<td>High — closes the exact brand name miss gap vs vector-only
+search</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td><strong>Cross-encoder re-ranker</strong> (top-20 → top-5,
+<code>ms-marco-MiniLM-L-6-v2</code>, ~25MB, CPU-runnable)</td>
+<td>&lt; 1 day</td>
+<td>Medium — improves ranking for ambiguous queries by ~15–25%</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td><strong>Vector fallback in factual flow</strong>
+(<code>fetch_exact_facts</code> falls back to vector when canonical
+lookup returns empty)</td>
+<td>&lt; 1 day</td>
+<td>Medium — surfaces answers for service/facility queries that miss
+keyword lookup</td>
+<td>Pending</td>
+</tr>
+</tbody>
+</table>
+<h3 id="demo-preparation-should-be-done-before-demo">Demo Preparation
+(should be done before demo)</h3>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>README update</strong></td>
+<td>Current README describes old 12-node single-flow architecture; live
+system is a 16-node dual-flow graph. Should reflect actual architecture
+and API routes.</td>
+</tr>
+<tr>
+<td><strong>Delta-ingest trigger</strong> (mtime-based, background)</td>
+<td>Medium effort (2–3 days) — borderline for the demo window</td>
+</tr>
+</tbody>
+</table>
+<h3 id="items-not-realistic-before-30.03.26">Items NOT Realistic Before
+30.03.26</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arabic multilingual support</td>
+<td>High effort — language detection, Arabic prompt variants, regional
+dialect handling; not achievable in 5 days</td>
+</tr>
+<tr>
+<td>Analytics dashboard</td>
+<td>Requires database migration + new frontend; 1+ week of work</td>
+</tr>
+<tr>
+<td>WhatsApp integration</td>
+<td>Requires WhatsApp Business API registration + integration work</td>
+</tr>
+<tr>
+<td>Visual / rich responses (cards, maps, CTAs)</td>
+<td>Requires new response schema + frontend rendering overhaul</td>
+</tr>
+<tr>
+<td>LangSmith production tracing</td>
+<td>Config exists but never wired into any code path</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="how-close-are-we-with-ai-findr">3. How Close Are We with AI
+Findr</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>AI Quality Dimension</th>
+<th>Parity</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conversational AI core</td>
+<td>~87%</td>
+<td><strong>Cenomi leads</strong></td>
+</tr>
+<tr>
+<td>Retrieval quality</td>
+<td>~85%</td>
+<td><strong>Cenomi leads</strong> — three-layer hybrid + scene-augmented
+vectors; BM25 fusion in progress</td>
+</tr>
+<tr>
+<td>Intent classification depth</td>
+<td><strong>Cenomi leads</strong></td>
+<td>Three-tier hybrid (rule fast-path + LLM fallback); AI Findr is
+single-pass LLM only</td>
+</tr>
+<tr>
+<td>Hallucination control</td>
+<td><strong>Cenomi leads</strong></td>
+<td>Post-generation validation against live canonical data; AI Findr’s
+grounding is unpublished</td>
+</tr>
+<tr>
+<td>Real-time session adaptation</td>
+<td><strong>Cenomi leads</strong></td>
+<td>Mid-session behavioral tuning from feedback; AI Findr improves
+offline only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="where-we-win">Where We Win</h3>
+<ul>
+<li><strong>Multi-turn scene memory</strong> — tracks companions,
+occasion, budget, and visit plan across every turn; AI Findr answers one
+query at a time</li>
+<li><strong>Dual-flow routing</strong> — concierge mode for planning,
+factual mode for lookups; AI Findr is a single flow</li>
+<li><strong>Hallucination guard</strong> — every LLM output validated
+against live mall data before delivery; AI Findr’s grounding is
+opaque</li>
+<li><strong>Real-time session adaptation</strong> — feedback signals
+(explicit and implicit) adjust behavior mid-session; AI Findr only
+improves offline</li>
+<li><strong>Playbook scenario engine</strong> — “romantic dinner” and
+“family outing” produce structurally different responses over the same
+data</li>
+<li><strong>Full data ownership</strong> — Gulf occasions, local brands,
+Saudi cultural context embedded natively; AI Findr is a generic
+platform</li>
+<li><strong>Data residency</strong> — all visitor data stays on Cenomi
+infrastructure; AI Findr requires Enterprise tier for on-premises</li>
+</ul>
+<h3 id="where-ai-findr-currently-leads">Where AI Findr Currently
+Leads</h3>
+<ul>
+<li><strong>Visual responses</strong> — interactive maps, store cards
+with images, booking CTAs</li>
+<li><strong>Arabic</strong> — auto-detect multilingual with regional
+tone; we have no Arabic support yet</li>
+<li><strong>Analytics</strong> — real-time dashboard for top queries,
+trends, and content gaps</li>
+<li><strong>Channels</strong> — WhatsApp, kiosk, digital signage, voice,
+mobile app; we are web-only today</li>
+</ul>
+<hr />
+<h2 id="what-ai-findr-doesnt-have-that-we-have-and-are-building">4. What
+AI Findr Doesn’t Have That We Have (and Are Building)</h2>
+<h3 id="already-differentiated-cenomi-capabilities">Already
+Differentiated (Cenomi capabilities)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What It Means for Visitors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scene Memory</strong></td>
+<td>The concierge remembers who you’re with, your occasion, budget, and
+shopping task — across every turn of the conversation</td>
+</tr>
+<tr>
+<td><strong>Concierge vs Factual routing</strong></td>
+<td>Planning queries (“help me plan a date night”) and lookup queries
+(“where is Zara?”) are handled by separate reasoning pipelines, not a
+one-size-fits-all flow</td>
+</tr>
+<tr>
+<td><strong>Hallucination guard</strong></td>
+<td>Store names, hours, movies, and offers in every response are
+validated against live mall data before the user sees them</td>
+</tr>
+<tr>
+<td><strong>Real-time feedback adaptation</strong></td>
+<td>If a visitor corrects the bot mid-session, behavior adjusts
+immediately — no waiting for a next-day model update</td>
+</tr>
+<tr>
+<td><strong>Playbook scenario engine</strong></td>
+<td>Context-matched scenarios (anniversary, family day, back-to-school)
+change entity ranking, tone, and response structure dynamically</td>
+</tr>
+<tr>
+<td><strong>Scene-augmented vector search</strong></td>
+<td>The same query (“something for dinner”) returns different results
+for an anniversary couple vs a family with kids — context shapes
+retrieval, not just the response</td>
+</tr>
+<tr>
+<td><strong>Cross-mall brand search</strong></td>
+<td>“Is Zara in any Cenomi mall?” searches across all properties with a
+single validated answer</td>
+</tr>
+<tr>
+<td><strong>Quality evaluator</strong></td>
+<td>Every response is automatically scored on accuracy, relevance, and
+honesty in the background — without slowing delivery</td>
+</tr>
+<tr>
+<td><strong>Full ownership</strong></td>
+<td>Prompts, rules, playbooks, and entity data are Cenomi’s — Gulf/Saudi
+context is embedded natively, not approximated by a generic vendor</td>
+</tr>
+<tr>
+<td><strong>Data stays in-house</strong></td>
+<td>All visitor interactions processed on Cenomi infrastructure by
+default</td>
+</tr>
+</tbody>
+</table>
+<h3 id="in-progress-roadmap">In Progress (Roadmap)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Timeline</th>
+<th>What It Adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hybrid retrieval (BM25 + vector fusion)</strong></td>
+<td>Pre-demo</td>
+<td>Exact brand name queries that slip through vector search are caught
+by keyword index — higher recall across all query types</td>
+</tr>
+<tr>
+<td><strong>Re-ranking</strong></td>
+<td>Pre-demo</td>
+<td>Top results for ambiguous queries reordered by true relevance —
+measurably better recommendations</td>
+</tr>
+<tr>
+<td><strong>Arabic language support</strong></td>
+<td>Post-demo</td>
+<td>Full Arabic conversation with Gulf dialect handling and bilingual
+retrieval</td>
+</tr>
+<tr>
+<td><strong>Analytics dashboard</strong></td>
+<td>Post-demo</td>
+<td>Business teams see top queries, trends, and content gaps without
+engineering involvement</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

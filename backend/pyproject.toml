@@ -25,6 +25,13 @@ dev = [
 redis = [
     "redis[asyncio]>=5.0",
 ]
+vector = [
+    "chromadb>=0.5",
+]
+all = [
+    "redis[asyncio]>=5.0",
+    "chromadb>=0.5",
+]
 
 [tool.setuptools.packages.find]
 include = ["app*", "guardrails*"]

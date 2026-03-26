@@ -1,0 +1,318 @@
+{
+  "generated_at": "2026-03-24 16:29:20 UTC",
+  "run_id": "8d65d9cf",
+  "session_meta": {
+    "session_id": "session-4647af8c1ae742e3",
+    "mall_id": "al_nakheel_plaza_28",
+    "exported_at": "2026-03-24T16:19:07.926Z",
+    "total_messages": 14
+  },
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 7,
+    "matched": 7,
+    "diffs": 0,
+    "avg_latency_ms": 15579
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "user_message": "hey",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.185,
+      "saved_reply_snippet": "Hello! Welcome to the mall concierge.\nAsk me about movies and showtimes, dining options, stores and brands, or anything like 'where is the A",
+      "new_reply_snippet": "Hey! Good to have you here.\nI can point you to the best shops, restaurants, and entertainment — or help with practical things like opening h",
+      "saved_debug": {
+        "intent_domain": "general",
+        "intent_sub": "general_inquiry",
+        "response_mode": "(smalltalk)",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [],
+        "budget": "",
+        "target_person": "",
+        "total_latency_ms": 59.44
+      },
+      "new_debug": {
+        "intent_domain": "general",
+        "intent_sub": "general_inquiry",
+        "response_mode": "(smalltalk)",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [],
+        "budget": "",
+        "target_person": "",
+        "total_latency_ms": 26.85
+      },
+      "latency_ms": 36
+    },
+    {
+      "turn": 2,
+      "user_message": "I need to buy a jacket",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.472,
+      "saved_reply_snippet": "Since you're shopping for a jacket, let's focus on fashion stores where you can find stylish options.\n\nFashion:\n- Zara (Ground, Main Gallery",
+      "new_reply_snippet": "Since you're shopping for a jacket, let's focus on fashion stores where you'll find stylish outerwear.\n\n**Fashion Stores for Jackets:**\n- **",
+      "saved_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "general_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 11099.28
+      },
+      "new_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "general_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 10844.34
+      },
+      "latency_ms": 10863
+    },
+    {
+      "turn": 3,
+      "user_message": "I am here with my 5 yearold kid and girlfriend. I want the jacket for him",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.444,
+      "saved_reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, and want a jacket for your child, I recommend focusing on kid-friendly options th",
+      "new_reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, and want a jacket for your child, I understand the need to keep things easy and k",
+      "saved_debug": {
+        "intent_domain": "exploration",
+        "intent_sub": "activity_suggestion",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 7339.01
+      },
+      "new_debug": {
+        "intent_domain": "exploration",
+        "intent_sub": "activity_suggestion",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 8521.52
+      },
+      "latency_ms": 8535
+    },
+    {
+      "turn": 4,
+      "user_message": "yes",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.196,
+      "saved_reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, here’s a family-friendly shopping plan with a romantic touch for your boyfriend’s",
+      "new_reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, and want something couple-friendly and family-appropriate, here’s a full list of ",
+      "saved_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "fashion_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 10324.18
+      },
+      "new_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "fashion_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "",
+        "target_person": "self",
+        "total_latency_ms": 40568.82
+      },
+      "latency_ms": 40589
+    },
+    {
+      "turn": 5,
+      "user_message": "I want an affordable jacket",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.289,
+      "saved_reply_snippet": "Since you're shopping with your girlfriend and a 5-year-old and want an affordable jacket for your boyfriend, I'd recommend these family-fri",
+      "new_reply_snippet": "Since you're shopping for an affordable jacket with your family and keeping your 5-year-old engaged, I'd focus on budget-friendly fashion sp",
+      "saved_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "fashion_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 18607.58
+      },
+      "new_debug": {
+        "intent_domain": "shopping",
+        "intent_sub": "fashion_shopping",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 10569.41
+      },
+      "latency_ms": 10589
+    },
+    {
+      "turn": 6,
+      "user_message": "Okay, cool. Where shall I go grab some food?",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.518,
+      "saved_reply_snippet": "Since you're visiting with your girlfriend and a 5-year-old, and want something affordable and kid-friendly, the Food Court on the Ground fl",
+      "new_reply_snippet": "Since you're visiting with your girlfriend and a 5-year-old, and want something affordable and kid-friendly, the Food Court on the Ground fl",
+      "saved_debug": {
+        "intent_domain": "dining",
+        "intent_sub": "quick_bite",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 8033.38
+      },
+      "new_debug": {
+        "intent_domain": "dining",
+        "intent_sub": "quick_bite",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": false,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 9385.98
+      },
+      "latency_ms": 9404
+    },
+    {
+      "turn": 7,
+      "user_message": "What movie would you suggest?",
+      "status": "MATCH",
+      "field_diffs": [],
+      "info_changes": [],
+      "response_overlap": 0.417,
+      "saved_reply_snippet": "Since you're visiting with your 5-year-old and want family-friendly entertainment that suits your boyfriend and keeps the child engaged, Muv",
+      "new_reply_snippet": "Since you're visiting with your girlfriend and a 5-year-old child, and want family-friendly entertainment, Muvi Cinema on the Cinema Level i",
+      "saved_debug": {
+        "intent_domain": "entertainment",
+        "intent_sub": "movie_showtime",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": true,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 2074.38
+      },
+      "new_debug": {
+        "intent_domain": "entertainment",
+        "intent_sub": "movie_showtime",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "retrieval_needed": true,
+        "fallback_applied": false,
+        "flow_type": "concierge",
+        "companions": [
+          "child",
+          "girlfriend",
+          "friend"
+        ],
+        "budget": "budget",
+        "target_person": "self",
+        "total_latency_ms": 29015.6
+      },
+      "latency_ms": 29034
+    }
+  ]
+}

@@ -11,19 +11,24 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Install build tools needed for some native dependencies
+# Build tools required for native extensions:
+#   build-essential / gcc  — general native compilation
+#   g++                    — hnswlib (chromadb's ANN index, C++)
+#   cmake                  — some chromadb native deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         gcc \
+        g++ \
+        cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the dependency manifest first (layer caching)
 COPY pyproject.toml .
 
-# Create a venv and install all deps including the optional redis extra
+# Install all optional extras: redis (sessions) + vector (chromadb)
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install -e ".[redis]"
+    /opt/venv/bin/pip install -e ".[all]"
 
 # ── Stage 2: runtime image ────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime
@@ -50,7 +55,7 @@ COPY data/         ./data/
 COPY pyproject.toml .
 
 # Re-install the package in the runtime image so pkg metadata is available
-RUN /opt/venv/bin/pip install --no-deps -e ".[redis]"
+RUN /opt/venv/bin/pip install --no-deps -e ".[all]"
 
 # Expose the default backend port
 EXPOSE 8000

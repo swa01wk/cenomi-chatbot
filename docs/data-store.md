@@ -10,6 +10,7 @@ backend/data/
 ├── playbooks/           Scenario-driven response strategies
 ├── context_packs/       Pre-assembled LLM context bundles
 ├── tenant_config/       Per-mall tunable parameters + global defaults
+├── chroma/              Chroma vector DB — per-mall embedding collections
 └── examples/            Sample / reference files for development
 ```
 
@@ -25,6 +26,7 @@ backend/data/
 | `playbooks/` | Retriever, Generator | Scenario logic + ranking biases |
 | `context_packs/` | Retriever, Generator | Fast-access LLM-ready context |
 | `tenant_config/` | All nodes | Tone, strategy weights, session rules |
+| `chroma/` | `VectorStoreService` | Persisted entity embedding vectors for semantic search |
 
 ---
 
@@ -514,6 +516,62 @@ When multiple intent domains match, this map resolves conflicts (lower number = 
 ### Resolution order
 
 When the pipeline loads config for a mall, it applies defaults first, then overlays the mall-specific file — any key present in the mall file overrides its default counterpart. Missing keys fall back to `tenant_defaults.json`.
+
+---
+
+## `chroma/`
+
+**Purpose:** Chroma persistent vector database storing `text-embedding-3-small` embeddings of every canonical entity description, used by `VectorStoreService` for fuzzy semantic search.
+
+**Files:** Chroma stores its internal HNSW index files per-segment plus a central SQLite catalogue.
+
+```
+chroma/
+├── chroma.sqlite3                          Central Chroma catalogue (collections, segments, metadata)
+└── <segment-uuid>/                         Per-collection HNSW segment directory
+    ├── data_level0.bin                     HNSW graph data
+    ├── header.bin
+    ├── length.bin
+    └── link_lists.bin
+```
+
+### Collections
+
+One Chroma collection per mall, named `cenomi_mall_{mall_id}`:
+
+| Collection | Stores | Dining | Services | Cinemas | Total |
+|---|---|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+
+Each vector was created by `scripts/ingest_vectors.py` which builds a semantically-dense text blob per entity (name + category + tags + description) and embeds it with `text-embedding-3-small`. The collection uses cosine distance (`hnsw:space: cosine`).
+
+### Ingestion
+
+Run once per mall (or after data updates):
+
+```bash
+cd backend
+python scripts/ingest_vectors.py --mall-id al_nakheel_plaza_28
+python scripts/ingest_vectors.py --all          # all malls in data/canonical/
+python scripts/ingest_vectors.py --all --dry-run  # preview without embedding
+```
+
+### When it is queried
+
+`VectorStoreService.search()` is called from the `_vector_search_fallback` helper in `compose_context.py` when both category-rule retrieval and playbook-based ranking return no entities. Before the search, `build_scene_prefix(scene)` prepends scene signals (occasion, companions, visit_type, budget) to the raw query so the embedded vector reflects the visitor's context rather than bare query text.
+
+`MallRetriever.search_semantic(scene=None)` exposes the same vector path as a standalone method; passing `scene` applies the same prefix augmentation internally.
+
+### Three-tier caching
+
+| Tier | Storage | Latency |
+|---|---|---|
+| 1 | Redis (`cenomi:vcache:{mall_id}:{sha256(query)}`) | ~1 ms |
+| 2 | Chroma HNSW index (disk, `data/chroma/`) | ~50–200 ms |
+| 3 | OpenAI embedding API (on full cache miss) | ~200–500 ms |
+
+Redis is optional (disabled by default — set `BACKEND_REDIS_URL` to enable). Chroma files are mounted as a Docker volume so embeddings survive image rebuilds.
 
 ---
 

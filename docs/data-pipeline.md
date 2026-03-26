@@ -328,11 +328,71 @@ The output mirrors `sample.json` at top level, with one addition: each brand obj
 
 ---
 
-## 3. Context Building Pipeline
+## 3. Vector Ingestion: `ingest_vectors.py`
+
+**File:** `backend/scripts/ingest_vectors.py`
+
+After the canonical file exists, this offline script embeds every entity description and loads the vectors into Chroma so the semantic search fallback in `compose_context` can operate at runtime.
+
+```
+data/canonical/{mall_id}.json
+    │
+    ▼
+_extract_entities()          ── builds a dense text blob per entity
+    │                             (name, category, tags, description, entity_type_label)
+    ▼
+VectorStoreService.upsert()  ── embeds each blob with text-embedding-3-small
+    │                             then upserts into Chroma collection cenomi_mall_{mall_id}
+    ▼
+data/chroma/                 ── persistent HNSW index (cosine distance)
+```
+
+### Entity text format
+
+`_build_entity_text()` concatenates these fields (deduplicated, comma-separated):
+
+```
+name, category, subcategory, dining_style, cuisine_type, tags (up to 12), description (first 200 chars), entity_type_label
+```
+
+Example output for a dining entity:
+```
+Kudu, dining, fast_food, Saudi, burgers, fast food, grilled, quick, halal, dining
+```
+
+### Running ingestion
+
+```bash
+cd backend
+
+# Single mall
+python scripts/ingest_vectors.py --mall-id al_nakheel_plaza_28
+
+# All malls found in data/canonical/
+python scripts/ingest_vectors.py --all
+
+# Dry-run: shows what would be embedded without calling OpenAI
+python scripts/ingest_vectors.py --all --dry-run
+```
+
+**Requires:** `BACKEND_OPENAI_API_KEY` in `.env`, `chromadb` installed.
+
+### Current collection state
+
+| Collection | Stores | Dining | Services | Cinemas | Total |
+|---|---|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+
+Re-run after any canonical data refresh to keep the vector index in sync.
+
+---
+
+## 4. Context Building Pipeline
 
 Context building happens in two stages: an **offline build** that processes canonical mall data into a pre-assembled context pack, and a **runtime assembly** that uses that pack plus live query state to build the exact LLM prompt for each turn.
 
-### Stage 1 — Offline: `ContextBuilder` → Context Packs
+### Stage 1 — Offline: `ContextBuilder` → Context Packs (and Vector Ingestion)
 
 **File:** `backend/app/services/context_builder.py`
 

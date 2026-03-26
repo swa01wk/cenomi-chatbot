@@ -308,6 +308,45 @@ def detect_category_from_intent(sub_intent: str) -> str | None:
     return mapping.get(sub_intent)
 
 
+def build_scene_prefix(scene) -> str:
+    """
+    Build a short keyword prefix from SceneMemory signals for vector query augmentation.
+
+    Prepended to the raw user query before embedding so the resulting vector
+    reflects the visitor's actual context rather than the bare query text.
+    Queries from different scenes therefore land in different neighbourhoods of
+    the embedding space, returning more contextually relevant entities.
+
+    Example:
+        scene(occasion="anniversary", companions=["partner"], visit_type="date")
+        → "anniversary partner date"
+
+        scene(companions=["kids"], visit_type="family_outing", budget="budget")
+        → "kids family outing budget"
+
+    Only fields with non-empty values contribute terms.  Up to three companion
+    entries are included to keep the prefix concise.  Underscore-separated
+    values (e.g. ``family_outing``) are normalised to space-separated words.
+    """
+    parts: list[str] = []
+    if scene.occasion:
+        parts.append(scene.occasion.replace("_", " "))
+    if scene.companions:
+        parts.extend(c.replace("_", " ") for c in scene.companions[:3])
+    if scene.visit_type:
+        parts.append(scene.visit_type.replace("_", " "))
+    if scene.budget:
+        parts.append(scene.budget.replace("_", " "))
+    # Deduplicate while preserving insertion order
+    seen: set[str] = set()
+    unique: list[str] = []
+    for p in parts:
+        if p and p not in seen:
+            seen.add(p)
+            unique.append(p)
+    return " ".join(unique)
+
+
 class MallRetriever:
     """Structured retrieval over mall intelligence."""
 
@@ -439,9 +478,44 @@ class MallRetriever:
         return sorted(results, key=lambda r: r.score, reverse=True)[:top_k]
 
     async def search_semantic(
-        self, query: str, tags: list[str] | None = None, top_k: int = 12
+        self, query: str, tags: list[str] | None = None, top_k: int = 12, scene=None
     ) -> list[RetrievalResult]:
-        """Tag-based search over semantic profiles."""
+        """
+        Vector similarity search over embedded entity descriptions.
+
+        Uses VectorStoreService (Chroma + Redis cache) when available.
+        Falls back to tag-word overlap when the vector store is not initialised
+        (e.g. before ingest_vectors.py has been run, or chromadb not installed).
+
+        ``scene`` — optional SceneMemory; when provided, scene signals
+        (occasion, companions, visit_type, budget) are prepended to the query
+        before embedding so results reflect the visitor's actual context.
+        """
+        if scene is not None:
+            prefix = build_scene_prefix(scene)
+            if prefix:
+                query = f"{prefix} {query}".strip()
+                logger.debug("search_semantic augmented query: %r", query[:80])
+
+        from app.runtime import get_vector_store
+        vs = get_vector_store()
+
+        if vs is not None and vs.is_available:
+            raw = await vs.search(query, mall_id=self.mall_id, top_k=top_k)
+            return [
+                RetrievalResult(
+                    content=r["entity_id"],
+                    source="vector",
+                    score=r["score"],
+                    metadata={
+                        "entity_id": r["entity_id"],
+                        "entity_type": r.get("entity_type", ""),
+                    },
+                )
+                for r in raw
+            ]
+
+        # ── Fallback: tag-word overlap (pre-vector / dev mode) ────────────
         try:
             mall_ctx = get_mall_context(self.mall_id)
         except RuntimeError:
@@ -461,7 +535,7 @@ class MallRetriever:
             results.append(
                 RetrievalResult(
                     content=f"{profile.entity_id} ({profile.entity_type})",
-                    source="semantic",
+                    source="semantic_tags",
                     score=min(score, 1.0),
                     metadata={
                         "entity_id": profile.entity_id,

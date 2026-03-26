@@ -1,0 +1,113 @@
+{
+  "run_timestamp": "2026-03-24 16:41:27 UTC",
+  "run_id": "76f31441",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "errors": 0,
+    "pass_pct": 100,
+    "avg_latency_ms": 12192
+  },
+  "suites": {
+    "session-scenario.json": [
+      {
+        "id": "SS1.2",
+        "query": "I need to buy a jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 30892,
+        "reply_snippet": "Since you're shopping for a jacket, let's focus on fashion stores where you'll find stylish options.\n\n**Fashion Stores for Jackets:**\n- **Za"
+      },
+      {
+        "id": "SS1.3",
+        "query": "I am here with my 5 yearold kid and girlfriend. I want the jacket for him",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "context_acknowledgement",
+        "actual_mode": "context_acknowledgement",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 10731,
+        "reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, and want a jacket for your child, I can guide you to kid-friendly options that ke"
+      },
+      {
+        "id": "SS1.4",
+        "query": "yes",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 16761,
+        "reply_snippet": "Since you're shopping with your 5-year-old and girlfriend, and want something couple-friendly and family-appropriate, here’s a solid plan fo"
+      },
+      {
+        "id": "SS1.5",
+        "query": "I want an affordable jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 9295,
+        "reply_snippet": "Since you're shopping for an affordable jacket for your boyfriend while keeping your 5-year-old engaged, I'd recommend these family-friendly"
+      },
+      {
+        "id": "SS1.6",
+        "query": "Okay, cool. Where shall I go grab some food?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "dining_recommendation",
+        "latency_ms": 3088,
+        "reply_snippet": "Since you're visiting with your girlfriend and a 5-year-old, and want something affordable and kid-friendly, head to the Food Court on the G"
+      },
+      {
+        "id": "SS1.7",
+        "query": "What movie would you suggest?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "dining_recommendation",
+        "latency_ms": 2386,
+        "reply_snippet": "Since you're visiting with your girlfriend and a 5-year-old, and want family-friendly entertainment, Muvi Cinema on the Cinema Level is your"
+      }
+    ]
+  }
+}

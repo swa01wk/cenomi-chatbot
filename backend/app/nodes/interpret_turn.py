@@ -89,6 +89,12 @@ _CONCIERGE_KEYWORD_SIGNALS: tuple[str, ...] = (
     "date plan", "date night",
     "family plan", "with my kids", "with my child", "with my daughter", "with my son",
     "with my girlfriend", "with my boyfriend", "with my wife", "with my husband",
+    # Personal pronoun references — always concierge/recommendation, never entity lookup
+    "anything she", "anything he", "anything they",
+    "something she", "something he", "something they",
+    "she would", "he would", "she likes", "he likes",
+    "she wants", "he wants", "she'd", "he'd",
+    "for her", "for him", "for them",
 )
 
 

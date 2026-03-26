@@ -42,8 +42,18 @@ services:
     environment:
       # Override Redis URL to use Docker internal DNS (service name 'redis')
       BACKEND_REDIS_URL: redis://redis:6379/0
+      # Multi-mall LRU cache: max malls held in Python RAM simultaneously
+      BACKEND_MALL_CACHE_SIZE: 5
+      # TTL (seconds) for serialized MallContextLoader in Redis Tier 2 (1 hour)
+      BACKEND_MALL_CTX_REDIS_TTL: 3600
+      # Vector store: Chroma persisted to the shared data volume
+      BACKEND_VECTOR_STORE_TYPE: chroma
+      BACKEND_CHROMA_PERSIST_DIR: data/chroma
+      # Redis vector search result cache TTL (seconds)
+      BACKEND_VECTOR_CACHE_TTL: 900
     volumes:
-      # Mount data directory so evaluation records and feedback persist outside the container
+      # Mount data directory so canonical data, Chroma DB, evaluations, and
+      # feedback all persist outside the container across restarts.
       - ./backend/data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c",

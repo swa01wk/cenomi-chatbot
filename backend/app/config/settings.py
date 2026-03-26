@@ -35,6 +35,21 @@ class Settings(BaseSettings):
     # --- Retrieval ---
     vector_store_type: str = "chroma"
     embedding_model: str = "text-embedding-3-small"
+    chroma_persist_dir: str = "data/chroma"
+    pinecone_api_key: str = ""
+    qdrant_url: str = ""
+
+    # --- Multi-mall memory management ---
+    # Max number of MallContextLoader objects kept in Python RAM simultaneously.
+    # Least-recently-used malls are evicted when this limit is exceeded.
+    # Evicted malls are restored from Redis (if available) or reloaded from disk.
+    mall_cache_size: int = 5
+    # TTL (seconds) for serialized MallContextLoader in Redis (Tier 2 cache).
+    # Restoring an evicted mall from Redis is ~50-100× faster than disk + normalization.
+    mall_ctx_redis_ttl: int = 3600
+    # TTL (seconds) for vector search result cache in Redis.
+    # Repeated identical queries skip the OpenAI embedding call entirely.
+    vector_cache_ttl: int = 900
 
     # --- Redis ---
     # Set to a valid Redis URL (e.g. "redis://localhost:6379/0") to enable
