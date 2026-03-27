@@ -99,6 +99,11 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         else base_config
     )
 
+    # Propagate time_of_day from request into scene (update every turn when provided)
+    scene = session.scene
+    if getattr(request, "time_of_day", ""):
+        scene = scene.model_copy(update={"time_of_day": request.time_of_day})
+
     initial_state = clean_context_builder(
         session_state={
             "session_id": session_id,
@@ -106,7 +111,7 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
             "mall_id": request.mall_id,
             "raw_user_message": request.message,
             "active_tenant_parameters": config,
-            "scene": session.scene,
+            "scene": scene,
             "last_intent": session.last_intent,
             "conversation_mode": session.conversation_mode,
         },

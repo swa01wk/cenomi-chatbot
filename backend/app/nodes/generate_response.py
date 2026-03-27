@@ -170,6 +170,189 @@ def _format_playbook(state: ConciergeState) -> str:
     return "\n".join(parts)
 
 
+_ASSURANCE_STRATEGIES: frozenset[str] = frozenset({
+    "guided_plan",
+    "concise_shortlist",
+    "gift_formula",
+    "mini_itinerary",
+    "movie_plus_food",
+    "budget_plan",
+    "route_plus_plan",
+})
+
+_LOYALTY_DOMAINS: frozenset[str] = frozenset({"shopping", "entertainment"})
+_LOYALTY_SUB_INTENTS: frozenset[str] = frozenset({
+    "gift_recommendation",
+    "movie_showtime",
+    "shopping_general",
+    "offer_lookup",
+    "offer_details",
+})
+
+
+def _build_assurance_instruction(state: ConciergeState) -> str:
+    """
+    Inject a prompt instruction asking the LLM to include a brief
+    confidence-reinforcement sentence after its recommendations.
+
+    Activates only for guided recommendation strategies. The assurance line
+    reduces decision anxiety by grounding the visitor in facts about the
+    mall layout, tenant range, or ease of access.
+    """
+    strategy = state.response_plan.chosen_strategy if state.response_plan else ""
+    if strategy not in _ASSURANCE_STRATEGIES:
+        return ""
+
+    # Do not add assurance on category dumps or offer-only turns
+    is_category_turn = any(
+        e.get("source", "").startswith("category/")
+        for e in (state.context.selected_entities if state.context else [])
+    )
+    if is_category_turn:
+        return ""
+
+    return (
+        "ASSURANCE LINE: After your recommendations, add ONE brief, factual confidence "
+        "line that reduces the visitor's decision anxiety. Ground it in the mall — "
+        "mention floor, proximity, range, or ease of access. Examples:\n"
+        "  • 'Both stores are on the Ground floor — easy to reach from the main entrance.'\n"
+        "  • 'Centrepoint carries a full kids' range — you'll find the right size.'\n"
+        "  • 'The Food Court has plenty of family seating and is right next door.'\n"
+        "Do NOT use filler like 'You won't be disappointed!' or 'A great choice awaits!'\n"
+        "Keep it to one sentence. Place it after the recommendations, before the CTA.\n\n"
+    )
+
+
+def _build_loyalty_hint(state: ConciergeState) -> str:
+    """
+    Inject a conditional loyalty/rewards mention for shopping, cinema, and
+    offer turns on the concierge path.
+
+    Only fires when the visitor is in an active shopping or entertainment
+    context — never for dining, navigation, or general queries.
+    The LLM is instructed to include it only if loyalty data is actually
+    present in the mall context to prevent hallucination.
+    """
+    domain = state.intent.domain or ""
+    sub = state.intent.sub_intent or ""
+    if domain not in _LOYALTY_DOMAINS and sub not in _LOYALTY_SUB_INTENTS:
+        return ""
+
+    return (
+        "LOYALTY HINT (conditional): If the MALL CONTEXT mentions a loyalty, "
+        "rewards, or points program, add ONE natural line at the end — for example: "
+        "'If you have a Cenomi rewards card, you may earn points here.' "
+        "Place it after the assurance line, before or after the CTA. "
+        "Only include this if loyalty data is actually present in the mall context. "
+        "NEVER fabricate a loyalty program that is not mentioned in the context.\n\n"
+    )
+
+
+def _build_dining_template_instruction(state: ConciergeState) -> str:
+    """
+    Inject dining-specific structure guidance for the LLM when the active
+    domain is dining. Adds cuisine/mood grouping, reservation redirect, and
+    time-of-day peak framing.
+
+    Only activates on concierge dining turns — not factual lookups.
+    """
+    if state.intent.domain != "dining":
+        return ""
+    if state.flow_type == "factual":
+        return ""
+
+    # Do not add on category list dumps (e.g. "show all cafes")
+    is_category_turn = any(
+        e.get("source", "").startswith("category/")
+        for e in (state.context.selected_entities if state.context else [])
+    )
+    if is_category_turn:
+        return ""
+
+    time_of_day = getattr(state.scene, "time_of_day", "")
+    has_child = bool(
+        any(c in {"child", "kids", "son", "daughter"} for c in state.scene.companions)
+        or any(d.get("type") == "child" for d in state.scene.companion_details)
+    )
+
+    lines: list[str] = [
+        "DINING RESPONSE FORMAT:",
+        "  • Group suggestions by mood or cuisine type — e.g. 'Quick Service / "
+        "Family Fare / Casual Bites' — rather than a flat numbered list.",
+    ]
+
+    if has_child:
+        lines.append(
+            "  • Family filter: max 3 sit-down restaurants. Do NOT list kiosks or "
+            "snack stands as primary meal options for a family with a child."
+        )
+
+    lines.append(
+        "  • If any suggested restaurant typically requires a reservation or has "
+        "table service, note: 'Best to ask at the counter or book ahead.'"
+    )
+
+    if time_of_day == "evening":
+        lines.append(
+            "  • Evening context: note that dining areas are busiest 7–9 PM. "
+            "Suggest arriving slightly early or mention a quieter alternative if available."
+        )
+    elif time_of_day == "morning":
+        lines.append(
+            "  • Morning context: lead with breakfast or brunch-friendly options if available."
+        )
+    elif time_of_day == "late_night":
+        lines.append(
+            "  • Late-night context: confirm venues are open; prioritise fast-casual "
+            "or 24-hour options over sit-down restaurants that may be closing."
+        )
+
+    return "\n".join(lines) + "\n\n"
+
+
+def _build_cinema_template_instruction(state: ConciergeState) -> str:
+    """
+    Inject cinema/entertainment-specific structure guidance.
+
+    Adds format info (IMAX/VIP/Standard) and a booking redirect for movie
+    queries, both on the factual and concierge paths.
+    """
+    domain = state.intent.domain or ""
+    sub = state.intent.sub_intent or ""
+    fact_scope = state.fact_scope or ""
+
+    is_cinema_turn = (
+        domain == "entertainment"
+        or sub in ("movie_showtime", "movie_recommendation", "cinema_lookup")
+        or fact_scope in ("movie_schedule", "cinema_lookup")
+    )
+    if not is_cinema_turn:
+        return ""
+
+    has_child = bool(
+        any(c in {"child", "kids", "son", "daughter"} for c in state.scene.companions)
+        or any(d.get("type") == "child" for d in state.scene.companion_details)
+    )
+
+    lines: list[str] = [
+        "CINEMA RESPONSE FORMAT:",
+        "  • For each movie, include available formats if present in the data "
+        "(e.g. Standard / IMAX / VIP) — one line per format type.",
+        "  • End with a booking redirect: 'Tickets available at the cinema counter "
+        "or via the Muvi app — book ahead for peak times.'",
+    ]
+
+    if has_child:
+        lines.append(
+            "  • Child present: only recommend films appropriate for the child's age. "
+            "Do NOT suggest sports broadcasts or adult-rated thrillers as children's options. "
+            "Do NOT suggest leaving the child at a play area while parents watch a film "
+            "on a separate floor — the child requires supervision."
+        )
+
+    return "\n".join(lines) + "\n\n"
+
+
 def _build_scene_acknowledgment(state: ConciergeState) -> str:
     """
     Build a brief scene-acknowledgment hint for the LLM.
@@ -255,6 +438,18 @@ def _build_conversation_context(state: ConciergeState) -> str:
         )
     if state.scene.companions:
         parts.append(f"Visitor is with: {', '.join(state.scene.companions)}")
+        # Explicit gender guard — prevents LLM from inverting partner gender
+        partner_found = [
+            c for c in state.scene.companions
+            if c in {"girlfriend", "boyfriend", "wife", "husband"}
+        ]
+        if partner_found:
+            parts.append(
+                f"COMPANION GENDER: The visitor's partner is '{partner_found[0]}'. "
+                f"Always refer to them as '{partner_found[0]}' — "
+                f"NEVER substitute with a different gendered term (e.g. do NOT say "
+                f"'boyfriend' if the partner is a 'girlfriend', and vice versa)."
+            )
     if state.scene.companion_details:
         detail_strs = [
             f"{d.get('type', 'companion')} age {d['age']}" if d.get("age") else d.get("type", "companion")
@@ -269,6 +464,8 @@ def _build_conversation_context(state: ConciergeState) -> str:
         parts.append(f"Occasion: {state.scene.occasion}")
     if state.scene.budget:
         parts.append(f"Budget: {state.scene.budget}")
+    if getattr(state.scene, "time_of_day", ""):
+        parts.append(f"Time of day: {state.scene.time_of_day}")
     if state.scene.pace:
         parts.append(f"Pace: {state.scene.pace}")
     if state.scene.implicit_goal:
@@ -410,12 +607,18 @@ def _build_conversation_context(state: ConciergeState) -> str:
             if current_domain == "dining":
                 cross_domain_constraints.append(
                     "food options MUST be kid-friendly (kids menus, family seating, "
-                    "casual pace) — NOT fine-dining or adult-only venues"
+                    "casual pace) — NOT fine-dining or adult-only venues. "
+                    "Recommend no more than 3 dining venues; prioritise sit-down "
+                    "restaurants suitable for families over kiosks or snack stands."
                 )
             elif current_domain == "entertainment":
                 cross_domain_constraints.append(
-                    "entertainment MUST be suitable for children — "
-                    "family-rated movies or kid-friendly activities"
+                    "entertainment MUST be suitable for children — family-rated movies "
+                    "or kid-friendly activities. Do NOT suggest parents watch a movie at "
+                    "the cinema while the child plays at a separate activity area on a "
+                    "different floor — a young child requires adult supervision at all times. "
+                    "Recommend activities the whole family can enjoy together, or if "
+                    "suggesting a play area, make clear a parent must accompany the child."
                 )
             elif current_domain == "shopping":
                 cross_domain_constraints.append(
@@ -1003,8 +1206,16 @@ def _build_factual_mode_instruction(
                 "  - Lead with the Family / Animation category if present.\n"
                 "  - For each movie, briefly note if it is suitable for children "
                 "(e.g. '✓ Great for kids' or '⚠ Adult-only').\n"
+                "  - SPORTS BROADCASTS: Any movie entry flagged 'is_sports_broadcast: true' "
+                "or with genre 'Sport' is a live football/sports screening — "
+                "do NOT recommend these as family-friendly or children's movies.\n"
+                "  - If NO film in the schedule belongs to the Animation/Family/Kids genre, "
+                "say so honestly: 'There's no children's film showing right now.' "
+                "Then suggest a kids' activity alternative available at the mall "
+                "(e.g. the kids' play area) instead of repurposing sports events.\n"
                 "  - Do NOT switch away from movies — this is still a movie query.\n"
-                "  - Close with one sentence noting which options are the safest family choice."
+                "  - Close with one sentence noting which options are the safest family choice, "
+                "or direct the visitor to the kids' play area if no suitable film exists."
             )
         if has_budget_filter:
             filter_notes.append(
@@ -1026,10 +1237,13 @@ def _build_factual_mode_instruction(
             "RULES:\n"
             "  1. Acknowledge the filter naturally in your opening line "
             "(e.g. 'For a child...' or 'If you're looking for something budget-friendly...').\n"
-            "  2. The factual movie list MUST come first — show ALL movies.\n"
+            "  2. Show all films from the schedule; for each entry flag its suitability — "
+            "clearly mark Sport/Broadcast entries as '⚠ Not suitable for children'.\n"
             "  3. Add ONE brief filter-note per movie where relevant.\n"
-            "  4. Do NOT add dining or entertainment suggestions in the main answer.\n"
-            "  5. Do NOT replace movies with kids-activity recommendations.\n\n"
+            "  4. Do NOT add dining or entertainment suggestions in the main answer — "
+            "UNLESS no family-appropriate film exists, in which case redirect to a kids' "
+            "activity alternative as a closing suggestion.\n"
+            "  5. Do NOT recommend sports broadcasts as children's entertainment.\n\n"
         )
 
     # ── Filtered factual list for non-movie scopes ────────────────────────────
@@ -1518,7 +1732,17 @@ async def generate_response(state: ConciergeState) -> dict:
         # ── CTA instruction ───────────────────────────────────────────
         cta_instruction = ""
         if not is_category_turn and not is_offer_query:
-            cta_instruction = get_cta_instruction(exp.cta_type)
+            cta_instruction = get_cta_instruction(exp.cta_type, strategy=strategy)
+
+        # ── Assurance line instruction ────────────────────────────────
+        assurance_instruction = _build_assurance_instruction(state)
+
+        # ── Loyalty hint instruction ──────────────────────────────────
+        loyalty_instruction = _build_loyalty_hint(state)
+
+        # ── Domain-specific template instructions ─────────────────────
+        dining_template_instruction = _build_dining_template_instruction(state)
+        cinema_template_instruction = _build_cinema_template_instruction(state)
 
         user_prompt = (
             f"{conversation_context}"
@@ -1527,10 +1751,14 @@ async def generate_response(state: ConciergeState) -> dict:
             f"Playbook plan:\n{playbook}\n\n"
             f"Relevant tenants:\n{retrieval_results}\n\n"
             f"{category_instruction}"
+            f"{dining_template_instruction}"
+            f"{cinema_template_instruction}"
             f"{hybrid_concierge_instruction}"
             f"{response_mode_instruction}"
             f"{decision_directive}"
             f"{experience_instruction}"
+            f"{assurance_instruction}"
+            f"{loyalty_instruction}"
             f"{cta_instruction}"
             "Generate a helpful concierge response. "
             "Only mention stores, restaurants, and services from the "
@@ -1878,6 +2106,31 @@ def _build_decision_response_directive(state: ConciergeState) -> str:
         return ""
 
     parts: list[str] = []
+
+    # ── Investigative mode: vague gift/shopping with no target context ─
+    needs_clarification = getattr(state.scene, "needs_clarification", False)
+    clarification_topic = getattr(state.scene, "clarification_topic", "")
+    if needs_clarification and clarification_topic == "gift_target":
+        parts.append(
+            "INVESTIGATIVE MODE — VAGUE GIFT QUERY:\n"
+            "The visitor asked about a gift but has not indicated who it is for.\n"
+            "Follow this approach:\n"
+            "  1. Give 2 broad gift suggestions as an immediate opener — show you can help.\n"
+            "  2. Ask exactly ONE targeting question, e.g.: 'Is this for a partner, "
+            "a child, or a friend? That'll help me narrow it down.'\n"
+            "Do NOT ask about budget yet. Do NOT ask more than one question.\n"
+            "Keep the opener concise — 2 options max before the question.\n"
+        )
+        return "\n".join(parts) + "\n"
+    elif needs_clarification and clarification_topic == "shopping_target":
+        parts.append(
+            "INVESTIGATIVE MODE — VAGUE SHOPPING QUERY:\n"
+            "The visitor's shopping query is open-ended without enough context.\n"
+            "Give 2–3 broad suggestions across different categories, then ask:\n"
+            "'Are you shopping for someone specific, or just browsing?'\n"
+            "One question only.\n"
+        )
+        return "\n".join(parts) + "\n"
 
     # ── Scene sufficient → block clarification questions ──────────────
     scene_sufficient = getattr(state.debug_enrichment, "scene_sufficient", False)

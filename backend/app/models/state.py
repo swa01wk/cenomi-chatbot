@@ -181,6 +181,14 @@ class SceneMemory(BaseModel):
     # scenario: real-world situation (e.g. "wedding_related", "family_outing", "date", "quick_visit")
     scenario: str = ""
 
+    # Time-of-day context — set from the request at session start
+    # Values: "morning" | "afternoon" | "evening" | "late_night" | ""
+    time_of_day: str = ""
+
+    # Vague-input clarification tracking
+    needs_clarification: bool = False
+    clarification_topic: str = ""  # e.g. "gift_target", "dining_preference"
+
     # Human-readable notes about what was inferred this turn
     inferred_scene_notes: list[str] = Field(default_factory=list)
 

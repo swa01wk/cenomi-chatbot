@@ -155,6 +155,13 @@ def _lookup_movie_schedule(msg: str, mall_ctx) -> dict | None:
                 "genre": m.genre,
                 "showtimes": m.showtimes,
                 "duration_minutes": m.duration_minutes,
+                "rating": getattr(m, "rating", None),
+                "is_sports_broadcast": any(
+                    g.lower() in ("sport", "sports", "live event")
+                    for g in (
+                        m.genre if isinstance(m.genre, list) else [m.genre or ""]
+                    )
+                ),
             }
             for m in movies
         ],

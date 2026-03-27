@@ -27,6 +27,15 @@ class ChatRequest(BaseModel):
         default=None,
         description="Optional client-side context hints",
     )
+    time_of_day: str = Field(
+        default="",
+        description=(
+            "Optional time-of-day hint from the client (browser local time). "
+            "Accepted values: 'morning' (6–11), 'afternoon' (11–17), "
+            "'evening' (17–21), 'late_night' (21–6). "
+            "Used for contextual enrichment (e.g. peak-time dining, closing times)."
+        ),
+    )
 
 
 class DebugPayload(BaseModel):

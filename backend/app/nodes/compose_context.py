@@ -629,6 +629,26 @@ async def compose_context(state: ConciergeState) -> dict:
         signals.append(scene.target_person)
     if scene.visit_type:
         signals.append(scene.visit_type)
+    # ── Time-of-day contextual enrichment ─────────────────────────────
+    if getattr(scene, "time_of_day", ""):
+        tod = scene.time_of_day
+        signals.append(tod)
+        current_domain = intent.domain if intent else ""
+        if tod == "evening" and current_domain == "dining":
+            warnings.append(
+                "Time-of-day: evening visit — prefer restaurants open late; "
+                "mention peak dining hours (7–9 PM) if relevant."
+            )
+        elif tod == "morning" and current_domain == "dining":
+            warnings.append(
+                "Time-of-day: morning visit — breakfast/brunch-friendly options "
+                "are most relevant."
+            )
+        elif tod == "late_night":
+            warnings.append(
+                "Time-of-day: late night — check that suggested venues are still open; "
+                "prioritise 24-hour or late-closing options."
+            )
     # Inject hybrid intent modifiers (kid_friendly, near_cinema, budget_sensitive…)
     for mod in (state.modifiers or []):
         if mod not in signals:

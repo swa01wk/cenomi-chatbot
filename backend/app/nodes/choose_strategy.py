@@ -245,6 +245,16 @@ async def choose_strategy(state: ConciergeState) -> dict:
     constraints = _build_constraints(intent, scene)
     entity_cap = _STRATEGY_ENTITY_CAPS.get(chosen, 8)
 
+    # ── Family + dining cap override ──────────────────────────────────
+    # When a child is present and the query is dining, cap at 3 entities
+    # to avoid noisy kiosk/snack-stand results cluttering the response.
+    if (
+        has_child
+        and chosen == "guided_plan"
+        and intent.domain == "dining"
+    ):
+        entity_cap = 3
+
     # ── Determine answer_mode and tone_mode ───────────────────────────
     if chosen in ("guided_plan", "mini_itinerary", "family_plan"):
         answer_mode = "concierge_guided"

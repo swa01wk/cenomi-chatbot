@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-69d0506c4acc",
+  "session_id": "cpx6-50d8dced",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-e4ccbe5cfd1e",
+  "user_message": "school is starting next week and i need to shop for three kids \u2014 ages 6, 11, and 15",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-26 17:10:27.945409"
+}

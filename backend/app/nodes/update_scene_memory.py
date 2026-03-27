@@ -843,6 +843,11 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     # the LLM should infer rather than asking a clarifying question.
     scene_sufficient = _is_scene_sufficient(scene)
 
+    # ── Investigative layer: detect vague inputs that need one targeting question ─
+    # Only trigger when the scene lacks enough context to infer who the gift/
+    # shopping is for. Reset needs_clarification once target_person is known.
+    _detect_vague_clarification_need(msg, intent, scene, changes)
+
     debug = DebugEnrichment(
         inferred_scene_notes=scene_notes,
         scene_update_reason=intent.message_kind,
@@ -883,6 +888,59 @@ def _is_scene_sufficient(scene: "SceneMemory") -> bool:
         or (scene.shopping_task.product_type and scene.shopping_task.target_person)
         or scene.user_role
     )
+
+
+_VAGUE_GIFT_SIGNALS: frozenset[str] = frozenset({
+    "gift_recommendation", "gift_search", "gift_ideas",
+})
+
+_VAGUE_SHOPPING_SIGNALS: frozenset[str] = frozenset({
+    "shopping_general", "general_shopping",
+})
+
+
+def _detect_vague_clarification_need(
+    msg: str,
+    intent: "InterpretedIntent",
+    scene: "SceneMemory",
+    changes: list[str],
+) -> None:
+    """
+    Detect when the visitor's shopping/gift query is too vague to give a
+    useful targeted recommendation.
+
+    Sets scene.needs_clarification = True and scene.clarification_topic
+    when the sub_intent is gift-related AND there is no target_person,
+    companion, or shopping_task target established yet.
+
+    Clears the flag once enough context has been gathered.
+    """
+    sub = getattr(intent, "sub_intent", "") or ""
+
+    # Clear the flag if target is now known
+    if scene.target_person or (
+        scene.shopping_task and scene.shopping_task.target_person
+    ):
+        if scene.needs_clarification:
+            scene.needs_clarification = False
+            scene.clarification_topic = ""
+            changes.append("clarification_resolved: target_person known")
+        return
+
+    # Set flag for vague gift queries without a target
+    if sub in _VAGUE_GIFT_SIGNALS and not scene.companions:
+        scene.needs_clarification = True
+        scene.clarification_topic = "gift_target"
+        changes.append("needs_clarification=True: vague gift, no target_person")
+    elif sub in _VAGUE_SHOPPING_SIGNALS and not scene.companions and not scene.occasion:
+        scene.needs_clarification = True
+        scene.clarification_topic = "shopping_target"
+        changes.append("needs_clarification=True: vague shopping, no context")
+    elif scene.needs_clarification and sub not in _VAGUE_GIFT_SIGNALS:
+        # Query moved on — clear the flag
+        scene.needs_clarification = False
+        scene.clarification_topic = ""
+        changes.append("clarification_cleared: topic changed")
 
 
 # ── Age extraction ──────────────────────────────────────────────────────────

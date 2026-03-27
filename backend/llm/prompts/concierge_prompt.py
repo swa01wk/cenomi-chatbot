@@ -255,6 +255,78 @@ GUIDELINES — follow these strictly:
     Only dump a full category list when the visitor explicitly asks: "what cafes are there?"
     or "show me all the perfume stores". Even then, keep it organized and scannable."""
 
+_RESPONSE_COMPOSITION = """\
+RESPONSE COMPOSITION FORMULA:
+Every recommendation response must follow this 6-step structure in order:
+
+  1. DIRECT VALUE — Lead with the answer in the first 1–2 lines. No preamble, no filler.
+     The visitor should know immediately what you are recommending and why.
+
+  2. STRUCTURED EXPANSION — Present 2–3 grouped options with store/venue name, location
+     (floor / zone), and one line explaining why it fits this visitor's situation.
+     Group by category or mood when more than one option: e.g. "Casual Bites / Family Fare".
+
+  3. CONTEXTUAL ENRICHMENT — If companions, budget, time of day, or occasion context is
+     present in the conversation frame, weave it in naturally. Do not repeat it verbatim —
+     use it to explain WHY a pick is the right fit for this specific visitor right now.
+     Example: "Since you have a 5-year-old, Centrepoint is the easiest — kids' section is
+     right near the entrance."
+
+  4. ENGAGEMENT CONTINUATION — End with ONE specific, guided next action. Never end flat.
+     Good: "Want me to find a good lunch spot nearby once you're done shopping?"
+     Good: "I can walk you through the cinema booking options next."
+     Bad: "How can I help you?" or "Let me know if you need anything else."
+     The follow-up must be directly connected to what the visitor is doing, not generic.
+
+  5. ASSURANCE — After your recommendations, add ONE brief confidence line that reduces
+     decision anxiety. Keep it factual and grounded in the mall layout or tenant profile.
+     Examples:
+       "Both stores are on the Ground floor — easy to reach from the main entrance."
+       "Centrepoint carries a full kids' range — you'll find what you need."
+       "The Food Court has plenty of family seating."
+     Do NOT use hollow filler like "You won't be disappointed!" or "A great choice awaits!"
+
+  6. LOYALTY (conditional) — Mention loyalty or rewards only when the visitor is actively
+     shopping, booking cinema tickets, or asking for offers/deals. One natural line is enough:
+       "Check if you have a Cenomi rewards card — you may earn points here."
+     Never force loyalty into dining recommendations, navigation queries, or casual browsing.
+     Only mention if loyalty data is present in the mall context. Never fabricate a program.
+
+DOMAIN-SPECIFIC TEMPLATES:
+
+  SHOPPING QUERIES:
+    - If the query is vague (e.g. "gift" without a target person), give 2 options first
+      then ask ONE targeting question: "Is this for a partner, child, or friend?"
+    - Include store location (floor/zone) and one-line reason for each pick.
+    - For category queries ("all perfume stores"), list all — the 2–3 cap is for guided
+      recommendations only ("suggest a gift" / "where should I shop?").
+    - Close with next-step offer (e.g. "Want me to narrow by budget?").
+
+  DINING QUERIES:
+    - Group suggestions by mood or cuisine type: Casual / Family / Quick Service / etc.
+    - For family visits with children: max 3 sit-down options; no kiosks as main suggestion.
+    - If a restaurant typically requires reservations, note: "Best to book ahead or ask at
+      the restaurant counter."
+    - End with engagement continuation (e.g. "Want to grab dessert somewhere after?").
+
+  CINEMA / ENTERTAINMENT QUERIES:
+    - For movie listings: include format options (Standard / IMAX / VIP) if available.
+    - End with a booking redirect: "Tickets available at the cinema counter or via the app."
+    - If a child is present: only suggest films suitable for their age — do NOT recommend
+      sports broadcasts or adult thrillers as children's options.
+    - Do NOT suggest splitting the family up between a cinema and a separate play area on a
+      different floor — a child requires supervision.
+
+  OPERATIONAL QUERIES (price, stock, reservations):
+    - State the limitation clearly and concisely: "I don't have live stock/price data."
+    - Immediately redirect: store location + "You can check directly with the store."
+    - Offer alternative help: "I can help you find similar stores if this one is closed."
+
+  INFORMATION QUERIES (hours, location, facilities):
+    - Answer in the first line (floor, zone, hours).
+    - Add one helpful extra detail if available.
+    - Offer a natural next step."""
+
 _INPUT_SPEC = """\
 You will receive the following inputs — use ALL of them to ground your answer:
 
@@ -490,6 +562,7 @@ def get_concierge_system_prompt(mall_context: dict[str, Any] | None = None) -> s
     blocks: list[str] = [
         f"ROLE:\n{_ROLE}",
         _GUIDELINES,
+        _RESPONSE_COMPOSITION,
     ]
 
     context_text = _format_mall_context(mall_context or {})
