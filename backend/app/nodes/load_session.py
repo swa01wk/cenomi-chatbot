@@ -62,6 +62,7 @@ async def load_session(state: ConciergeState) -> dict:
             "completed_steps": state.scene.completed_steps,
             "visit_constraints": state.scene.visit_constraints,
             "current_plan_step": state.scene.current_plan_step,
+            "excluded_domains": state.scene.excluded_domains,
         }
 
     expansion = expand_short_query(normalized, scene_context=scene_ctx)

@@ -104,7 +104,7 @@ export function useChat() {
           } else if (event.type === "done") {
             setSessionId(event.sessionId);
             turnCountRef.current += 1;
-            // Finalise the message: mark not streaming, attach debug/feedback
+            // Finalise the message: mark not streaming, attach debug/feedback/suggestions
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantId
@@ -112,7 +112,7 @@ export function useChat() {
                       ...m,
                       isStreaming: false,
                       sources: [],
-                      suggestions: [],
+                      suggestions: event.suggestions ?? [],
                       debug: (event.debug as DebugPayload) ?? null,
                       feedback: { rating: null, tags: [], comment: "", submitted: false },
                     }

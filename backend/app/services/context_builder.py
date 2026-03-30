@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -387,7 +388,16 @@ class ContextBuilder:
                 if eid and name:
                     entity_id_to_name[eid] = name
 
+        today = date.today()
+
         for event in self._canonical.get("events", []):
+            end = getattr(event, "end_date", "")
+            if end:
+                try:
+                    if date.fromisoformat(end) < today:
+                        continue
+                except ValueError:
+                    pass
             items.append({
                 "type": "event",
                 "title": event.title,
@@ -395,6 +405,13 @@ class ContextBuilder:
                 "description": event.description,
             })
         for offer in self._canonical.get("offers", []):
+            until = getattr(offer, "valid_until", "")
+            if until:
+                try:
+                    if date.fromisoformat(until) < today:
+                        continue
+                except ValueError:
+                    pass
             tenant_names = [
                 entity_id_to_name[tid]
                 for tid in getattr(offer, "tenant_entity_ids", [])

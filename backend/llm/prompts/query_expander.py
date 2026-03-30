@@ -138,6 +138,34 @@ _EXPANSION_MAP: dict[str, str] = {
     "events": "current events happening in the mall",
 }
 
+# Phrases that represent disengagement, vagueness, or social filler — they
+# must NEVER be scene-expanded to domain queries.  "Nothing much" after a
+# greeting must NOT become "quick bite options (quick_visit) in the mall".
+_EXPANSION_BLOCKLIST: frozenset[str] = frozenset({
+    "nothing much", "not much", "nothing", "nothing really",
+    "nothing in particular", "nothing specific",
+    "nevermind", "never mind", "nvm", "forget it", "forget about it",
+    "fine", "ok fine", "okay fine", "ok", "okay", "alright",
+    "whatever", "doesn't matter", "doesnt matter", "it doesn't matter",
+    "not interested", "no thanks", "no thank you",
+    "just looking", "just browsing",
+    "no idea", "i don't know", "i dont know", "not sure",
+    "good", "great", "cool", "sure",
+    "bye", "goodbye", "see you", "see ya", "thanks", "thank you",
+})
+
+# Domain words in expanded queries — if any of these appear in an expansion
+# while that domain is excluded, the expansion is suppressed.
+_DOMAIN_EXPANSION_WORDS: dict[str, frozenset[str]] = {
+    "dining": frozenset({
+        "food", "dining", "restaurant", "eat", "bite", "meal", "lunch",
+        "dinner", "breakfast", "snack", "cafe", "coffee", "drink",
+    }),
+    "shopping": frozenset({"shopping", "shop", "store", "stores", "buy"}),
+    "entertainment": frozenset({"cinema", "movie", "film", "entertainment"}),
+}
+
+
 _MULTI_WORD_EXPANSIONS: dict[str, str] = {
     "ice cream": "ice cream and dessert spots in the mall",
     "kids zone": "kids play zone and family activities in the mall",
@@ -194,6 +222,12 @@ def expand_short_query(
         return ExpansionResult(original=cleaned, expanded=cleaned, was_expanded=False)
 
     lower = cleaned.lower()
+    lower_stripped_check = lower.rstrip("?!., ")
+
+    # Blocklist: disengagement / filler phrases must never be expanded.
+    if lower_stripped_check in _EXPANSION_BLOCKLIST:
+        return ExpansionResult(original=cleaned, expanded=cleaned, was_expanded=False)
+
     words = lower.split()
 
     # Sequential queries should always use scene expansion regardless of length
@@ -210,6 +244,22 @@ def expand_short_query(
     # Scene-aware expansion for short follow-ups and sequential queries
     if scene_context and (len(words) <= 3 or is_sequential):
         scene_expanded = _expand_with_scene(lower, scene_context)
+        if scene_expanded:
+            # Suppress expansion if it would re-introduce an excluded domain.
+            excluded_domains: list[str] = scene_context.get("excluded_domains") or []
+            if excluded_domains:
+                expanded_lower = scene_expanded.lower()
+                blocked = any(
+                    any(w in expanded_lower for w in _DOMAIN_EXPANSION_WORDS.get(dom, frozenset()))
+                    for dom in excluded_domains
+                )
+                if blocked:
+                    logger.debug(
+                        "Scene expansion suppressed (excluded domain): %r → %r skipped",
+                        cleaned, scene_expanded,
+                    )
+                    scene_expanded = None
+
         if scene_expanded:
             logger.debug(
                 "Short query expanded (scene): %r → %r", cleaned, scene_expanded,

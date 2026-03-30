@@ -5,16 +5,9 @@ Provides:
   EXAMPLE_MAPPINGS   – dict mapping example queries → (domain, sub_intent)
   MALL_INFO_EXAMPLES – subset focused on the mall_info domain
   validate_intent()  – check a (domain, sub_intent) pair is recognised
-  parse_intent()     – classify + map a raw query, returning (domain, sub_intent, confidence)
 """
 
 from __future__ import annotations
-
-from intent.query_classifier import (
-    ClassifiedIntent,
-    classify_query,
-    map_to_graph_intent,
-)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Canonical example query → (domain, sub_intent) mappings
@@ -130,19 +123,3 @@ def validate_intent(domain: str, sub_intent: str) -> bool:
     return sub_intent in allowed
 
 
-def parse_intent(
-    query: str,
-    *,
-    history_len: int = 0,
-) -> tuple[str, str, float]:
-    """
-    Classify *query* and return ``(domain, sub_intent, confidence)``.
-
-    Thin convenience wrapper around :func:`classify_query` +
-    :func:`map_to_graph_intent`.
-    """
-    result: ClassifiedIntent = classify_query(
-        query, history_len=history_len,
-    )
-    domain, sub_intent = map_to_graph_intent(result)
-    return domain, sub_intent, result.confidence

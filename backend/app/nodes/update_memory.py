@@ -32,18 +32,35 @@ async def update_memory(state: ConciergeState) -> dict:
     scene.last_flow_type = current_flow
     changes.append(f"last_flow_type={current_flow}")
 
-    # ── Context-setting tracking ──────────────────────────────────────
-    # Record when the user last provided scene context so downstream nodes
-    # can reason about how fresh the scene framing is.
     turn_index = len(state.messages)  # proxy for turn counter
-    if state.intent.message_kind == "context_setting":
-        scene.last_context_setting_turn = turn_index
-        changes.append(f"last_context_setting_turn={turn_index}")
 
-    # ── Experience mode tracking ──────────────────────────────────────
-    if state.debug_enrichment.response_experience_mode:
-        scene.last_response_experience_mode = state.debug_enrichment.response_experience_mode
-        changes.append(f"last_response_experience_mode={scene.last_response_experience_mode}")
+    # ── Greeting streak tracking ──────────────────────────────────────
+    # Increment when this turn was a greeting (smalltalk node), reset otherwise.
+    # response_debug_summary is "smalltalk/greeting [greeting_scaffold]" on
+    # greeting turns regardless of which tier was selected.
+    if state.response_debug_summary.startswith("smalltalk/greeting"):
+        scene.greeting_streak = (scene.greeting_streak or 0) + 1
+        changes.append(f"greeting_streak={scene.greeting_streak}")
+    elif scene.greeting_streak:
+        scene.greeting_streak = 0
+        changes.append("greeting_streak reset")
+
+    # ── Mood / emotional state persistence ───────────────────────────
+    # When the visitor was recently frustrated or disengaged, record it in
+    # SceneMemory so the next turn's classifier and response generator can
+    # adapt tone and routing accordingly.
+    # Mood expires automatically after 2 subsequent non-emotional turns so it
+    # doesn't bleed into unrelated queries later in the session.
+    _EMOTIONAL_KINDS = frozenset({"disengagement", "emotional"})
+    current_kind = state.intent.message_kind
+    if current_kind in _EMOTIONAL_KINDS:
+        scene.recent_mood = current_kind
+        scene.mood_turn_index = turn_index
+        changes.append(f"recent_mood={current_kind} at turn_index={turn_index}")
+    elif scene.recent_mood and (turn_index - scene.mood_turn_index) >= 2:
+        changes.append(f"recent_mood cleared (was '{scene.recent_mood}', expired after 2 turns)")
+        scene.recent_mood = ""
+        scene.mood_turn_index = 0
 
     # ── Hybrid intent memory — persist across turns for follow-up ─────
     # primary_intent and secondary_filters are stored so the NEXT turn
@@ -149,6 +166,13 @@ async def update_memory(state: ConciergeState) -> dict:
             scene.topic_lock_confidence = min(1.0, scene.topic_lock_confidence + 0.1)
             changes.append(f"topic_lock reinforced: {scene.topic_lock}")
 
+    # ── Scene acknowledgment — mark as acknowledged after first ack turn ─
+    # Once the bot has opened with a scene-aware line, stop forcing it to
+    # re-acknowledge companions on every subsequent turn.
+    if state.response_plan.must_acknowledge_scene and not scene.scene_acknowledged:
+        scene.scene_acknowledged = True
+        changes.append("scene_acknowledged=True")
+
     # ── Persist selected playbook ─────────────────────────────────────
     if state.playbook.selected_playbook:
         scene.last_selected_playbook = state.playbook.selected_playbook
@@ -183,6 +207,16 @@ async def update_memory(state: ConciergeState) -> dict:
             f"Memory[factual]: {', '.join(changes) if changes else 'no changes'}"
         )
         return result
+
+    # ── Domain exclusions — merge and persist across all turns ──────────
+    # excluded_domains are durable: they accumulate and are NEVER cleared,
+    # not even on topic_switch. Only an explicit reversal ("actually food is
+    # fine") should remove them, which is not yet implemented.
+    if state.scene.excluded_domains:
+        existing_excluded = set(scene.excluded_domains or [])
+        existing_excluded.update(state.scene.excluded_domains)
+        scene.excluded_domains = list(existing_excluded)
+        changes.append(f"excluded_domains={scene.excluded_domains}")
 
     # ── Concierge-flow memory updates (existing logic) ────────────────
     if state.intent.domain and state.intent.domain != "general":

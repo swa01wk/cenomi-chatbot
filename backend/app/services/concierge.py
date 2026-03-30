@@ -33,6 +33,7 @@ from app.runtime import (
     get_session_tuning_engine,
 )
 from app.services.clean_context import clean_context_builder
+from app.services.cta_generator import get_cta_suggestions
 from app.services.tenant_params import apply_session_overrides, load_tenant_config
 from app.utils.ids import generate_session_id
 
@@ -114,6 +115,7 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
             "scene": scene,
             "last_intent": session.last_intent,
             "conversation_mode": session.conversation_mode,
+            "conversation_history": session.conversation_history,
         },
         mall_context=mall_ctx.get_context_pack(),
     )
@@ -139,6 +141,8 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         scene=result.scene,
         last_intent=result.intent.domain,
         conversation_mode=result.intent.message_kind,
+        user_message=request.message,
+        assistant_message=result.final_response_text,
     )
 
     # ── Async quality evaluator (fire-and-forget, never blocks response) ──
@@ -198,10 +202,14 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     if request.debug:
         debug_payload = _build_debug_payload(result, elapsed_ms)
 
+    cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
+    suggestions = get_cta_suggestions(cta_type)
+
     return ChatResponse(
         session_id=session_id,
         message=result.final_response_text,
         session_state=session_summary,
+        suggestions=suggestions,
         debug=debug_payload,
     )
 

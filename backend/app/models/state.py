@@ -14,6 +14,7 @@ Design principles:
 from __future__ import annotations
 
 import operator
+from enum import Enum
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field
@@ -37,17 +38,53 @@ class Message(BaseModel):
 # Interpreted Intent
 # ═══════════════════════════════════════════════════════════════════════════
 
-MESSAGE_KIND = Literal[
-    "fresh_request",
-    "refinement",
-    "correction",
-    "topic_switch",
-    "followup",
-    "constraint_refinement",
-    "context_setting",   # user is providing scene context (role, companions, occasion)
-    "greeting",
-    "smalltalk",
-]
+class MessageKind(str, Enum):
+    """
+    Classification of the current conversational turn.
+
+    Inherits from ``str`` so all downstream string comparisons
+    (e.g. ``intent.message_kind == "acknowledgement"``) continue to work
+    unchanged — no modifications needed in route_flow, update_scene_memory,
+    generate_response, or any other consumer.
+    """
+    FRESH_REQUEST         = "fresh_request"
+    REFINEMENT            = "refinement"
+    CORRECTION            = "correction"
+    TOPIC_SWITCH          = "topic_switch"
+    FOLLOWUP              = "followup"
+    CONSTRAINT_REFINEMENT = "constraint_refinement"
+    CONTEXT_SETTING       = "context_setting"   # user declaring role/companions/occasion
+    GREETING              = "greeting"
+    SMALLTALK             = "smalltalk"
+    EMOTIONAL             = "emotional"         # frustration, boredom, mood expression
+    DISENGAGEMENT         = "disengagement"     # "forget it", "whatever", giving up
+    CATEGORY_NEGATION     = "category_negation" # "not food", "no cinema"
+    ACKNOWLEDGEMENT       = "acknowledgement"   # "okay", "wait", "hmm" — no action needed
+    COMPANION_CORRECTION  = "companion_correction"  # "I don't have kids", "I'm alone"
+    # Previously regex-only in smalltalk.py — now LLM-classified
+    CRISIS                = "crisis"     # self-harm / suicidal language
+    IDENTITY              = "identity"   # "who are you", "are you a bot", "what can you do"
+    HOWRU                 = "howru"      # "how are you", "how's it going"
+    THANKS                = "thanks"     # "thanks", "thank you", "shukran"
+    FAREWELL              = "farewell"   # "bye", "goodbye", "see you"
+
+
+# Backward-compatible type alias — existing annotations like ``message_kind: MESSAGE_KIND``
+# now refer to the MessageKind enum class.
+MESSAGE_KIND = MessageKind
+
+# Smalltalk routing gate — used by is_smalltalk() and the smalltalk node.
+# Any turn whose message_kind is in this set bypasses route_flow and goes
+# directly to the smalltalk node.
+SMALLTALK_KINDS: frozenset[MessageKind] = frozenset({
+    MessageKind.GREETING,
+    MessageKind.HOWRU,
+    MessageKind.THANKS,
+    MessageKind.FAREWELL,
+    MessageKind.EMOTIONAL,
+    MessageKind.IDENTITY,
+    MessageKind.CRISIS,
+})
 
 FLOW_TYPE = Literal["concierge", "factual", ""]
 
@@ -81,7 +118,7 @@ class InterpretedIntent(BaseModel):
 
     domain: str = ""
     sub_intent: str = ""
-    message_kind: MESSAGE_KIND = "fresh_request"
+    message_kind: MessageKind = MessageKind.FRESH_REQUEST
     confidence: float = 0.0
     raw_signals: dict[str, Any] = Field(default_factory=dict)
     # Enriched signals emitted by interpret_turn for downstream use
@@ -99,6 +136,11 @@ class InterpretedIntent(BaseModel):
     primary_intent: str = ""
     secondary_intents: list[str] = Field(default_factory=list)
     modifiers: list[str] = Field(default_factory=list)
+    # ── Scene correction directives (LLM-populated on companion_correction turns) ─
+    # List of correction tokens applied by update_scene_memory before any other mutation.
+    # Valid tokens: "all_family_context", "companion:<name>", "visit_type:<value>",
+    #               "target_person", "scenario", "visit_type:solo", "audience:family"
+    scene_corrections: list[str] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -164,8 +206,6 @@ class SceneMemory(BaseModel):
     previous_topic: str = ""
     active_shortlist: list[str] = Field(default_factory=list)
     rejected_options: list[str] = Field(default_factory=list)
-    current_preferences: dict[str, Any] = Field(default_factory=dict)
-
     # Conversation frame extensions
     target_person: str = ""
     goal: str = ""
@@ -188,9 +228,6 @@ class SceneMemory(BaseModel):
     # Vague-input clarification tracking
     needs_clarification: bool = False
     clarification_topic: str = ""  # e.g. "gift_target", "dining_preference"
-
-    # Human-readable notes about what was inferred this turn
-    inferred_scene_notes: list[str] = Field(default_factory=list)
 
     # Factual-flow follow-up memory
     last_flow_type: str = ""
@@ -215,6 +252,14 @@ class SceneMemory(BaseModel):
         default_factory=list,
         description="User-expressed constraints, e.g. ['quick', 'light', 'affordable']",
     )
+    excluded_domains: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Domains/categories explicitly excluded by the user (e.g. 'dining', 'cafe'). "
+            "Accumulated across turns and never reset — hard-filtered in compose_context "
+            "and injected as a HARD CONSTRAINT into the LLM prompt."
+        ),
+    )
     multi_activity_mode: bool = Field(
         default=False,
         description="True when the user has stated a multi-step visit plan",
@@ -227,6 +272,36 @@ class SceneMemory(BaseModel):
     # ── Structured shopping task (persists across turns) ─────────────
     shopping_task: ShoppingTask = Field(default_factory=ShoppingTask)
 
+    # ── Greeting streak (persists across turns via update_memory) ────────
+    # Tracks how many consecutive greeting turns have happened so far in this
+    # session.  Used by the smalltalk node to select a progressive response
+    # (welcome → mall insight → direct ask) instead of repeating the same line.
+    # Incremented by update_memory when response_debug_summary starts with
+    # "smalltalk/greeting"; reset to 0 on any non-greeting turn.
+    greeting_streak: int = 0
+
+    # ── Emotional / mood state (persists across turns via update_memory) ─
+    # recent_mood: the most recent emotional signal from the visitor.
+    # Set when message_kind is "emotional" or "disengagement"; expires after
+    # 2 subsequent non-emotional turns so it doesn't bleed into unrelated queries.
+    recent_mood: str = Field(
+        default="",
+        description=(
+            "Most recent emotional signal: 'emotional' | 'disengagement' | ''. "
+            "Expires after 2 non-emotional turns."
+        ),
+    )
+    mood_turn_index: int = Field(
+        default=0,
+        description="Turn index (len(state.messages)) when recent_mood was last recorded.",
+    )
+
+    # ── Scene acknowledgment tracking ─────────────────────────────────
+    # True once the bot has explicitly acknowledged the visitor's companion/
+    # visit-context situation.  Prevents repetitive re-acknowledgment every turn.
+    # Reset to False when companions change so the new context gets acknowledged.
+    scene_acknowledged: bool = False
+
     # ── Topic lock — prevents drift on follow-up turns ────────────────
     # topic_lock: the locked active topic (e.g. "movies", "dining", "mall_info")
     topic_lock: str = Field(
@@ -237,19 +312,10 @@ class SceneMemory(BaseModel):
         default=0.0,
         description="Confidence [0–1] that topic_lock is still valid",
     )
-    # last_context_setting_turn: turn counter when user last set scene context
-    last_context_setting_turn: int = Field(
-        default=0,
-        description="Turn index of the most recent context_setting message",
-    )
-    # last_selected_playbook / last_response_experience_mode: cross-turn continuity
+    # last_selected_playbook: cross-turn continuity
     last_selected_playbook: str = Field(
         default="",
         description="Most recently selected playbook (persistent across turns)",
-    )
-    last_response_experience_mode: str = Field(
-        default="",
-        description="Most recently resolved experience mode",
     )
 
 

@@ -1,0 +1,25 @@
+{
+  "event_id": "fb-4e5b3230a92b",
+  "session_id": "session-a1aa0d5325334cc9",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-4e16173b21af",
+  "user_message": "I want an affordable jacket",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch",
+    "preference_override"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\baffordable\\b",
+      "confidence": 0.9500000000000001
+    },
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-30 05:39:26.459332"
+}

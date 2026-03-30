@@ -36,12 +36,9 @@ from app.models.state import (
 from app.nodes.rank_and_dedupe import rank_and_dedupe, _dedupe_key
 from app.nodes.route_flow import route_flow, _has_strong_scene_context, _is_pure_lookup
 from app.nodes.interpret_turn import (
-    _detect_message_kind,
     _extract_scenario_from_message,
-    _is_context_setting,
 )
 from intent.query_classifier import (
-    classify_query,
     is_likely_unsupported,
     maybe_correct_brand,
     normalize_query,
@@ -215,24 +212,13 @@ class TestQueryNormalization:
         assert norm == query
         assert label == ""
 
+    @pytest.mark.skip(reason="rule classifier removed — classification is LLM-only now")
     def test_movie_classifies_as_entertainment(self):
         """All movie variants should classify to entertainment domain."""
-        for query in ["movies", "now showing", "what movies are showing", "cinema"]:
-            norm = normalize_query(query)
-            result = classify_query(norm)
-            assert result.intent_class.value == "entertainment", (
-                f"{query!r} → {norm!r}: expected entertainment, got {result.intent_class.value}"
-            )
 
+    @pytest.mark.skip(reason="rule classifier removed — classification is LLM-only now")
     def test_offer_classifies_as_shopping(self):
         """Offer/deal queries must classify as shopping/offers."""
-        for query in ["offers", "deals", "any discounts", "what offers are available"]:
-            norm = normalize_query(query)
-            result = classify_query(norm)
-            assert result.intent_class.value == "shopping", (
-                f"{query!r}: expected shopping, got {result.intent_class.value}"
-            )
-            assert "offers" in result.sub_tags
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -375,25 +361,13 @@ class TestContextSettingDetection:
         "visiting with my family",
     ]
 
+    @pytest.mark.skip(reason="regex _is_context_setting removed — classification is LLM-only now")
     def test_context_setting_patterns_detected(self):
         """All context-setting messages should be classified as context_setting."""
-        for msg in self.CONTEXT_SETTING_MESSAGES:
-            result = _is_context_setting(msg, history_len=1)
-            assert result, f"Expected context_setting for: {msg!r}"
 
+    @pytest.mark.skip(reason="regex _is_context_setting removed — classification is LLM-only now")
     def test_non_context_setting_not_falsely_detected(self):
         """Regular queries should not be wrongly classified as context_setting."""
-        regular_queries = [
-            "what movies are showing",
-            "where can i eat",
-            "show me stores",
-            "any offers",
-            "where is the atm",
-            "hi",
-        ]
-        for msg in regular_queries:
-            result = _is_context_setting(msg, history_len=1)
-            assert not result, f"False positive context_setting for: {msg!r}"
 
     def test_context_setting_routes_concierge(self):
         """Context-setting should route to concierge (not factual)."""
@@ -477,51 +451,19 @@ class TestScenarioExtraction:
 # 5. Message Kind Detection
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="_detect_message_kind removed — message_kind is LLM-classified now")
 class TestMessageKindDetection:
     """Verify correct message_kind classification across query types."""
 
     def _make_state_with_history(self, msg: str, active_topic: str = "", active_shortlist: list[str] | None = None) -> ConciergeState:
-        return _make_state(
-            msg,
-            active_topic=active_topic,
-            active_shortlist=active_shortlist or [],
-        )
+        return _make_state(msg, active_topic=active_topic, active_shortlist=active_shortlist or [])
 
-    def test_context_setting_priority(self):
-        """context_setting must take priority over all other kinds."""
-        state = self._make_state_with_history("i am here with my kid")
-        kind = _detect_message_kind("i am here with my kid", history_len=2, state=state)
-        assert kind == "context_setting"
-
-    def test_followup_short_query_with_active_topic(self):
-        """Short query with active topic should be followup, not fresh."""
-        state = _make_state("food", active_topic="dining")
-        kind = _detect_message_kind("food", history_len=2, state=state)
-        assert kind == "followup"
-
-    def test_constraint_refinement_detection(self):
-        """Constraint refinement cues should be detected."""
-        state = _make_state("something quicker", active_shortlist=["Restaurant A", "Restaurant B"])
-        kind = _detect_message_kind("something quicker", history_len=2, state=state)
-        assert kind == "constraint_refinement"
-
-    def test_topic_switch_detection(self):
-        """Topic switch cues should be detected."""
-        state = _make_state("forget that", active_topic="dining")
-        kind = _detect_message_kind("forget that", history_len=2, state=state)
-        assert kind == "topic_switch"
-
-    def test_sequential_followup(self):
-        """Sequential queries should be classified as followup."""
-        state = _make_state("after that?", active_topic="dining")
-        kind = _detect_message_kind("after that?", history_len=2, state=state)
-        assert kind == "followup"
-
-    def test_fresh_request_first_message(self):
-        """First message in conversation is always fresh_request."""
-        state = _make_state("show me movies")
-        kind = _detect_message_kind("show me movies", history_len=1, state=state)
-        assert kind == "fresh_request"
+    def test_context_setting_priority(self): ...
+    def test_followup_short_query_with_active_topic(self): ...
+    def test_constraint_refinement_detection(self): ...
+    def test_topic_switch_detection(self): ...
+    def test_sequential_followup(self): ...
+    def test_fresh_request_first_message(self): ...
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -855,15 +797,9 @@ class TestScenarioRichPlaybookSelection:
 class TestOfferHandling:
     """Offer queries must route correctly and not hallucinate."""
 
+    @pytest.mark.skip(reason="rule classifier removed — classification is LLM-only now")
     def test_offers_classified_as_shopping(self):
         """All offer query variants must classify as shopping/offer_details."""
-        for query in ["any offers", "what deals are there", "any discounts", "offers"]:
-            norm = normalize_query(query)
-            result = classify_query(norm)
-            assert result.intent_class.value == "shopping", (
-                f"{query!r}: expected shopping, got {result.intent_class.value}"
-            )
-            assert "offers" in result.sub_tags
 
     def test_offer_query_routes_factual(self):
         """Offer sub-intent should route to factual (exact data needed)."""

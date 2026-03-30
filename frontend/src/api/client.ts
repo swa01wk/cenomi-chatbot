@@ -37,7 +37,7 @@ export async function sendMessage(req: ChatRequest): Promise<ChatResponse> {
 
 export type StreamEvent =
   | { type: "token"; text: string }
-  | { type: "done"; sessionId: string; sessionState: ChatResponse["session_state"]; debug: DebugPayload | null }
+  | { type: "done"; sessionId: string; sessionState: ChatResponse["session_state"]; debug: DebugPayload | null; suggestions: string[] }
   | { type: "error"; detail: string };
 
 /**
@@ -91,6 +91,7 @@ export async function* streamMessage(req: ChatRequest): AsyncGenerator<StreamEve
               sessionId: data.session_id as string,
               sessionState: data.session_state ?? null,
               debug: (data.debug as DebugPayload) ?? null,
+              suggestions: (data.suggestions as string[]) ?? [],
             };
           } else if (currentEvent === "error") {
             yield { type: "error", detail: data.detail as string };

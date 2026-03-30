@@ -18,8 +18,9 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
 from app.config.settings import get_settings
@@ -54,6 +55,31 @@ _CHILD_COMPANIONS_CONTEXT: frozenset[str] = frozenset({
 })
 
 
+def _build_prior_messages(
+    state: "ConciergeState",
+) -> list:
+    """
+    Return a list of HumanMessage / AIMessage objects for all prior turns
+    in state.messages (i.e. everything except the last entry, which is the
+    current user message appended by load_session).
+
+    These are prepended to the LLM call so the model sees the full raw
+    dialogue and is not limited to what SceneMemory managed to extract.
+    """
+    from app.models.state import Message  # local import to avoid circular
+
+    prior = state.messages[:-1] if state.messages else []
+    lc_msgs: list = []
+    for msg in prior:
+        if not isinstance(msg, Message):
+            continue
+        if msg.role == "user":
+            lc_msgs.append(HumanMessage(content=msg.content))
+        elif msg.role == "assistant":
+            lc_msgs.append(AIMessage(content=msg.content))
+    return lc_msgs
+
+
 def _get_llm() -> ChatOpenAI:
     global _llm
     if _llm is None:
@@ -70,6 +96,108 @@ def _get_llm() -> ChatOpenAI:
             max_tokens=1024,
         )
     return _llm
+
+
+# ── Narrowing-clarification LLM (cached singleton, gpt-4o-mini) ──────
+# A lightweight model used specifically to generate the ONE targeted
+# clarifying question after the visitor confirms they want to narrow down.
+
+_narrowing_llm: ChatOpenAI | None = None
+
+
+def _get_narrowing_llm() -> ChatOpenAI:
+    global _narrowing_llm
+    if _narrowing_llm is None:
+        settings = get_settings()
+        _narrowing_llm = ChatOpenAI(
+            model=settings.classifier_model,
+            temperature=0.4,
+            api_key=settings.openai_api_key,
+            max_tokens=80,
+        )
+    return _narrowing_llm
+
+
+async def _generate_narrowing_question(state: "ConciergeState") -> str | None:
+    """
+    Generate the single most relevant targeting question when the visitor has
+    confirmed they want to narrow down recommendations.
+
+    Uses full scene context (occasion, companions, shopping_task, modifiers,
+    active_shortlist) so the question is specific to the visitor's actual
+    situation — e.g. "Ethnic, western, or designer?" for a fashion query with
+    a wedding occasion, rather than the generic "budget or style in mind?"
+
+    Returns the generated question string, or None on failure (caller falls
+    back to the topic-keyed static templates).
+    """
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    scene = state.scene
+    task = scene.shopping_task
+
+    context_parts: list[str] = []
+    if scene.active_topic and scene.active_topic not in ("general", ""):
+        context_parts.append(f"browsing topic: {scene.active_topic}")
+    if scene.occasion:
+        context_parts.append(f"occasion: {scene.occasion}")
+    if scene.companions:
+        context_parts.append(f"companions: {', '.join(scene.companions)}")
+    if task.product_type:
+        context_parts.append(f"product: {task.product_type}")
+    if task.target_person:
+        context_parts.append(f"for: {task.target_person}")
+    if task.use_case:
+        context_parts.append(f"use case: {task.use_case}")
+    if task.style_preference:
+        context_parts.append(f"style hints: {', '.join(task.style_preference)}")
+    if scene.active_modifiers:
+        context_parts.append(f"modifiers: {', '.join(scene.active_modifiers)}")
+    if scene.active_shortlist:
+        context_parts.append(
+            f"options already shown: {', '.join(scene.active_shortlist[:3])}"
+        )
+    if scene.budget:
+        context_parts.append(f"budget: {scene.budget}")
+
+    scene_str = "; ".join(context_parts) if context_parts else "no specific context"
+
+    system_prompt = (
+        "You are a mall concierge. The visitor just confirmed they want you to "
+        "narrow down recommendations. Ask exactly ONE short, specific clarifying "
+        "question — one sentence only — that will most help you pick the right "
+        "option for this specific visitor right now.\n\n"
+        "Use the scene context to make the question precise and relevant. "
+        "Do NOT ask a generic question if context is available. "
+        "Do NOT make recommendations. Do NOT ask more than one question.\n\n"
+        "Examples of the RIGHT level of specificity:\n"
+        "- Fashion query + wedding occasion → 'Is this for the bride, groom, or a guest?'\n"
+        "- Fashion query + no occasion → 'Ethnic, western, or designer?'\n"
+        "- Gift query + no target → 'Who is it for — a partner, a child, or a friend?'\n"
+        "- Dining + with kids → 'Something quick or a proper sit-down meal?'\n"
+        "- Shopping + self + no budget → 'Any budget in mind, or going with what fits?'\n"
+        "- Entertainment + evening → 'A movie, or more interactive — bowling, arcade?'"
+    )
+
+    human_prompt = (
+        f"Scene context: {scene_str}\n"
+        f"Visitor confirmed: {state.normalized_user_message or 'yes'}"
+    )
+
+    try:
+        llm = _get_narrowing_llm()
+        response = await llm.ainvoke(
+            [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
+        )
+        text = (response.content or "").strip()
+        if text:
+            return text
+    except Exception as exc:
+        logger.warning(
+            "Narrowing clarification LLM call failed, using static fallback: %s", exc
+        )
+
+    return None
 
 
 # Explicit tone instructions keyed by playbook scenario name.
@@ -363,21 +491,28 @@ def _build_scene_acknowledgment(state: ConciergeState) -> str:
     scene = state.scene
     parts: list[str] = []
 
-    # Child companion + shopping/dining
+    # Child companion + shopping/dining — use gendered label when available
+    _child_kinds = {"child", "kids", "son", "daughter"}
+    child_label = "child"
+    for _c in scene.companions:
+        if _c in _child_kinds:
+            child_label = _c  # e.g. "daughter", "son", "kids"
+            break
     has_child = (
-        "child" in scene.companions
-        or any(d.get("type") == "child" for d in scene.companion_details)
+        any(c in _child_kinds for c in scene.companions)
+        or any(d.get("type") in _child_kinds for d in scene.companion_details)
     )
+
     child_age = None
     if scene.companion_details:
         for d in scene.companion_details:
-            if d.get("type") == "child" and d.get("age"):
+            if d.get("type") in _child_kinds and d.get("age"):
                 child_age = d["age"]
                 break
 
     if has_child:
         age_part = f" (age {child_age})" if child_age else ""
-        parts.append(f"visiting with a child{age_part}")
+        parts.append(f"visiting with {child_label}{age_part}")
 
     partner_companions = {"girlfriend", "boyfriend", "wife", "husband"}
     for comp in scene.companions:
@@ -401,14 +536,22 @@ def _build_scene_acknowledgment(state: ConciergeState) -> str:
         return ""
 
     situation = ", ".join(parts)
+    # Build a gendered-child instruction when applicable.
+    gendered_child_note = ""
+    if child_label in ("daughter", "son"):
+        gendered_child_note = (
+            f"IMPORTANT: The child companion is specifically the visitor's {child_label}. "
+            f"ALWAYS use 'your {child_label}' in the response — do NOT say 'your child' or just 'your X-year-old'.\n"
+        )
     return (
         "SCENE ACKNOWLEDGMENT REQUIRED:\n"
         f"Visitor situation: {situation}.\n"
+        f"{gendered_child_note}"
         "Your opening sentence MUST acknowledge this situation naturally — "
         "but NEVER use 'Since you're...', 'Given you're...', 'As you're...', or 'Because you're...'.\n"
         "Instead rotate through these opener styles:\n"
         "  • Lead with the destination:   'Head to Centrepoint — great value kids' jackets on the Ground floor.'\n"
-        "  • Lead with the person/group:  'For your 5-year-old, the best picks are in the Main Gallery.'\n"
+        "  • Lead with the person/group:  'For your daughter, the best picks are in the Main Gallery.'\n"
         "  • Lead with the need:          'For an affordable jacket, here are your top three options:'\n"
         "  • Lead with an action:         'Start at Red Tag for solid budget picks, then swing by Max next door.'\n"
         "  • Lead with a direct answer:   'Muvi Cinema on the Cinema Level is your best bet for a family film.'\n"
@@ -449,6 +592,15 @@ def _build_conversation_context(state: ConciergeState) -> str:
                 f"Always refer to them as '{partner_found[0]}' — "
                 f"NEVER substitute with a different gendered term (e.g. do NOT say "
                 f"'boyfriend' if the partner is a 'girlfriend', and vice versa)."
+            )
+        # After the first scene acknowledgment, companions are background context
+        # for filtering — not something to call out explicitly in every response.
+        if state.scene.scene_acknowledged:
+            parts.append(
+                "COMPANION USAGE: Companion context above is for FILTERING only. "
+                "Do NOT explicitly say 'with your child', 'for you and your son', "
+                "'easy for a parent with a child', or similar phrases in the response. "
+                "The visitor knows who they are with — just tailor the recommendation silently."
             )
     if state.scene.companion_details:
         detail_strs = [
@@ -510,7 +662,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
             f"Already covered in this conversation: {' → '.join(state.scene.completed_steps)}"
         )
     if state.scene.topic_history and len(state.scene.topic_history) > 1:
-        recent = state.scene.topic_history[-4:]
+        recent = state.scene.topic_history
         journey_lines.append(
             f"Conversation journey so far: {' → '.join(recent)}"
         )
@@ -544,6 +696,27 @@ def _build_conversation_context(state: ConciergeState) -> str:
             )
         frame_block += "\n\n"
 
+    # ── Active shopping task guard ────────────────────────────────────
+    # When a specific product shopping task is in progress (e.g. jacket, shoes),
+    # lock the response to that product. Prevents gift_for or other secondary
+    # intents from pivoting the response to unrelated gift recommendations.
+    _st = state.scene.shopping_task
+    if _st and _st.product_type and state.intent.domain == "shopping":
+        _task_parts = [_st.product_type]
+        if _st.target_person:
+            _task_parts.append(f"for {_st.target_person}")
+        if _st.budget_preference:
+            _task_parts.append(f"budget: {_st.budget_preference}")
+        frame_block += (
+            f"ACTIVE SHOPPING TASK: The visitor is shopping for a "
+            f"{' '.join(_task_parts)}. "
+            f"ALL recommendations MUST be stores that sell {_st.product_type}. "
+            f"Do NOT pivot to gift shops, accessories, jewellery, or other product "
+            f"categories unless the visitor explicitly changes the request. "
+            f"Context refinements like gender or age ('he is a boy') narrow "
+            f"the {_st.product_type} search — they do NOT change the product type.\n\n"
+        )
+
     # ── Constraint directive ─────────────────────────────────────────
     if state.scene.visit_constraints:
         constraint_str = " and ".join(state.scene.visit_constraints)
@@ -551,6 +724,24 @@ def _build_conversation_context(state: ConciergeState) -> str:
             f"CONSTRAINT: The visitor wants something {constraint_str}. "
             "Keep suggestions focused, concise, and appropriate to this constraint. "
             "Do NOT recommend elaborate full-course dining for a 'quick' or 'light' query.\n\n"
+        )
+
+    # ── Hard exclusion directive ──────────────────────────────────────
+    # Injected when the user has explicitly refused one or more domains.
+    # This is a HARD constraint — it must be respected unconditionally and
+    # carries through every turn for the remainder of the session.
+    if state.scene.excluded_domains:
+        domains_str = " and ".join(state.scene.excluded_domains)
+        plural = "these categories" if len(state.scene.excluded_domains) > 1 else "this category"
+        frame_block += (
+            f"HARD CONSTRAINT — DOMAIN EXCLUSION: The visitor has EXPLICITLY refused "
+            f"{domains_str} recommendations. "
+            f"DO NOT suggest, mention, or allude to any {domains_str} options under ANY "
+            f"circumstances, even indirectly. "
+            f"If the entity list below contains {plural}, ignore them entirely. "
+            f"If there are no suitable alternatives available outside {plural}, respond with a "
+            f"brief empathetic acknowledgement and ask the visitor what they are looking for "
+            f"instead — do NOT default back to {plural}.\n\n"
         )
 
     # ── Follow-up / sequential directive ─────────────────────────────
@@ -639,7 +830,6 @@ def _build_conversation_context(state: ConciergeState) -> str:
         if cross_domain_constraints:
             frame_block += (
                 f"CROSS-DOMAIN CONTINUITY: You are now helping with {current_domain}. "
-                f"The visitor is still with {companions_str}. "
                 f"This means: {'; '.join(cross_domain_constraints)}. "
                 "Apply these constraints to ALL recommendations in this response.\n\n"
             )
@@ -1431,10 +1621,10 @@ async def _build_mall_info_response(
 
     try:
         llm = _get_llm()
-        response = await llm.ainvoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt),
-        ])
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.extend(_build_prior_messages(state))
+        lc_messages.append(HumanMessage(content=user_prompt))
+        response = await llm.ainvoke(lc_messages)
         final_text = response.content
         final_text = _run_hallucination_guard(final_text, mall_ctx, warnings)
         return final_text, warnings, STRUCTURED_OVERVIEW
@@ -1500,10 +1690,9 @@ async def _build_cross_mall_response(
         "Generate a helpful, conversational concierge response."
     )
 
-    langchain_messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content=user_prompt),
-    ]
+    langchain_messages = [SystemMessage(content=system_prompt)]
+    langchain_messages.extend(_build_prior_messages(state))
+    langchain_messages.append(HumanMessage(content=user_prompt))
 
     try:
         llm = _get_llm()
@@ -1604,6 +1793,283 @@ async def generate_response(state: ConciergeState) -> dict:
             "_trace_summary": "Generated unsupported-input recovery response",
         }
 
+    # ── Early exit: acknowledgement — non-actionable filler, no intent ──────
+    # The visitor said something vague ("okay", "wait", "hmm", "not sure") that
+    # carries no new topic or request. The bot must ask a clarifying question
+    # instead of generating unsolicited recommendations.
+    #
+    # SAFETY CHECK: If the previous assistant message ended with a direct question
+    # or offer (e.g. "Want me to...?", "Shall I...?"), an affirmative reply
+    # ("sure", "yes", "ok", "yeah") is a CONFIRMATION — not an acknowledgement.
+    # Bypass the clarification path and let the full pipeline handle it.
+    if state.intent.message_kind == "acknowledgement":
+        _affirm_starts = frozenset({
+            "sure", "yes", "yeah", "yep", "ok", "okay", "please", "go ahead",
+            "do it", "sounds good", "perfect", "of course", "absolutely",
+            "why not", "love that", "great idea", "go for it",
+        })
+        _msg_lower = (state.normalized_user_message or "").lower().strip().rstrip("!.,")
+        # Exact match OR starts-with any affirmative token (catches "yes that will be good" etc.)
+        _first_word = _msg_lower.split()[0] if _msg_lower.split() else ""
+        _is_affirmative = _msg_lower in _affirm_starts or _first_word in _affirm_starts
+
+        if _is_affirmative:
+            # Check if the last assistant message ended with a question or offer
+            prior_assistant_msgs = [
+                m for m in state.messages if m.role == "assistant"
+            ]
+            if prior_assistant_msgs:
+                _last_bot = prior_assistant_msgs[-1].content.strip()
+                # Look for question markers or common offer patterns near end of message
+                _last_sentence = _last_bot.split(".")[-2] if "." in _last_bot else _last_bot
+                _last_sentence = _last_sentence.strip()
+                _is_bot_question = (
+                    _last_bot.endswith("?")
+                    or _last_sentence.endswith("?")
+                    or any(
+                        phrase in _last_bot.lower()
+                        for phrase in (
+                            "want me to", "shall i", "would you like", "want to", "should i",
+                            "if you want", "i can help", "i can also", "i can next",
+                            "shall we", "want a", "would you want", "i can plan",
+                            "i can line up", "i can point", "i can turn",
+                        )
+                    )
+                )
+                if _is_bot_question:
+                    # Check if the bot offered to narrow/filter — if so, the visitor
+                    # confirmed that offer. Ask the actual narrowing question rather
+                    # than falling through to another round of recommendations.
+                    _narrowing_phrases = (
+                        "narrow it down", "narrow down", "narrow this",
+                        "narrow the", "narrow by",
+                    )
+                    _is_narrowing_offer = any(
+                        phrase in _last_bot.lower() for phrase in _narrowing_phrases
+                    )
+                    if _is_narrowing_offer:
+                        # LLM generates the most relevant one-sentence targeting
+                        # question using full scene context (occasion, companions,
+                        # shopping_task, modifiers, active_shortlist). Falls back
+                        # to topic-keyed static templates if the LLM call fails.
+                        llm_question = await _generate_narrowing_question(state)
+
+                        if llm_question:
+                            final_text = llm_question
+                        else:
+                            # Static fallback keyed by active topic
+                            _task = state.scene.shopping_task
+                            _active_topic = state.scene.active_topic or ""
+                            if _task and _task.product_type:
+                                _product = _task.product_type
+                                final_text = (
+                                    f"Sure! To find the best {_product}, tell me: "
+                                    f"who is it for, what's your budget, or any style preference? "
+                                    f"Any one of those helps me point you to the right store."
+                                )
+                            elif _active_topic in ("dining", "food"):
+                                final_text = (
+                                    "Of course! Quick question — do you prefer a sit-down meal, "
+                                    "something fast, or a light snack? And any cuisine in mind?"
+                                )
+                            elif _active_topic == "shopping":
+                                final_text = (
+                                    "Happy to narrow it down! Is this for you or someone else, "
+                                    "and do you have a budget or style in mind?"
+                                )
+                            elif _active_topic == "entertainment":
+                                final_text = (
+                                    "Sure! Any preference — a specific genre, age group, "
+                                    "or something to do right now vs. later?"
+                                )
+                            else:
+                                final_text = (
+                                    "Of course! Tell me a bit more — who is it for, "
+                                    "what's your budget, or any preference you have in mind?"
+                                )
+
+                        assistant_msg = Message(
+                            role="assistant",
+                            content=final_text,
+                            turn_id=state.turn_id,
+                            metadata={
+                                "strategy": "narrowing_clarification",
+                                "experience_mode": "clarification",
+                            },
+                        )
+                        return {
+                            "final_response_text": final_text,
+                            "response_debug_summary": "strategy=narrowing_clarification",
+                            "messages": [assistant_msg],
+                            "debug_enrichment": state.debug_enrichment.model_copy(
+                                update={"response_experience_mode": "narrowing_clarification"}
+                            ),
+                            "_trace_summary": "Confirmed narrowing offer: returned clarifying question",
+                        }
+
+                    # Not a narrowing offer — treat as standard followup confirmation
+                    logger.info(
+                        "Acknowledgement override: prior bot message was a question, "
+                        "treating affirmative '%s' as followup", state.normalized_user_message
+                    )
+                    state = state.model_copy(
+                        update={"intent": state.intent.model_copy(update={"message_kind": "followup"})}
+                    )
+                    # Fall through to main pipeline below
+                else:
+                    pass  # genuine acknowledgement — proceed to clarification
+
+        if state.intent.message_kind == "acknowledgement":
+            # Build a context-aware clarifying question. If there's an active topic
+            # from a prior turn, gently anchor to it; otherwise ask openly.
+            active = state.scene.active_topic
+            prior_need = state.scene.previous_need
+            if active and active not in ("general",):
+                topic_label = active.replace("_", " ")
+                final_text = random.choice([
+                    f"Still thinking about {topic_label}? Just let me know what you're "
+                    f"looking for and I'll help narrow it down.",
+
+                    f"Happy to help with {topic_label} — what specifically are you after?",
+
+                    f"Still on {topic_label}? Tell me what you need and I'll narrow it right down.",
+                ])
+            elif prior_need:
+                final_text = random.choice([
+                    "Take your time — what would you like to find or do today? "
+                    "Shopping, dining, a movie, or something else?",
+
+                    "No rush. What are you in the mood for — shopping, food, a film, or exploring?",
+
+                    "Whenever you're ready — what can I help you find?",
+                ])
+            else:
+                final_text = random.choice([
+                    "What are you looking for today? "
+                    "Tell me anything — a store, a meal, a movie, or even just a vibe — "
+                    "and I'll point you in the right direction.",
+
+                    "What brings you here today? Shopping, dining, a movie, or something else?",
+
+                    "How can I help? Just name it — store, food, film, or any service — "
+                    "and I'll take it from there.",
+                ])
+            assistant_msg = Message(
+                role="assistant",
+                content=final_text,
+                turn_id=state.turn_id,
+                metadata={"strategy": "acknowledgement_clarification", "experience_mode": "clarification"},
+            )
+            return {
+                "final_response_text": final_text,
+                "response_debug_summary": "strategy=acknowledgement_clarification",
+                "messages": [assistant_msg],
+                "debug_enrichment": state.debug_enrichment.model_copy(
+                    update={"response_experience_mode": "acknowledgement_clarification"}
+                ),
+                "_trace_summary": "Acknowledgement: returned clarifying question",
+            }
+
+    # ── Early exit: companion_correction — user denied a false assumption ───
+    # The LLM already cleared the incorrect companions via scene_corrections.
+    # The bot must acknowledge the correction naturally and ask what they want.
+    if state.intent.message_kind == "companion_correction":
+        # Determine what was corrected to phrase the acknowledgement naturally.
+        corrections = state.intent.scene_corrections
+        is_solo_correction = any(
+            t in corrections for t in ("all_family_context", "visit_type:solo")
+        ) or any(
+            sig in (state.normalized_user_message or "").lower()
+            for sig in ("alone", "solo", "by myself", "just me", "no kids", "dont have kids",
+                        "don't have kids")
+        )
+        if is_solo_correction:
+            final_text = random.choice([
+                "Got it — solo visit, noted. "
+                "What are you looking to do today? Shopping, grab a bite, catch a film, "
+                "or just exploring?",
+
+                "Noted, just you — my apologies for the mix-up. "
+                "What can I help you find today?",
+
+                "Solo it is — got it. What are you after? "
+                "A meal, some shopping, a film, or something else?",
+            ])
+        else:
+            final_text = random.choice([
+                "Understood, my mistake for the wrong assumption. "
+                "What are you actually looking for today? "
+                "Shopping, dining, a movie, or something else?",
+
+                "My apologies — I got that wrong. Let's start fresh. "
+                "What would you like help with?",
+
+                "Thanks for the correction. What are you looking to do? "
+                "I can help with shopping, food, entertainment, or services.",
+            ])
+        assistant_msg = Message(
+            role="assistant",
+            content=final_text,
+            turn_id=state.turn_id,
+            metadata={"strategy": "companion_correction_ack", "experience_mode": "correction"},
+        )
+        return {
+            "final_response_text": final_text,
+            "response_debug_summary": "strategy=companion_correction_ack",
+            "messages": [assistant_msg],
+            "debug_enrichment": state.debug_enrichment.model_copy(
+                update={"response_experience_mode": "companion_correction_ack"}
+            ),
+            "_trace_summary": "Companion correction: acknowledged + asked what visitor wants",
+        }
+
+    # ── Early exit: disengagement — visitor is frustrated or giving up ───
+    # Returns a brief empathetic recovery message instead of recycling prior
+    # recommendations. Does NOT call the full LLM pipeline.
+    if state.intent.message_kind == "disengagement":
+        excluded = state.scene.excluded_domains
+        if excluded:
+            domains_str = " or ".join(excluded)
+            final_text = random.choice([
+                f"Apologies for not getting that right — I kept suggesting "
+                f"{domains_str} options even after you said no. "
+                f"What kind of activity are you looking for? I can help with "
+                f"shopping, entertainment, services, or directions.",
+
+                f"Sorry about that — I should have moved on from {domains_str} sooner. "
+                f"What would you like to do instead?",
+
+                f"My mistake for not catching that earlier. Let's move away from {domains_str}. "
+                f"Shopping, entertainment, or something else?",
+            ])
+        else:
+            final_text = random.choice([
+                "I'm sorry if I wasn't being helpful. "
+                "What would you like to do? I can help with shopping, dining, "
+                "movies, entertainment, services, or directions at the mall.",
+
+                "Apologies for the confusion. Let's try again — "
+                "what are you looking for right now?",
+
+                "My bad — let me do better. Tell me what you need "
+                "and I'll point you straight to it.",
+            ])
+        assistant_msg = Message(
+            role="assistant",
+            content=final_text,
+            turn_id=state.turn_id,
+            metadata={"strategy": "disengagement_recovery", "experience_mode": "disengagement"},
+        )
+        return {
+            "final_response_text": final_text,
+            "response_debug_summary": "strategy=disengagement_recovery | visitor_disengaged",
+            "messages": [assistant_msg],
+            "debug_enrichment": state.debug_enrichment.model_copy(
+                update={"response_experience_mode": "disengagement_recovery"}
+            ),
+            "_trace_summary": "Generated disengagement recovery response",
+        }
+
     is_mall_info = (
         state.response_plan.chosen_strategy == "mall_overview"
         or state.intent.domain == "mall_info"
@@ -1622,6 +2088,21 @@ async def generate_response(state: ConciergeState) -> dict:
     else:
         mall_context = mall_ctx.get_canonical_for_prompt()
         system_prompt = get_concierge_system_prompt(mall_context)
+
+        # ── Emotional recovery tone modifier ──────────────────────────
+        # When the visitor was recently frustrated or disengaged, append a
+        # tone instruction so the LLM opens with brief, genuine empathy
+        # before moving into recommendations.  This keeps the first sentence
+        # warm without turning the entire response into an apology.
+        if state.scene.recent_mood in ("emotional", "disengagement"):
+            system_prompt += (
+                "\n\nTONE OVERRIDE — EMOTIONAL RECOVERY: The visitor was recently "
+                "frustrated or disengaged. Begin your response with ONE brief, "
+                "genuine sentence acknowledging their experience (e.g. 'Let me try "
+                "to make this easier for you.' or 'Happy to help you find the right "
+                "spot.'). Do NOT over-apologise or dwell on it — pivot quickly to "
+                "the recommendation. Keep the rest of the response warm but practical."
+            )
 
         query = state.normalized_user_message or state.raw_user_message
         playbook = _format_playbook(state)
@@ -1765,10 +2246,9 @@ async def generate_response(state: ConciergeState) -> dict:
             "mall context. Never invent names or details."
         )
 
-        langchain_messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt),
-        ]
+        langchain_messages = [SystemMessage(content=system_prompt)]
+        langchain_messages.extend(_build_prior_messages(state))
+        langchain_messages.append(HumanMessage(content=user_prompt))
 
         try:
             llm = _get_llm()
@@ -1856,6 +2336,22 @@ def _build_concierge_experience_instruction(
             f"REFINEMENT NOTE: {exp.refinement_acknowledgement}. "
             "Open with a natural acknowledgement of this refinement "
             "(e.g. 'For something quicker...' / 'If you're with a child...').\n"
+        )
+
+    # ── Mode: category negation (highest priority after disengagement) ───
+    if state.intent.message_kind == "category_negation":
+        excluded = state.scene.excluded_domains
+        domains_str = " and ".join(excluded) if excluded else "the excluded category"
+        return (
+            f"{ack_prefix}"
+            "CATEGORY EXCLUSION MODE: The visitor has explicitly refused a category.\n"
+            f"Excluded domains: {domains_str}\n"
+            "Rules:\n"
+            "  1. Do NOT suggest anything from the excluded domains — not even as a passing mention\n"
+            "  2. Acknowledge the exclusion briefly (e.g. 'Understood — no dining.')\n"
+            "  3. Pivot to alternatives: ask what the visitor IS looking for, "
+            "or suggest non-excluded options (shopping, entertainment, services)\n"
+            "  4. Keep the response short — 2-3 sentences maximum\n\n"
         )
 
     # ── Mode: constraint refinement (highest priority) ────────────────

@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-547949540816",
+  "session_id": "e2e-c736460f927a",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-9af26527df71",
+  "user_message": "we have like 300 SAR between us so what can we actually afford",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bactually\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-27 21:53:24.535519"
+}

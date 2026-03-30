@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
     openai_temperature: float = 0.3
+    # Separate model for intent classification, scene extraction, and routing
+    # escape-hatch calls.  Defaults to gpt-4o-mini which is ~30x cheaper per
+    # token than gpt-4o and accurate enough for structured classification tasks.
+    # Set BACKEND_CLASSIFIER_MODEL in .env to override.
+    classifier_model: str = "gpt-4o-mini"
 
     # --- Mall ---
     # Comma-separated list of mall IDs to load at startup.

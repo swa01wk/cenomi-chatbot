@@ -245,14 +245,14 @@ class TestSceneEngine:
 
     @pytest.mark.asyncio
     async def test_inferred_scene_notes_populated(self):
-        """Scene notes must be populated when meaningful inferences are made."""
+        """Scene notes must be populated in debug_enrichment when meaningful inferences are made."""
         from app.nodes.update_scene_memory import update_scene_memory
 
         state = _make_state(msg="with my 5 yr old")
         result = await update_scene_memory(state)
-        scene = result["scene"]
+        debug = result["debug_enrichment"]
 
-        assert len(scene.inferred_scene_notes) > 0, "Expected inferred_scene_notes to be populated"
+        assert len(debug.inferred_scene_notes) > 0, "Expected inferred_scene_notes in debug_enrichment to be populated"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -576,6 +576,7 @@ class TestRankAndDedupe:
 # 5. Interpret Turn — constraint_refinement detection
 # ══════════════════════════════════════════════════════════════════════════════
 
+@pytest.mark.skip(reason="_detect_message_kind removed — message_kind is LLM-classified now")
 class TestInterpretTurn:
     """Tests for message_kind detection, specifically constraint_refinement."""
 
@@ -741,20 +742,10 @@ class TestAcceptanceCriteria:
         # Should have reasonable cap
         assert plan.entity_cap <= 8, f"Cap too high for bare shopping: {plan.entity_cap}"
 
+    @pytest.mark.skip(reason="_detect_message_kind removed — message_kind is LLM-classified now")
     @pytest.mark.asyncio
     async def test_ac6_something_quicker_is_constraint_refinement(self):
         """AC6: 'something quicker' with prior context → constraint_refinement."""
-        from app.nodes.interpret_turn import _detect_message_kind
-
-        state = _make_state(
-            msg="something quicker",
-            active_shortlist=["McDonald's", "Herfy"],
-        )
-        state.scene.active_shortlist = ["McDonald's", "Herfy"]
-        state.scene.current_need = "food"
-
-        kind = _detect_message_kind("something quicker", 2, state)
-        assert kind == "constraint_refinement"
 
     @pytest.mark.asyncio
     async def test_ac7_closer_to_cinema_sets_near_cinema(self):

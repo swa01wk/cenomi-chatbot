@@ -270,7 +270,12 @@ async def choose_strategy(state: ConciergeState) -> dict:
         tone_mode = "compact_human_concierge"
 
     # ── must_acknowledge_scene ────────────────────────────────────────
-    must_acknowledge = is_contextual_query or chosen == "guided_plan"
+    # Only acknowledge on the first turn the visitor's scene is established,
+    # or when scene context changes (scene_acknowledged resets on companion change).
+    must_acknowledge = (
+        (is_contextual_query or chosen == "guided_plan")
+        and not state.scene.scene_acknowledged
+    )
 
     # ── must_include_anchor_type ──────────────────────────────────────
     anchor_type = ""

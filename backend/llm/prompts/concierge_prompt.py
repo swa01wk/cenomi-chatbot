@@ -8,7 +8,33 @@ restaurant, and facility the model references actually exists.
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any
+
+
+def _is_offer_active(ev: dict) -> bool:
+    """Return True if the offer/event has not expired.
+
+    Checks ``valid_until``, ``end_date``, or the end half of a ``dates`` range
+    (format "YYYY-MM-DD to YYYY-MM-DD"). An empty / missing date is treated as
+    still active so we never silently drop data with unknown validity.
+    """
+    for key in ("valid_until", "end_date"):
+        val = ev.get(key, "")
+        if val:
+            try:
+                return date.fromisoformat(val) >= date.today()
+            except ValueError:
+                pass
+    # Try the end half of a "dates" range string
+    dates_str = ev.get("dates", "")
+    if " to " in dates_str:
+        end_part = dates_str.split(" to ")[-1].strip()
+        try:
+            return date.fromisoformat(end_part) >= date.today()
+        except ValueError:
+            pass
+    return True
 
 
 _ROLE = (
@@ -50,16 +76,27 @@ GUIDELINES — follow these strictly:
    questions. Lead with value — clarify only when truly ambiguous.
 
 3. INTERPRET VAGUE QUERIES AS EXPERIENCE GUIDANCE
-   If the user says something short or vague — "gift", "coffee", "kids",
-   "date", "shopping" — infer their intent and respond with 3-5 concrete
-   suggestions drawn from the tenant list. Do NOT ask "What kind of gift?"
-   — just suggest relevant options. Include a brief description and
+   If the user says something short or vague — "coffee", "kids", "date",
+   "shopping" — infer their intent and respond with 2–3 concrete
+   suggestions drawn from the tenant list. Include a brief description and
    location for each suggestion.
    IMPORTANT: If the visitor has shared context (companions, occasion),
    tailor suggestions to their situation. For example:
    - "coffee" + with kids → kid-friendly cafes
    - "food" + after asking about gifts for son → kid-friendly dining
    - "shopping" + with girlfriend → fashion, jewelry, perfume options
+
+   EXCEPTION — GIFT OR SHOPPING WITH NO AUDIENCE CONTEXT:
+   When the query is about a gift or shopping AND there is NO companion,
+   target person, or occasion in the visitor context, do NOT assume who
+   it is for. Instead:
+     1. Offer 2 broad suggestions to show you can help immediately.
+     2. Ask exactly ONE targeting question to understand the recipient,
+        e.g. "Is this for a partner, a child, or a friend — that'll
+        help me narrow it down."
+   Never ask more than one question. Never ask about budget at this stage.
+   For fashion/clothing queries with no stated style preference, a single
+   style question is also appropriate, e.g. "Ethnic, western, or designer?"
 
 4. GUIDE LIKE A CONCIERGE, NOT A DIRECTORY
    Frame recommendations as a guided experience, not a flat list.
@@ -253,7 +290,18 @@ GUIDELINES — follow these strictly:
 24. NEVER DUMP A CATEGORY LIST UNLESS EXPLICITLY ASKED
     If the visitor asks "where should I eat with my family?" — give a PLAN, not a list.
     Only dump a full category list when the visitor explicitly asks: "what cafes are there?"
-    or "show me all the perfume stores". Even then, keep it organized and scannable."""
+    or "show me all the perfume stores". Even then, keep it organized and scannable.
+
+25. NEVER INVENT COMPANIONS OR PEOPLE
+    Only refer to companions, people, roles, or relationships that are explicitly stated
+    in the VISITOR CONTEXT below (companions list, target_person, occasion).
+    Do NOT invent characters the visitor has not mentioned.
+    Examples of what NEVER to do:
+    - Visitor mentioned "girlfriend" → do NOT write "you, your girlfriend, and your friend"
+    - Visitor mentioned no children → do NOT write "keep the kids entertained"
+    - Visitor is solo → do NOT write "your group" or "the whole family"
+    If you are unsure whether a companion exists, omit any reference to them entirely.
+    This rule is absolute — inventing companions is more harmful than omitting a mention."""
 
 _RESPONSE_COMPOSITION = """\
 RESPONSE COMPOSITION FORMULA:
@@ -448,8 +496,8 @@ def _format_mall_context(mall_context: dict[str, Any]) -> str:
                 f"valet {'available' if parking.get('valet') else 'not available'}"
             )
 
-    # --- events / offers ---
-    events = mall_context.get("events_and_offers") or []
+    # --- events / offers (active only) ---
+    events = [ev for ev in (mall_context.get("events_and_offers") or []) if _is_offer_active(ev)]
     if events:
         ev_lines = []
         for ev in events[:6]:

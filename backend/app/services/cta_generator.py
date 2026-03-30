@@ -137,3 +137,30 @@ def get_cta_example(cta_type: str) -> str:
     """Return just the example text for the given CTA type (for testing / logging)."""
     bank = _CTA_BANKS.get(cta_type, [])
     return bank[0] if bank else ""
+
+
+# Short clickable chip labels for each CTA type.
+# These surface in the frontend as quick-reply pills below the response.
+# Max 2 chips per CTA — keep each label ≤ 6 words.
+_CTA_CHIP_LABELS: dict[str, list[str]] = {
+    "movie_refinement":  ["Filter by genre", "Help me pick one"],
+    "family_narrowing":  ["Kid-friendly picks only", "Family options"],
+    "dining_suggestion": ["Narrow by cuisine", "Suggest dessert or coffee"],
+    "dining_next":       ["Dessert spots", "Coffee nearby"],
+    "shopping_narrowing": ["Filter by budget", "Who is it for?"],
+    "service_help":      ["Guide me there", "Other services"],
+    "overview_continue": ["Shopping", "Dining", "Cinema"],
+    "route_help":        ["More directions", "Other services"],
+    "cross_mall":        ["Search other malls", "Check availability"],
+    "cinema_followup":   ["Booking options", "Dining near cinema"],
+    "offer_followup":    ["Show active deals", "Latest offers"],
+}
+
+
+def get_cta_suggestions(cta_type: str) -> list[str]:
+    """Return 2–3 short chip labels for the given CTA type.
+
+    These are meant to be rendered as quick-reply pills in the UI.
+    Returns an empty list when no chips are configured for the type.
+    """
+    return list(_CTA_CHIP_LABELS.get(cta_type, []))

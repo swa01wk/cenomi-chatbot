@@ -35,12 +35,90 @@ Routing rules (in priority order):
 
 from __future__ import annotations
 
+import json
 import logging
 
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openai import ChatOpenAI
+
+from app.config.settings import get_settings
 from app.models.state import ConciergeState
 from app.nodes._tracing import traced_node
 
 logger = logging.getLogger(__name__)
+
+# ── LLM routing escape hatch ──────────────────────────────────────────────────
+
+_routing_llm: ChatOpenAI | None = None
+
+
+def _get_routing_llm() -> ChatOpenAI:
+    global _routing_llm
+    if _routing_llm is None:
+        settings = get_settings()
+        _routing_llm = ChatOpenAI(
+            model=settings.classifier_model,
+            temperature=0.0,
+            api_key=settings.openai_api_key,
+            max_tokens=80,
+        )
+    return _routing_llm
+
+
+_ROUTING_ESCAPE_PROMPT = """\
+You are a routing classifier for a mall concierge chatbot.
+Decide whether the visitor's current message should go to the FACTUAL pipeline
+(exact data lookup: hours, movies, store locations, brand availability) or the
+CONCIERGE pipeline (recommendations, planning, suggestions, experience curation).
+
+Return ONLY valid JSON:
+{"flow_type": "factual" | "concierge", "reason": "one sentence"}
+
+RULES:
+- factual: user wants a specific data answer — hours, showtimes, store location, brand presence
+- concierge: user wants recommendations, suggestions, a plan, or curation
+- When in doubt, prefer concierge
+"""
+
+
+async def _llm_routing_escape(
+    msg: str,
+    intent_domain: str,
+    intent_sub_intent: str,
+    intent_confidence: float,
+    last_flow_type: str,
+    primary_intent: str,
+) -> tuple[str, str]:
+    """
+    LLM escape hatch — called only when all hard rules leave flow_type empty.
+    Returns (flow_type, reason) tuple.  Falls back to ("concierge", "llm_escape_fallback")
+    on any error.
+    """
+    try:
+        llm = _get_routing_llm()
+        context = (
+            f"Message: {msg}\n"
+            f"Classified intent: {intent_domain}/{intent_sub_intent} "
+            f"(confidence={intent_confidence:.2f})\n"
+            f"Previous flow: {last_flow_type or 'none'}\n"
+            f"Primary intent: {primary_intent or 'unknown'}"
+        )
+        response = await llm.ainvoke([
+            SystemMessage(content=_ROUTING_ESCAPE_PROMPT),
+            HumanMessage(content=context),
+        ])
+        raw = response.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0]
+        parsed = json.loads(raw)
+        flow = parsed.get("flow_type", "concierge")
+        reason = parsed.get("reason", "llm_escape_hatch")
+        if flow not in ("factual", "concierge"):
+            flow = "concierge"
+        return flow, f"[llm_escape] {reason}"
+    except Exception as exc:
+        logger.warning("LLM routing escape hatch failed: %s", exc)
+        return "concierge", "llm_escape_fallback (error)"
 
 # Sub-intents that require factual flow regardless of scene
 # NOTE: "offer_details" intentionally excluded — offer/sale queries in a shopping
@@ -432,6 +510,24 @@ async def route_flow(state: ConciergeState) -> dict:
         if not primary_intent:
             primary_intent = "dining_recommendation"
 
+    # ── 0d. Emotional recovery: prefer concierge for recovering visitors ──
+    # When the visitor was recently frustrated or disengaged, route ambiguous
+    # queries to concierge for a warm, guided response rather than a cold
+    # factual data dump.  Hard factual queries (exact location, showtimes,
+    # brand presence) still go factual regardless.
+    if not flow_type and scene.recent_mood in ("emotional", "disengagement"):
+        is_hard_factual = (
+            intent.sub_intent in _FACTUAL_SUB_INTENTS
+            or intent.domain in _FACTUAL_DOMAINS
+            or any(sig in msg for sig in _FACTUAL_HARD_SIGNALS)
+        )
+        if not is_hard_factual:
+            flow_type = "concierge"
+            routing_reason = (
+                f"Emotional recovery (recent_mood='{scene.recent_mood}'): "
+                "routing ambiguous query to concierge for warm guided response"
+            )
+
     # ── 0. Domain lock: preserve factual primary intent across turns ──
     # When the user established a factual domain (e.g. movie_lookup) in a prior
     # turn, subsequent follow-ups MUST stay in that domain.
@@ -652,20 +748,35 @@ async def route_flow(state: ConciergeState) -> dict:
             flow_type = "concierge"
             routing_reason = "Explicit planning/suggestion keyword signals detected"
 
-    # ── 7b. Context-setting → concierge + acknowledge scene ─────────
-    # "i am bridesmaid", "i am here with the kid", etc. are scene context
-    # declarations.  They MUST go concierge for acknowledgement + options.
-    # They must NEVER be routed to factual even if family/companion signals
-    # are present.
-    elif not flow_type and intent.message_kind == "context_setting":
+    # ── 7b. Context-setting / companion_correction / acknowledgement → concierge ──
+    # context_setting: user declares role/companions/occasion → acknowledge + offer options.
+    # companion_correction: user corrects a wrong assumption → acknowledge + ask what they want.
+    # acknowledgement: vague filler with no intent → ask a clarifying question.
+    # None of these should ever reach factual retrieval.
+    elif not flow_type and intent.message_kind in (
+        "context_setting", "companion_correction", "acknowledgement",
+    ):
         flow_type = "concierge"
-        routing_reason = (
-            "Context-setting message: user declared role/companions/occasion. "
-            "Routing to concierge for scene acknowledgement and next-step options."
-        )
-        # Ensure the response plan acknowledges the scene
-        if not primary_intent:
-            primary_intent = "discovery"
+        if intent.message_kind == "context_setting":
+            routing_reason = (
+                "Context-setting message: user declared role/companions/occasion. "
+                "Routing to concierge for scene acknowledgement and next-step options."
+            )
+            if not primary_intent:
+                primary_intent = "discovery"
+        elif intent.message_kind == "companion_correction":
+            routing_reason = (
+                "Companion correction: user is correcting a false companion/demographic "
+                "assumption. Scene corrections applied; bot should acknowledge and ask "
+                "what the visitor actually wants."
+            )
+            primary_intent = "companion_correction_response"
+        else:  # acknowledgement
+            routing_reason = (
+                "Acknowledgement: non-actionable filler with no new intent. "
+                "Bot must ask a clarifying question — not repeat or expand recommendations."
+            )
+            primary_intent = "clarification_request"
 
     # ── 8. Follow-up of a factual turn → stay factual ─────────────
     elif not flow_type and (
@@ -698,10 +809,22 @@ async def route_flow(state: ConciergeState) -> dict:
         if flow_type == "factual":
             retrieval_priority = "high"
 
-    # ── 11. Default: concierge (safe fallback) ─────────────────────
+    # ── 11. LLM escape hatch — reason about ambiguous cases ───────
+    # Only fires when all hard rules (0–10) left flow_type empty.
+    # Uses gpt-4o-mini with a minimal prompt (~80 tokens output cap).
     if not flow_type:
-        flow_type = "concierge"
-        routing_reason = "Default concierge flow — no strong factual signals detected"
+        flow_type, routing_reason = await _llm_routing_escape(
+            msg=msg,
+            intent_domain=intent.domain,
+            intent_sub_intent=intent.sub_intent,
+            intent_confidence=intent.confidence,
+            last_flow_type=scene.last_flow_type or "",
+            primary_intent=primary_intent,
+        )
+        # Safety: ensure valid value
+        if flow_type not in ("factual", "concierge"):
+            flow_type = "concierge"
+            routing_reason = "Default concierge flow — no strong factual signals detected"
 
     # ── Resolve response strategy ─────────────────────────────────────
     # Determine the canonical response strategy from primary_intent +

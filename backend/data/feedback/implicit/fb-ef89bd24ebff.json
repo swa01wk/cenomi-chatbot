@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-ef89bd24ebff",
+  "session_id": "e2e-c66a356e8dd7",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-352ade2db58f",
+  "user_message": "for my kid",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+my\\s+(?:son|daughter|kid|child|baby|toddler)\\b",
+      "confidence": 0.9500000000000001
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-27 21:37:01.859483"
+}

@@ -46,6 +46,7 @@ from app.runtime import (
 )
 from app.services.clean_context import clean_context_builder
 from app.services.concierge import _build_debug_payload, _get_graph, _to_state
+from app.services.cta_generator import get_cta_suggestions
 from app.services.tenant_params import apply_session_overrides, load_tenant_config
 from app.utils.ids import generate_session_id
 
@@ -234,10 +235,18 @@ async def _generate_stream(
         if request.debug:
             debug_payload = _build_debug_payload(result, elapsed_ms)
 
+    # Derive quick-reply chip suggestions from the active CTA type so the
+    # frontend can render contextual pills BEFORE any closing intent question.
+    suggestions: list[str] = []
+    if result is not None:
+        cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
+        suggestions = get_cta_suggestions(cta_type)
+
     done_data = {
         "session_id": session_id,
         "session_state": session_summary.model_dump() if session_summary else {},
         "debug": debug_payload.model_dump() if debug_payload else None,
+        "suggestions": suggestions,
     }
     yield _sse("done", json.dumps(done_data, default=str))
 

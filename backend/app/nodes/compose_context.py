@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import date
 from typing import Any
 
 from app.models.state import ConciergeState, ContextComposition, DebugEnrichment
@@ -159,6 +160,60 @@ _APPAREL_PRODUCT_CATEGORIES: frozenset[str] = frozenset({
 _BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
     "gifts", "fashion", "", "all_stores",
 })
+
+# Mapping from user-expressed excluded_domain labels → entity_type sets that
+# must be hard-removed from the entity list before ranking.
+# This is the enforcement gate between SceneMemory.excluded_domains and the
+# mall intelligence layer output.
+_EXCLUDED_DOMAIN_ENTITY_TYPES: dict[str, frozenset[str]] = {
+    "dining": frozenset({
+        "dining", "restaurant", "cafe", "coffee", "dessert", "food", "bakery",
+        "quick_service", "fast_food", "food_court", "casual_dining",
+        "fine_dining", "fast_casual",
+    }),
+    "cafe": frozenset({
+        "cafe", "coffee", "coffee_shop", "bakery", "dessert",
+    }),
+    "shopping": frozenset({
+        "store", "retail", "fashion", "apparel", "electronics", "shop",
+        "boutique", "department_store",
+    }),
+    "entertainment": frozenset({
+        "cinema", "entertainment", "movie", "arcade", "gaming",
+        "amusement", "family_entertainment",
+    }),
+}
+
+# Maps category retrieval keys (from detect_category_from_query / detect_category_from_intent)
+# to the high-level domain they belong to.  Used by _resolve_category_key to skip
+# retrieval entirely when the category falls inside an excluded domain — preventing
+# a conflicting "CATEGORY RETRIEVAL: N entities. List ALL" note from ever reaching
+# the LLM prompt when that domain has been refused by the user.
+_CATEGORY_KEY_TO_DOMAIN: dict[str, str] = {
+    # Dining
+    "all_dining": "dining",
+    "fast_food":  "dining",
+    "restaurant": "dining",
+    "cafe":       "dining",
+    "coffee":     "dining",
+    "dessert":    "dining",
+    # Shopping
+    "all_stores":  "shopping",
+    "clothing":    "shopping",
+    "fashion":     "shopping",
+    "perfume":     "shopping",
+    "beauty":      "shopping",
+    "jewelry":     "shopping",
+    "accessories": "shopping",
+    "gift":        "shopping",
+    "electronics": "shopping",
+    "kids":        "shopping",
+    "sportswear":  "shopping",
+    "home":        "shopping",
+    # Entertainment
+    "cinema":        "entertainment",
+    "entertainment": "entertainment",
+}
 
 # ── Shopping task → allowed topic blocks ──────────────────────────────────
 # When a specific shopping task is active, only topic blocks relevant to that
@@ -387,10 +442,29 @@ def _is_mall_overview_followup(state: ConciergeState) -> bool:
 
     Ensures that "more about the mall" / "what else" / "tell me more" stays
     locked in mall_overview and does NOT reopen shopping/dining entities.
+
+    Guard: only applies when the conversation is STILL in the mall_info context.
+    If active_topic has moved to shopping, dining, or entertainment, this must
+    return False even if the visitor once saw a mall overview — "what else"
+    in a shopping context means "more shopping options", not "more mall facts".
     """
     scene = state.scene
     intent = state.intent
     msg = (state.normalized_user_message or "").lower().strip()
+
+    # Hard exit: if the active topic has moved out of mall_info, this function
+    # must not capture "what else" / "more" meant for the new domain.
+    _NON_OVERVIEW_TOPICS = {
+        "shopping", "dining", "entertainment", "services",
+        "navigation", "exploration", "general",
+    }
+    if scene.active_topic in _NON_OVERVIEW_TOPICS:
+        return False
+
+    # Also exit if there is an active shopping task — the user is shopping,
+    # regardless of what their first topic was.
+    if scene.shopping_task and scene.shopping_task.product_type:
+        return False
 
     was_in_overview = (
         scene.active_topic in ("mall_info", "mall_overview")
@@ -828,6 +902,43 @@ async def compose_context(state: ConciergeState) -> dict:
                 + (f": {_off_topic_names_suppressed[:5]}" if _off_topic_names_suppressed else "")
             )
 
+    # ── Domain exclusion hard filter ──────────────────────────────────
+    # Applies user-expressed domain exclusions (e.g. "no food", "no dining")
+    # as a hard filter AFTER all retrieval paths. This ensures excluded
+    # categories are never surfaced regardless of how they were retrieved.
+    if scene.excluded_domains:
+        entities_before_exclusion = len(entities)
+        entities = _apply_domain_exclusions(entities, scene.excluded_domains)
+
+        # If all entities were removed AND there's a before_movie occasion,
+        # attempt to re-route to non-dining near-cinema alternatives.
+        if not entities and scene.occasion in ("before_movie", "after_movie"):
+            fallback_category = "entertainment" if "entertainment" not in scene.excluded_domains else None
+            if not fallback_category:
+                fallback_category = "all_stores" if "shopping" not in scene.excluded_domains else None
+            if fallback_category:
+                try:
+                    fallback_entities = mall_ctx.get_entities_by_category(fallback_category)
+                    if fallback_entities:
+                        # Re-apply exclusion filter on the fallback set too
+                        fallback_entities = _apply_domain_exclusions(
+                            fallback_entities, scene.excluded_domains
+                        )
+                        entities = fallback_entities[:10]
+                        notes.append(
+                            f"DOMAIN EXCLUSION RE-ROUTE: User excluded {scene.excluded_domains}. "
+                            f"Switched to '{fallback_category}' alternatives ({len(entities)} found)."
+                        )
+                except Exception:
+                    warnings.append("Domain exclusion re-route fallback failed")
+
+        if entities_before_exclusion > 0 and len(entities) < entities_before_exclusion:
+            warnings.append(
+                f"Domain exclusion: removed "
+                f"{entities_before_exclusion - len(entities)} entities "
+                f"(excluded domains: {scene.excluded_domains})"
+            )
+
     # ── Apply tenant ranking biases ───────────────────────────────────
     if state.active_tenant_parameters and entities:
         try:
@@ -882,6 +993,12 @@ async def compose_context(state: ConciergeState) -> dict:
         notes.append(
             f"Playbook '{playbook_obj.playbook_id}' active — "
             f"{playbook_obj.concierge_reasoning_notes}"
+        )
+    if scene.excluded_domains:
+        notes.append(
+            f"HARD EXCLUSION: User has explicitly refused these domains: {scene.excluded_domains}. "
+            f"DO NOT recommend ANY entities from these categories. "
+            f"If no alternatives exist, ask the user what they are looking for instead."
         )
     if scene.rejected_options:
         notes.append(f"Exclude previously rejected: {scene.rejected_options}")
@@ -985,6 +1102,11 @@ def _resolve_category_key(state: ConciergeState) -> str | None:
 
     Checks the sub_intent first, then falls back to query text analysis.
     Returns a category rule key or None.
+
+    If the resolved key belongs to a domain that the user has explicitly
+    excluded (scene.excluded_domains), returns None so that no category
+    retrieval note is ever written for that domain — avoiding a conflicting
+    "CATEGORY RETRIEVAL: N entities. List ALL" directive in the LLM prompt.
     """
     sub_intent = state.intent.sub_intent
     query = state.normalized_user_message or state.raw_user_message
@@ -995,16 +1117,22 @@ def _resolve_category_key(state: ConciergeState) -> str | None:
         # general_shopping query), then fall back to intent mapping
         from_query = detect_category_from_query(query)
         if from_query:
-            return from_query
-        from_intent = detect_category_from_intent(sub_intent)
-        if from_intent:
-            return from_intent
+            resolved = from_query
+        else:
+            from_intent = detect_category_from_intent(sub_intent)
+            resolved = from_intent
+    elif state.intent.domain in ("shopping", "dining"):
+        # Query-based detection for domains that commonly ask for categories
+        resolved = detect_category_from_query(query)
+    else:
+        resolved = None
 
-    # Query-based detection for domains that commonly ask for categories
-    if state.intent.domain in ("shopping", "dining"):
-        return detect_category_from_query(query)
+    if resolved and state.scene.excluded_domains:
+        domain_for_key = _CATEGORY_KEY_TO_DOMAIN.get(resolved, "")
+        if domain_for_key in state.scene.excluded_domains:
+            return None
 
-    return None
+    return resolved
 
 
 def _exploration_topic_blocks(mall_ctx) -> list[str]:
@@ -1092,10 +1220,20 @@ def _add_location_info(entity_data: dict, enriched: dict) -> None:
         enriched["directions_hint"] = loc.get("directions_hint", "")
 
 
+def _is_date_active(date_str: str) -> bool:
+    """Return True if date_str is empty (unknown) or is today / in the future."""
+    if not date_str:
+        return True
+    try:
+        return date.fromisoformat(date_str) >= date.today()
+    except ValueError:
+        return True
+
+
 def _inject_offer_context(
     entities: list[dict], mall_ctx, state: ConciergeState,
 ) -> None:
-    """Pre-load offer and event data into the entity list for offer queries."""
+    """Pre-load active offer and event data into the entity list for offer queries."""
     try:
         canonical = mall_ctx._builder._canonical
         offers = canonical.get("offers", [])
@@ -1105,6 +1243,9 @@ def _inject_offer_context(
 
         for offer in offers:
             if offer.entity_id in existing_ids:
+                continue
+            # Skip expired offers
+            if not _is_date_active(getattr(offer, "valid_until", "")):
                 continue
             store_names: list[str] = []
             tenant_ids = getattr(offer, "tenant_entity_ids", [])
@@ -1133,6 +1274,9 @@ def _inject_offer_context(
 
         for event in events:
             if event.entity_id in existing_ids:
+                continue
+            # Skip past events
+            if not _is_date_active(getattr(event, "end_date", "")):
                 continue
             event_data = {
                 "entity_id": event.entity_id,
@@ -1196,14 +1340,30 @@ def _map_audience_to_semantic_tags(scene) -> list[str]:
             tags.extend(audience_tag_map[aud_tag])
 
     target_person_map: dict[str, list[str]] = {
-        "child": ["kid_friendly", "has_kids_menu", "family_friendly"],
-        "girlfriend": ["romantic", "gift_friendly", "premium"],
-        "boyfriend": ["gift_friendly", "premium"],
-        "wife": ["romantic", "gift_friendly", "premium", "special_occasion"],
-        "husband": ["gift_friendly", "premium"],
+        "child":        ["kid_friendly", "has_kids_menu", "family_friendly"],
+        "girlfriend":   ["romantic", "gift_friendly", "premium"],
+        "boyfriend":    ["gift_friendly", "premium"],
+        "wife":         ["romantic", "gift_friendly", "premium", "special_occasion"],
+        "husband":      ["gift_friendly", "premium"],
+        "bride":        ["occasion_wear", "formal", "premium", "special_occasion", "bridal"],
+        "groom":        ["occasion_wear", "formal", "premium", "special_occasion"],
+        "bridesmaid":   ["occasion_wear", "formal", "gift_friendly"],
+        "guest":        ["occasion_wear", "formal", "special_occasion"],
     }
     if scene.target_person and scene.target_person in target_person_map:
         tags.extend(target_person_map[scene.target_person])
+
+    user_role_tag_map: dict[str, list[str]] = {
+        "bride":           ["occasion_wear", "formal", "premium", "bridal"],
+        "groom":           ["occasion_wear", "formal", "premium"],
+        "bridesmaid":      ["occasion_wear", "formal", "gift_friendly"],
+        "maid_of_honor":   ["occasion_wear", "formal", "gift_friendly"],
+        "best_man":        ["occasion_wear", "formal"],
+        "mother_of_bride": ["occasion_wear", "formal", "premium"],
+        "father_of_bride": ["occasion_wear", "formal"],
+    }
+    if scene.user_role and scene.user_role in user_role_tag_map:
+        tags.extend(user_role_tag_map[scene.user_role])
 
     return list(dict.fromkeys(tags))
 
@@ -1257,6 +1417,47 @@ def _filter_entities_by_intent_domain(
 
     # Fewer than 2 matches — keep full list so response isn't empty
     return entities
+
+
+def _apply_domain_exclusions(
+    entities: list[dict],
+    excluded_domains: list[str],
+) -> list[dict]:
+    """
+    Hard-remove entities whose entity_type belongs to a user-excluded domain.
+
+    This is the enforcement gate between SceneMemory.excluded_domains (set when
+    the user says "no food", "strictly no food", etc.) and the entity list
+    produced by the mall intelligence layer.
+
+    Unlike _filter_entities_by_intent_domain (which is a best-effort filter with
+    a ≥2 fallback), this function is a HARD filter — it respects the user's
+    explicit refusal unconditionally and returns an empty list if nothing survives.
+    Downstream logic (re-routing) handles the empty case.
+    """
+    if not excluded_domains:
+        return entities
+
+    # Build the combined set of forbidden entity_types from all excluded domains
+    forbidden: set[str] = set()
+    for domain in excluded_domains:
+        forbidden.update(_EXCLUDED_DOMAIN_ENTITY_TYPES.get(domain, frozenset()))
+
+    if not forbidden:
+        return entities
+
+    filtered = [
+        e for e in entities
+        if e.get("entity_type", "").lower() not in forbidden
+    ]
+
+    if len(filtered) < len(entities):
+        logger.debug(
+            "Domain exclusion filter %s: %d → %d entities",
+            excluded_domains, len(entities), len(filtered),
+        )
+
+    return filtered
 
 
 def _boost_audience_fit(

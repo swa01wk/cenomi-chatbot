@@ -33,7 +33,8 @@ class SessionData:
     """
     Mutable session record.
 
-    Stores only structured state — never raw LLM outputs.
+    Stores structured state and the full raw conversation log so the LLM
+    can see every prior exchange on each new turn.
     """
 
     __slots__ = (
@@ -45,6 +46,7 @@ class SessionData:
         "turn_count",
         "created_at",
         "updated_at",
+        "conversation_history",
     )
 
     def __init__(self, session_id: str, mall_id: str = "al_nakheel_plaza_28"):
@@ -56,6 +58,10 @@ class SessionData:
         self.turn_count: int = 0
         self.created_at: float = time.time()
         self.updated_at: float = self.created_at
+        # Raw dialogue log: [{"role": "user"|"assistant", "content": str}, ...]
+        # Accumulated across turns; passed to the LLM on every new turn so it
+        # sees the full conversation, not just structured SceneMemory signals.
+        self.conversation_history: list[dict] = []
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -67,6 +73,7 @@ class SessionData:
             "turn_count": self.turn_count,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "conversation_history": self.conversation_history,
         }
 
     @classmethod
@@ -80,6 +87,7 @@ class SessionData:
         obj.turn_count = data.get("turn_count", 0)
         obj.created_at = data.get("created_at", time.time())
         obj.updated_at = data.get("updated_at", time.time())
+        obj.conversation_history = data.get("conversation_history", [])
         return obj
 
 
@@ -104,6 +112,8 @@ class AbstractSessionStore(ABC):
         scene: SceneMemory,
         last_intent: str,
         conversation_mode: str,
+        user_message: str = "",
+        assistant_message: str = "",
     ) -> None: ...
 
     @abstractmethod
@@ -146,6 +156,8 @@ class SessionStore(AbstractSessionStore):
         scene: SceneMemory,
         last_intent: str,
         conversation_mode: str,
+        user_message: str = "",
+        assistant_message: str = "",
     ) -> None:
         session = self._sessions.get(session_id)
         if not session:
@@ -157,6 +169,9 @@ class SessionStore(AbstractSessionStore):
         session.conversation_mode = conversation_mode
         session.turn_count += 1
         session.updated_at = time.time()
+        if user_message and assistant_message:
+            session.conversation_history.append({"role": "user", "content": user_message})
+            session.conversation_history.append({"role": "assistant", "content": assistant_message})
 
     async def reset(self, session_id: str) -> bool:
         if session_id in self._sessions:
@@ -249,6 +264,8 @@ class RedisSessionStore(AbstractSessionStore):
         scene: SceneMemory,
         last_intent: str,
         conversation_mode: str,
+        user_message: str = "",
+        assistant_message: str = "",
     ) -> None:
         session = await self.get(session_id)
         if session is None:
@@ -260,6 +277,9 @@ class RedisSessionStore(AbstractSessionStore):
         session.conversation_mode = conversation_mode
         session.turn_count += 1
         session.updated_at = time.time()
+        if user_message and assistant_message:
+            session.conversation_history.append({"role": "user", "content": user_message})
+            session.conversation_history.append({"role": "assistant", "content": assistant_message})
 
         await self._client.set(
             self._key(session_id),
