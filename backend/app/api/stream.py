@@ -34,7 +34,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from app.models.api import ChatRequest, DebugPayload, SessionSummary
-from app.models.state import ConciergeState
+from app.models.state import ConciergeState, SMALLTALK_KINDS
 from app.runtime import (
     get_checkpointer,
     get_feedback_normalizer,
@@ -104,6 +104,7 @@ async def _generate_stream(
                 "scene": session.scene,
                 "last_intent": session.last_intent,
                 "conversation_mode": session.conversation_mode,
+                "conversation_history": session.conversation_history,
             },
             mall_context=mall_ctx.get_context_pack(),
         )
@@ -159,11 +160,22 @@ async def _generate_stream(
         try:
             result = _to_state(final_state_dict)
 
+            # Preserve the previous conversation_mode for transient smalltalk turns
+            # (greeting, thanks, farewell, crisis, etc.) so the classifier on the
+            # NEXT turn doesn't see a stale "Conversation mode: greeting" that would
+            # confuse it about the real conversation state.
+            saved_mode = (
+                session.conversation_mode
+                if result.intent.message_kind in SMALLTALK_KINDS
+                else result.intent.message_kind
+            )
             await store.save_turn(
                 session_id=session_id,
                 scene=result.scene,
                 last_intent=result.intent.domain,
-                conversation_mode=result.intent.message_kind,
+                conversation_mode=saved_mode,
+                user_message=request.message,
+                assistant_message=result.final_response_text,
             )
 
             # Quality evaluator (fire-and-forget)

@@ -20,7 +20,6 @@ CONTRACT
 from __future__ import annotations
 
 import logging
-import re
 from datetime import date
 from typing import Any
 
@@ -32,44 +31,17 @@ from app.retrieval.retriever import (
     detect_category_from_query,
     get_related_categories,
 )
-from app.runtime import get_mall_context, get_vector_store, search_brand_across_malls
-from app.services.playbook_engine import PlaybookEngine
+from app.runtime import (
+    get_mall_context,
+    get_vector_store,
+    search_brand_across_configured_malls,
+)
+from app.services.cross_mall_brand import resolve_cross_mall_brand_query
 from app.services.tenant_runtime import TenantRuntime
 
 logger = logging.getLogger(__name__)
 
 
-# ── Cross-mall trigger phrase patterns ────────────────────────────────────────
-# These are stripped from the user message to isolate the brand/store name.
-_CROSS_MALL_STRIP_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r"which (?:of (?:your|the) |cenomi )?malls? (?:has|have|carries|carry|offer[s]?)\s+", re.I),
-    re.compile(r"do(?:es)? (?:any|other) (?:of (?:your|the) |cenomi )?malls? (?:have|carry|offer|has)\s+", re.I),
-    re.compile(r"(?:in|at) (?:both|all|other) (?:your )?malls?", re.I),
-    re.compile(r"across (?:all |your |the )?malls?", re.I),
-    re.compile(r"(?:at|in) any (?:cenomi |other )?mall", re.I),
-    re.compile(r"(?:also|too) (?:have|carry|offer|available)", re.I),
-    re.compile(r"(?:other|the other) (?:cenomi )?malls?\s*(?:also|too)?\s*(?:have|has|carry|offer)?\s*", re.I),
-    re.compile(r"does (?:the other|any other|mall of arabia|al nakheel|al nakheel plaza)\s*(?:also\s*)?have\s*", re.I),
-    re.compile(r"also (?:available|found|in|at) (?:other|the other|any) malls?\s*", re.I),
-    re.compile(r"is (?:this|it|that) (?:brand|store|shop) (?:also |too )?(?:in|at|available)\s*", re.I),
-    re.compile(r"(?:is|are)\s+\w+\s+(?:available\s+)?(?:in|at)\s+", re.I),
-    re.compile(r"can i find\s+", re.I),
-    re.compile(r"where can i find\s+", re.I),
-]
-
-
-def _extract_brand_query(message: str) -> str:
-    """
-    Strip cross-mall trigger phrases from the user message, returning the
-    brand/store name suitable for a name-based search across all malls.
-    """
-    result = message
-    for pattern in _CROSS_MALL_STRIP_PATTERNS:
-        result = pattern.sub(" ", result)
-    # Clean up punctuation and filler words
-    result = re.sub(r"\b(also|too|any|both|other|all|the|your|cenomi|malls?|please|here)\b", " ", result, flags=re.I)
-    result = re.sub(r"\s{2,}", " ", result)
-    return result.strip(" ?.,!")
 
 
 # Sub-intents that are category-level queries and should use structured
@@ -519,10 +491,38 @@ async def compose_context(state: ConciergeState) -> dict:
     scene = state.scene
     playbook = state.playbook
 
+    # ── Cross-mall (concierge path only — factual flow uses compose_fact_response_context)
+    if intent.domain == "cross_mall" and state.flow_type != "factual":
+        brand_query = resolve_cross_mall_brand_query(state)
+        logger.info(
+            "Cross-mall (concierge) — brand_query=%r home_mall=%s",
+            brand_query,
+            state.mall_id,
+        )
+        cross_results = await search_brand_across_configured_malls(
+            brand_query, home_mall_id=state.mall_id
+        )
+        home_count = sum(1 for r in cross_results if r["is_home_mall"])
+        other_count = len(cross_results) - home_count
+        note = (
+            f"cross-mall search for '{brand_query}': "
+            f"{home_count} match(es) at home mall ({state.mall_id}), "
+            f"{other_count} match(es) at other mall(s)"
+        )
+        if not cross_results:
+            note = (
+                f"cross-mall search for '{brand_query}': "
+                f"no matches found in configured malls"
+            )
+        return {
+            "context": ContextComposition(
+                selected_entities=cross_results,
+                ranking_notes=[note],
+            ),
+            "warnings": list(state.warnings),
+        }
+
     # ── Factual flow guard: this node is concierge-only ────────────────
-    # Factual flow uses compose_fact_response_context instead.
-    # If somehow we end up here in factual mode, return a minimal empty context
-    # so downstream nodes don't get semantic pollution.
     if state.flow_type == "factual":
         logger.debug(
             "compose_context called in factual flow — returning minimal context"
@@ -535,35 +535,6 @@ async def compose_context(state: ConciergeState) -> dict:
                 ranking_notes=["factual_flow:compose_context_skipped"],
             ),
             "_trace_summary": "compose_context skipped (factual flow)",
-        }
-
-    # ── Cross-mall brand search fast path ─────────────────────────────────────
-    # When the user asks about brand presence across Cenomi malls, bypass the
-    # single-mall retrieval pipeline entirely and search all loaded contexts.
-    # The home mall (state.mall_id) is always sorted first in results so the
-    # LLM response naturally reads: "Yes, it's here AND at [other mall]."
-    if intent.domain == "cross_mall":
-        brand_query = _extract_brand_query(state.normalized_user_message or state.raw_user_message)
-        logger.info("Cross-mall search — brand_query=%r home_mall=%s", brand_query, state.mall_id)
-
-        cross_results = search_brand_across_malls(brand_query, home_mall_id=state.mall_id)
-
-        home_count = sum(1 for r in cross_results if r["is_home_mall"])
-        other_count = len(cross_results) - home_count
-        note = (
-            f"cross-mall search for '{brand_query}': "
-            f"{home_count} match(es) at home mall ({state.mall_id}), "
-            f"{other_count} match(es) at other mall(s)"
-        )
-        if not cross_results:
-            note = f"cross-mall search for '{brand_query}': no matches found in any loaded mall"
-
-        return {
-            "context": ContextComposition(
-                selected_entities=cross_results,
-                ranking_notes=[note],
-            ),
-            "warnings": list(state.warnings),
         }
 
     mall_ctx = get_mall_context(state.mall_id)

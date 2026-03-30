@@ -36,6 +36,8 @@ from typing import Any
 
 from app.models.state import ConciergeState, ContextComposition, ResponsePlan
 from app.nodes._tracing import traced_node
+from app.runtime import search_brand_across_configured_malls
+from app.services.cross_mall_brand import resolve_cross_mall_brand_query
 from app.services.response_mode_resolver import resolve_response_mode
 
 logger = logging.getLogger(__name__)
@@ -69,6 +71,9 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
     scope = state.fact_scope or "store_lookup"
     response_mode = state.fact_response_mode or _SCOPE_STRATEGY.get(scope, "direct_lookup")
     query_entity = state.fact_query_entity or ""
+
+    if scope == "cross_mall_availability" or state.intent.domain == "cross_mall":
+        return await _compose_cross_mall_fact_context(state)
 
     retrieval_results = state.retrieval.retrieval_results
     fact_payload: dict[str, Any] = {
@@ -317,6 +322,95 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
             f"FactContext: scope={scope} | strategy={strategy} | "
             f"entities={len(extracted_entities)} | "
             f"retrieval={'ok' if retrieval_succeeded else 'empty'} | "
+            f"mode={rm} [{confidence_level}]"
+        ),
+    }
+
+
+async def _compose_cross_mall_fact_context(state: ConciergeState) -> dict:
+    """Factual-flow cross-mall: resolve Redis/disk-backed mall contexts and search brand."""
+    scope = "cross_mall_availability"
+    response_mode = "cross_mall_availability"
+    home_mid = state.mall_id or ""
+    brand = resolve_cross_mall_brand_query(state)
+    extracted_entities: list[dict[str, Any]] = []
+    fact_payload: dict[str, Any] = {
+        "scope": scope,
+        "entity_type": state.fact_entity_type or "brand",
+        "query_entity": brand,
+        "response_mode": response_mode,
+        "results": [],
+        "summary_notes": [],
+        "cross_mall_brand_query": brand,
+    }
+
+    if not brand:
+        fact_payload["summary_notes"].append(
+            "Cross-mall: no brand resolved from message or scene — ask which store/brand"
+        )
+        fact_payload["retrieval_succeeded"] = False
+        cross_results: list[dict[str, Any]] = []
+    else:
+        cross_results = await search_brand_across_configured_malls(brand, home_mall_id=home_mid)
+        at_home = [r for r in cross_results if r.get("is_home_mall")]
+        other = [r for r in cross_results if not r.get("is_home_mall")]
+        fact_payload["cross_mall_at_home"] = at_home
+        fact_payload["cross_mall_other"] = other
+        fact_payload["summary_notes"].append(
+            f"cross-mall search for {brand!r}: {len(at_home)} at active mall, "
+            f"{len(other)} at other mall(s)"
+        )
+        extracted_entities = list(cross_results)
+        fact_payload["retrieval_succeeded"] = bool(cross_results)
+
+    secondary_intents = state.secondary_intents or []
+    modifiers = state.modifiers or []
+    entity_cap = _FACTUAL_ENTITY_CAPS.get(response_mode, 10)
+    modifier_signals = [m for m in modifiers if m]
+    minimal_context = ContextComposition(
+        selected_topic_blocks=[scope],
+        selected_entities=extracted_entities[:entity_cap],
+        selected_semantic_signals=modifier_signals,
+        ranking_notes=[
+            f"factual_flow:{scope}",
+            f"brand={brand!r}",
+            f"hits={len(extracted_entities)}",
+        ],
+        candidate_count_before_dedupe=len(extracted_entities),
+    )
+    strategy = _SCOPE_STRATEGY.get(scope, "direct_lookup")
+    updated_plan = state.response_plan.model_copy(deep=True)
+    updated_plan.chosen_strategy = strategy
+    updated_plan.response_shape_hint = _strategy_shape(strategy)
+    updated_plan.answer_mode = "direct_answer"
+    updated_plan.tone_mode = "structured"
+    updated_plan.entity_cap = entity_cap
+    updated_plan.must_acknowledge_scene = bool(secondary_intents or modifiers)
+    updated_plan.primary_goal = state.primary_intent or scope
+    updated_plan.secondary_filters = secondary_intents
+    updated_plan.dominant_context_type = state.dominant_context_type or scope
+    updated_plan.fact_first = True
+    updated_plan.concierge_tail_allowed = bool(
+        "family_filter" in secondary_intents
+        or "romantic_filter" in secondary_intents
+    )
+    rm, confidence_level, rm_reason, rm_fallback = resolve_response_mode(state)
+    updated_plan.response_mode = rm
+    updated_plan.confidence_level = confidence_level
+
+    logger.info(
+        "compose_fact_response_context (cross-mall): brand=%r hits=%d succeeded=%s",
+        brand,
+        len(extracted_entities),
+        fact_payload.get("retrieval_succeeded"),
+    )
+
+    return {
+        "fact_context": fact_payload,
+        "context": minimal_context,
+        "response_plan": updated_plan,
+        "_trace_summary": (
+            f"FactContext: cross_mall | brand={brand!r} | hits={len(extracted_entities)} | "
             f"mode={rm} [{confidence_level}]"
         ),
     }

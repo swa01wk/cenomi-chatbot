@@ -226,6 +226,16 @@ export function useChat() {
     turnCountRef.current = 0;
   }, [sessionId, mallId]);
 
+  /** Switch active mall: clears chat session so scene/history stay mall-consistent (multi-mall v1). */
+  const changeMallId = useCallback(
+    async (nextMallId: string) => {
+      if (nextMallId === mallId) return;
+      await reset();
+      setMallId(nextMallId);
+    },
+    [mallId, reset],
+  );
+
   const exportConversation = useCallback(() => {
     const data = {
       session_id: sessionId,
@@ -272,6 +282,7 @@ export function useChat() {
     setDebugMode,
     setTenantId,
     setMallId,
+    changeMallId,
     setSelectedTurnId,
   };
 }

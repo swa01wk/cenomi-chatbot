@@ -59,7 +59,8 @@ backend/
 │   │   ├── concierge.py        Chat turn orchestration
 │   │   ├── context_builder.py  Context pack assembly from data layers
 │   │   ├── clean_context.py    Per-turn context sanitisation (no history contamination)
-│   │   ├── session_store.py    In-memory session store (LRU, max 1000)
+│   │   ├── cross_mall_brand.py Cross-mall brand extraction and scene-fallback resolution
+│   │   ├── session_store.py    In-memory + Redis session store; updates mall_id on reuse
 │   │   ├── playbook_engine.py  Playbook resolution (thin adapter over app layer)
 │   │   ├── enricher.py         Semantic enrichment helpers
 │   │   ├── normalizer.py       Canonical entity normalisation
@@ -127,7 +128,8 @@ backend/
 │   └── mall_retriever.py       LLM-safe category/entity lookups over canonical JSON
 │
 ├── tests/                      Test suite
-│   └── test_stability.py       80-test stability suite — 14 AC categories (intent, routing, context, dedup, unsupported inputs)
+│   ├── test_stability.py       80-test stability suite — 14 AC categories (intent, routing, context, dedup, unsupported inputs)
+│   └── test_cross_mall_v1.py   Cross-mall unit tests — brand resolution, fact context ordering, flow hints (no LLM calls)
 ├── scripts/                    Dev and ops scripts
 │   ├── convert_to_canonical.py     ETL: output_mall_XX.json → canonical/{mall_id}.json
 │   ├── synthesize_mall_data.py     LLM synthesis: canonical → semantic, playbooks, etc.

@@ -6,6 +6,58 @@ Format: `## [vX.Y] — YYYY-MM-DD` with sections Added / Changed / Fixed.
 
 ---
 
+## [v1.5] — 2026-03-30
+
+### Added
+
+**Cross-Mall Factual Path — Dedicated Pipeline Routing for Brand Availability**
+
+Cross-mall brand queries now flow through the structured factual pipeline (`resolve_fact_scope → compose_fact_response_context → generate_response`) instead of being assembled inline inside `generate_response`. This gives cross-mall queries a proper scope, dedicated context composition, and a consistent response shape.
+
+- `backend/app/services/cross_mall_brand.py` **(new)** — `resolve_cross_mall_brand_query(state)` resolves the search string for cross-mall lookups via a fallback chain: stripped message → `fact_query_entity` → `scene.last_resolved_entity` → `scene.active_shortlist[0]`. `extract_brand_query_from_message()` strips 15+ cross-mall boilerplate patterns before extracting the brand fragment. Enables follow-up queries like `"where else can I find it?"` to correctly resolve the brand from prior scene context.
+- `backend/tests/test_cross_mall_v1.py` **(new)** — Unit tests with no LLM calls covering: brand resolution via all four fallback paths, `_format_fact_context` section ordering (AT YOUR CURRENT MALL before AT OTHER CENOMI MALLS), and flow-hint routing (`cross_mall_search` → `factual` / `cross_mall_availability` / `brand`, single-mall `brand_availability` not misclassified as cross-mall).
+
+**New async runtime helpers (runtime.py)**
+
+- `search_brand_across_configured_malls(brand_name, home_mall_id)` — async variant of `search_brand_across_malls`. Iterates every mall in `BACKEND_MALL_IDS` via `ensure_mall_loaded` per mall so LRU eviction between steps cannot drop results. Logs a warning when `mall_cache_size` is smaller than the configured mall count to surface potential churn under parallel traffic.
+- `build_merged_guard_canonical_for_configured_malls()` — async version of `get_all_mall_canonical_for_guard`. Loads each configured mall through the Tier 1 → Tier 2 (Redis) → Tier 3 (disk) chain before merging, ensuring the hallucination guard covers all configured malls even when some are cold-evicted from RAM.
+- `ensure_configured_malls_loaded()` — pre-warms every mall in `BACKEND_MALL_IDS` (convenience helper for startup or batch operations).
+
+### Changed
+
+**`compose_fact_response_context.py` — cross-mall early exit**
+
+`_compose_cross_mall_fact_context()` added: when `scope == "cross_mall_availability"`, calls `resolve_cross_mall_brand_query` and `search_brand_across_configured_malls`, then splits results into `cross_mall_at_home` and `cross_mall_other` lists (each capped), attaches `cross_mall_brand_query`, and returns a structured fact context dict that `generate_response` formats directly. Empty brand query produces a graceful no-results payload instead of an error.
+
+**`generate_response.py` — factual cross-mall formatting**
+
+- `_format_fact_context` now recognises `scope == "cross_mall_availability"` and renders a two-section block: `AT YOUR CURRENT MALL` (home results) followed by `AT OTHER CENOMI MALLS` (other-mall results).
+- Hallucination guard for the `cross_mall_availability` scope now uses `build_merged_guard_canonical_for_configured_malls()` (async, all configured malls) instead of the RAM-only `get_all_mall_canonical_for_guard()`.
+
+**`interpret_turn.py` — cross-mall flow hint**
+
+`_detect_flow_type_candidate` maps `domain="cross_mall"` / `sub_intent="cross_mall_search"` to `flow_type="factual"`, `scope="cross_mall_availability"`, `entity_type="brand"`. This steers the turn into the factual branch before `resolve_fact_scope` runs.
+
+**`resolve_fact_scope.py` — cross-mall scope keywords**
+
+Cross-mall trigger phrases (`"which.*mall"`, `"other mall"`, `"both malls"`, `"across malls"`, etc.) now map deterministically to `scope="cross_mall_availability"` with an empty `[]` retrieval targets list (targets are resolved downstream by `compose_fact_response_context`).
+
+**`compose_context.py` — configured-malls search integration**
+
+Cross-mall context assembly now calls `search_brand_across_configured_malls` and `resolve_cross_mall_brand_query` (instead of the RAM-only `search_brand_across_malls`) so all configured malls are searched regardless of LRU state.
+
+**`session_store.py` — mall_id update on session reuse**
+
+When a request arrives with an existing `session_id` but a different `mall_id` (visitor switches mall mid-session or the same session token is reused from a new mall context), the session's `mall_id` is now updated in both the in-memory store and Redis. Previously the stale `mall_id` was silently retained.
+
+**`frontend/src/App.tsx`** — Responsive width classes adjusted for the chat vs debug panel split layout.
+
+**`frontend/src/hooks/useChat.ts`** — Streaming edge-case hardening: `done` event finalises the bubble even if no tokens arrived; empty stream or mid-stream error no longer leaves the message in a permanent `isStreaming: true` state.
+
+**Files changed:** `backend/app/services/cross_mall_brand.py` *(new)*, `backend/tests/test_cross_mall_v1.py` *(new)*, `backend/app/runtime.py`, `backend/app/nodes/compose_fact_response_context.py`, `backend/app/nodes/generate_response.py`, `backend/app/nodes/interpret_turn.py`, `backend/app/nodes/resolve_fact_scope.py`, `backend/app/nodes/compose_context.py`, `backend/app/services/session_store.py`, `backend/app/config/settings.py`, `frontend/src/App.tsx`, `frontend/src/hooks/useChat.ts`
+
+---
+
 ## [v1.4.1] — 2026-03-24
 
 ### Changed

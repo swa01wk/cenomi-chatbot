@@ -20,7 +20,7 @@ from app.models.api import (
     DebugPayload,
     SessionSummary,
 )
-from app.models.state import ConciergeState
+from app.models.state import ConciergeState, SMALLTALK_KINDS
 from app.models.tenant import TenantConfig
 from app.runtime import (
     ensure_mall_loaded,
@@ -136,11 +136,20 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
 
     result = _to_state(raw_result)
 
+    # Preserve the previous conversation_mode for transient smalltalk turns
+    # (greeting, thanks, farewell, crisis, etc.) so the classifier on the
+    # NEXT turn doesn't see a stale "Conversation mode: greeting" that would
+    # confuse it about the real conversation state.
+    saved_mode = (
+        session.conversation_mode
+        if result.intent.message_kind in SMALLTALK_KINDS
+        else result.intent.message_kind
+    )
     await store.save_turn(
         session_id=session_id,
         scene=result.scene,
         last_intent=result.intent.domain,
-        conversation_mode=result.intent.message_kind,
+        conversation_mode=saved_mode,
         user_message=request.message,
         assistant_message=result.final_response_text,
     )

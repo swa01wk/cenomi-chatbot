@@ -140,7 +140,10 @@ class SessionStore(AbstractSessionStore):
 
     async def get_or_create(self, session_id: str, mall_id: str = "al_nakheel_plaza_28") -> SessionData:
         if session_id in self._sessions:
-            return self._sessions[session_id]
+            existing = self._sessions[session_id]
+            if existing.mall_id != mall_id:
+                existing.mall_id = mall_id
+            return existing
 
         if len(self._sessions) >= self._max_sessions:
             self._evict_oldest()
@@ -247,6 +250,13 @@ class RedisSessionStore(AbstractSessionStore):
     ) -> SessionData:
         existing = await self.get(session_id)
         if existing is not None:
+            if existing.mall_id != mall_id:
+                existing.mall_id = mall_id
+                await self._client.set(
+                    self._key(session_id),
+                    json.dumps(existing.to_dict()),
+                    ex=self._ttl,
+                )
             return existing
 
         session = SessionData(session_id=session_id, mall_id=mall_id)

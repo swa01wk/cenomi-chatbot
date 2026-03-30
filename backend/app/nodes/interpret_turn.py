@@ -386,11 +386,14 @@ MODIFIERS (semantic tags — include all that apply):
 - fresh_start — user is re-engaging after disengagement; treat as new conversation
 
 DOMAINS AND SUB-INTENTS:
-- cross_mall: cross_mall_search — visitor asks about brand/store availability across multiple Cenomi malls.
-  Use ONLY when the question explicitly references other malls, "both malls", "any of your malls", "Mall of Arabia",
-  "across malls", or asks "does [other mall] also have X?". Examples:
-  "Which of your malls has H&M?", "Is Nike at Mall of Arabia too?", "Does any Cenomi mall carry Starbucks?"
-  DO NOT use cross_mall for single-mall questions like "Do you have Nike?" or "Is H&M here?".
+- cross_mall: cross_mall_search — visitor asks about brand/store availability beyond only the current mall.
+  USE cross_mall when ANY of these apply:
+  • Explicit multi-mall wording: "which of your malls", "both malls", "any Cenomi mall", "Mall of Arabia", "across malls",
+    "at other malls", "where else", "all locations", "does [other mall] also have X".
+  • Follow-up after a specific store/brand was discussed: "where else can I find it?", "is it at your other mall too?",
+    "what about other Cenomi malls?" — use scene/last entity to infer the brand; still output cross_mall_search.
+  DO NOT use cross_mall for questions clearly about ONLY this mall with no multi-mall signal, e.g. "Do you have Nike?",
+  "Is H&M here?", "Do you carry Zara?" (those → shopping/brand_availability).
 - mall_info: overview ("tell me about the mall", "what is this place"), facilities_summary ("what facilities"), opening_hours ("mall opening hours"), family_friendliness ("is this mall family friendly", "can I come with kids"), what_is_available ("what shops are in the mall")
 - exploration: open_exploration (vague "what can I do", "what's here"), activity_suggestion ("suggest something fun"), first_visit_guide ("first time here")
 - dining: general_dining, romantic_dining, quick_bite, family_dining, cafe_recommendation, dessert_recommendation
@@ -422,8 +425,14 @@ CONTEXT RESOLUTION (CRITICAL):
   - "perfume?" when target_person=girlfriend → shopping/perfume_shopping (gift context)
   - "dessert?" when companions include kids → dining/dessert_recommendation (kid-friendly)
   - "what to do?" when visit_type=family → exploration/activity_suggestion (family activities)
-- Short follow-up queries (1-2 words) should ALWAYS be interpreted in the context of
-  the previous conversation, not as standalone queries.
+
+- Multi-mall follow-ups: if the previous turn mentioned a specific store/brand and the user now asks "where else",
+  "other malls", "all your malls", etc. → cross_mall/cross_mall_search (not brand_availability).
+- Short follow-up queries (1-2 words) should be interpreted in the context of
+  the previous conversation — but ONLY when they are within the same domain or naturally
+  extend the current topic. If a short query clearly belongs to a DIFFERENT domain than
+  the active_topic, it is a topic_switch, NOT a followup.
+  (e.g. active_topic=shopping → "movies" → topic_switch; active_topic=dining → "perfume" → topic_switch)
 
 ACTIVE SHOPPING TASK (CRITICAL — overrides gift_for inference):
 - If an "Active shopping task" is provided in context (e.g. product_type=jacket), ALL
@@ -484,11 +493,40 @@ MESSAGE KIND RULES:
   This is STRONGER than constraint_refinement — it completely excludes the domain for all future turns.
   Do NOT classify "no food" as correction; it is category_negation.
 - disengagement: visitor is frustrated, dismissing the bot, or giving up.
-  Examples: "nevermind", "never mind", "forget it", "fine", "doesn't matter",
-  "don't bother", "nvm", "nevermind dude", "forget about it".
-  Key signal: the message conveys resignation or frustration, NOT a request for new content.
+  Examples:
+  • Resignation: "nevermind", "never mind", "forget it", "fine", "doesn't matter",
+    "don't bother", "nvm", "nevermind dude", "forget about it", "whatever forget it".
+  • Stopping the flow: "stop", "okay stop", "ok stop", "just stop", "please stop",
+    "stop recommending", "enough", "no more".
+  • Complaints about the bot's performance: "chatbot is not working", "not working",
+    "this isn't working", "nothing is working", "you're not helping", "not helpful",
+    "this is useless", "you keep repeating", "same thing again", "still not useful",
+    "this is terrible", "you're not understanding me".
+  • Anger/frustration about a person (third-party or self): "[name] is pissed", "I'm pissed",
+    "[name] is angry", "I'm furious", "I'm frustrated", "I'm done", "I give up", "forget it".
+  IMPORTANT — ANGER → DISENGAGEMENT (not emotional): "[name] is pissed", "I'm pissed",
+  "I'm angry", "I'm furious" → ALWAYS disengagement. emotional is for sadness/stress/boredom.
+  Key signal: the message conveys resignation, frustration, anger, or dismissal — NOT a request for new content.
   Respond with a brief empathetic acknowledgement and an open-ended question — do NOT recycle prior recommendations.
-- topic_switch: user changes topic ("instead", "forget that", "something else")
+  CRITICAL: NEVER classify as disengagement if the message contains "thanks", "thank you",
+  or any positive word (great, amazing, perfect, awesome, brilliant, wonderful, fantastic).
+  NEVER classify as disengagement if the message is a genuine topic request (food, movies, shopping, etc.).
+  Disengagement is ONLY for messages that actively dismiss, resign, express anger, or express frustration.
+- topic_switch: user changes topic ("instead", "forget that", "something else").
+  IMPORTANT: Also use topic_switch when the user's message clearly refers to a DIFFERENT
+  domain from the active topic — even without explicit transition words.
+  Examples:
+  • Active topic = dining, user says "men's wear" → shopping/fashion_shopping, topic_switch
+  • Active topic = shopping, user says "what's showing at the cinema?" → entertainment, topic_switch
+  • Active topic = entertainment, user says "food?" → dining, topic_switch
+  Key test: if the user's message domain is unambiguously different from the active_topic
+  field, classify as topic_switch, not followup or refinement.
+  SHORT-QUERY RULE: This domain-switch test applies to ALL query lengths, including 1-2 words.
+  Even single-word queries are topic_switch when they clearly refer to a different domain:
+  • active_topic=shopping → "movies" or "cinema" → topic_switch to entertainment (NOT followup)
+  • active_topic=dining → "shopping" or "clothes" or "perfume" → topic_switch (NOT followup)
+  • active_topic=entertainment → "food" or "restaurant" → topic_switch to dining (NOT followup)
+  NEVER classify a clear domain-crossing query as followup just because it is short.
 - followup: short response continuing current topic OR sequential query ("after that?", "what next?", "and then?", "coffee?", "dessert?")
   ALSO use followup when the visitor is CONFIRMING an action the bot offered or asked about.
   If the bot's most recent message contained a direct question or offer (e.g. "Want me to...?",
@@ -504,6 +542,14 @@ MESSAGE KIND RULES:
   followed by ANY words (e.g. "yes that will be good", "yes please", "yeah that would work")
   AND follows a bot offer/question → ALWAYS classify as followup.
   The visitor is confirming the proposed action, so the bot should execute it.
+  THANKS EXCEPTION (ABSOLUTE RULE): "thanks", "thank you", "thanks chatbot", "thank you so much",
+  "thanks a lot", "cheers", "shukran" — ANY message that is primarily an expression of GRATITUDE
+  must ALWAYS be classified as "thanks", NEVER as "followup" — even if the bot just asked a question
+  or made an offer. Gratitude signals the end of the exchange, not confirmation of the offer.
+  Examples:
+  • Bot: "Want me to narrow this down?" → User: "Thanks" → thanks (NOT followup)
+  • Bot: "Shall I suggest more?" → User: "Thanks chatbot" → thanks (NOT followup)
+  • Bot: "Want me to map this out?" → User: "Thank you" → thanks (NOT followup)
 - acknowledgement: the message is a NON-ACTIONABLE filler with no new intent, topic, or request.
   The user is just reacting or lingering — the bot must respond with a gentle clarifying question,
   NOT repeat or generate unsolicited recommendations.
@@ -514,6 +560,33 @@ MESSAGE KIND RULES:
   after a bot offer or question is ALWAYS followup, NOT acknowledgement — even if it has extra words.
   Key test: if the message gives no actionable information about what the visitor wants AND the
   bot did not just ask a yes/no question or make an offer, it is acknowledgement.
+  CRITICAL DISTINCTION from disengagement: acknowledgement is for NEUTRAL vague fillers
+  ("ok", "hmm", "alright") — messages with NO frustration or complaint.
+  If the message contains ANY hint of complaint, frustration, or dismissal (e.g. "not working",
+  "chatbot is not working", "useless", "pissed", "[X] is pissed"), classify as disengagement NOT acknowledgement.
+  If the message mentions a person being angry or frustrated (e.g. "Binoo is pissed",
+  "I'm pissed"), classify as disengagement, NOT acknowledgement or emotional.
+- emotional: visitor expresses a SAD, STRESSED, BORED, or OVERWHELMED state,
+  OR makes a request motivated by low mood rather than a specific need.
+  Examples:
+  • "I'm sad", "I feel down", "I'm bored", "I'm stressed", "I'm tired"
+  • "I'm sad, give me a plan that will make me happy" — emotional, even though it asks for a plan
+  • "give me something fun", "I need cheering up", "cheer me up", "make me happy"
+  • "I'm overwhelmed", "I don't know what to do", "nothing sounds good"
+  • "my wife seems down", "my friend is stressed", "they're having a rough day"
+  NOTE: Anger/frustration expressions ("[name] is pissed", "I'm pissed", "I'm angry",
+  "I'm furious") → disengagement, NOT emotional. Emotional is ONLY for sadness/stress/boredom.
+  CRITICAL MOOD OVERRIDE (absolute — overrides all other rules):
+    • Any message starting with "I'm sad", "I feel down", "I'm stressed", "I'm bored",
+      "I'm tired", "I'm depressed", "I'm overwhelmed" → ALWAYS message_kind="emotional",
+      even if the rest of the message contains "give me a plan", "suggest something", "what to do".
+    • "cheer me up", "make me happy", "I need cheering up", "lift my spirits",
+      "I'm having a bad day" → ALWAYS message_kind="emotional".
+  For all of the above, set domain=exploration, sub_intent=activity_suggestion.
+  "I'm sad, give me a plan that will make me happy" → emotional (NOT fresh_request or refinement).
+  "cheer me up" → emotional (NOT fresh_request or exploration with fresh_request kind).
+  Do NOT inherit a shopping/dining/entertainment domain from active_topic for emotional turns.
+  The bot responds with empathy + an open activity suggestion, not recycled recommendations.
 - companion_correction: the user is explicitly correcting a FALSE assumption about their companions
   or personal situation that the bot has been making.
   Examples: "I don't have kids", "I'm alone", "I am by myself", "no kids", "I came alone",
@@ -559,7 +632,20 @@ Examples:
 SMALLTALK AND SAFETY MESSAGE KINDS (new — use these when the message is purely conversational or requires special handling):
 - "greeting"  — pure greeting with no information request: "hi", "hello", "hey", "good morning", "marhaba", "ahlan"
 - "howru"     — asking how the bot is: "how are you", "how's it going", "what's up"
-- "thanks"    — expressing gratitude: "thanks", "thank you", "thx", "shukran", "cheers"
+- "thanks"    — expressing gratitude or satisfaction: "thanks", "thank you", "thx", "shukran", "cheers",
+                "great thanks", "amazing thanks", "perfect thanks", "awesome thanks",
+                "that's great thanks", "great! amazing thanks", "great! thanks",
+                "thanks a lot", "thank you so much", "brilliant thanks",
+                "lovely thanks", "wonderful thanks", "fantastic thanks",
+                "nice one", "good one", "well done", "good job",
+                "thanks chatbot", "thanks bot", "thank you chatbot",
+                ANY message that combines a positive word (great, amazing, perfect, awesome,
+                brilliant, wonderful, fantastic, excellent, lovely) with thanks/thank-you —
+                even after a difficult exchange, classify as "thanks" not "disengagement".
+                ABSOLUTE RULE: if the message's PRIMARY meaning is gratitude, classify as "thanks"
+                regardless of prior conversation context, active topic, or whether the bot just
+                asked a question. NEVER classify "thanks" / "thank you" as "followup" or
+                "acknowledgement". Gratitude is ALWAYS "thanks".
 - "farewell"  — saying goodbye: "bye", "goodbye", "see you", "take care", "ma'a salama"
 - "identity"  — asking what/who the bot is: "who are you", "what are you", "are you a bot",
                 "are you AI", "what is your name", "what can you do", "how do you work"
@@ -864,14 +950,23 @@ async def _llm_classify(
         context_parts.append("Recent conversation (most recent last):\n" + "\n".join(dialogue_lines))
 
     # ── Inject recent mood state ─────────────────────────────────────
-    # If the visitor was recently frustrated or disengaged, tell the LLM
-    # so it can correctly classify the current query in that emotional context
-    # (e.g. a vague follow-up query after frustration is likely a fresh
-    # attempt, not a refinement of the prior recommendation).
+    # If the visitor was recently frustrated or disengaged, inform the LLM
+    # so it can apply a warmer recovery tone — but do NOT let it re-classify
+    # genuine requests or positive expressions as disengagement.
     if state.scene.recent_mood:
         context_parts.append(
-            f"Visitor's recent emotional state: {state.scene.recent_mood} "
-            f"(factor this into message_kind classification)"
+            f"Visitor's recent emotional state: {state.scene.recent_mood}. "
+            f"IMPORTANT: This is historical context only — do NOT use it to "
+            f"re-classify genuine TOPIC requests or positive expressions. "
+            f"If the current message is a genuine topic request "
+            f"(e.g. 'food', 'movies', 'shopping'), a positive expression "
+            f"(e.g. 'great', 'thanks', 'perfect'), or any real new topic, classify "
+            f"it normally (fresh_request, thanks, followup, etc.). "
+            f"EXCEPTION: Mood-driven requests that directly follow an emotional state "
+            f"('cheer me up', 'make me happy', 'I need cheering up', 'lift my spirits', "
+            f"'I need a pick-me-up') ARE still emotional — do NOT classify as fresh_request. "
+            f"Only classify as 'disengagement' if the CURRENT message itself is "
+            f"frustrated or resigned (e.g. 'nevermind', 'forget it', 'doesn't matter')."
         )
 
     user_text = "\n".join(context_parts)
@@ -908,6 +1003,19 @@ async def _llm_classify(
         "greeting", "howru", "thanks", "farewell", "identity", "crisis",
     }
     if message_kind not in valid_kinds:
+        message_kind = "fresh_request"
+
+    # Guard: continuation kinds require an established topic.
+    # Without an active topic and no meaningful prior domain, followup/refinement
+    # is impossible — the LLM is hallucinating context that doesn't exist yet.
+    # This covers: first turns, and turns immediately after greeting/smalltalk
+    # where no real topic was established (domain="general" resets active_topic).
+    _CONTINUATION_KINDS = {"followup", "refinement", "constraint_refinement"}
+    if (
+        message_kind in _CONTINUATION_KINDS
+        and not state.scene.active_topic
+        and state.last_intent in ("", "general")
+    ):
         message_kind = "fresh_request"
 
     # Parse scene_corrections — only meaningful for companion_correction turns.

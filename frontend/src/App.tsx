@@ -14,7 +14,7 @@ export default function App() {
         debugMode={chat.debugMode}
         sessionId={chat.sessionId}
         onTenantChange={chat.setTenantId}
-        onMallChange={chat.setMallId}
+        onMallChange={chat.changeMallId}
         onDebugToggle={chat.setDebugMode}
         onReset={chat.reset}
         onExport={chat.exportConversation}

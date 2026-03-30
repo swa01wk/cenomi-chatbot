@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-5971fbf2cc20",
+  "session_id": "reg-2f0ba5f960c3",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-196573747c19",
+  "user_message": "I want to end it all",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-30 11:04:22.692141"
+}

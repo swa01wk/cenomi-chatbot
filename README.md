@@ -299,6 +299,7 @@ backend/
 │   │   ├── clean_context.py    # Contamination-free per-turn context assembly
 │   │   ├── concierge.py        # Orchestrates chat turns via LangGraph
 │   │   ├── context_builder.py  # Builds mall context from data layers
+│   │   ├── cross_mall_brand.py # Cross-mall brand query extraction and resolution
 │   │   ├── enricher.py         # Semantic enrichment of entities
 │   │   ├── feedback_normalizer.py     # Normalizes feedback signals
 │   │   ├── feedback_service.py        # Feedback lifecycle management
@@ -306,7 +307,7 @@ backend/
 │   │   ├── knowledge_gap_analyzer.py  # Playbook/knowledge gap analysis
 │   │   ├── normalizer.py       # Canonical data normalization
 │   │   ├── playbook_engine.py  # Playbook matching and ranking
-│   │   ├── session_store.py    # In-memory session storage
+│   │   ├── session_store.py    # In-memory + Redis session storage (mall_id update on reuse)
 │   │   ├── session_tuning_engine.py   # Feedback-based session tuning
 │   │   ├── tenant_params.py    # Tenant config loading/merging
 │   │   ├── tenant_parameter_tuner.py  # Tenant-level feedback aggregation
@@ -339,6 +340,7 @@ backend/
 │   └── run_dev.sh              # Dev server startup script
 ├── tests/
 │   ├── test_chat.py            # Chat endpoint tests
+│   ├── test_cross_mall_v1.py   # Cross-mall brand resolution and flow-hint unit tests
 │   └── test_health.py          # Health endpoint tests
 ├── pyproject.toml              # Project metadata and dependencies
 ├── .env.example                # Environment variable template
@@ -486,7 +488,8 @@ load_session
 | `concierge`                   | Orchestrates chat turns by invoking the LangGraph pipeline |
 | `clean_context`               | Assembles contamination-free per-turn context (no prior LLM history) |
 | `context_builder`             | Builds mall context from canonical, semantic, and playbook data |
-| `session_store`               | Dual-implementation session store: `SessionStore` (in-memory LRU, default) and `RedisSessionStore` (Redis-backed, selected automatically when `BACKEND_REDIS_URL` is set) |
+| `cross_mall_brand`            | Extracts and resolves the brand search string for cross-mall queries; falls back through `fact_query_entity → scene.last_resolved_entity → active_shortlist[0]` for follow-up turns |
+| `session_store`               | Dual-implementation session store: `SessionStore` (in-memory LRU, default) and `RedisSessionStore` (Redis-backed, selected automatically when `BACKEND_REDIS_URL` is set); updates `mall_id` when a session is reused from a different mall |
 | `feedback_service`            | Manages the full feedback lifecycle                        |
 | `feedback_normalizer`         | Normalizes feedback into actionable signals                |
 | `implicit_feedback_detector`  | Detects implicit feedback (e.g., user corrections)         |
@@ -796,11 +799,18 @@ git remote set-url origin git@github.com:<your-username>/cenomi-chatbot.git
 
 ## Project Status
 
-**v1.4 — Adaptive Concierge Decision Engine.**
+**v1.5 — Cross-Mall Factual Pipeline.**
 
 See [CHANGELOG.md](CHANGELOG.md) for full release history.
 
-### v1.4 — Adaptive concierge decision engine (current)
+### v1.5 — Cross-mall factual pipeline (current)
+- Cross-mall brand queries routed through the structured factual branch (`resolve_fact_scope → compose_fact_response_context → generate_response`) instead of inline assembly inside `generate_response`
+- New `cross_mall_brand` service: strips boilerplate phrases and resolves the brand via a four-step fallback chain (message → `fact_query_entity` → `scene.last_resolved_entity` → `active_shortlist[0]`) enabling follow-up queries like "where else can I find it?"
+- `cross_mall_availability` scope: `_format_fact_context` renders structured `AT YOUR CURRENT MALL` / `AT OTHER CENOMI MALLS` sections; hallucination guard uses async all-configured-malls merge
+- `search_brand_across_configured_malls` and `build_merged_guard_canonical_for_configured_malls` added to `runtime.py` — async, LRU-eviction-safe, cover all malls in `BACKEND_MALL_IDS`
+- Session `mall_id` updated in memory + Redis when an existing session is reused from a different mall
+
+### v1.4 — Adaptive concierge decision engine
 - Scene completion: infers `target_person`, `budget`, `use_case` defaults instead of asking clarifying questions
 - Constraint-aware ranking: audience fit weight raised to 0.30 with hard mismatch penalty for mismatched audience
 - Structured response format: 4-part PRIMARY / SECONDARY / ACTION PLAN / FOLLOW-UP template, max 2–3 picks per guided query

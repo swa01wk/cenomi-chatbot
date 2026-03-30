@@ -199,6 +199,28 @@ _RESPONSES: dict[str, list[str]] = {
         "Happy to help — let me know if you need anything else.",
         "Anytime! Got more questions? Just ask.",
     ],
+    # Context-aware thanks variants — used when scene has meaningful context.
+    # These append a proactive nudge toward something the visitor hasn't explored yet.
+    "thanks_with_dining_suggestion": [
+        "Glad that helped! If you haven't eaten yet, there are some great options in the Food Court — just say the word.",
+        "Happy to help! And if you're getting hungry, I can point you to a good spot to eat.",
+        "Of course! Still time to grab a bite? Just ask and I'll suggest something quick.",
+    ],
+    "thanks_with_shopping_suggestion": [
+        "Glad that helped! There's plenty of shopping here too — want me to point you to any stores?",
+        "Happy to help! If you feel like browsing, I can suggest what's worth checking out.",
+        "Of course! And if you want to explore the shops while you're here, just say the word.",
+    ],
+    "thanks_with_entertainment_suggestion": [
+        "Glad that helped! Muvi Cinema is here too if you're up for a film — want to know what's showing?",
+        "Happy to help! And if you're in the mood for entertainment, there's plenty on offer — just ask.",
+        "Of course! There's a cinema here if you want to wind down with a film — let me know.",
+    ],
+    "thanks_with_generic_suggestion": [
+        "Happy to help! Still exploring? I can suggest dining, shopping, movies, or any services you need.",
+        "Of course! There's plenty more to discover here — just tell me what sounds good next.",
+        "Anytime! If there's anything else on your list — food, shops, a film, services — just ask.",
+    ],
     "farewell": [
         "Enjoy the rest of your visit! I'll be right here if you need directions, "
         "recommendations, or anything else — just send a message.",
@@ -225,15 +247,84 @@ _RESPONSES: dict[str, list[str]] = {
         "Tell me what's on your mind — whether it's finding something specific "
         "or just needing a quiet spot to regroup — and we'll sort it.",
     ],
+    "emotional_mood_plan": [
+        "Let's fix that. Quick mood-booster plan: grab something delicious from the Food Court, "
+        "browse a few shops to unwind, and if you want to switch off completely — there's a cinema here too. "
+        "Want me to build a proper feel-good route for you?",
+
+        "Sounds like you need a good visit, not just directions. "
+        "Here's a simple pick-me-up loop: a treat from the Food Court, "
+        "a browse through the shops, and a film if you fancy it. "
+        "Tell me what sounds most appealing and I'll plan it out.",
+
+        "I've got you. Mall therapy: start with something tasty to eat, "
+        "do a bit of browsing at the shops, and end with a film or a good coffee. "
+        "What's the one thing that sounds most appealing right now?",
+    ],
 }
 
 
 _KIND_TO_POOL: dict[MessageKind, str] = {
     MessageKind.HOWRU:     "howru",
-    MessageKind.THANKS:    "thanks",
     MessageKind.FAREWELL:  "farewell",
     MessageKind.EMOTIONAL: "emotional",
 }
+
+# Domains that count as "completed" for proactive follow-up logic.
+# Ordered by priority of suggestion (most universally useful first).
+_SUGGESTION_PRIORITY: list[tuple[str, str]] = [
+    ("dining",         "thanks_with_dining_suggestion"),
+    ("shopping",       "thanks_with_shopping_suggestion"),
+    ("entertainment",  "thanks_with_entertainment_suggestion"),
+]
+
+
+def _pick_emotional_response(state: ConciergeState) -> str:
+    """
+    Return a context-aware emotional response.
+
+    When the visitor expresses a mood + asks for a plan/activity to feel better,
+    use the uplifting mood-plan pool. Otherwise use the standard empathetic pool.
+    """
+    msg = (state.normalized_user_message or state.raw_user_message or "").lower()
+    _MOOD_PLAN_SIGNALS = (
+        "make me happy", "cheer me up", "feel better", "give me a plan",
+        "make it better", "something fun", "fun plan", "good plan",
+        "pick me up", "lift my mood",
+    )
+    if any(sig in msg for sig in _MOOD_PLAN_SIGNALS):
+        return random.choice(_RESPONSES["emotional_mood_plan"])
+    return random.choice(_RESPONSES["emotional"])
+
+
+def _pick_thanks_response(state: ConciergeState) -> str:
+    """
+    Return a context-aware thanks response.
+
+    If the visitor has covered some topics already, proactively suggest
+    a domain they haven't explored yet — so the conversation stays alive
+    rather than ending with a dead-end "you're welcome".
+
+    Falls back to the generic thanks pool when no context is available.
+    """
+    scene = state.scene
+    completed = set(scene.completed_steps or [])
+    active = scene.active_topic or ""
+
+    # Build the set of domains the visitor has NOT yet explored.
+    unexplored = [
+        pool_key
+        for domain, pool_key in _SUGGESTION_PRIORITY
+        if domain != active and domain not in completed
+    ]
+
+    if unexplored and (completed or active):
+        # Suggest the first unexplored domain that makes sense given context.
+        pool_key = unexplored[0]
+        return random.choice(_RESPONSES[pool_key])
+
+    # No meaningful context — use the generic pool.
+    return random.choice(_RESPONSES["thanks_with_generic_suggestion"])
 
 
 def is_smalltalk(state: ConciergeState) -> bool:
@@ -275,6 +366,12 @@ async def smalltalk(state: ConciergeState) -> dict:
         # Falls back to the static pool automatically on any LLM error.
         response_text = await _generate_farewell(state)
         experience_mode = "farewell_personalised"
+    elif kind == MessageKind.THANKS:
+        response_text = _pick_thanks_response(state)
+        experience_mode = "thanks_response"
+    elif kind == MessageKind.EMOTIONAL:
+        response_text = _pick_emotional_response(state)
+        experience_mode = "emotional_response"
     elif kind in _KIND_TO_POOL:
         response_text = random.choice(_RESPONSES[_KIND_TO_POOL[kind]])
         experience_mode = "smalltalk"

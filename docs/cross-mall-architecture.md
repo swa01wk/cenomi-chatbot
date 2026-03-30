@@ -21,28 +21,34 @@ Single-mall questions (`"Do you have Zara?"`) are **not** affected and flow thro
 
 ## 2. Current Implementation Status
 
-### What Is Built (as of now)
+### What Is Built (as of v1.5)
 
 | Capability | Status | Location |
 |-----------|--------|---------|
 | Multi-mall data loading at startup | **Done** | `app/runtime.py` → `initialize()` |
-| Runtime registry for all mall contexts | **Done** | `_mall_contexts: dict[str, MallContextLoader]` |
-| `search_brand_across_malls()` utility | **Done** | `app/runtime.py` |
+| Runtime registry for all mall contexts | **Done** | `_mall_contexts: LRUMallContextRegistry` |
+| `search_brand_across_malls()` utility (RAM-resident) | **Done** | `app/runtime.py` |
+| `search_brand_across_configured_malls()` (async, LRU-safe) | **Done** | `app/runtime.py` |
+| `build_merged_guard_canonical_for_configured_malls()` (async) | **Done** | `app/runtime.py` |
 | `get_loaded_mall_ids()` | **Done** | `app/runtime.py` |
-| `get_all_mall_canonical_for_guard()` | **Done** | `app/runtime.py` |
+| `get_all_mall_canonical_for_guard()` (RAM-only) | **Done** | `app/runtime.py` |
 | Regex-based cross-mall intent detection | **Done** | `intent/query_classifier.py` |
 | `domain = cross_mall`, `sub_intent = cross_mall_search` | **Done** | `app/nodes/interpret_turn.py` |
+| `cross_mall_search` → factual flow hint (`cross_mall_availability` scope) | **Done** | `app/nodes/interpret_turn.py` |
+| `cross_mall_availability` scope in `resolve_fact_scope` | **Done** | `app/nodes/resolve_fact_scope.py` |
 | LLM classifier instructions for cross-mall | **Done** | `CLASSIFICATION_PROMPT` |
-| Cross-mall context injection into generate_response | **Done** | `app/nodes/generate_response.py` |
-| Hallucination guard that covers all-mall entities | **Done** | `get_all_mall_canonical_for_guard()` |
+| Dedicated cross-mall fact context composition | **Done** | `app/nodes/compose_fact_response_context.py` |
+| `AT YOUR CURRENT MALL` / `AT OTHER CENOMI MALLS` response sections | **Done** | `app/nodes/generate_response.py` |
+| Hallucination guard that covers all configured-mall entities (async) | **Done** | `build_merged_guard_canonical_for_configured_malls()` |
+| Brand resolution service (follow-up queries, scene fallback) | **Done** | `app/services/cross_mall_brand.py` |
 | Multi-mall health endpoint (`mall_ids` array) | **Done** | `app/api/health.py` |
 | Frontend mall selector for home mall | **Done** | `TopBar.tsx` |
+| Session `mall_id` update on reuse from different mall | **Done** | `app/services/session_store.py` |
 
 ### What Is Not Yet Built
 
 | Capability | Status | Notes |
 |-----------|--------|-------|
-| Dedicated `cross_mall_search` graph node | Not done | Currently inline in `generate_response` |
 | Cross-mall playbook resolution | Not done | Playbooks are per-mall only |
 | Cross-mall scene memory | Not done | `SceneMemory` is home-mall anchored |
 | Cross-mall semantic signal ranking | Not done | Signals are single-mall only |
@@ -167,9 +173,9 @@ VALID_SUB_INTENTS = { ..., "cross_mall_search" }
 
 ---
 
-## 5. Graph Design — Current Single Pipeline Handling
+## 5. Graph Design — Current Pipeline Handling
 
-The current graph is a **single unified pipeline** for both single-mall and cross-mall queries. Cross-mall is not a separate branch — it is handled by injecting cross-mall results into the existing `generate_response` node when `intent.domain == "cross_mall"`.
+Cross-mall brand queries flow through the **factual branch** of the pipeline (introduced in v1.5). `interpret_turn` steers the turn into the factual path with `scope="cross_mall_availability"`, which is then composed by `compose_fact_response_context` before `generate_response` renders the structured response.
 
 ```
 START
@@ -180,55 +186,62 @@ load_session
   ▼
 interpret_turn
   │   Detects cross_mall via regex → domain="cross_mall", sub_intent="cross_mall_search"
+  │   Flow hint: flow_type="factual", scope="cross_mall_availability", entity_type="brand"
   │
-  ├─── (smalltalk) ───► smalltalk ──────────────────────────────────┐
-  │                                                                  │
-  ▼ (normal path — including cross_mall)                            │
-update_scene_memory                                                  │
-  │   cross_mall: no special branch — scene updated normally        │
+  ├─── (smalltalk) ───► smalltalk ──────────────────────────────────────────┐
+  │                                                                          │
+  ▼ (factual path — cross_mall_availability)                                │
+resolve_fact_scope                                                            │
+  │   cross_mall phrases → scope="cross_mall_availability", targets=[]      │
   ▼
-resolve_playbooks
-  │   cross_mall: no home-mall playbook matches; returns empty      │
+fetch_exact_facts                                                             │
+  │   scope=cross_mall_availability: delegates brand resolution to          │
+  │   compose_fact_response_context (no raw retrieval targets)              │
   ▼
-choose_strategy
-  │   cross_mall domain → strategy="direct_fact" or "shortlist"    │
+compose_fact_response_context                                                 │
+  │   _compose_cross_mall_fact_context():                                   │
+  │     • resolve_cross_mall_brand_query(state) — strips phrases,          │
+  │       falls back: fact_query_entity → last_resolved_entity →           │
+  │       active_shortlist[0]                                               │
+  │     • search_brand_across_configured_malls() — async, ensures all      │
+  │       configured malls loaded regardless of LRU state                  │
+  │     • Splits results: cross_mall_at_home / cross_mall_other            │
   ▼
-compose_context
-  │   cross_mall: home-mall context only (current limitation)       │
-  ▼
-rank_and_dedupe
-  │   cross_mall: entities from home mall only (current limitation) │
-  ▼
-decide_retrieval
-  │   cross_mall: retrieval_needed=True (brand lookup needed)       │
-  ▼
-fetch_exact_facts
-  │   Triggers search_brand_across_malls() via retriever            │
-  │   Returns: [{mall_id, name, floor, category, is_home_mall}, …]  │
-  ▼
-generate_response
-  │   Detects intent.domain == "cross_mall"                         │
-  │   Injects cross-mall results into prompt                        │
-  │   Hallucination guard uses get_all_mall_canonical_for_guard()   │
-  │   (all malls' entities are valid, not just home mall)           │
-  ▼
-update_memory
+generate_response                                                             │
+  │   _format_fact_context(scope="cross_mall_availability"):               │
+  │     Renders "AT YOUR CURRENT MALL" section, then                       │
+  │     "AT OTHER CENOMI MALLS" section                                    │
+  │   Hallucination guard: build_merged_guard_canonical_for_configured_malls()  │
+  ▼                                                                         │
+update_memory ◄───────────────────────────────────────────────────────────┘
   ▼
 emit_debug_payload
   ▼
 END
 ```
 
-### How generate_response Handles Cross-Mall
+### How compose_fact_response_context Handles Cross-Mall
 
-When `intent.domain == "cross_mall"`, `generate_response` uses a dedicated path:
+When `scope == "cross_mall_availability"`, `_compose_cross_mall_fact_context` runs:
 
-1. Calls `search_brand_across_malls(brand_name, home_mall_id)` to get per-mall results
-2. Formats results grouped by `is_home_mall` (home first)
-3. Injects into the LLM prompt:
-   - Cross-mall search results (home mall prominently)
-   - Instruction: "Home mall results first; clearly label which mall each entity belongs to"
-4. Hallucination guard validates against `get_all_mall_canonical_for_guard()` (all malls merged)
+1. Calls `resolve_cross_mall_brand_query(state)` — strips boilerplate phrases from the message; if the result is empty or a useless token, falls back to `fact_query_entity`, then `scene.last_resolved_entity`, then `scene.active_shortlist[0]`
+2. Calls `search_brand_across_configured_malls(brand_query, home_mall_id)` — async, calls `ensure_mall_loaded` per mall in `BACKEND_MALL_IDS` to prevent LRU eviction dropping results
+3. Splits results into `cross_mall_at_home` (home mall) and `cross_mall_other` (other malls), each capped
+4. Returns a structured fact context dict with keys: `scope`, `cross_mall_brand_query`, `cross_mall_at_home`, `cross_mall_other`
+
+### How generate_response Formats the Cross-Mall Response
+
+`_format_fact_context` recognises `scope == "cross_mall_availability"` and renders:
+
+```
+AT YOUR CURRENT MALL
+  • [home mall results]
+
+AT OTHER CENOMI MALLS
+  • [other mall results grouped by mall_name]
+```
+
+The hallucination guard uses `build_merged_guard_canonical_for_configured_malls()` (async, loads all configured malls through the Tier 1→2→3 chain) so entity names from any configured mall are never incorrectly stripped.
 
 ---
 
@@ -352,27 +365,24 @@ When `debug=True`, the cross-mall path surfaces:
 
 The present cross-mall implementation handles brand presence queries well. The following gaps exist for more complex cross-mall scenarios:
 
-### Gap 1 — No Dedicated Graph Node
+### ~~Gap 1 — No Dedicated Graph Node~~ *(Resolved in v1.5)*
 
-Cross-mall context assembly is embedded in `generate_response` rather than being a first-class pipeline stage. This means:
-- `compose_context` and `rank_and_dedupe` use home-mall entities only
-- Cross-mall results bypass the scene/playbook/ranking pipeline
-- No `debug_enrichment` fields for cross-mall ranking
+Cross-mall queries now flow through the factual pipeline (`resolve_fact_scope → compose_fact_response_context → generate_response`). `compose_fact_response_context` owns brand resolution and all-configured-malls search; `generate_response` renders structured `AT YOUR CURRENT MALL` / `AT OTHER CENOMI MALLS` sections.
 
 ### Gap 2 — Brand Search Only
 
-`search_brand_across_malls()` is a name-match search (`query in entity_name.lower()`). It does not support:
+`search_brand_across_configured_malls()` is a substring name-match search (`query in entity_name.lower()`). It does not support:
 - Category-level cross-mall queries ("Which mall has more dining options?")
 - Semantic cross-mall matching ("Which mall is better for a family visit?")
 - Cross-mall experience comparison
 
 ### Gap 3 — No Scene Memory Cross-Mall Propagation
 
-If a visitor has established a family-visit scene (child companion, implicit goal) and asks a cross-mall question, the cross-mall response does not respect scene context. It treats the query as a raw brand lookup.
+If a visitor has established a family-visit scene (child companion, implicit goal) and asks a cross-mall question, the cross-mall response does not respect scene context. It treats the query as a brand lookup. The brand resolution fallback chain (`last_resolved_entity`, `active_shortlist`) does read scene memory for the *brand name*, but scene signals (occasion, companions, budget) are not used to filter or rank cross-mall results.
 
 ### Gap 4 — No Cross-Mall Playbook or Strategy
 
-There are no playbooks for cross-mall scenarios. The `choose_strategy` node defaults to `direct_fact` or `shortlist_recommendation` for all cross-mall queries, regardless of visit context.
+There are no playbooks for cross-mall scenarios. Cross-mall turns flow through the factual branch and bypass `resolve_playbooks` and `choose_strategy`.
 
 ### Gap 5 — No Mall-Switch Recommendation
 
@@ -620,13 +630,19 @@ For full test scripts and edge cases, see [`docs/cross-mall-testing.md`](cross-m
 | File | Cross-Mall Role |
 |------|----------------|
 | `backend/.env` | `BACKEND_MALL_IDS` — comma-separated list of mall IDs to load |
-| `app/runtime.py` | Multi-mall context registry; `search_brand_across_malls()`; `get_all_mall_canonical_for_guard()` |
+| `app/runtime.py` | Multi-mall context registry; `search_brand_across_malls()` (RAM-only); `search_brand_across_configured_malls()` (async, LRU-safe); `build_merged_guard_canonical_for_configured_malls()` (async guard merge); `get_all_mall_canonical_for_guard()` (RAM-only) |
 | `app/main.py` | Lifespan calls `runtime.initialize(settings.mall_ids)` |
 | `app/config/settings.py` | `mall_ids: list[str]` setting (parsed from `BACKEND_MALL_IDS`) |
-| `app/nodes/interpret_turn.py` | `cross_mall` domain + regex detection |
+| `app/nodes/interpret_turn.py` | `cross_mall` domain + regex detection; flow hint → `factual` / `cross_mall_availability` / `brand` |
+| `app/nodes/resolve_fact_scope.py` | Maps cross-mall phrases to `cross_mall_availability` scope with `targets=[]` |
+| `app/nodes/compose_fact_response_context.py` | `_compose_cross_mall_fact_context()`: resolves brand, searches configured malls, splits results |
+| `app/nodes/generate_response.py` | `_format_fact_context()` renders AT YOUR CURRENT MALL / AT OTHER CENOMI MALLS; uses async all-mall guard |
+| `app/nodes/compose_context.py` | Cross-mall context assembly using `search_brand_across_configured_malls` and `resolve_cross_mall_brand_query` |
+| `app/services/cross_mall_brand.py` | `extract_brand_query_from_message()` + `resolve_cross_mall_brand_query()` — brand resolution with scene fallback |
+| `app/services/session_store.py` | Updates session `mall_id` in memory + Redis when reused from a different mall |
 | `intent/query_classifier.py` | High-priority cross-mall regex rules |
-| `app/nodes/generate_response.py` | Cross-mall path: injects brand results, uses all-mall guard |
 | `app/api/health.py` | Returns `mall_ids` list for observability |
 | `app/context/mall_context.py` | Per-mall intelligence loader |
 | `guardrails/hallucination_guard.py` | All-mall guard mode for cross-mall responses |
+| `backend/tests/test_cross_mall_v1.py` | Unit tests: brand resolution, fact context ordering, flow hints |
 | `frontend/src/components/TopBar.tsx` | Mall selector UI (home mall selector) |

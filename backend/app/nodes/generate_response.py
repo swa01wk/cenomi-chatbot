@@ -26,7 +26,11 @@ from langchain_openai import ChatOpenAI
 from app.config.settings import get_settings
 from app.models.state import ConciergeState, Message
 from app.nodes._tracing import traced_node
-from app.runtime import get_all_mall_canonical_for_guard, get_mall_context
+from app.runtime import (
+    build_merged_guard_canonical_for_configured_malls,
+    get_all_mall_canonical_for_guard,
+    get_mall_context,
+)
 from app.services.cta_generator import get_cta_instruction
 from app.services.experience_resolver import (
     CURATED_SHORTLIST,
@@ -1118,7 +1122,13 @@ async def _build_factual_response(
             HumanMessage(content=user_prompt),
         ])
         final_text = response.content
-        final_text = _run_hallucination_guard(final_text, mall_ctx, warnings)
+        if scope == "cross_mall_availability":
+            merged = await build_merged_guard_canonical_for_configured_malls()
+            final_text = _run_hallucination_guard(
+                final_text, mall_ctx, warnings, canonical_override=merged
+            )
+        else:
+            final_text = _run_hallucination_guard(final_text, mall_ctx, warnings)
     except Exception as exc:
         logger.error("LLM call failed for factual response: %s", exc)
         warnings.append(f"LLM call failed: {exc}")
@@ -1159,6 +1169,32 @@ def _format_fact_context(fact_ctx: dict, state) -> str:
     """Serialize the fact_context into a structured text block for the LLM."""
     import json as _json
     parts: list[str] = []
+
+    if fact_ctx.get("scope") == "cross_mall_availability" or (
+        "cross_mall_at_home" in fact_ctx or "cross_mall_other" in fact_ctx
+    ):
+        brand = fact_ctx.get("cross_mall_brand_query") or fact_ctx.get("query_entity") or ""
+        parts.append("=== CROSS-MALL BRAND AVAILABILITY ===")
+        parts.append(f"Brand search: {brand}")
+        at_home = fact_ctx.get("cross_mall_at_home") or []
+        other = fact_ctx.get("cross_mall_other") or []
+        parts.append("AT YOUR CURRENT MALL (answer this section first):")
+        if at_home:
+            for e in at_home:
+                floor = f" — {e['floor']}" if e.get("floor") else ""
+                parts.append(f"  • {e.get('name', '')} ({e.get('entity_type', '')}){floor}")
+        else:
+            parts.append("  (no listing for this brand at the active mall in available data)")
+        parts.append("AT OTHER CENOMI MALLS (only if listed — mention after current mall):")
+        if other:
+            for e in other:
+                floor = f" — {e['floor']}" if e.get("floor") else ""
+                parts.append(
+                    f"  • {e.get('name', '')} at {e.get('mall_name', '')}{floor}"
+                )
+        else:
+            parts.append("  (no other matches in available data)")
+        return "\n".join(parts)
 
     # Detect if family/kid filter is active — determines whether to group by genre
     secondary_intents = getattr(state, "secondary_intents", []) or []
@@ -1505,8 +1541,11 @@ def _build_factual_mode_instruction(
     if scope == "cross_mall_availability":
         return (
             "RESPONSE MODE — CROSS-MALL AVAILABILITY:\n"
-            "Answer using the cross-mall data above. Lead with the home mall, "
-            "then mention other Cenomi malls. Be direct and accurate.\n\n"
+            "Use ONLY the cross-mall sections above. Order is mandatory:\n"
+            "1) Answer for YOUR CURRENT MALL first (yes/no, then floor/location if listed).\n"
+            "2) Then, only if other malls are listed, mention those — never lead with another mall.\n"
+            "If the brand is only at other malls, say clearly it is not at the current mall, then say where it is.\n"
+            "Be concise and accurate; do not invent locations.\n\n"
         )
     return (
         "RESPONSE MODE — DIRECT ANSWER:\n"
@@ -1548,6 +1587,24 @@ def _build_factual_fallback(state, fact_ctx: dict) -> str:
         hours = fact_ctx.get("mall_hours")
         if hours:
             return f"Mall hours: {hours}"
+
+    if scope == "cross_mall_availability":
+        at_home = fact_ctx.get("cross_mall_at_home") or []
+        other = fact_ctx.get("cross_mall_other") or []
+        brand = fact_ctx.get("cross_mall_brand_query") or fact_ctx.get("query_entity") or "that brand"
+        if not fact_ctx.get("cross_mall_brand_query") and not fact_ctx.get("query_entity"):
+            return "Which store or brand should I look up across our malls?"
+        if at_home and other:
+            o0 = other[0]
+            return (
+                f"Yes, {brand} is at your current mall and also at {o0.get('mall_name', 'another mall')}."
+            )
+        if at_home:
+            return f"Yes, {brand} is listed at your current mall."
+        if other:
+            o0 = other[0]
+            return f"{brand} is not listed at your current mall in our data, but it is at {o0.get('mall_name', 'another mall')}."
+        return f"I couldn't find {brand} at the malls I have data for."
 
     return (
         "I'm having trouble retrieving that information right now. "

@@ -278,6 +278,136 @@ Expected: `domain: shopping` (or `tenant_search`) — **not** `cross_mall`.
 
 ---
 
+## 8. Factual-path cross-mall queries (v1.5+)
+
+Starting in v1.5, cross-mall brand queries flow through the factual pipeline (`resolve_fact_scope → compose_fact_response_context → generate_response`). The response always renders two labelled sections. Use the `debug=true` flag to verify the scope.
+
+### Confirm `scope = cross_mall_availability` in debug output
+
+```bash
+curl -s -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Which of your malls has Zara?",
+    "mall_id": "al_nakheel_plaza_28",
+    "tenant_id": "al_nakheel_plaza_28",
+    "debug": true
+  }' | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+dbg = d.get('debug', {})
+print('flow_type :', dbg.get('flow_type'))
+print('scope     :', dbg.get('fact_scope'))
+print()
+print('Response preview:')
+print(d.get('message', '')[:300])
+"
+```
+
+Expected:
+
+```
+flow_type : factual
+scope     : cross_mall_availability
+```
+
+### Verify AT YOUR CURRENT MALL / AT OTHER CENOMI MALLS structure
+
+The LLM prompt receives pre-formatted context with `AT YOUR CURRENT MALL` before `AT OTHER CENOMI MALLS`. The response should mirror this ordering. Validate with any brand that exists in both malls (e.g. Zara, Starbucks):
+
+| Query | Expected response structure |
+|---|---|
+| `"Which of your malls has Starbucks?"` | Leads with home-mall Starbucks details, then "Also at Mall of Arabia" |
+| `"Is Zara available at both your malls?"` | Home mall confirmed first, then other mall |
+| `"Does Al Nakheel Plaza have Popeyes?"` (from Mall of Arabia) | AT YOUR CURRENT MALL: not found. AT OTHER CENOMI MALLS: not found at Al Nakheel Plaza |
+
+### Scope routing unit test
+
+Run without LLM or live server:
+
+```bash
+cd backend
+source .venv/bin/activate
+pytest tests/test_cross_mall_v1.py::TestCrossMallFlowHints -v
+```
+
+Expected output — both tests pass:
+
+```
+tests/test_cross_mall_v1.py::TestCrossMallFlowHints::test_single_mall_brand_is_not_cross_mall_scope PASSED
+tests/test_cross_mall_v1.py::TestCrossMallFlowHints::test_cross_mall_search_hint PASSED
+```
+
+---
+
+## 9. Follow-up cross-mall queries and brand resolution
+
+When a visitor asks a follow-up like `"where else can I find it?"`, `resolve_cross_mall_brand_query` resolves the brand from prior context without requiring the brand name to be repeated.
+
+### Fallback chain
+
+1. Stripped message (boilerplate phrases removed) — catches `"which malls have Starbucks?"`
+2. `fact_query_entity` — set by retrieval on single-mall brand availability turns
+3. `scene.last_resolved_entity` — set by `update_memory` after a prior brand mention
+4. `scene.active_shortlist[0]` — first entity from a prior shortlist
+
+### Test the fallback chain (unit tests, no LLM)
+
+```bash
+cd backend
+source .venv/bin/activate
+pytest tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery -v
+```
+
+Expected:
+
+```
+tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery::test_where_else_uses_last_resolved_entity PASSED
+tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery::test_empty_when_only_pronouns PASSED
+tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery::test_explicit_brand_in_message PASSED
+tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery::test_fact_query_entity_fallback PASSED
+tests/test_cross_mall_v1.py::TestResolveCrossMallBrandQuery::test_active_shortlist_fallback PASSED
+```
+
+### Live follow-up session test
+
+Send two turns with the same `session_id`. The second turn does not name the brand.
+
+```bash
+SESSION_ID="test-followup-$(date +%s)"
+
+# Turn 1 — establish brand in scene
+curl -s -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"message\": \"Is Zara here at Al Nakheel?\",
+    \"mall_id\": \"al_nakheel_plaza_28\",
+    \"session_id\": \"$SESSION_ID\"
+  }" | python3 -m json.tool
+
+# Turn 2 — follow-up without naming the brand
+curl -s -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"message\": \"where else can I find it?\",
+    \"mall_id\": \"al_nakheel_plaza_28\",
+    \"session_id\": \"$SESSION_ID\",
+    \"debug\": true
+  }" | python3 -m json.tool
+```
+
+**Expected behaviour (Turn 2):** Response covers Zara across both malls with `AT YOUR CURRENT MALL` / `AT OTHER CENOMI MALLS` structure. The debug payload should show `scope: cross_mall_availability` and the resolved brand in the fact context.
+
+### Edge cases
+
+| Scenario | Expected behaviour |
+|---|---|
+| Follow-up with only a pronoun (`"it"`, `"this"`, `"that store"`) and no prior scene entity | Brand query resolves to empty string; response gracefully states no specific brand could be identified and prompts the visitor to name it |
+| Follow-up after a multi-entity shortlist (e.g. dining suggestions) | `active_shortlist[0]` used as the brand; response may not be precise — visitor should clarify |
+| Cross-mall query in a fresh session with no brand in message | Empty brand → graceful no-results response |
+
+---
+
 ## Troubleshooting
 
 **Both malls not loaded at startup**
@@ -285,6 +415,9 @@ Check `BACKEND_MALL_IDS` in `backend/.env` — must be comma-separated with no s
 
 **`domain` shows `shopping` instead of `cross_mall` for a cross-mall question**
 The regex did not match. Check that the query contains explicit cross-mall language (e.g. "Mall of Arabia", "other mall", "both malls", "across malls", "any Cenomi mall"). Ambiguous phrasing like "Do you have Zara there?" will fall through to the LLM classifier, which may return `shopping` if there is no prior context establishing "there" as another mall.
+
+**`scope` shows `brand_availability` instead of `cross_mall_availability`**
+The cross-mall flow hint in `interpret_turn` did not fire. Confirm `intent.domain == "cross_mall"` in the debug output. If the domain is correct but the scope is wrong, check that `resolve_fact_scope.py` has the cross-mall keyword patterns (updated in v1.5).
 
 **`KeyError` on mall_id**
 The `mall_id` in the request body does not match one of the loaded IDs. Run the health check to see which IDs are loaded.

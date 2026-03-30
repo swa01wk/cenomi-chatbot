@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-2f20f651a2aa",
+  "session_id": "reg-f467afb6d9ab",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-0580cd991f1e",
+  "user_message": "I need a good restaurant for dinner",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-30 11:23:49.864940"
+}

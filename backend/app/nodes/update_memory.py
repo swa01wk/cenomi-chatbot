@@ -53,12 +53,34 @@ async def update_memory(state: ConciergeState) -> dict:
     # doesn't bleed into unrelated queries later in the session.
     _EMOTIONAL_KINDS = frozenset({"disengagement", "emotional"})
     current_kind = state.intent.message_kind
-    if current_kind in _EMOTIONAL_KINDS:
+
+    # Guard: if the current turn was classified as "disengagement" but the intent
+    # domain is a real actionable domain (not "general"), it is very likely a false
+    # positive caused by the recent_mood context poisoning the LLM classifier.
+    # In that case, treat it as a fresh request rather than a genuine disengagement.
+    _is_false_disengagement = (
+        current_kind == "disengagement"
+        and state.intent.domain not in ("general", "")
+    )
+
+    if current_kind in _EMOTIONAL_KINDS and not _is_false_disengagement:
         scene.recent_mood = current_kind
         scene.mood_turn_index = turn_index
         changes.append(f"recent_mood={current_kind} at turn_index={turn_index}")
     elif scene.recent_mood and (turn_index - scene.mood_turn_index) >= 2:
         changes.append(f"recent_mood cleared (was '{scene.recent_mood}', expired after 2 turns)")
+        scene.recent_mood = ""
+        scene.mood_turn_index = 0
+
+    # Critical: after a disengagement recovery response is served the conversation
+    # has been reset — clear the mood immediately so the NEXT turn starts clean.
+    # Without this, the stale recent_mood biases the LLM into classifying every
+    # subsequent user message as disengagement, creating an infinite loop.
+    if "disengagement_recovery" in (state.response_debug_summary or ""):
+        if scene.recent_mood:
+            changes.append(
+                f"recent_mood cleared (disengagement recovery served, was '{scene.recent_mood}')"
+            )
         scene.recent_mood = ""
         scene.mood_turn_index = 0
 

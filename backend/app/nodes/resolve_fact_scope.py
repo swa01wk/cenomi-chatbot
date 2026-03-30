@@ -133,7 +133,7 @@ _SCOPE_RETRIEVAL_TARGETS: dict[str, list[str]] = {
     "cinema_lookup": ["entity_location"],
     "movie_schedule": ["movie_schedule"],
     "brand_availability": ["entity_location"],
-    "cross_mall_availability": [],  # handled by compose_context cross-mall path
+    "cross_mall_availability": [],  # handled by compose_fact_response_context cross-mall path
     "route_hint": ["entity_location", "facility_location"],
 }
 

@@ -80,6 +80,10 @@ class LRUMallContextRegistry:
         self._redis_ttl = redis_ttl
         self._redis: Any | None = None  # lazily created on first access
 
+    @property
+    def capacity(self) -> int:
+        return self._capacity
+
     async def _get_redis(self) -> Any | None:
         """Return (and lazily create) the Redis client, or None if not configured."""
         if self._redis is not None:
@@ -338,50 +342,126 @@ def get_vector_store() -> VectorStoreService | None:
     return _vector_store
 
 
+def _collect_brand_hits_from_loader(
+    ctx: Any,
+    mall_id: str,
+    query: str,
+    home_mall_id: str | None,
+) -> list[dict]:
+    """Scan one MallContextLoader's canonical data for substring brand matches."""
+    results: list[dict] = []
+    if not query:
+        return results
+    canonical = ctx._builder._canonical
+    mall_profile = canonical.get("mall_profile")
+    mall_name = getattr(mall_profile, "name", mall_id) if mall_profile else mall_id
+    q = query.lower()
+
+    for etype in ("stores", "dining", "cinemas"):
+        for entity in canonical.get(etype, []):
+            entity_name = getattr(entity, "name", "") or ""
+            if q in entity_name.lower():
+                results.append({
+                    "mall_id": mall_id,
+                    "mall_name": mall_name,
+                    "entity_type": etype,
+                    "name": entity_name,
+                    "floor": getattr(entity, "floor", "") or "",
+                    "category": getattr(entity, "category", "") or "",
+                    "is_home_mall": mall_id == home_mall_id,
+                    "source": "cross_mall_search",
+                })
+    return results
+
+
 def search_brand_across_malls(
     brand_name: str,
     home_mall_id: str | None = None,
 ) -> list[dict]:
     """
-    Search all loaded mall contexts for a brand/store by display name.
+    Search all **currently RAM-resident** mall contexts for a brand/store name.
 
-    Only malls currently in the LRU RAM cache are searched.  Malls that
-    have not yet received any requests are not yet loaded and are skipped.
-
-    Results are sorted so the home mall always appears first.
-
-    Each entry contains:
-        mall_id, mall_name, entity_type, name, floor, category,
-        is_home_mall, source
+    Prefer `search_brand_across_configured_malls` for cross-mall answers so every
+    mall in BACKEND_MALL_IDS is visited (each load resolves Tier 2 Redis → Tier 3 disk).
     """
     if _mall_registry is None:
         return []
 
-    results = []
     query = brand_name.strip().lower()
-
+    results: list[dict] = []
     for mall_id, ctx in _mall_registry.items():
-        canonical = ctx._builder._canonical
-        mall_profile = canonical.get("mall_profile")
-        mall_name = getattr(mall_profile, "name", mall_id) if mall_profile else mall_id
-
-        for etype in ("stores", "dining", "cinemas"):
-            for entity in canonical.get(etype, []):
-                entity_name = getattr(entity, "name", "") or ""
-                if query in entity_name.lower():
-                    results.append({
-                        "mall_id": mall_id,
-                        "mall_name": mall_name,
-                        "entity_type": etype,
-                        "name": entity_name,
-                        "floor": getattr(entity, "floor", "") or "",
-                        "category": getattr(entity, "category", "") or "",
-                        "is_home_mall": mall_id == home_mall_id,
-                        "source": "cross_mall_search",
-                    })
+        results.extend(_collect_brand_hits_from_loader(ctx, mall_id, query, home_mall_id))
 
     results.sort(key=lambda r: (0 if r["is_home_mall"] else 1, r["mall_name"]))
     return results
+
+
+async def search_brand_across_configured_malls(
+    brand_name: str,
+    home_mall_id: str | None = None,
+) -> list[dict]:
+    """
+    Search every mall in Settings.get_mall_id_list() for substring brand matches.
+
+    Calls `ensure_mall_loaded` per mall so each context is resolved via the normal
+    Tier 1 → Tier 2 (Redis `cenomi:ctx:{mall_id}`) → Tier 3 (disk) chain.  Results
+    are accumulated mall-by-mall so LRU eviction between steps does not drop data.
+    """
+    if _mall_registry is None:
+        return []
+
+    from app.config.settings import get_settings
+
+    query = brand_name.strip().lower()
+    if not query:
+        return []
+
+    results: list[dict] = []
+    mall_ids = get_settings().get_mall_id_list()
+    if len(mall_ids) > _mall_registry.capacity:
+        logger.warning(
+            "Cross-mall search: %d malls configured but mall_cache_size=%d — "
+            "raise BACKEND_MALL_CACHE_SIZE to avoid churn during parallel traffic",
+            len(mall_ids),
+            _mall_registry.capacity,
+        )
+    for mid in mall_ids:
+        await ensure_mall_loaded(mid)
+        ctx = get_mall_context(mid)
+        results.extend(_collect_brand_hits_from_loader(ctx, mid, query, home_mall_id))
+
+    results.sort(key=lambda r: (0 if r["is_home_mall"] else 1, r["mall_name"]))
+    return results
+
+
+async def ensure_configured_malls_loaded() -> None:
+    """Pre-warm every mall in BACKEND_MALL_IDS (used before cross-mall search if needed)."""
+    from app.config.settings import get_settings
+
+    for mid in get_settings().get_mall_id_list():
+        await ensure_mall_loaded(mid)
+
+
+async def build_merged_guard_canonical_for_configured_malls() -> dict:
+    """
+    Merge `get_canonical_for_guard()` across all configured malls for hallucination guard.
+
+    Loads each mall in turn (Redis/disk chain) and extends sections before eviction.
+    """
+    sections = ("stores", "dining", "cinemas", "movies", "events", "offers", "services")
+    merged: dict = {s: [] for s in sections}
+    if _mall_registry is None:
+        return merged
+
+    from app.config.settings import get_settings
+
+    for mid in get_settings().get_mall_id_list():
+        await ensure_mall_loaded(mid)
+        ctx = get_mall_context(mid)
+        guard_data = ctx.get_canonical_for_guard()
+        for section in sections:
+            merged[section].extend(guard_data.get(section, []))
+    return merged
 
 
 def get_all_mall_canonical_for_guard() -> dict:
