@@ -357,20 +357,63 @@ def _collect_brand_hits_from_loader(
     mall_name = getattr(mall_profile, "name", mall_id) if mall_profile else mall_id
     q = query.lower()
 
+    seen_entity_ids: set[str] = set()
+
     for etype in ("stores", "dining", "cinemas"):
         for entity in canonical.get(etype, []):
             entity_name = getattr(entity, "name", "") or ""
-            if q in entity_name.lower():
-                results.append({
-                    "mall_id": mall_id,
-                    "mall_name": mall_name,
-                    "entity_type": etype,
-                    "name": entity_name,
-                    "floor": getattr(entity, "floor", "") or "",
-                    "category": getattr(entity, "category", "") or "",
-                    "is_home_mall": mall_id == home_mall_id,
-                    "source": "cross_mall_search",
-                })
+            entity_id = getattr(entity, "entity_id", "") or ""
+
+            # Primary: name-based substring match
+            name_match = q in entity_name.lower()
+
+            # Secondary: cuisine_type / category / tags / description search
+            # Only used when name doesn't match, so food-ingredient queries (e.g.
+            # "seafood", "sushi") can surface relevant dining venues by cuisine or tag.
+            secondary_match = False
+            if not name_match and etype in ("dining", "stores"):
+                cuisine = (getattr(entity, "cuisine_type", "") or "").lower()
+                category = (getattr(entity, "category", "") or "").lower()
+                description = (getattr(entity, "description", "") or "").lower()
+                tags = " ".join(getattr(entity, "tags", []) or []).lower()
+                secondary_match = any(
+                    q in field for field in (cuisine, category, description, tags) if field
+                )
+
+            if not (name_match or secondary_match):
+                continue
+
+            # Deduplicate by entity_id across name/secondary paths
+            if entity_id and entity_id in seen_entity_ids:
+                continue
+            if entity_id:
+                seen_entity_ids.add(entity_id)
+
+            # Floor/zone/unit live on the nested LocationRef object
+            loc = getattr(entity, "location", None)
+            floor = (getattr(loc, "floor", "") if loc else "") or ""
+            zone = (getattr(loc, "zone", "") if loc else "") or ""
+            unit_number = (getattr(loc, "unit_number", "") if loc else "") or ""
+            # Category: stores have category, dining have cuisine_type
+            entity_category = (
+                getattr(entity, "category", "")
+                or getattr(entity, "cuisine_type", "")
+                or ""
+            )
+            results.append({
+                "mall_id": mall_id,
+                "mall_name": mall_name,
+                "entity_type": etype,
+                "entity_id": entity_id,
+                "name": entity_name,
+                "floor": floor,
+                "zone": zone,
+                "unit_number": unit_number,
+                "category": entity_category,
+                "is_home_mall": mall_id == home_mall_id,
+                "source": "cross_mall_search",
+                "match_type": "name" if name_match else "description",
+            })
     return results
 
 

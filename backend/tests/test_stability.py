@@ -34,16 +34,8 @@ from app.models.state import (
     SceneMemory,
 )
 from app.nodes.rank_and_dedupe import rank_and_dedupe, _dedupe_key
-from app.nodes.route_flow import route_flow, _has_strong_scene_context, _is_pure_lookup
-from app.nodes.interpret_turn import (
-    _extract_scenario_from_message,
-)
-from intent.query_classifier import (
-    is_likely_unsupported,
-    maybe_correct_brand,
-    normalize_query,
-    normalize_query_with_pattern,
-)
+from app.nodes.route_flow import route_flow, _has_strong_scene_context
+from intent.query_classifier import is_likely_unsupported
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -75,6 +67,7 @@ def _make_state(
     user_role: str = "",
     visit_constraints: list[str] | None = None,
     active_shortlist: list[str] | None = None,
+    flow_type_candidate: str = "",
 ) -> ConciergeState:
     scene = SceneMemory(
         companions=companions or [],
@@ -98,6 +91,7 @@ def _make_state(
         primary_intent=primary_intent,
         secondary_intents=secondary_intents or [],
         modifiers=modifiers or [],
+        flow_type_candidate=flow_type_candidate,
     )
     return ConciergeState(
         session_id="test-session",
@@ -117,6 +111,7 @@ def _make_state(
 # 1. Query Normalization / Intent Equivalence
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="normalize_query / normalize_query_with_pattern removed in v1.6 — all normalization is LLM-handled now")
 class TestQueryNormalization:
     """All semantically equivalent queries must normalize to the same canonical form."""
 
@@ -234,6 +229,7 @@ class TestRouteFlowDiscipline:
             domain="entertainment",
             sub_intent="movie_showtime",
             primary_intent="movie_lookup",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual", (
@@ -250,6 +246,7 @@ class TestRouteFlowDiscipline:
             secondary_intents=["family_filter"],
             modifiers=["kid_friendly"],
             companions=["child"],
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual", (
@@ -294,6 +291,7 @@ class TestRouteFlowDiscipline:
             domain="navigation",
             sub_intent="location_query",
             primary_intent="location_lookup",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -328,6 +326,7 @@ class TestRouteFlowDiscipline:
             domain="shopping",
             sub_intent="general_shopping",
             primary_intent="brand_availability",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual", (
@@ -401,50 +400,20 @@ class TestContextSettingDetection:
 # 4. Scenario Extraction
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="_extract_scenario_from_message removed in v1.6 — scenarios are LLM-classified now")
 class TestScenarioExtraction:
     """Scenarios must be extracted correctly from messages."""
 
-    def test_bridesmaid_scenario(self):
-        sc = _extract_scenario_from_message("i am a bridesmaid here for shopping", {})
-        assert sc == "wedding_related"
-
-    def test_family_outing_scenario(self):
-        sc = _extract_scenario_from_message("i am here with my kid", {})
-        assert sc == "family_outing"
-
-    def test_date_scenario(self):
-        sc = _extract_scenario_from_message("date night ideas", {})
-        assert sc == "date"
-
-    def test_gift_shopping_scenario(self):
-        sc = _extract_scenario_from_message("gift for my girlfriend", {})
-        assert sc in ("gift_shopping", "date")
-
-    def test_quick_visit_scenario(self):
-        sc = _extract_scenario_from_message("we are in a hurry", {})
-        assert sc == "quick_visit"
-
-    def test_before_movie_scenario(self):
-        sc = _extract_scenario_from_message("something quick before the movie", {})
-        assert sc == "before_movie"
-
-    def test_birthday_scenario(self):
-        sc = _extract_scenario_from_message("it's my birthday today", {})
-        assert sc == "birthday"
-
-    def test_first_visit_scenario(self):
-        sc = _extract_scenario_from_message("first time visiting", {})
-        assert sc == "first_visit"
-
-    def test_group_outing_scenario(self):
-        sc = _extract_scenario_from_message("here with my friends", {})
-        assert sc == "group_outing"
-
-    def test_scenario_fallback_from_context(self):
-        """If no scenario in message, fall back to scene context."""
-        scene_ctx = {"companions": ["son"]}
-        sc = _extract_scenario_from_message("food", scene_ctx)
-        assert sc == "family_outing"
+    def test_bridesmaid_scenario(self): pass
+    def test_family_outing_scenario(self): pass
+    def test_date_scenario(self): pass
+    def test_gift_shopping_scenario(self): pass
+    def test_quick_visit_scenario(self): pass
+    def test_before_movie_scenario(self): pass
+    def test_birthday_scenario(self): pass
+    def test_first_visit_scenario(self): pass
+    def test_group_outing_scenario(self): pass
+    def test_scenario_fallback_from_context(self): pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -486,11 +455,9 @@ class TestTopicLockContinuity:
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
 
+    @pytest.mark.skip(reason="normalize_query removed in v1.6")
     def test_mall_overview_followup_stays_in_scope(self):
-        """'More about the mall' follow-up should normalize to same scope."""
-        # The normalization table handles "more about the mall"
-        normalized = normalize_query("more about the mall")
-        assert normalized == "tell me about the mall"
+        pass
 
     def test_gift_not_expensive_preserves_topic(self):
         """'not too expensive' after gift query should NOT change topic to dining."""
@@ -594,11 +561,14 @@ class TestMultiIntentHandling:
 class TestUnsupportedInputHandling:
     """Graceful recovery for random, gibberish, and misspelled inputs."""
 
-    def test_gibberish_detected(self):
-        """Pure gibberish should be detected as unsupported."""
-        assert is_likely_unsupported("asdf") is True
-        assert is_likely_unsupported("sdkfj") is True
-        assert is_likely_unsupported("aaaaa") is True
+    def test_empty_and_very_short_detected(self):
+        """v1.6: only empty or 1-2 char inputs are flagged; longer gibberish is left to LLM."""
+        assert is_likely_unsupported("") is True
+        assert is_likely_unsupported("   ") is True
+        assert is_likely_unsupported("x") is True
+        # Longer gibberish is handled by LLM classifier, not the pre-flight
+        assert is_likely_unsupported("asdf") is False
+        assert is_likely_unsupported("aaaaa") is False
 
     def test_short_but_valid_not_flagged(self):
         """Short but valid words should NOT be flagged as unsupported."""
@@ -606,35 +576,23 @@ class TestUnsupportedInputHandling:
         assert is_likely_unsupported("food") is False
         assert is_likely_unsupported("ok") is False
 
-    def test_brand_misspelling_detected(self):
-        """Known brand misspellings should return correction hints."""
-        brand, conf = maybe_correct_brand("nkie")
-        assert brand == "Nike"
-        assert conf >= 0.7
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_brand_misspelling_detected(self): pass
 
-        brand, conf = maybe_correct_brand("zaara")
-        assert brand == "Zara"
-        assert conf >= 0.7
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_brand_correction_from_query(self): pass
 
-    def test_brand_correction_from_query(self):
-        """Brand correction handles full lookup queries too."""
-        brand, conf = maybe_correct_brand("is nkie here")
-        assert brand == "Nike"
-
-    def test_clean_input_no_correction(self):
-        """Clean non-brand input should return None."""
-        brand, conf = maybe_correct_brand("where can i eat")
-        assert brand is None
-        assert conf == 0.0
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_clean_input_no_correction(self): pass
 
     def test_empty_query_flagged(self):
         """Empty query should be flagged as unsupported."""
         assert is_likely_unsupported("") is True
         assert is_likely_unsupported("   ") is True
 
+    @pytest.mark.skip(reason="v1.6: long gibberish strings are handled by LLM classifier, not pre-flight")
     def test_random_long_string_flagged(self):
-        """Long string with near-zero char diversity should be flagged."""
-        assert is_likely_unsupported("bbbbbbbbbbb") is True
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -740,6 +698,7 @@ class TestBrandLookupDiscipline:
                 domain="shopping",
                 sub_intent="brand_availability",
                 primary_intent="brand_availability",
+                flow_type_candidate="factual",
             )
             result = _run(route_flow(state))
             assert result["flow_type"] == expected_flow, (
@@ -808,8 +767,8 @@ class TestOfferHandling:
             domain="shopping",
             sub_intent="offer_details",
             primary_intent="offer_lookup",
+            flow_type_candidate="factual",
         )
-        # offer_details is now in _FACTUAL_SUB_INTENTS
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual", (
             f"Offer lookup should route factual, got: {result['flow_routing_reason']}"
@@ -820,23 +779,15 @@ class TestOfferHandling:
 # 13. Is-Pure-Lookup Helper
 # ─────────────────────────────────────────────────────────────────────────────
 
+@pytest.mark.skip(reason="_is_pure_lookup removed in v1.6 — routing is LLM-first policy now")
 class TestIsPureLookup:
     """Verify _is_pure_lookup correctly identifies direct lookups."""
 
-    def test_what_movies_is_pure(self):
-        assert _is_pure_lookup("what movies are showing")
-
-    def test_where_is_is_pure(self):
-        assert _is_pure_lookup("where is the atm")
-
-    def test_do_you_have_is_pure(self):
-        assert _is_pure_lookup("do you have nike")
-
-    def test_planning_query_not_pure(self):
-        assert not _is_pure_lookup("something quick before the movie")
-
-    def test_concierge_query_not_pure(self):
-        assert not _is_pure_lookup("suggest something for date night")
+    def test_what_movies_is_pure(self): pass
+    def test_where_is_is_pure(self): pass
+    def test_do_you_have_is_pure(self): pass
+    def test_planning_query_not_pure(self): pass
+    def test_concierge_query_not_pure(self): pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -859,19 +810,16 @@ class TestAcceptanceCriteria:
         ]
         flow_types = set()
         for msg, domain, sub in movie_variants:
-            norm = normalize_query(msg)
-            state = _make_state(norm, domain=domain, sub_intent=sub, primary_intent="movie_lookup")
+            state = _make_state(msg, domain=domain, sub_intent=sub, primary_intent="movie_lookup")
             result = _run(route_flow(state))
             flow_types.add(result["flow_type"])
         assert len(flow_types) == 1, (
             f"Different flow types for equivalent movie queries: {flow_types}"
         )
 
+    @pytest.mark.skip(reason="normalize_query removed in v1.6")
     def test_ac2_mall_overview_follow_ups_stay(self):
-        """AC2: Mall overview follow-ups should stay in mall overview context."""
-        # "more about the mall" normalizes to the same form
-        normalized = normalize_query("more about the mall")
-        assert normalized == "tell me about the mall"
+        pass
 
     def test_ac3_context_setting_not_collapsed(self):
         """AC3: Context-setting messages don't collapse into narrow answers."""
@@ -885,6 +833,7 @@ class TestAcceptanceCriteria:
             domain="shopping",
             sub_intent="general_shopping",
             primary_intent="brand_availability",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -905,10 +854,10 @@ class TestAcceptanceCriteria:
         assert "family_filter" in result["secondary_intents"]
 
     def test_ac7_unsupported_recovers_gracefully(self):
-        """AC7: Unsupported inputs recover gracefully — no exception."""
-        assert is_likely_unsupported("asdf") is True
-        brand, _ = maybe_correct_brand("nkie")
-        assert brand == "Nike"
+        """AC7: v1.6 pre-flight only flags empty/1-2 char inputs; LLM handles longer gibberish."""
+        assert is_likely_unsupported("") is True
+        assert is_likely_unsupported("x") is True
+        assert is_likely_unsupported("asdf") is False  # handled by LLM classifier
 
     def test_ac8_duplicates_collapse(self):
         """AC8: Duplicate entities collapse by normalized name."""

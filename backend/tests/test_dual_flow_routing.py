@@ -28,10 +28,9 @@ from app.models.state import (
     RetrievalDecision,
     ContextComposition,
 )
-from app.nodes.route_flow import route_flow, _has_strong_scene_context, _is_pure_lookup
+from app.nodes.route_flow import route_flow, _has_strong_scene_context
 from app.nodes.resolve_fact_scope import resolve_fact_scope
 from app.nodes.choose_strategy import _choose_factual_strategy
-from app.nodes.interpret_turn import _detect_flow_type_candidate
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -88,13 +87,18 @@ def _run(coro):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestFactualFlowRouting:
-    """Acceptance criteria A: queries that must go to factual flow."""
+    """Acceptance criteria A: queries that must go to factual flow.
+
+    In v1.6 the router is policy-only. Tests simulate what the LLM classifier
+    would emit by pre-setting flow_type_candidate="factual" on intent.
+    """
 
     def test_what_movies_do_we_have(self):
         state = _make_state(
             "what movies do we have",
             domain="entertainment",
             sub_intent="movie_showtime",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual", (
@@ -107,6 +111,7 @@ class TestFactualFlowRouting:
             "what movies can i watch",
             domain="entertainment",
             sub_intent="movie_showtime",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -116,6 +121,7 @@ class TestFactualFlowRouting:
             "where is the atm",
             domain="services",
             sub_intent="service_info",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -125,6 +131,7 @@ class TestFactualFlowRouting:
             "do you have zara",
             domain="shopping",
             sub_intent="general_shopping",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -134,11 +141,13 @@ class TestFactualFlowRouting:
             "what time do you close",
             domain="mall_info",
             sub_intent="opening_hours",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
 
     def test_does_mall_of_arabia_also_have_starbucks(self):
+        # cross_mall domain → Rule 1 always-factual; no flow_type_candidate needed
         state = _make_state(
             "does mall of arabia also have starbucks",
             domain="cross_mall",
@@ -152,6 +161,7 @@ class TestFactualFlowRouting:
             "where is muvi cinema",
             domain="navigation",
             sub_intent="location_query",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -161,6 +171,7 @@ class TestFactualFlowRouting:
             "is starbucks here",
             domain="shopping",
             sub_intent="general_shopping",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -170,6 +181,7 @@ class TestFactualFlowRouting:
             "do you have prayer rooms",
             domain="services",
             sub_intent="prayer_room",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -179,6 +191,7 @@ class TestFactualFlowRouting:
             "what are your opening hours",
             domain="mall_info",
             sub_intent="opening_hours",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -188,6 +201,7 @@ class TestFactualFlowRouting:
             "where is the parking",
             domain="services",
             sub_intent="parking_info",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -197,6 +211,7 @@ class TestFactualFlowRouting:
             "all movies list",
             domain="entertainment",
             sub_intent="movie_showtime",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -328,11 +343,12 @@ class TestHybridRouting:
         assert result["flow_type"] == "concierge"
 
     def test_movie_showtime_with_planning_intent(self):
-        """Pure movie lookup remains factual — no planning signals."""
+        """Pure movie lookup routes factual when LLM sets flow_type_candidate=factual."""
         state = _make_state(
             "what movies are showing today",
             domain="entertainment",
             sub_intent="movie_showtime",
+            flow_type_candidate="factual",
         )
         result = _run(route_flow(state))
         assert result["flow_type"] == "factual"
@@ -619,72 +635,9 @@ class TestRankAndDedupeFactual:
         assert "context" in result
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# I. INTERPRET_TURN FLOW HINT TESTS
-# ─────────────────────────────────────────────────────────────────────────────
-
-class TestInterpretTurnFlowHints:
-    """_detect_flow_type_candidate should emit correct hints."""
-
-    def test_movie_showtime_hint(self):
-        ft, scope, entity = _detect_flow_type_candidate(
-            "what movies do we have",
-            "entertainment",
-            "movie_showtime",
-            {},
-        )
-        assert ft == "factual"
-        assert scope == "movie_schedule"
-        assert entity == "movie"
-
-    def test_opening_hours_hint(self):
-        ft, scope, entity = _detect_flow_type_candidate(
-            "what are your opening hours",
-            "mall_info",
-            "opening_hours",
-            {},
-        )
-        assert ft == "factual"
-        assert scope == "mall_fact"
-
-    def test_concierge_signal_overrides_factual_subintent(self):
-        """Planning signal must override movie_showtime sub-intent."""
-        ft, scope, entity = _detect_flow_type_candidate(
-            "we want something quick before the movie",
-            "entertainment",
-            "movie_showtime",
-            {},
-        )
-        assert ft == "concierge"
-
-    def test_gift_for_girlfriend_hint(self):
-        ft, scope, entity = _detect_flow_type_candidate(
-            "gift for my girlfriend",
-            "shopping",
-            "gift_recommendation",
-            {},
-        )
-        assert ft == "concierge"
-
-    def test_scene_context_triggers_concierge(self):
-        ft, scope, entity = _detect_flow_type_candidate(
-            "what can we eat",
-            "dining",
-            "general_dining",
-            {"companions": ["girlfriend"], "occasion": "anniversary"},
-        )
-        assert ft == "concierge"
-
-    def test_cross_mall_always_factual(self):
-        ft, scope, entity = _detect_flow_type_candidate(
-            "does mall of arabia have starbucks",
-            "cross_mall",
-            "cross_mall_search",
-            {},
-        )
-        assert ft == "factual"
-        assert scope == "cross_mall_availability"
-
+# Note: TestInterpretTurnFlowHints removed — _detect_flow_type_candidate was deleted
+# in v1.6 (LLM-first refactor). Flow hints now come directly from the LLM classifier
+# via intent.flow_type_candidate in interpret_turn._llm_classify.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # J. HELPER FUNCTION TESTS
@@ -708,14 +661,4 @@ class TestHelpers:
         scene = SceneMemory(occasion="anniversary")
         assert _has_strong_scene_context(scene) is True
 
-    def test_is_pure_lookup_movies(self):
-        assert _is_pure_lookup("what movies do we have") is True
-
-    def test_is_pure_lookup_planning(self):
-        assert _is_pure_lookup("something fun before the movie") is False
-
-    def test_is_pure_lookup_where_is(self):
-        assert _is_pure_lookup("where is the atm") is True
-
-    def test_is_pure_lookup_do_you_have(self):
-        assert _is_pure_lookup("do you have zara") is True
+    # Note: _is_pure_lookup tests removed — function deleted in v1.6 LLM-first refactor.

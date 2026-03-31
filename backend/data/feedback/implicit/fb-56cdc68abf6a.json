@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-56cdc68abf6a",
+  "session_id": "brk4-6ce07a03",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-c6d96a7f32db",
+  "user_message": "i need something elegant",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-31 18:41:22.862987"
+}

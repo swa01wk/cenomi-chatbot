@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-51e75238aac7",
+  "session_id": "cpx7-20f96690",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-e9b417204677",
+  "user_message": "start with fashion \u2014 i want to refresh my wardrobe, both casual and formal",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-31 17:43:41.126488"
+}

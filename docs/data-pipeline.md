@@ -379,12 +379,15 @@ python scripts/ingest_vectors.py --all --dry-run
 
 ### Current collection state
 
-| Collection | Stores | Dining | Services | Cinemas | Total |
-|---|---|---|---|---|---|
-| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
-| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+| Collection | Mall | City | Total |
+|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | Al Nakheel Plaza | Buraidah | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | Mall of Arabia | Jeddah | **54** |
+| `cenomi_mall_al_nakheel_plaza_1` | Al Ahsa Mall | Al Ahsa | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_10` | The View Mall | Riyadh | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_27` | Al Nakheel Mall | Riyadh | *(see canonical)* |
 
-Re-run after any canonical data refresh to keep the vector index in sync.
+Re-run `ingest_vectors.py --all` after any canonical data refresh to keep all vector indices in sync.
 
 ---
 
@@ -396,23 +399,25 @@ Context building happens in two stages: an **offline build** that processes cano
 
 **File:** `backend/app/services/context_builder.py`
 
-`ContextBuilder` reads the canonical data in `backend/data/` and produces a `GlobalContextPack` stored in `backend/data/context_packs/`. This runs once (or when data changes) — not on every request.
+`ContextBuilder` reads the canonical data in `backend/data/` and produces a `GlobalContextPack` stored in `backend/data/context_packs/`. This runs once (or when data changes) — not on every request. The same pipeline is executed for each of the five malls.
 
-**Input sources:**
+**Input sources (per mall):**
 
 | File | Purpose |
 |---|---|
-| `backend/data/canonical/al_nakheel_plaza_28.json` | Master mall data: stores, dining, cinemas, movies, services, events, offers |
-| `backend/data/semantic/al_nakheel_plaza_28.json` | Enrichment rules and tag taxonomy |
-| `backend/data/playbooks/al_nakheel_plaza_28.json` | Scenario playbooks for intent-driven reasoning |
+| `backend/data/canonical/{mall_id}.json` | Master mall data: stores, dining, cinemas, movies, services, events, offers |
+| `backend/data/semantic/{mall_id}.json` | Enrichment rules and tag taxonomy |
+| `backend/data/playbooks/{mall_id}.json` | Scenario playbooks for intent-driven reasoning |
 
 **Pipeline:**
 
 ```
-load_canonical()
-load_semantic()          ──► build_context_pack() ──► GlobalContextPack ──► context_packs/*.json
-load_playbooks()
+load_canonical({mall_id})
+load_semantic({mall_id})  ──► build_context_pack() ──► GlobalContextPack ──► context_packs/{mall_id}_context.json
+load_playbooks({mall_id})
 ```
+
+At startup, `LRUMallContextRegistry` in `runtime.py` loads all malls in `BACKEND_MALL_IDS` (default: all five) through a three-tier chain — RAM → Redis → disk — ensuring fast access without redundant loading.
 
 **`build_context_pack` produces:**
 
@@ -572,30 +577,35 @@ For all other message kinds, the normalized user message is sent directly.
 ### Full Context Flow (End to End)
 
 ```
-Raw API JSON files (./data/)
+Cenomi API data (output_mall_N.json — five malls)
         │
         ▼
-transform_mall_data.py
+scripts/convert_to_canonical.py     ← deterministic ETL, no LLM
         │
         ▼
-output_mall_28.json  ──► manually reviewed and curated ──►  backend/data/canonical/*.json
-                                                                        │
-                                                          ContextBuilder (offline)
-                                                                        │
-                                                          backend/data/context_packs/*.json
-                                                                        │
-                                                            loaded at server startup into
-                                                                MallContext singleton
-                                                                        │
-                                              ┌─────────────────────────┴────────────────────────┐
-                                              │                                                    │
-                                  Per-turn pipeline state                               PromptBuilder
-                                  (intent, entities, scene,                      reads context pack +
-                                   retrieval, response plan)                     pipeline state to build
-                                              │                                  4-message LLM payload
-                                              └──────────────────────────────────────────┘
-                                                                        │
-                                                                   LLM call
-                                                                        │
-                                                              grounded response
+data/canonical/{mall_id}.json
+        │
+        ▼
+scripts/synthesize_mall_data.py     ← LLM synthesis (GPT-4.1, few-shot from mall 28)
+        │
+        ├─► data/semantic/{mall_id}.json
+        ├─► data/playbooks/{mall_id}.json
+        ├─► data/tenant_config/{mall_id}.json
+        └─► data/context_packs/{mall_id}_context.json
+                        │
+                        ▼
+            loaded at server startup into
+            LRUMallContextRegistry (per mall)
+                        │
+          ┌─────────────┴────────────────────────┐
+          │                                       │
+Per-turn pipeline state                    PromptBuilder
+(intent, entities, scene,           reads context pack +
+ retrieval, response plan)          pipeline state to build
+          │                         4-message LLM payload
+          └────────────────────────────────┘
+                        │
+                   LLM call (GPT-4.1)
+                        │
+              grounded streaming response
 ```

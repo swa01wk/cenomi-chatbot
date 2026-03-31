@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from app.models.state import ConciergeState, InterpretedIntent, SceneMemory
 from app.nodes.generate_response import _format_fact_context
-from app.nodes.interpret_turn import _detect_flow_type_candidate
 from app.services.cross_mall_brand import resolve_cross_mall_brand_query
 
 
@@ -95,28 +94,6 @@ class TestFormatFactContextCrossMall:
         text = _format_fact_context(fact_ctx, None)
         assert text.index("AT YOUR CURRENT MALL") < text.index("AT OTHER CENOMI MALLS")
 
-
-class TestCrossMallFlowHints:
-    """Classifier output is simulated; flow hints must stay separated."""
-
-    def test_single_mall_brand_is_not_cross_mall_scope(self):
-        ft, scope, et = _detect_flow_type_candidate(
-            "Do you have Nike?",
-            "shopping",
-            "brand_availability",
-            {},
-        )
-        assert ft == "factual"
-        assert scope == "brand_availability"
-        assert et == "store"
-
-    def test_cross_mall_search_hint(self):
-        ft, scope, et = _detect_flow_type_candidate(
-            "Which of your malls have Nike?",
-            "cross_mall",
-            "cross_mall_search",
-            {},
-        )
-        assert ft == "factual"
-        assert scope == "cross_mall_availability"
-        assert et == "brand"
+# Note: TestCrossMallFlowHints removed — _detect_flow_type_candidate was deleted
+# in v1.6 (LLM-first refactor). Cross-mall routing is now handled by the LLM
+# classifier directly via flow_type_candidate in interpret_turn.

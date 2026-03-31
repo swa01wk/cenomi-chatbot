@@ -28,11 +28,30 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 DINING_CATEGORY_MAP: dict[str, tuple[str, str, str]] = {
     # raw_category: (canonical_category, subcategory, dining_style)
-    "Chicken Cuisine":                                   ("Dining",   "Fast Food",      "fast_food"),
-    "Fast food excluding Food Court":                    ("Dining",   "Fast Food",      "fast_food"),
-    "Food items/specialities":                           ("Dining",   "Dessert",        "dessert"),
-    "Coffee & Light Dining":                             ("Dining",   "Cafe",           "cafe"),
+    # ── Fast food & food court ──────────────────────────────────────
+    "Chicken Cuisine":                                          ("Dining", "Fast Food",      "fast_food"),
+    "Fast food excluding Food Court":                           ("Dining", "Fast Food",      "fast_food"),
+    "Fast food excluding Food Court-food with seating":         ("Dining", "Fast Food",      "fast_food"),
+    # ── Casual / fine dining (sit-down restaurants) ─────────────────
+    "Casual & Fine Dining":                                     ("Dining", "Casual Dining",  "casual_dining"),
+    # ── Cafes & beverages ───────────────────────────────────────────
+    "Coffee & Light Dining":                                    ("Dining", "Cafe",           "cafe"),
+    # ── Bakeries & sweets ───────────────────────────────────────────
+    "Bakeries and Sweets":                                      ("Dining", "Bakery & Sweets", "cafe"),
+    # ── Desserts & food specialties ─────────────────────────────────
+    "Food items/specialities":                                  ("Dining", "Dessert",         "dessert"),
+    "Food items/specialities-chocolates":                       ("Dining", "Dessert",         "dessert"),
 }
+
+# Prefix patterns for dining categories not matched exactly above.
+# Checked in order; first match wins.  Entries: (prefix, subcategory, dining_style)
+_DINING_CATEGORY_PREFIXES: list[tuple[str, str, str]] = [
+    ("Fast food excluding Food Court",  "Fast Food",      "fast_food"),
+    ("Food items/specialities",         "Dessert",        "dessert"),
+    ("Casual & Fine Dining",            "Casual Dining",  "casual_dining"),
+    ("Coffee & Light Dining",           "Cafe",           "cafe"),
+    ("Bakeries",                        "Bakery & Sweets", "cafe"),
+]
 
 CINEMA_BRAND_NAMES = {"muvi cinema", "vox cinema", "vox cinemas", "cinemaxx"}
 
@@ -172,13 +191,27 @@ def _service_title(service: dict) -> str:
     return f"Service {service.get('id', '?')}"
 
 
+def _extract_text(value) -> list[str]:
+    """Recursively extract all string leaves from a content value."""
+    if isinstance(value, str):
+        return [value] if value else []
+    if isinstance(value, list):
+        result = []
+        for item in value:
+            result.extend(_extract_text(item))
+        return result
+    if isinstance(value, dict):
+        return _extract_text(value.get("content", ""))
+    return []
+
+
 def _service_desc(service: dict) -> str:
     parts = []
     for item in service.get("details", []):
         t = item.get("type", "")
         c = item.get("content", "")
         if isinstance(c, list):
-            parts.extend(c)
+            parts.extend(_extract_text(c))
         elif c and t in ("paragraph", "heading", "bullet"):
             parts.append(c)
     return " ".join(parts)
@@ -315,7 +348,7 @@ def _build_canonical_offers(brands: list[dict]) -> list[dict]:
                 "valid_until": (eng.get("end_date") or "")[:10],
                 "is_exclusive": bool(eng.get("is_exclusive")),
                 "loyalty_exclusive": False,
-                "tags": [t.get("tag_text", "") for t in eng.get("tags_en", []) if t.get("tag_text")],
+                "tags": [t.get("tag_text", "") for t in (eng.get("tags_en") or []) if t.get("tag_text")],
             })
     return out
 
@@ -420,10 +453,23 @@ def convert_brands(brands_raw: list[dict], mall_timing: list[dict]) -> tuple[lis
             continue
 
         # ── Dining ──────────────────────────────────────────────
-        if raw_cat in DINING_CATEGORY_MAP:
+        # Primary: exact match in DINING_CATEGORY_MAP
+        # Secondary: prefix match for variant category strings
+        # Tertiary: group_name == "Dine" from source system (safety net)
+        dining_entry = DINING_CATEGORY_MAP.get(raw_cat)
+        if dining_entry is None:
+            for prefix, subcat_p, style_p in _DINING_CATEGORY_PREFIXES:
+                if raw_cat.startswith(prefix):
+                    dining_entry = ("Dining", subcat_p, style_p)
+                    break
+        if dining_entry is None and brand.get("group_name") == "Dine":
+            # Source system says it's a dining brand — use generic casual_dining
+            dining_entry = ("Dining", "Casual Dining", "casual_dining")
+
+        if dining_entry is not None:
             dining_idx += 1
-            _, subcat, dining_style = DINING_CATEGORY_MAP[raw_cat]
-            is_fast = dining_style in ("fast_food",)
+            _, subcat, dining_style = dining_entry
+            is_fast = dining_style == "fast_food"
             price = "budget" if is_fast else "mid_range"
 
             dining.append({
@@ -533,7 +579,7 @@ def build_mall_profile(data: dict) -> dict:
             "zone_id": "z-foodcourt",
             "name": "Food Court",
             "floor": "Ground",
-            "description": "Quick-service and fast-casual dining — McDonald's, Herfy, Kudu, Popeyes, Cinnabon.",
+            "description": "Quick-service and fast-casual dining options.",
             "category_focus": ["Fast Food", "Cafe", "Dessert"],
         },
         {

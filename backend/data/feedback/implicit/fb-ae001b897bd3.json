@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-ae001b897bd3",
+  "session_id": "session-7a4e403c004e48e1",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_13",
+  "turn_id": "msg-b0f226b3bcad",
+  "user_message": "I want to watch a movie tonight",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-30 17:38:54.678001"
+}

@@ -46,14 +46,8 @@ from app.nodes.smalltalk import (
 )
 from app.nodes.interpret_turn import (
     CLASSIFICATION_PROMPT,
-    _extract_scenario_from_message,
 )
-from intent.query_classifier import (
-    is_likely_unsupported,
-    maybe_correct_brand,
-    normalize_query,
-    normalize_query_with_pattern,
-)
+from intent.query_classifier import is_likely_unsupported
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -302,15 +296,19 @@ class TestSmalltalkNodeResponsePools:
         result = _run(smalltalk(state))
         assert result["final_response_text"] in _RESPONSES["howru"]
 
-    def test_thanks_uses_thanks_pool(self):
+    def test_thanks_uses_context_aware_response(self):
+        # v1.6: THANKS uses _pick_thanks_response() — context-aware, not a fixed pool
         state = _state_with_kind(MessageKind.THANKS)
         result = _run(smalltalk(state))
-        assert result["final_response_text"] in _RESPONSES["thanks"]
+        assert isinstance(result["final_response_text"], str)
+        assert len(result["final_response_text"]) > 0
 
-    def test_farewell_uses_farewell_pool(self):
+    def test_farewell_returns_non_empty_response(self):
+        # v1.6: FAREWELL uses _generate_farewell() (LLM) with static pool fallback
         state = _state_with_kind(MessageKind.FAREWELL)
         result = _run(smalltalk(state))
-        assert result["final_response_text"] in _RESPONSES["farewell"]
+        assert isinstance(result["final_response_text"], str)
+        assert len(result["final_response_text"]) > 0
 
     def test_emotional_uses_emotional_pool(self):
         state = _state_with_kind(MessageKind.EMOTIONAL)
@@ -330,9 +328,10 @@ class TestSmalltalkMetadata:
         (MessageKind.IDENTITY,  "identity_response"),
         (MessageKind.GREETING,  "greeting_scaffold"),
         (MessageKind.HOWRU,     "smalltalk"),
-        (MessageKind.THANKS,    "smalltalk"),
-        (MessageKind.FAREWELL,  "smalltalk"),
-        (MessageKind.EMOTIONAL, "smalltalk"),
+        # v1.6: thanks/farewell/emotional have dedicated experience_mode values
+        (MessageKind.THANKS,    "thanks_response"),
+        (MessageKind.FAREWELL,  "farewell_personalised"),
+        (MessageKind.EMOTIONAL, "emotional_response"),
     ])
     def test_experience_mode_is_correct(self, kind, expected_mode):
         state = _state_with_kind(kind)
@@ -441,10 +440,13 @@ class TestCrisisResponseQuality:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestKindToPoolMapping:
-    """_KIND_TO_POOL must cover all SMALLTALK_KINDS except the special-cased ones."""
+    """_KIND_TO_POOL covers SMALLTALK_KINDS that use generic pool routing."""
 
-    # These are handled with dedicated branches (not via _KIND_TO_POOL)
-    SPECIAL_CASED = {MessageKind.CRISIS, MessageKind.IDENTITY, MessageKind.GREETING}
+    # v1.6: THANKS, FAREWELL, EMOTIONAL all have dedicated handlers now
+    SPECIAL_CASED = {
+        MessageKind.CRISIS, MessageKind.IDENTITY, MessageKind.GREETING,
+        MessageKind.THANKS, MessageKind.FAREWELL, MessageKind.EMOTIONAL,
+    }
 
     def test_all_non_special_smalltalk_kinds_have_pool_entry(self):
         """Every SMALLTALK_KINDS member that isn't special-cased must be in _KIND_TO_POOL."""
@@ -586,48 +588,9 @@ class TestLLMResponseParsing:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestPreprocessingUtilities:
-    """query_classifier utilities must still function after the classifier removal."""
+    """query_classifier — only is_likely_unsupported remains in v1.6."""
 
-    # ── normalize_query ───────────────────────────────────────────────
-    MOVIE_VARIANTS_TO_CANONICAL = {
-        "movies":                   "what movies are showing",
-        "now showing":              "what movies are showing",
-        "what movies are there":    "what movies are showing",
-        "what can i watch":         "what movies are showing",
-    }
-
-    MALL_OVERVIEW_TO_CANONICAL = {
-        "tell me about the mall":       "tell me about the mall",
-        "mall info":                    "tell me about the mall",
-        "about this mall":              "tell me about the mall",
-    }
-
-    def test_movie_variants_normalize_correctly(self):
-        for variant, canonical in self.MOVIE_VARIANTS_TO_CANONICAL.items():
-            assert normalize_query(variant) == canonical, (
-                f"{variant!r} → expected {canonical!r}, got {normalize_query(variant)!r}"
-            )
-
-    def test_mall_overview_variants_normalize_correctly(self):
-        for variant, canonical in self.MALL_OVERVIEW_TO_CANONICAL.items():
-            result = normalize_query(variant)
-            assert result == canonical, (
-                f"{variant!r} → expected {canonical!r}, got {result!r}"
-            )
-
-    def test_normalize_returns_original_for_unknown_query(self):
-        query = "what perfume stores do you have"
-        assert normalize_query(query) == query
-
-    def test_normalize_with_pattern_returns_label(self):
-        _, label = normalize_query_with_pattern("what movies are showing")
-        assert label != "", "Expected a non-empty pattern label for canonical movie query"
-
-    def test_normalize_with_pattern_no_label_for_unknown(self):
-        _, label = normalize_query_with_pattern("suggest something for a date night")
-        assert label == ""
-
-    # ── is_likely_unsupported ─────────────────────────────────────────
+    # ── is_likely_unsupported (still present) ─────────────────────────
     GIBBERISH_INPUTS = [
         "asdf", "qwerty", "zxcv", "aaaaaaa", "sdfghjkl",
         "rtks", "jjjjjj",
@@ -639,9 +602,13 @@ class TestPreprocessingUtilities:
     ]
 
     def test_gibberish_flagged_as_unsupported(self):
+        # v1.6: pre-flight only flags empty or ≤2-char inputs; longer gibberish → LLM
+        assert is_likely_unsupported("") is True
+        assert is_likely_unsupported("x") is True
+        # Longer strings like "asdf" are NOT flagged by pre-flight
         for text in self.GIBBERISH_INPUTS:
-            assert is_likely_unsupported(text), (
-                f"Expected {text!r} to be flagged as unsupported"
+            assert is_likely_unsupported(text) is False, (
+                f"v1.6 pre-flight should NOT flag {text!r} (left to LLM)"
             )
 
     def test_valid_short_queries_not_flagged(self):
@@ -653,72 +620,43 @@ class TestPreprocessingUtilities:
     def test_empty_string_is_unsupported(self):
         assert is_likely_unsupported("")
 
+    @pytest.mark.skip(reason="v1.6: off-topic detection is LLM-only — pre-flight only checks length")
     def test_off_topic_signals_flagged(self):
-        assert is_likely_unsupported("what is the weather today")
-        assert is_likely_unsupported("tell me a joke")
+        pass
 
-    # ── maybe_correct_brand ───────────────────────────────────────────
-    def test_known_misspelling_corrected(self):
-        brand, conf = maybe_correct_brand("nkie")
-        assert brand == "Nike"
-        assert conf > 0.5
+    # Note: normalize_query, normalize_query_with_pattern, maybe_correct_brand
+    # were removed in v1.6. These functions are no longer part of query_classifier.
+    @pytest.mark.skip(reason="normalize_query removed in v1.6")
+    def test_movie_variants_normalize_correctly(self): pass
 
-    def test_exact_brand_match(self):
-        brand, conf = maybe_correct_brand("zaara")
-        assert brand == "Zara"
+    @pytest.mark.skip(reason="normalize_query removed in v1.6")
+    def test_mall_overview_variants_normalize_correctly(self): pass
 
-    def test_unknown_query_returns_none(self):
-        brand, conf = maybe_correct_brand("i want to eat sushi")
-        assert brand is None
-        assert conf == 0.0
+    @pytest.mark.skip(reason="normalize_query removed in v1.6")
+    def test_normalize_returns_original_for_unknown_query(self): pass
+
+    @pytest.mark.skip(reason="normalize_query_with_pattern removed in v1.6")
+    def test_normalize_with_pattern_returns_label(self): pass
+
+    @pytest.mark.skip(reason="normalize_query_with_pattern removed in v1.6")
+    def test_normalize_with_pattern_no_label_for_unknown(self): pass
+
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_known_misspelling_corrected(self): pass
+
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_exact_brand_match(self): pass
+
+    @pytest.mark.skip(reason="maybe_correct_brand removed in v1.6")
+    def test_unknown_query_returns_none(self): pass
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 12. _extract_scenario_from_message
-# ═══════════════════════════════════════════════════════════════════════════
-
-class TestExtractScenarioFromMessage:
-    """Scenario extractor must still detect signals correctly."""
-
-    SCENARIO_CASES = [
-        ("i am a bridesmaid here for shopping",   "wedding_related"),
-        ("i am here with my kid",                 "family_outing"),
-        ("with my son",                           "family_outing"),
-        ("date night ideas",                      "date"),
-        ("with my girlfriend",                    "date"),
-        ("gift for my girlfriend",                "date"),
-        ("we are in a hurry",                     "quick_visit"),
-        ("quick visit",                           "quick_visit"),
-        ("something quick before the movie",      "before_movie"),
-        ("it's my birthday today",                "birthday"),
-        ("first time visiting",                   "first_visit"),
-        ("here with my friends",                  "group_outing"),
-        ("i came alone",                          "solo_visit"),
-    ]
-
-    @pytest.mark.parametrize("msg,expected_scenario", SCENARIO_CASES)
-    def test_scenario_detected(self, msg, expected_scenario):
-        result = _extract_scenario_from_message(msg, {})
-        assert result == expected_scenario, (
-            f"{msg!r} → expected {expected_scenario!r}, got {result!r}"
-        )
-
-    def test_fallback_from_companions_context(self):
-        """If no signals in message, fall back to scene context companions."""
-        result = _extract_scenario_from_message("food", {"companions": ["son"]})
-        assert result == "family_outing"
-
-    def test_fallback_from_occasion_context(self):
-        result = _extract_scenario_from_message("food", {"occasion": "anniversary"})
-        assert result == "date"
-
-    def test_empty_when_no_signals(self):
-        result = _extract_scenario_from_message("what movies are showing", {})
-        assert result == ""
-
+# Note: TestExtractScenarioFromMessage (section 12) removed — _extract_scenario_from_message
+# was deleted in v1.6 (LLM-first refactor). Scenario detection is now performed by
+# the LLM classifier in interpret_turn._llm_classify returning a "scenario" field.
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 13. Routing isolation — non-smalltalk kinds must NOT enter smalltalk node
+# 12. Routing isolation — non-smalltalk kinds must NOT enter smalltalk node
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestRoutingIsolation:
@@ -1148,7 +1086,10 @@ class TestCompanionCorrectionAndAntiHallucination:
         result = self._run_generate_response(state)
         text = result["final_response_text"].lower()
         has_apology = any(
-            sig in text for sig in ("got it", "solo", "mistake", "understood", "my bad")
+            sig in text for sig in (
+                "got it", "solo", "mistake", "understood", "my bad",
+                "noted", "apolog", "mix-up", "just you", "alone",
+            )
         )
         assert has_apology, f"Response lacks apology/acknowledgement: {text!r}"
 

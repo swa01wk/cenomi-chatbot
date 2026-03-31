@@ -38,12 +38,15 @@ export const FEEDBACK_REASON_LABELS: Record<string, string> = {
   should_recommend_something_else: "Should recommend something else",
 };
 
-export const TENANTS = [
-  { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza" },
-  { id: "al_nakheel_plaza_13", label: "Mall of Arabia" },
+export const MALLS = [
+  { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza", city: "Buraidah" },
+  { id: "al_nakheel_plaza_13", label: "Mall of Arabia", city: "Jeddah" },
+  { id: "al_nakheel_plaza_27", label: "Al Nakheel Mall", city: "Riyadh" },
+  { id: "al_nakheel_plaza_10", label: "The View Mall", city: "Riyadh" },
+  { id: "al_nakheel_plaza_1", label: "Al Ahsa Mall", city: "Al Ahsa" },
 ] as const;
 
-export const MALLS = [
-  { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza — Buraidah" },
-  { id: "al_nakheel_plaza_13", label: "Mall of Arabia — Jeddah" },
-] as const;
+export type MallId = (typeof MALLS)[number]["id"];
+
+/** @deprecated Kept for API compatibility — always equals the active mall ID. */
+export const TENANTS = MALLS;

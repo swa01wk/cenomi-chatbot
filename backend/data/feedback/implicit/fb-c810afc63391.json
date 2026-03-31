@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-c810afc63391",
+  "session_id": "cpx8-6ce07a03",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-9f8bd2910bd2",
+  "user_message": "i want to grab a post-workout smoothie \u2014 any good spots?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-31 18:56:18.052065"
+}

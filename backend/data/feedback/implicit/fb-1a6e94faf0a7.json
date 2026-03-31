@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-1a6e94faf0a7",
+  "session_id": "cpx6-388adffd",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-1e2fa1e4225f",
+  "user_message": "the 15-year-old is very particular about style \u2014 any trendy options for teens?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.9500000000000001
+    }
+  },
+  "confidence": 0.9500000000000001,
+  "timestamp": "2026-03-31 13:17:39.232093"
+}

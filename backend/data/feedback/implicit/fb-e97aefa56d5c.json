@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-e97aefa56d5c",
+  "session_id": "brk18-1f19b4a2",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-ba0b1d74f243",
+  "user_message": "i mean affordable brands, clothes",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\baffordable\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-31 19:25:41.487686"
+}

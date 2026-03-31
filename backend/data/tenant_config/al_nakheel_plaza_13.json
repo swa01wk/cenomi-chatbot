@@ -1,100 +1,169 @@
 {
   "mall_id": "al_nakheel_plaza_13",
   "config_version": "2.0.0",
-  "description": "Mall of Arabia (Jeddah) — large, entertainment-rich, family-oriented. Muvi Cinema has a diverse lineup including family-friendly animation (ZOOTROPOLIS 2, SPONGEBOB) plus adult titles. Fun Time is the supplemental kids anchor. Emphasizes rich movie+family support, clear recommendations, and entertainment diversity.",
+  "description": "Mall of Arabia (Jeddah) — major family-and-leisure mall with a strong cinema anchor. Muvi Cinema shows animation/family films including HOPPERS, so kids movie queries should be highlighted rather than redirected. Emphasizes exact movie/showtime retrieval, family planning, quick before/after-movie stops, and practical service guidance.",
   "tone": {
-    "warmth": 0.80,
-    "directness": 0.82,
-    "formality": 0.33,
-    "concierge_confidence": 0.88,
-    "mall_branding_prominence": 0.48,
-    "practicalness_vs_exploratory": 0.70
+    "warmth": 0.8,
+    "directness": 0.86,
+    "formality": 0.34,
+    "concierge_confidence": 0.9,
+    "mall_branding_prominence": 0.42,
+    "practicalness_vs_exploratory": 0.74
   },
   "clarification": {
-    "ambiguity_tolerance": 0.83,
-    "answer_first_bias": 0.92,
+    "ambiguity_tolerance": 0.82,
+    "answer_first_bias": 0.94,
     "assumption_aggressiveness": 0.78
   },
   "behavior_rules": {
     "movie_intent_override": {
       "enabled": true,
-      "description": "When user explicitly asks about movies, showtimes, or cinema, entertainment/movie intent overrides shopping drift. Route to cinema entity and movie list first.",
-      "trigger_signals": ["movie", "cinema", "showtime", "what's playing", "now showing", "film"],
+      "trigger_signals": [
+        "movie",
+        "cinema",
+        "showtime",
+        "what's playing",
+        "now showing",
+        "film",
+        "tickets",
+        "screening"
+      ],
       "preferred_strategy": "exact_retrieval",
       "preferred_response_shape": "direct_fact",
       "override_shopping_signals": true,
       "cinema_entity_id": "t-cinema-001",
-      "note": "Mall of Arabia has a diverse lineup with family-friendly animation films. Proactively mention ZOOTROPOLIS 2 and SPONGEBOB MOVIE for families with kids."
+      "note": "Movie and showtime queries should be answered with exact cinema/movie retrieval first. Muvi Cinema is the cinema anchor."
     },
     "kids_movie_highlight": {
       "enabled": true,
-      "description": "When user has kids and asks about movies or entertainment, highlight animation films at Muvi Cinema first.",
-      "trigger_signals": ["kids movie", "animated", "cartoon", "family movie", "movie for my kid", "child movie"],
-      "preferred_strategy": "exact_retrieval",
-      "preferred_response_shape": "direct_fact",
+      "trigger_signals": [
+        "kids movie",
+        "kid movie",
+        "animated",
+        "animation",
+        "cartoon",
+        "family film",
+        "movie for my child",
+        "movie for my kids"
+      ],
       "cinema_entity_id": "t-cinema-001",
-      "highlight_tags": ["kid_friendly", "animation", "family_movie"]
+      "highlight_tags": [
+        "family_friendly",
+        "kid_friendly",
+        "animation",
+        "showing_now"
+      ]
     },
     "service_lookup": {
       "enabled": true,
-      "description": "Service queries (ATM, stroller, prayer room, wheelchair, info desk) prefer direct fact response, not shortlists.",
-      "trigger_signals": ["ATM", "stroller", "wheelchair", "prayer", "prayer room", "info", "information desk", "restroom", "toilet"],
+      "trigger_signals": [
+        "ATM",
+        "wheelchair",
+        "lost and found",
+        "information desk",
+        "parking",
+        "prayer room",
+        "washroom",
+        "restroom",
+        "wifi",
+        "free wifi"
+      ],
       "preferred_strategy": "direct_fact",
-      "preferred_response_shape": "direct_fact",
       "entity_cap": 2
     },
     "before_movie_quick_stop": {
       "enabled": true,
-      "description": "Before-movie queries bias toward Food Court and Kiosk Row — quick, low-commitment options near cinema.",
-      "trigger_signals": ["before movie", "quick", "fast", "quick bite", "close to cinema", "near cinema"],
-      "preferred_strategy": "proximity_guided_shortlist",
-      "ranking_boost_tags": ["near_cinema", "before_movie", "quick_stop", "low_commitment"],
-      "preferred_zones": ["Food Court", "Kiosk Row"],
+      "trigger_signals": [
+        "before movie",
+        "quick bite",
+        "fast",
+        "quick",
+        "close to cinema",
+        "near cinema",
+        "before the movie"
+      ],
+      "ranking_boost_tags": [
+        "near_cinema",
+        "before_movie",
+        "quick_stop",
+        "low_commitment"
+      ],
+      "preferred_zones": [
+        "Cinema Zone",
+        "Food Court",
+        "Kiosk Row"
+      ],
       "entity_cap": 3
     },
     "after_movie_reward": {
       "enabled": true,
-      "description": "After-movie queries bias toward dessert and cafe options near cinema.",
-      "trigger_signals": ["after movie", "dessert", "something sweet", "reward"],
-      "preferred_strategy": "shortlist",
-      "ranking_boost_tags": ["after_movie", "reward_stop", "dessert_spot", "near_cinema"],
+      "trigger_signals": [
+        "after movie",
+        "dessert",
+        "sweet",
+        "coffee",
+        "reward",
+        "treat"
+      ],
+      "ranking_boost_tags": [
+        "after_movie",
+        "reward_stop",
+        "dessert_spot",
+        "near_cinema"
+      ],
       "entity_cap": 3
     },
     "family_guided_plan": {
       "enabled": true,
-      "description": "Contextual family asks with young children prefer guided plans that include both cinema (animation films available) and child-relief anchor.",
-      "trigger_signals": ["5 year old", "toddler", "young child", "kid", "with my child", "my baby", "family with kids"],
+      "trigger_signals": [
+        "family",
+        "with kids",
+        "with my kids",
+        "toddler",
+        "child",
+        "young children",
+        "family outing"
+      ],
       "preferred_strategy": "guided_plan",
-      "must_include_entity_types": ["kids_entertainment"],
-      "cinema_note": "ZOOTROPOLIS 2 and SPONGEBOB MOVIE available — may be primary family activity option.",
+      "must_include_entity_types": [
+        "kids_entertainment",
+        "dining"
+      ],
+      "child_relief_anchor_entity_id": "t-store-190",
       "preferred_response_shape": "itinerary"
     },
     "route_proximity_refinement": {
       "enabled": true,
-      "description": "Route/proximity refinement is allowed when user asks for nearby or closer options.",
-      "trigger_signals": ["closer to", "near", "nearby", "next to", "close to cinema", "on the way"],
-      "preferred_strategy": "proximity_filtered",
-      "ranking_boost_tags": ["near_cinema", "near_food", "near_entertainment"]
+      "trigger_signals": [
+        "near",
+        "nearby",
+        "closer",
+        "closest",
+        "next to",
+        "close to cinema",
+        "on the way"
+      ],
+      "ranking_boost_tags": [
+        "near_cinema",
+        "near_food",
+        "near_entertainment"
+      ]
     },
     "brand_direct_lookup": {
       "enabled": true,
-      "description": "Explicit brand lookup triggers direct entity retrieval, not shortlist generation.",
-      "trigger_signals": ["do you have", "where is", "is there a", "looking for [brand]"],
-      "preferred_strategy": "direct_lookup",
-      "preferred_response_shape": "direct_fact"
+      "preferred_strategy": "direct_lookup"
     },
     "cross_mall_fallback": {
       "enabled": true,
-      "description": "When no matching entity found in home mall, cross-mall fallback may be enabled.",
       "fallback_scope": "same_city_first",
       "max_fallback_results": 2
     }
   },
   "strategy_weights": {
     "shortlist_recommendation": 1.3,
-    "family_plan": 1.2,
+    "family_plan": 1.25,
     "gift_formula": 1.0,
-    "movie_plus_food": 1.1,
+    "movie_plus_food": 1.05,
     "movie_showtime_lookup": 1.5,
     "family_movie_plan": 1.5,
     "kids_entertainment_plan": 1.4,
@@ -106,36 +175,38 @@
   },
   "response_shape": {
     "default_shortlist_size": 4,
-    "movie_shortlist_size": 6,
+    "movie_shortlist_size": 5,
     "service_shortlist_size": 2,
     "before_after_movie_shortlist_size": 3,
     "kids_entertainment_shortlist_size": 3,
     "location_detail_level": "floor_zone",
-    "recommendation_density": 0.80,
-    "exact_name_usage_bias": 0.88,
+    "recommendation_density": 0.78,
+    "exact_name_usage_bias": 0.9,
     "always_include_location_hint": true
   },
   "context_weights": {
-    "prioritize_playbooks": 0.85,
-    "prioritize_family_signals": 0.85,
-    "prioritize_kid_signals": 0.83,
-    "prioritize_exact_entity_examples": 0.80,
-    "prioritize_movie_signals": 0.90,
+    "prioritize_playbooks": 0.88,
+    "prioritize_family_signals": 0.87,
+    "prioritize_kid_signals": 0.85,
+    "prioritize_exact_entity_examples": 0.83,
+    "prioritize_movie_signals": 0.9,
     "prioritize_service_signals": 0.88,
-    "prioritize_proximity_signals": 0.80
+    "prioritize_proximity_signals": 0.84
   },
   "retrieval": {
     "movie_showtime_query": {
       "strategy": "exact_retrieval",
       "source": "canonical.movies",
       "filter_by": "status=SHOWING_NOW",
-      "include_cinema_entity": true
+      "include_cinema_entity": true,
+      "max_results": 6
     },
     "family_movie_query": {
-      "strategy": "tag_filtered",
-      "required_tags": ["kid_friendly", "family_movie"],
+      "strategy": "exact_retrieval",
       "source": "canonical.movies",
-      "max_results": 3
+      "filter_by": "status=SHOWING_NOW AND (family_friendly=true OR kid_friendly=true)",
+      "include_cinema_entity": true,
+      "max_results": 4
     },
     "service_query": {
       "strategy": "exact_retrieval",
@@ -144,18 +215,31 @@
     },
     "kids_entertainment_query": {
       "strategy": "tag_filtered",
-      "required_tags": ["child_relief_anchor", "kids_entertainment"],
-      "max_results": 2
+      "required_tags": [
+        "child_relief_anchor",
+        "kids_entertainment"
+      ],
+      "max_results": 3
     },
     "before_movie_query": {
       "strategy": "tag_filtered",
-      "required_tags": ["near_cinema", "before_movie"],
-      "preferred_zones": ["Food Court", "Kiosk Row"],
+      "required_tags": [
+        "near_cinema",
+        "before_movie"
+      ],
+      "preferred_zones": [
+        "Cinema Zone",
+        "Food Court",
+        "Kiosk Row"
+      ],
       "max_results": 3
     },
     "after_movie_query": {
       "strategy": "tag_filtered",
-      "required_tags": ["after_movie", "reward_stop"],
+      "required_tags": [
+        "after_movie",
+        "reward_stop"
+      ],
       "max_results": 3
     },
     "near_cinema_query": {
@@ -165,19 +249,18 @@
     }
   },
   "ranking": {
-    "favor_family_friendly": 0.75,
-    "favor_kid_friendly": 0.73,
-    "favor_anchor_entities": 0.62,
-    "favor_diversity_vs_confidence": 0.50,
-    "favor_near_cinema_for_movie_context": 0.85,
-    "favor_quick_stop_for_time_sensitive": 0.80,
-    "penalize_shopping_for_explicit_movie_query": 0.70,
-    "boost_family_movie_for_family_with_kids": 0.95,
-    "boost_child_relief_anchor_for_family": 0.90
+    "favor_family_friendly": 0.8,
+    "favor_kid_friendly": 0.78,
+    "favor_anchor_entities": 0.7,
+    "favor_diversity_vs_confidence": 0.48,
+    "favor_near_cinema_for_movie_context": 0.88,
+    "favor_quick_stop_for_time_sensitive": 0.82,
+    "penalize_shopping_for_explicit_movie_query": 0.75,
+    "boost_child_relief_anchor_for_family": 0.92
   },
   "session_adaptation": {
     "preserve_companions_strongly": 0.92,
-    "reinterpret_short_followups_aggressively": 0.85,
+    "reinterpret_short_followups_aggressively": 0.86,
     "carry_movie_context_across_turns": true,
     "carry_family_context_across_turns": true,
     "treat_refinement_as_proximity_filter": true

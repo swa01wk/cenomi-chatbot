@@ -49,14 +49,15 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 
 ### Design Principles
 
-- **Single-mall scoped** — `mall_id = "al_nakheel_plaza_28"` by default; multi-mall is a future concern.
+- **LLM-first classification (v1.6)** — `interpret_turn` is a pure LLM classifier (`gpt-4o-mini`). It returns `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, and `scene_corrections` directly. No keyword overrides run post-LLM. Route flow and scene extraction are thin policy layers.
+- **Multi-mall** — five malls operational; `mall_id` is threaded through all models. `LRUMallContextRegistry` manages RAM → Redis → disk loading.
 - **Answer-first** — the pipeline is biased toward generating a response immediately, not interrogating the user.
 - **Concierge-first** — the system behaves like a smart human concierge: it infers context, selects a playbook, produces a compact guided plan, and acknowledges the visitor's situation naturally.
-- **Smalltalk fast-path** — greetings and casual messages are detected after `interpret_turn` and handled by a dedicated `smalltalk` node with zero LLM cost; they skip the full pipeline entirely.
-- **Scene engine** — `update_scene_memory` acts as a scene compiler, not a shallow memory updater. It extracts companion age, visit type, implicit goals, pace, and constraints from natural language.
-- **Semantic intelligence** — a dedicated `semantic_signals` service maps user phrases + scene fields to semantic tags. These flow through playbook resolution, ranking, and response generation.
-- **Playbook-driven** — scenario playbooks shape strategy selection, entity ranking boosts/penalties, and response shape (guided_plan, concise_shortlist, etc.).
-- **rank_and_dedupe** — a dedicated post-composition node deduplicates, scores, and caps the entity shortlist before it reaches the LLM.
+- **Smalltalk fast-path** — routing uses `SMALLTALK_KINDS` frozenset (not regex). The `smalltalk` node provides three-tier progressive greetings, LLM-generated farewells, context-aware thanks, and mood-plan emotional responses.
+- **Scene engine** — `update_scene_memory` uses LLM-first delta extraction: a structured LLM call returns only changed fields. New fields tracked: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`. `scene_corrections` from `interpret_turn` are applied in a separate pass.
+- **Semantic intelligence** — `semantic_signals` service maps structured `SceneMemory` and `InterpretedIntent` fields to semantic tags via pure lookup tables (no regex).
+- **Playbook-driven** — scenario playbooks shape strategy selection, entity ranking boosts/penalties, and response shape; now includes occasion/wedding overrides, luxury guard, and shopping task scope checks.
+- **rank_and_dedupe** — rebalanced scoring (audience weight raised to 0.30); hard audience mismatch penalty; child-relief anchor injection skipped when a specific shopping task is active.
 - **Retrieval-optional** — exact retrieval only fires when the query demands factual precision (hours, showtimes, offers).
 - **Constraint refinement** — messages like "something quicker" or "closer to cinema" are classified as `constraint_refinement` and refine the existing shortlist rather than resetting the conversation.
 - **Observable** — every node emits a trace entry; the final node aggregates them into a rich debug payload including scene notes, ranking explanations, and playbook rejection reasons.
@@ -112,18 +113,25 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 | `intent.scene_candidates` | `list[str]` | Scene signal candidates from message |
 | `intent.semantic_candidates` | `list[str]` | Semantic tag candidates from message |
 
-**`message_kind` values:**
+**`message_kind` values** (now a `MessageKind` str enum — all values LLM-classified):
 
-| Kind | When Used |
-|------|-----------|
-| `fresh_request` | New standalone question |
-| `followup` | Short continuation of active topic |
-| `refinement` | Adding to current topic ("also", "what about") |
-| `constraint_refinement` | Tightening a prior suggestion ("something quicker", "not expensive", "closer to cinema") — does NOT reset the topic |
-| `correction` | Correcting a previous answer ("no", "I meant") |
-| `topic_switch` | Changing topic entirely ("forget that", "instead") |
-| `context_setting` | User declares scene context without asking a question — *"I'm here with my kid"*, *"it's our anniversary"*, *"solo trip"*. Routes to concierge for scene acknowledgement; never routes to factual even if companion signals match factual patterns |
-| `greeting` / `smalltalk` | Casual chat, greetings |
+| Kind | Routed via `SMALLTALK_KINDS`? | When Used |
+|------|------|-----------|
+| `FRESH_REQUEST` | No | New standalone question |
+| `FOLLOWUP` | No | Short continuation of active topic |
+| `REFINEMENT` | No | Adding to current topic ("also", "what about") |
+| `CONSTRAINT_REFINEMENT` | No | Tightening a prior suggestion ("something quicker", "not expensive") — does NOT reset the topic |
+| `CORRECTION` | No | Correcting a previous answer ("no", "I meant") |
+| `TOPIC_SWITCH` | No | Changing topic entirely ("forget that", "instead") |
+| `CONTEXT_SETTING` | No | User declares scene context without asking a question — routes to concierge for acknowledgement |
+| `CATEGORY_NEGATION` | No | Rejecting a category ("not that kind of restaurant") |
+| `COMPANION_CORRECTION` | No | Correcting who they're with ("actually no kids, just adults") |
+| `GREETING` | Yes | Hello, hi, welcome |
+| `HOWRU` | Yes | "How are you?", "How's it going?" |
+| `THANKS` | Yes | "Thanks", "That's helpful", "Great" |
+| `FAREWELL` | Yes | "Bye", "See you", "Thanks, goodbye" |
+| `CRISIS` | Yes | Emotional distress signals — handled with empathy redirect |
+| `IDENTITY` | Yes | Questions about what the bot is |
 
 ### Group 6 — Scene Memory
 
@@ -149,16 +157,23 @@ Production-grade graph design for a single-mall AI Findr-style concierge.
 | `scene.implicit_goal` | `str` | Inferred higher-level goal e.g. "shopping while keeping child engaged" |
 | `scene.topic_history` | `list[str]` | Last 10 domains visited |
 | `scene.inferred_scene_notes` | `list[str]` | Human-readable notes about what was inferred this turn |
-| `scene.visit_plan` | `list[str]` | Ordered planned activity sequence |
+| `scene.visit_plan` | `list[str]` | Ordered planned activity sequence (v1.6 — LLM extracted) |
 | `scene.completed_steps` | `list[str]` | Activities already discussed |
 | `scene.visit_constraints` | `list[str]` | Inferred practical constraints: quick, kid_friendly_required, near_cinema_preferred, budget_sensitive, time_sensitive, quick_stop_preferred |
 | `scene.multi_activity_mode` | `bool` | True when user stated a multi-step plan |
 | `scene.current_plan_step` | `str` | Which visit_plan step is being addressed |
 | `scene.topic_lock` | `bool` | Whether the active topic is locked (follow-up continuity guard) |
-| `scene.topic_lock_confidence` | `float` | 0.0–1.0 confidence in the topic lock; increases on follow-ups, decreases on topic switches, cleared on explicit switches |
-| `scene.last_context_setting_turn` | `int` | Turn index of the most recent `context_setting` message — used to bias playbook matching when scene context was recently established |
-| `scene.last_selected_playbook` | `str` | Playbook ID from the previous turn — for warm-start continuity |
-| `scene.last_response_experience_mode` | `str` | Response experience mode from previous turn (e.g., `"factual_list"`, `"guided_shortlist"`) |
+| `scene.topic_lock_confidence` | `float` | 0.0–1.0 confidence in the topic lock |
+| `scene.last_context_setting_turn` | `int` | Turn index of the most recent `context_setting` message |
+| `scene.last_selected_playbook` | `str` | Playbook ID from the previous turn |
+| `scene.last_response_experience_mode` | `str` | Response experience mode from previous turn |
+| `scene.scenario` | `str` | *(v1.6)* Visit scenario label (e.g. `"wedding_shopping"`, `"family_day_out"`) from LLM |
+| `scene.user_role` | `str` | *(v1.6)* Visitor's role in the group (e.g. `"mother"`, `"bride"`, `"solo_shopper"`) |
+| `scene.style_intent` | `str` | *(v1.6)* Aesthetic or style preference declared by the user |
+| `scene.excluded_domains` | `list[str]` | *(v1.6)* Domains the user has explicitly ruled out this session |
+| `scene.shopping_task` | `ShoppingTask \| None` | *(v1.6)* Active shopping task with `item`, `recipient`, `budget_hint`, `urgency` |
+| `scene.greeting_streak` | `int` | *(v1.6)* Number of consecutive greeting turns — drives 3-tier greeting pool in `smalltalk` |
+| `scene.recent_mood` | `str` | *(v1.6)* Emotional tone of the last user message (`"happy"`, `"stressed"`, `"neutral"`) |
 
 ### Group 7 — Playbook Resolution
 
@@ -322,7 +337,7 @@ else:
     → update_scene_memory → ... (full pipeline)
 ```
 
-Triggered by `interpret_turn` when `is_smalltalk()` returns `True`. The `smalltalk` node uses static pattern matching (regex) for greetings, thanks, how-are-you, and goodbye patterns — zero LLM cost.
+Triggered by `interpret_turn` when `intent.message_kind` is in `SMALLTALK_KINDS` frozenset — evaluated without regex. The `smalltalk` node uses tiered response pools plus selective LLM calls (farewells, emotional responses) rather than pure static responses.
 
 ### Rule 1: Retrieval Gate
 
@@ -413,8 +428,12 @@ Every `interpret_turn` execution emits a mandatory structured contract stored in
   "primary_intent": "movie_lookup",
   "scenario": "before_movie",
   "modifiers": ["kid_friendly"],
-  "message_kind": "fresh_request",
+  "message_kind": "FRESH_REQUEST",
   "flow_type": "factual",
+  "response_mode": "direct_factual",
+  "is_gibberish": false,
+  "secondary_intents": [],
+  "scene_corrections": {},
   "active_topic": "entertainment",
   "fact_scope": "current_mall",
   "normalized_query": "what movies are showing",
@@ -423,6 +442,8 @@ Every `interpret_turn` execution emits a mandatory structured contract stored in
   "topic_lock_confidence": 0.0
 }
 ```
+
+The `scene_corrections` field allows `interpret_turn` to emit corrective patches (e.g. `{"companions": ["solo"]}`) that `update_scene_memory` applies atomically before its own LLM delta extraction.
 
 This contract is the authoritative record of what `interpret_turn` decided and why. All downstream nodes (route_flow, resolve_playbooks, compose_context) should be traceable to its fields.
 
@@ -445,14 +466,17 @@ The `app/services/semantic_signals.py` module extracts semantic tags from user m
 | `"by myself"` | solo_friendly |
 | `"with my girlfriend"` | couple_friendly, romantic |
 
-### Signal Sources
+### Signal Sources (v1.6 — lookup tables only, no regex)
 
-1. **Phrase matching** — `_PHRASE_TAG_MAP` (40+ patterns)
-2. **Scene companions** — each companion maps to audience tags
-3. **Scene occasion** — each occasion maps to context tags
-4. **Visit constraints** — constraints map to directional tags
-5. **Budget** — maps to price band tags
-6. **Intent domain/sub-intent** — each intent maps to task tags
+1. **Scene companions** — each companion value maps to audience tags via lookup table
+2. **Scene occasion** — each occasion value maps to context tags via lookup table
+3. **Visit constraints** — each constraint maps to directional tags via lookup table
+4. **Budget** — maps to price band tags
+5. **Intent domain/sub-intent** — each intent value maps to task tags via lookup table
+6. **Scenario** — new `scene.scenario` field maps to scenario-specific semantic tags
+7. **Excluded domains** — mapped to anti-tags for ranking penalty
+
+Phrase/text matching (`_PHRASE_TAG_MAP`) was removed in v1.6. All signals now originate from structured state fields set by the LLM classifier.
 
 ---
 
@@ -466,14 +490,15 @@ The `app/services/semantic_signals.py` module extracts semantic tags from user m
 1. Take context.selected_entities from compose_context
 2. Record candidate_count_before_dedupe
 3. Deduplicate by entity_id (or normalized name if no ID)
-4. Score each entity using weighted formula:
+4. Score each entity using weighted formula (v1.6 rebalanced weights):
    final_score =
      intent_fit       * 0.20   (entity type matches domain)
-     + semantic_score * 0.20   (tag overlap with semantic_signals)
-     + audience_fit   * 0.15   (audience_fit matches scene.audience)
-     + playbook_score * 0.20   (ranking_biases from active playbook)
+     + semantic_score * 0.15   (tag overlap with semantic_signals) ← lowered
+     + audience_fit   * 0.30   (audience_fit matches scene.audience) ← raised
+     + playbook_score * 0.15   (ranking_biases from active playbook) ← lowered
      + constraint_fit * 0.15   (tags satisfy visit_constraints)
-     + diversity_pen  * 0.10   (penalize 4th+ of same entity_type)
+     + diversity_pen  * 0.05   (penalize 4th+ of same entity_type)
+   + hard penalty: audience mismatch (entity tagged adult-only when children present) ← new
 5. Sort descending by final_score
 6. Apply diversity penalty: 3rd+ entity of same type loses 0.15/step
 7. Enforce entity_cap (from response_plan.entity_cap, default 5)
@@ -481,6 +506,7 @@ The `app/services/semantic_signals.py` module extracts semantic tags from user m
 8. Enforce must_include_anchor_type (child-relief anchor injection):
    - If child companion + no entertainment entity → pull best entertainment entity
    - Replace lowest-scoring non-dining entity if at cap
+   - SKIP anchor injection when scene.shopping_task is active (specific product purchase takes priority) ← new
 9. Emit ranking_explanations for top-5
 10. Update context.selected_entities and context.candidate_count_before_dedupe
 ```
@@ -818,14 +844,12 @@ The `load_session` node reads from the store; `update_memory` writes back. The `
 
 | Step | Status |
 |------|--------|
-| LLM wired in `generate_response` (OpenAI GPT-4o) | Done |
+| LLM wired in `generate_response` (OpenAI GPT-4.1) | Done |
 | `fetch_exact_facts` with canonical data lookups | Done |
 | `compose_context` pulls real entities from context packs | Done |
 | `normalizer.py` wired into `load_session` | Done |
 | `ScenarioPlaybook` objects loaded in `resolve_playbooks` | Done |
-| Hybrid intent classifier (rule-based + LLM fallback) in `interpret_turn` | Done |
 | In-memory session store (LRU, max 1 000) | Done |
-| Smalltalk fast-path node (`smalltalk.py`) | Done |
 | Clean context builder (no LLM history contamination) | Done |
 | Semantic mall model (`semantic_mall_model.py`) | Done |
 | Feedback system (explicit + implicit + tuning) | Done |
@@ -862,3 +886,19 @@ The `load_session` node reads from the store; `update_memory` writes back. The `
 | **LangGraph checkpointer for durable state** — `runtime.py` wires `MemorySaver` (dev) or `AsyncRedisSaver` (when Redis URL set); controlled by `BACKEND_ENABLE_CHECKPOINTER`; `build_concierge_graph(checkpointer=...)` accepts it | **Done** |
 | **Quality evaluator from `evaluator_stub` data** — `services/quality_evaluator.py` LLM-as-judge scorer; fires fire-and-forget after every turn in both `concierge.py` and `stream.py`; persists to `data/evaluations/`; controlled by `BACKEND_ENABLE_EVALUATOR` | **Done** |
 | **Streaming responses (SSE)** — `app/api/stream.py` implements `POST /api/chat/stream` with token-by-token SSE; blocking `POST /api/chat` endpoint unaffected | **Done** |
+| **LLM-first `interpret_turn`** — pure `gpt-4o-mini` classifier; returns `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections` | **Done (v1.6)** |
+| **Thin `route_flow`** — six business-policy rules, `_resolve_response_strategy()`, topic lock stability; keyword tables removed | **Done (v1.6)** |
+| **LLM-first `update_scene_memory`** — structured delta extraction; `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task` fields | **Done (v1.6)** |
+| **`MessageKind` str enum** — 13 values including `CRISIS`, `IDENTITY`, `HOWRU`, `THANKS`, `FAREWELL`, `CATEGORY_NEGATION`, `COMPANION_CORRECTION`; `SMALLTALK_KINDS` frozenset | **Done (v1.6)** |
+| **`ShoppingTask` sub-model** — `item`, `recipient`, `budget_hint`, `urgency` in `SceneMemory` | **Done (v1.6)** |
+| **Progressive greeting engine** — `scene.greeting_streak` drives 3-tier greeting pool in `smalltalk` | **Done (v1.6)** |
+| **LLM-generated personalised farewell** — `gpt-4o-mini` call using scene context | **Done (v1.6)** |
+| **Context-aware thanks & mood-plan responses** in `smalltalk` | **Done (v1.6)** |
+| **Semantic signals lookup tables** — `semantic_signals.py` now purely lookup-based; regex/phrase matching removed | **Done (v1.6)** |
+| **Thin `response_mode_resolver`** — trusts LLM hint; hard overrides for edge cases only | **Done (v1.6)** |
+| **Rebalanced `rank_and_dedupe` weights** — audience 0.30, hard mismatch penalty, shopping task guard | **Done (v1.6)** |
+| **Playbook occasion/wedding override + luxury guard + shopping task scope** in `resolve_playbooks` | **Done (v1.6)** |
+| **`load_session` query expansion** — `expand_short_query()` produces `expanded_query` from scene context | **Done (v1.6)** |
+| **`stream.py` suggestions** — `done` event includes `suggestions` CTA chips; `conversation_mode` preserved across smalltalk | **Done (v1.6)** |
+| **Three new malls** — Al Ahsa Mall (1), The View Mall (10), Al Nakheel Mall (27); five malls total | **Done (v1.6)** |
+| **`classifier_model` setting** — `gpt-4o-mini` for classification calls; reduces cost ~30× vs GPT-4o | **Done (v1.6)** |

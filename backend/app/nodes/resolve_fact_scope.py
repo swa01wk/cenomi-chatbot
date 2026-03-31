@@ -43,7 +43,21 @@ from app.nodes._tracing import traced_node
 
 logger = logging.getLogger(__name__)
 
-# ── Keyword → fact_scope mapping ──────────────────────────────────────────
+# Default response modes for each scope — used when the LLM candidate is trusted
+# directly without running the keyword rules (which also set response_mode).
+_SCOPE_DEFAULT_RESPONSE_MODE: dict[str, str] = {
+    "movie_schedule":          "structured_fact_list",
+    "mall_fact":               "quick_answer",
+    "service_lookup":          "route_hint",
+    "cinema_lookup":           "route_hint",
+    "brand_availability":      "direct_lookup",
+    "cross_mall_availability": "cross_mall_availability",
+    "route_hint":              "route_hint",
+    "store_lookup":            "direct_lookup",
+}
+
+# ── Keyword → fact_scope mapping (fallback only) ───────────────────────────
+# Only consulted when the LLM classifier left fact_scope_candidate empty.
 _SCOPE_RULES: list[tuple[tuple[str, ...], str, str, str]] = [
     # (keywords, fact_scope, fact_entity_type, response_mode)
     (
@@ -152,36 +166,40 @@ async def resolve_fact_scope(state: ConciergeState) -> dict:
     msg = (state.normalized_user_message or state.raw_user_message).lower()
     intent = state.intent
 
-    # ── Start with hint from interpret_turn, refine with keyword rules ─
+    # ── Trust LLM classifier's fact_scope_candidate when set ─────────────────
+    # The classifier already has full context to determine scope; only fall back
+    # to the keyword rules when it left the field empty.
     scope = intent.fact_scope_candidate or ""
     entity_type = intent.fact_entity_type_candidate or ""
-    response_mode = ""
+    response_mode = _SCOPE_DEFAULT_RESPONSE_MODE.get(scope, "") if scope else ""
     query_entity = ""
 
-    # Apply keyword rules in priority order
-    for keywords, rule_scope, rule_entity_type, rule_mode in _SCOPE_RULES:
-        if any(kw in msg for kw in keywords):
-            scope = rule_scope
-            entity_type = rule_entity_type
-            response_mode = rule_mode
-            break
-
-    # ── Catch-all: "is X here" / "is X available" → brand_availability ─
-    # This handles cases like "is starbucks here", "is nike available" that
-    # don't match the specific brand list in _SCOPE_RULES.
+    # ── Keyword rules: fallback only when classifier left scope empty ─────────
     if not scope:
-        import re as _re
-        _brand_here_pat = _re.compile(
-            r"\bis\s+\w[\w &'-]{1,20}\s+(?:here|available|in (?:this|the) mall)",
-            _re.I,
-        )
-        if _brand_here_pat.search(msg):
-            scope = "brand_availability"
-            entity_type = "store"
-            response_mode = "direct_lookup"
+        for keywords, rule_scope, rule_entity_type, rule_mode in _SCOPE_RULES:
+            if any(kw in msg for kw in keywords):
+                scope = rule_scope
+                entity_type = rule_entity_type
+                response_mode = rule_mode
+                break
 
-    # ── Extract named entity from message ─────────────────────────────
-    query_entity = _extract_entity_name(msg, scope)
+        # Catch-all: "is X here / available" → brand_availability
+        if not scope:
+            _brand_here_pat = re.compile(
+                r"\bis\s+\w[\w &'-]{1,20}\s+(?:here|available|in (?:this|the) mall)",
+                re.I,
+            )
+            if _brand_here_pat.search(msg):
+                scope = "brand_availability"
+                entity_type = "store"
+                response_mode = "direct_lookup"
+
+    # ── Extract named entity ───────────────────────────────────────────
+    # Prefer the LLM-extracted entity from interpret_turn (zero regex, more robust).
+    # Fall back to the regex pattern matcher for scopes/turns where the LLM
+    # left entity_query empty (e.g. concierge turns that hit factual keywords).
+    llm_entity = (intent.entity_query or "").strip()
+    query_entity = llm_entity or _extract_entity_name(msg, scope)
 
     # ── Determine retrieval targets ────────────────────────────────────
     retrieval_targets = _resolve_retrieval_targets(scope, entity_type, msg)

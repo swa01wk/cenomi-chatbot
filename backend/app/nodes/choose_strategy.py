@@ -290,6 +290,22 @@ async def choose_strategy(state: ConciergeState) -> dict:
         resolve_response_mode(state)
     )
 
+    # ── Strategy → hybrid_plan upgrade ───────────────────────────────
+    # When a multi-domain strategy is selected, the response mode should
+    # reflect that even if the LLM didn't explicitly set hybrid_plan.
+    # This uses the LLM-driven strategy signal (which is selected based on
+    # intent + playbook) to infer the appropriate response mode.
+    _HYBRID_STRATEGIES = frozenset({
+        "movie_plus_food", "mini_itinerary", "day_plan",
+        "route_plus_plan", "family_plan",
+    })
+    if chosen in _HYBRID_STRATEGIES and response_mode in {
+        "guided_recommendation", "best_effort_shortlist", ""
+    }:
+        response_mode = "hybrid_plan"
+        rm_reason = f"multi-domain strategy '{chosen}' → hybrid_plan inferred"
+        fallback_applied = False
+
     plan = ResponsePlan(
         chosen_strategy=chosen,
         response_shape_hint=shape,

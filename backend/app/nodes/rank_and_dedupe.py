@@ -255,13 +255,6 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         cap_from_strategy = _STRATEGY_CAPS.get(strategy, 8)
         entity_cap = cap_from_plan if cap_from_plan > 0 else cap_from_strategy
 
-        # For category-level retrieval, preserve the full list (don't cap)
-        is_category_retrieval = any(
-            e.get("source", "").startswith("category/") for e in deduped
-        )
-        if is_category_retrieval:
-            entity_cap = len(deduped)
-
         # ── 3. Collect scoring context ────────────────────────────────
         has_child = bool(_CHILD_COMPANIONS & set(scene.companions)) or any(
             d.get("type") == "child" for d in scene.companion_details
@@ -270,6 +263,20 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         constraint_set = set(scene.visit_constraints)
         shopping_task = getattr(scene, "shopping_task", None)
         is_context_setting = state.intent.message_kind == "context_setting"
+
+        # For category-level retrieval, preserve the full list (don't cap) —
+        # UNLESS a specific target person is set (e.g. "men", "son", "girlfriend").
+        # When the guest has specified who they are shopping for, the result
+        # should be a focused shortlist, not a full category dump.
+        is_category_retrieval = any(
+            e.get("source", "").startswith("category/") for e in deduped
+        )
+        has_specific_target = bool(
+            shopping_task
+            and getattr(shopping_task, "target_person", "") not in ("", "self")
+        )
+        if is_category_retrieval and not has_specific_target:
+            entity_cap = len(deduped)
 
         # Determine whether an active audience requirement is in force.
         # When True, entities that do not match audience_fit receive a hard

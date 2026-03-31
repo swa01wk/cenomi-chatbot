@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-7644c8d4133d",
+  "session_id": "v6-cmp1-3d97aa61",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-b6cf1685c9a2",
+  "user_message": "actually i am alone, no kids",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bactually\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-31 13:03:47.181587"
+}

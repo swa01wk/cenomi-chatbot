@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-7c53d049d658",
+  "session_id": "cpx2-1f19b4a2",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-2c1fec3957d8",
+  "user_message": "great \u2014 which restaurant would you actually recommend for us?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bactually\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-31 19:28:35.522976"
+}

@@ -369,7 +369,7 @@ cp .env.example .env
 | `BACKEND_DEBUG`                 | `true`                   | No       | Enable debug mode                                                           |
 | `BACKEND_LOG_LEVEL`             | `debug`                  | No       | Logging level (`debug` / `info` / `warning` / `error`)                     |
 | `BACKEND_FRONTEND_ORIGIN`       | `http://localhost:5173`  | No       | Allowed CORS origin for the frontend                                        |
-| `BACKEND_MALL_IDS`              | `al_nakheel_plaza_28`    | No       | Comma-separated mall IDs to load at startup (e.g. `id1,id2`)              |
+| `BACKEND_MALL_IDS`              | five malls (see settings.py) | No   | Comma-separated mall IDs to load at startup. Default: all five configured malls (28, 13, 1, 10, 27) |
 | `BACKEND_REDIS_URL`             | `""`                     | No       | Redis connection URL. Empty = in-memory store. Set to `redis://localhost:6379/0` for local Redis or `redis://redis:6379/0` inside Docker Compose |
 | `BACKEND_REDIS_SESSION_TTL`     | `1800`                   | No       | Redis session TTL in seconds (default: 30 minutes). Refreshed on every turn |
 | `BACKEND_ENABLE_CHECKPOINTER`   | `false`                  | No       | Snapshot every LangGraph turn for replay/debugging. Uses `MemorySaver` when Redis URL is empty; `AsyncRedisSaver` when Redis is set |
@@ -393,7 +393,7 @@ BACKEND_ENV=development
 BACKEND_LOG_LEVEL=debug
 BACKEND_DEBUG=true
 BACKEND_FRONTEND_ORIGIN=http://localhost:5173
-BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13
+BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13,al_nakheel_plaza_1,al_nakheel_plaza_10,al_nakheel_plaza_27
 
 # Redis — leave empty for in-memory (dev), set URL for production
 BACKEND_REDIS_URL=
@@ -507,11 +507,11 @@ Located in `backend/data/`, all data is stored as JSON:
 
 | Directory        | File(s)                                | Description                                    |
 |------------------|----------------------------------------|------------------------------------------------|
-| `canonical/`     | `al_nakheel_plaza_28.json`             | Normalized tenant records (stores, restaurants) |
-| `semantic/`      | `al_nakheel_plaza_28.json`             | Derived facts, semantic tags, audience fit     |
-| `playbooks/`     | `al_nakheel_plaza_28.json`             | Pre-built scenario response strategies          |
-| `context_packs/` | `al_nakheel_plaza_28_context.json`     | Pre-assembled context bundle for the mall      |
-| `tenant_config/` | `tenant_defaults.json`, `al_nakheel_plaza_28.json` | Tenant parameters and overrides |
+| `canonical/`     | `al_nakheel_plaza_{1,10,13,27,28}.json` | Normalized tenant records (stores, restaurants) |
+| `semantic/`      | `al_nakheel_plaza_{1,10,13,27,28}.json` | Derived facts, semantic tags, audience fit     |
+| `playbooks/`     | `al_nakheel_plaza_{1,10,13,27,28}.json` | Pre-built scenario response strategies         |
+| `context_packs/` | `al_nakheel_plaza_{1,10,13,27,28}_context.json` | Pre-assembled context bundles        |
+| `tenant_config/` | `tenant_defaults.json`, `al_nakheel_plaza_{1,10,13,27,28}.json` | Tenant parameters and overrides |
 | `examples/`      | `example_turn_state.json`, `mall_profile.json`, `playbooks_sample.json`, `semantic_entries_sample.json`, `tenant_params_sample.json`, `tenants_sample.json` | Reference data for development |
 | `feedback/`      | `implicit/`, `normalized/`             | Auto-generated and normalized feedback data    |
 
@@ -799,11 +799,22 @@ git remote set-url origin git@github.com:<your-username>/cenomi-chatbot.git
 
 ## Project Status
 
-**v1.5 — Cross-Mall Factual Pipeline.**
+**v1.6 — LLM-First Architecture.**
 
 See [CHANGELOG.md](CHANGELOG.md) for full release history.
 
-### v1.5 — Cross-mall factual pipeline (current)
+### v1.6 — LLM-first architecture (current)
+- Pure LLM classifier in `interpret_turn`: no keyword overrides post-LLM; LLM returns `flow_type`, `response_mode`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections`, `is_gibberish` directly
+- `update_scene_memory` replaced keyword scanner with a structured LLM delta call; new scene fields: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`
+- `route_flow` reduced to six clean business-policy rules; all `_CONCIERGE_HARD_SIGNALS` lists removed
+- `smalltalk` engine: progressive 3-tier greeting, LLM-generated farewell, context-aware thanks, mood-plan emotional responses
+- `rank_and_dedupe` audience weight raised to 0.30 with hard mismatch penalty; shopping task scope guards child-relief injection
+- `resolve_playbooks`: occasion/wedding override, luxury playbook guard, shopping task scope checking
+- `query_classifier.py` reduced to a minimal pre-flight; all classification delegated to the LLM
+- Three new malls: Al Ahsa Mall (mall 1), The View Mall (mall 10), Al Nakheel Mall Riyadh (mall 27) — platform now serves five malls simultaneously
+- Frontend mall selector expanded to all five malls; debug cards updated for new scene fields
+
+### v1.5 — Cross-mall factual pipeline
 - Cross-mall brand queries routed through the structured factual branch (`resolve_fact_scope → compose_fact_response_context → generate_response`) instead of inline assembly inside `generate_response`
 - New `cross_mall_brand` service: strips boilerplate phrases and resolves the brand via a four-step fallback chain (message → `fact_query_entity` → `scene.last_resolved_entity` → `active_shortlist[0]`) enabling follow-up queries like "where else can I find it?"
 - `cross_mall_availability` scope: `_format_fact_context` renders structured `AT YOUR CURRENT MALL` / `AT OTHER CENOMI MALLS` sections; hallucination guard uses async all-configured-malls merge

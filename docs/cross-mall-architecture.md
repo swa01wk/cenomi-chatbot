@@ -21,7 +21,7 @@ Single-mall questions (`"Do you have Zara?"`) are **not** affected and flow thro
 
 ## 2. Current Implementation Status
 
-### What Is Built (as of v1.5)
+### What Is Built (as of v1.6)
 
 | Capability | Status | Location |
 |-----------|--------|---------|
@@ -32,7 +32,7 @@ Single-mall questions (`"Do you have Zara?"`) are **not** affected and flow thro
 | `build_merged_guard_canonical_for_configured_malls()` (async) | **Done** | `app/runtime.py` |
 | `get_loaded_mall_ids()` | **Done** | `app/runtime.py` |
 | `get_all_mall_canonical_for_guard()` (RAM-only) | **Done** | `app/runtime.py` |
-| Regex-based cross-mall intent detection | **Done** | `intent/query_classifier.py` |
+| LLM-based cross-mall intent detection (`domain=cross_mall`) | **Done** | `app/nodes/interpret_turn.py` (LLM-first, v1.6) |
 | `domain = cross_mall`, `sub_intent = cross_mall_search` | **Done** | `app/nodes/interpret_turn.py` |
 | `cross_mall_search` → factual flow hint (`cross_mall_availability` scope) | **Done** | `app/nodes/interpret_turn.py` |
 | `cross_mall_availability` scope in `resolve_fact_scope` | **Done** | `app/nodes/resolve_fact_scope.py` |
@@ -69,10 +69,15 @@ At startup, `app/runtime.py` initializes one `MallContextLoader` per mall listed
 ```
 startup
   │
-  ├── runtime.initialize(["al_nakheel_plaza_28", "al_nakheel_plaza_13"])
+  ├── runtime.initialize([
+  │       "al_nakheel_plaza_1",    ← Al Ahsa Mall (Al Ahsa)
+  │       "al_nakheel_plaza_10",   ← The View Mall (Riyadh)
+  │       "al_nakheel_plaza_13",   ← Mall of Arabia (Jeddah)
+  │       "al_nakheel_plaza_27",   ← Al Nakheel Mall (Riyadh)
+  │       "al_nakheel_plaza_28",   ← Al Nakheel Plaza (Buraidah)
+  │   ])
   │         │
-  │         ├── MallContextLoader("al_nakheel_plaza_28").load()   → _mall_contexts["al_nakheel_plaza_28"]
-  │         └── MallContextLoader("al_nakheel_plaza_13").load()   → _mall_contexts["al_nakheel_plaza_13"]
+  │         └── MallContextLoader(mall_id).load()  → _mall_contexts[mall_id]  (per mall)
   │
   └── Shared services: SessionStore, FeedbackService, ImplicitFeedbackDetector
 ```
@@ -114,55 +119,49 @@ get_all_mall_canonical_for_guard() → {
 ### Configuration
 
 ```bash
-# backend/.env
-BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13
+# backend/.env — defaults to all five malls
+BACKEND_MALL_IDS=al_nakheel_plaza_1,al_nakheel_plaza_10,al_nakheel_plaza_13,al_nakheel_plaza_27,al_nakheel_plaza_28
 ```
 
 Each mall needs its data files in the standard per-mall paths:
 
 ```
 backend/data/
-├── canonical/al_nakheel_plaza_28.json
-├── canonical/al_nakheel_plaza_13.json
-├── semantic/al_nakheel_plaza_28.json
-├── semantic/al_nakheel_plaza_13.json
-├── playbooks/al_nakheel_plaza_28.json
-├── playbooks/al_nakheel_plaza_13.json
-├── context_packs/al_nakheel_plaza_28_context.json
-└── context_packs/al_nakheel_plaza_13_context.json
+├── canonical/al_nakheel_plaza_{1,10,13,27,28}.json
+├── semantic/al_nakheel_plaza_{1,10,13,27,28}.json
+├── playbooks/al_nakheel_plaza_{1,10,13,27,28}.json
+├── context_packs/al_nakheel_plaza_{1,10,13,27,28}_context.json
+└── tenant_config/al_nakheel_plaza_{1,10,13,27,28}.json
 ```
 
 ---
 
 ## 4. Intent Detection — Cross-Mall Classification
 
-### Detection Priority
+### Detection Priority (v1.6 — LLM-first)
 
-Cross-mall intent is detected before LLM classification fires. It uses a **high-priority regex rule** in `intent/query_classifier.py`:
+Cross-mall intent is classified by the LLM in `interpret_turn` using the `CLASSIFICATION_PROMPT`. The prompt instructs the LLM to use `domain="cross_mall"` when the query explicitly references other malls.
 
 ```
 User message
     │
-    ├── 1. Exact/static table lookup   (< 3 words — no cross-mall queries here)
-    │
-    ├── 2. Cross-mall regex match (HIGH PRIORITY — before general keyword rules)
-    │        Patterns: "mall of arabia", "nakheel", "other mall", "both malls",
-    │                  "any cenomi mall", "across malls", "which.*mall.*has",
-    │                  "does.*also have", "available at.*other"
-    │        → domain="cross_mall", sub_intent="cross_mall_search", conf=0.97
-    │
-    ├── 3. General keyword rules
-    │
-    └── 4. LLM fallback
+    └── LLM classifier (gpt-4o-mini)
+             ├── "does Mall of Arabia also have Starbucks?" → domain="cross_mall"
+             ├── "which of your malls has H&M?"            → domain="cross_mall"
+             └── "do you have Zara?"                       → domain="shopping" (single-mall)
 ```
 
-### LLM Classifier Instructions (when rule confidence is insufficient)
+The previous regex-based pre-classification step in `query_classifier.py` has been removed in v1.6; all classification is now LLM-driven.
+
+### LLM Classifier Instructions
 
 `CLASSIFICATION_PROMPT` in `interpret_turn.py` instructs the LLM:
 
 > Use `cross_mall` ONLY when the question explicitly references other malls, "both malls", "any of your malls", "Mall of Arabia", "across malls", or asks "does [other mall] also have X?"
 >
 > DO NOT use `cross_mall` for single-mall questions like "Do you have Nike?" or "Is H&M here?"
+
+In v1.6 this is the **primary** (and only) cross-mall detection mechanism. No regex fallback exists.
 
 ### Valid Cross-Mall Values
 
@@ -275,16 +274,19 @@ The current `ConciergeState` is home-mall scoped. These fields are relevant to c
 
 ---
 
-## 7. Loaded Mall Reference (Current)
+## 7. Loaded Mall Reference (Current — v1.6)
 
 | Mall ID | Mall Name | City |
 |---------|-----------|------|
-| `al_nakheel_plaza_28` | Al Nakheel Plaza | Buraidah |
+| `al_nakheel_plaza_1` | Al Ahsa Mall | Al Ahsa |
+| `al_nakheel_plaza_10` | The View Mall | Riyadh |
 | `al_nakheel_plaza_13` | Mall of Arabia | Jeddah |
+| `al_nakheel_plaza_27` | Al Nakheel Mall | Riyadh |
+| `al_nakheel_plaza_28` | Al Nakheel Plaza | Buraidah |
 
-### Known Cross-Mall Brand Matrix
+### Known Cross-Mall Brand Matrix (malls 13 and 28)
 
-| Brand | Al Nakheel (28) | Mall of Arabia (13) |
+| Brand | Al Nakheel Plaza (28) | Mall of Arabia (13) |
 |-------|----------------|---------------------|
 | Starbucks | yes | yes |
 | Zara | yes | yes |
@@ -299,6 +301,8 @@ The current `ConciergeState` is home-mall scoped. These fields are relevant to c
 | Red Tag | yes | **no** |
 | Kudu Restaurant | **no** | yes |
 | Popeyes | **no** | yes |
+
+For brand matrices for malls 1, 10, and 27, run a cross-mall query against the live backend or search canonical JSON files directly.
 
 ---
 
@@ -600,16 +604,17 @@ The `mall_id` field designates the visitor's **home mall**. All cross-mall resul
 ## 14. Running Cross-Mall Locally
 
 ```bash
-# 1. Set both malls in .env
-echo "BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13" >> backend/.env
+# 1. All five malls are enabled by default in settings.py — no .env change needed
+#    To override, set explicitly:
+# echo "BACKEND_MALL_IDS=al_nakheel_plaza_28,al_nakheel_plaza_13" >> backend/.env
 
 # 2. Start the server
 cd backend && source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
 
-# 3. Confirm both malls loaded
+# 3. Confirm all malls loaded
 curl -s http://localhost:8000/api/health | python3 -m json.tool
-# Expected: "mall_ids": ["al_nakheel_plaza_28", "al_nakheel_plaza_13"]
+# Expected: "mall_ids": ["al_nakheel_plaza_1", "al_nakheel_plaza_10", "al_nakheel_plaza_13", "al_nakheel_plaza_27", "al_nakheel_plaza_28"]
 
 # 4. Cross-mall query
 curl -s -X POST http://localhost:8000/api/chat \

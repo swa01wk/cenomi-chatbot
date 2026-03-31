@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-06aca8f4e6c8",
+  "session_id": "eval-c10-bridal-v16",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-7c808ffeb170",
+  "user_message": "we need something quick to eat before we start \u2014 nothing too heavy",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-03-31 13:23:53.971713"
+}

@@ -3,13 +3,16 @@ Interpret Turn node — classifies user intent and message kind.
 
 Uses a single LLM classifier (gpt-4o-mini) that receives the full
 conversation context and returns structured JSON with domain, sub_intent,
-and message_kind.  No rule-based or regex path — the LLM is always
-the decision-maker.
+message_kind, flow_type, scenario, and related signals.
+
+The LLM is the sole decision-maker for intent, routing hints, and scenario.
+No keyword lists, regex tables, or post-LLM rule overrides are used.
 
 CONTRACT
 ────────
   Purpose:  Analyze the normalized message in conversation context.
-            Determine domain, sub_intent, message_kind, and flow routing hints.
+            Determine domain, sub_intent, message_kind, flow_type, scenario,
+            and flow routing hints.
   Reads:    normalized_user_message, messages (history), scene
   Writes:   intent (InterpretedIntent) including flow_type_candidate,
             fact_scope_candidate, fact_entity_type_candidate
@@ -29,11 +32,7 @@ from langchain_openai import ChatOpenAI
 from app.config.settings import get_settings
 from app.models.state import ConciergeState, DebugEnrichment, InterpretedIntent
 from app.nodes._tracing import traced_node
-from intent.query_classifier import (
-    is_likely_unsupported,
-    maybe_correct_brand,
-    normalize_query_with_pattern,
-)
+from intent.query_classifier import is_likely_unsupported
 
 logger = logging.getLogger(__name__)
 
@@ -45,134 +44,8 @@ VALID_DOMAINS = {
     "cross_mall",
 }
 
-# ── Flow routing hint tables ────────────────────────────────────────────────
-# Sub-intents that strongly signal factual flow
-_FACTUAL_SUB_INTENTS: frozenset[str] = frozenset({
-    "movie_showtime",
-    "opening_hours",
-    "store_hours",
-    "location_query",
-    "service_info",
-    "prayer_room",
-    "parking_info",
-    "cross_mall_search",
-    "brand_availability",    # "do you have H&M?" / "is Nike here?" → exact presence check
-    "overview",              # "tell me about the mall" → factual mall data
-    "facilities_summary",    # "what facilities does this mall have?"
-    "family_friendliness",   # "is this mall family friendly?"
-    "what_is_available",     # "what does this mall have?"
-})
-
-# Keywords that signal a direct factual lookup regardless of domain
-_FACTUAL_KEYWORD_SIGNALS: tuple[str, ...] = (
-    "what movies", "which movies", "movies do we", "movies can i",
-    "now showing", "what's playing", "what is playing",
-    "all movies", "movie list", "show times", "showtimes",
-    "where is", "where's the", "where are the",
-    "what time do you", "when do you open", "when do you close",
-    "opening hours", "closing time", "what are your hours",
-    "do you have", "is there a", "is there an", "do you carry",
-    "is starbucks", "is zara", "is nike", "is h&m",
-    "where is the atm", "atm location", "prayer room", "restroom",
-    "how do i get to", "directions to",
-)
-
-# Keywords that strongly indicate concierge / planning flow
-_CONCIERGE_KEYWORD_SIGNALS: tuple[str, ...] = (
-    "suggest", "recommend", "what can we do", "what should we",
-    "something quick", "something fun", "something for",
-    "before the movie", "after the movie",
-    "gift for", "present for",
-    "date plan", "date night",
-    "family plan", "with my kids", "with my child", "with my daughter", "with my son",
-    "with my girlfriend", "with my boyfriend", "with my wife", "with my husband",
-    # Personal pronoun references — always concierge/recommendation, never entity lookup
-    "anything she", "anything he", "anything they",
-    "something she", "something he", "something they",
-    "she would", "he would", "she likes", "he likes",
-    "she wants", "he wants", "she'd", "he'd",
-    "for her", "for him", "for them",
-)
-
-
-def _detect_flow_type_candidate(
-    msg: str,
-    domain: str,
-    sub_intent: str,
-    scene_context: dict,
-) -> tuple[str, str, str]:
-    """
-    Emit a (flow_type_candidate, fact_scope_candidate, fact_entity_type_candidate)
-    hint for the route_flow node.
-
-    Returns strings — the route_flow node makes the final decision.
-    """
-    lower = msg.lower()
-
-    # Cross-mall is always factual
-    if domain == "cross_mall" or sub_intent == "cross_mall_search":
-        return "factual", "cross_mall_availability", "brand"
-
-    # Concierge signals override if strong planning language is present
-    has_concierge_signal = any(cue in lower for cue in _CONCIERGE_KEYWORD_SIGNALS)
-    # Also treat companion/occasion/visit context as concierge signal
-    has_scene_context = bool(
-        scene_context.get("companions")
-        or scene_context.get("occasion")
-        or scene_context.get("visit_type")
-        or scene_context.get("goal")
-    )
-
-    # Factual sub-intent check
-    if sub_intent in _FACTUAL_SUB_INTENTS:
-        # Edge case: "something quick before the movie" is concierge even if
-        # movie_showtime appears as sub-intent — let concierge signals win
-        if has_concierge_signal:
-            return "concierge", "", ""
-        # Map sub_intent → fact_scope
-        _SUB_INTENT_SCOPE: dict[str, tuple[str, str]] = {
-            "movie_showtime": ("movie_schedule", "movie"),
-            "opening_hours": ("mall_fact", "mall"),
-            "store_hours": ("store_lookup", "store"),
-            "location_query": ("route_hint", "entity"),
-            "service_info": ("service_lookup", "service"),
-            "prayer_room": ("service_lookup", "facility"),
-            "parking_info": ("service_lookup", "parking"),
-            "cross_mall_search": ("cross_mall_availability", "brand"),
-            "brand_availability": ("brand_availability", "store"),
-            "overview": ("mall_fact", "mall"),
-            "facilities_summary": ("mall_fact", "mall"),
-            "family_friendliness": ("mall_fact", "mall"),
-            "what_is_available": ("mall_fact", "mall"),
-        }
-        scope_info = _SUB_INTENT_SCOPE.get(sub_intent, ("", ""))
-        return "factual", scope_info[0], scope_info[1]
-
-    # Explicit factual keyword signals
-    has_factual_signal = any(cue in lower for cue in _FACTUAL_KEYWORD_SIGNALS)
-    if has_factual_signal and not has_concierge_signal:
-        # Try to resolve scope from keywords
-        if any(k in lower for k in ("movie", "film", "cinema", "showtime", "playing")):
-            return "factual", "movie_schedule", "movie"
-        if any(k in lower for k in ("hours", "open", "close", "timing")):
-            return "factual", "mall_fact", "mall"
-        if any(k in lower for k in ("where is", "where's", "location", "floor", "directions")):
-            return "factual", "route_hint", "entity"
-        if any(k in lower for k in ("do you have", "is there", "do you carry", "is starbucks", "is zara")):
-            return "factual", "brand_availability", "store"
-        if any(k in lower for k in ("atm", "prayer", "restroom", "parking", "stroller", "wheelchair")):
-            return "factual", "service_lookup", "facility"
-        return "factual", "store_lookup", "entity"
-
-    # Exploration with strong scene context → concierge
-    if has_scene_context or has_concierge_signal:
-        return "concierge", "", ""
-
-    # Default — route_flow will make the final call
-    return "", "", ""
-
-
-# ── Hybrid intent extraction ────────────────────────────────────────────────
+# ── Deterministic lookup tables (domain/sub_intent → canonical labels) ───────
+# These do not match against raw message text — they map structured LLM output.
 
 # Domain/sub-intent → canonical primary intent label
 _PRIMARY_INTENT_MAP: dict[str, str] = {
@@ -208,66 +81,7 @@ _PRIMARY_INTENT_MAP: dict[str, str] = {
     "cross_mall/cross_mall_search": "cross_mall_lookup",
 }
 
-# Keyword patterns → secondary intent labels
-_SECONDARY_INTENT_SIGNALS: list[tuple[tuple[str, ...], str]] = [
-    (("with the kid", "with my kid", "with kids", "with my kids",
-      "with child", "with my child", "with the children", "for the kid",
-      "any movies with", "movies with kid", "movies for kids",
-      "movies for children"), "family_filter"),
-    (("before the movie", "before movie"), "before_movie_constraint"),
-    (("after the movie", "after movie"), "after_movie_constraint"),
-    (("and coffee", "coffee after", "coffee before"), "add_coffee_step"),
-    (("and dinner", "dinner after", "dinner before",
-      "and food", "and eat", "and then eat", "grab food",
-      "grab a bite", "grab dinner", "and lunch",
-      "food and", "movies and food", "movies and eat"), "add_dining_step"),
-    (("near cinema", "near the cinema", "closer to cinema",
-      "close to cinema", "next to cinema"), "proximity_filter"),
-    (("not expensive", "not too expensive", "affordable",
-      "budget", "cheaper"), "budget_filter"),
-    (("gift for", "present for", "buying for", "shopping for"), "gift_for"),
-    (("romantic", "for my girlfriend", "for my boyfriend",
-      "for wife", "for husband"), "romantic_filter"),
-    (("quick", "something quick", "fast", "hurry"), "quick_filter"),
-]
-
-# Keyword patterns → semantic modifier tags
-_MODIFIER_SIGNALS: list[tuple[tuple[str, ...], list[str]]] = [
-    (("with the kid", "with my kid", "with kids", "with my kids",
-      "with child", "with my child", "with the children",
-      "any movies with", "for kids", "for children",
-      "kid friendly", "kid-friendly", "child friendly"),
-     ["kid_friendly", "family_friendly", "parent_with_child"]),
-    (("before the movie", "before movie"),
-     ["before_movie", "time_sensitive", "near_cinema"]),
-    (("after the movie", "after movie"),
-     ["after_movie", "time_sensitive"]),
-    (("near cinema", "near the cinema", "closer to cinema",
-      "close to cinema", "next to cinema"),
-     ["near_cinema"]),
-    (("not expensive", "not too expensive", "something affordable",
-      "affordable", "budget friendly", "budget-friendly",
-      "not too pricey", "cheaper"),
-     ["budget_sensitive"]),
-    (("quick", "something quick", "in a hurry", "short visit",
-      "fast", "not much time"),
-     ["quick_stop", "time_sensitive"]),
-    (("girlfriend", "boyfriend", "wife", "husband", "romantic",
-      "date", "anniversary"),
-     ["romantic", "couple_friendly"]),
-    (("family", "families"),
-     ["family_friendly"]),
-    (("gift", "present", "buying for", "shopping for"),
-     ["gift_friendly"]),
-    (("healthy", "light meal", "light snack", "something light"),
-     ["healthy", "light"]),
-    (("solo", "alone", "by myself"),
-     ["solo_friendly"]),
-    (("group", "friends", "with friends"),
-     ["group_friendly"]),
-]
-
-# Domain-level dominant context type
+# Domain → dominant context type label
 _DOMAIN_CONTEXT_TYPE: dict[str, str] = {
     "entertainment": "cinema_and_movies",
     "shopping": "retail_stores",
@@ -280,49 +94,22 @@ _DOMAIN_CONTEXT_TYPE: dict[str, str] = {
     "general": "general",
 }
 
-
-def _extract_hybrid_intent_bundle(
-    msg: str,
-    domain: str,
-    sub_intent: str,
-) -> tuple[str, list[str], list[str], str]:
-    """
-    Extract (primary_intent, secondary_intents, modifiers, dominant_context_type)
-    from the message + classified domain/sub-intent.
-
-    This is a pure keyword-based extractor. It never overrides the primary intent —
-    it only ADDS secondary intents and modifiers.
-    """
-    lower = msg.lower()
-
-    # Primary intent from domain/sub_intent map
-    key = f"{domain}/{sub_intent}"
-    primary_intent = _PRIMARY_INTENT_MAP.get(key, "")
-    if not primary_intent:
-        # Fallback: domain-level primary
-        primary_intent = _PRIMARY_INTENT_MAP.get(f"{domain}/", domain or "general")
-
-    # Dominant context type from domain
-    dominant_context_type = _DOMAIN_CONTEXT_TYPE.get(domain, "general")
-
-    # Secondary intents — add any that match, never replace primary
-    secondary_intents: list[str] = []
-    for keywords, secondary in _SECONDARY_INTENT_SIGNALS:
-        if any(kw in lower for kw in keywords):
-            if secondary not in secondary_intents:
-                secondary_intents.append(secondary)
-
-    # Modifiers — collect all matching tags
-    seen_modifiers: set[str] = set()
-    modifiers: list[str] = []
-    for keywords, tags in _MODIFIER_SIGNALS:
-        if any(kw in lower for kw in keywords):
-            for tag in tags:
-                if tag not in seen_modifiers:
-                    seen_modifiers.add(tag)
-                    modifiers.append(tag)
-
-    return primary_intent, secondary_intents, modifiers, dominant_context_type
+# Sub-intent → (fact_scope, fact_entity_type) for factual flow routing hints
+_SUB_INTENT_TO_FACT_SCOPE: dict[str, tuple[str, str]] = {
+    "movie_showtime": ("movie_schedule", "movie"),
+    "opening_hours": ("mall_fact", "mall"),
+    "store_hours": ("store_lookup", "store"),
+    "location_query": ("route_hint", "entity"),
+    "service_info": ("service_lookup", "service"),
+    "prayer_room": ("service_lookup", "facility"),
+    "parking_info": ("service_lookup", "parking"),
+    "cross_mall_search": ("cross_mall_availability", "brand"),
+    "brand_availability": ("brand_availability", "store"),
+    "overview": ("mall_fact", "mall"),
+    "facilities_summary": ("mall_fact", "mall"),
+    "family_friendliness": ("mall_fact", "mall"),
+    "what_is_available": ("mall_fact", "mall"),
+}
 
 VALID_SUB_INTENTS = {
     "general_dining", "romantic_dining", "quick_bite", "family_dining",
@@ -350,15 +137,88 @@ Return ONLY valid JSON with these fields:
   "message_kind": one of: fresh_request, correction, refinement, constraint_refinement, topic_switch, followup, context_setting, disengagement, category_negation, emotional, acknowledgement, companion_correction, greeting, howru, thanks, farewell, identity, crisis
   "confidence": 0.0-1.0,
   "is_gibberish": true/false  (true if the message is random characters, keyboard mashing, or completely meaningless — e.g. "sadasdas", "qwerty", "asdfgh"; false for any real word, phrase, or intent)
+  "flow_type": "factual" | "concierge"  (routing decision — see FLOW TYPE RULES below)
+  "scenario": ""  (real-world context — see SCENARIO VALUES below)
+  "response_mode": ""  (how to respond — see RESPONSE MODE RULES below)
   "scene_corrections": []  (list — REQUIRED when message_kind is "companion_correction", empty otherwise)
   "secondary_intents": []  (list — contextual filters active for this turn, chosen from the list below)
   "modifiers": []          (list — semantic modifier tags active for this turn, chosen from the list below)
+  "entity_query": ""       (the specific entity/brand/item being searched — REQUIRED for factual flow and cross_mall; empty string otherwise)
 }
+
+ENTITY_QUERY EXTRACTION RULES:
+- Populate "entity_query" whenever flow_type="factual" OR domain="cross_mall".
+- Extract only the core entity/brand/item — strip all question scaffolding.
+  Examples:
+  • "which all malls does shrimp"          → "shrimp"
+  • "which malls have Starbucks"           → "Starbucks"
+  • "do you have H&M"                      → "H&M"
+  • "where is the prayer room"             → "prayer room"
+  • "what time does Zara close"            → "Zara"
+  • "is there a Muvi Cinema here"          → "Muvi Cinema"
+  • "which malls sell sushi"               → "sushi"
+  • "where can I find something like Zara" → "Zara"
+  • "where else can I find it" (scene has last entity "Nike") → "Nike"
+- For follow-up cross-mall turns ("where else", "other malls too?"), use the last mentioned entity from conversation context.
+- Leave empty ("") for concierge/recommendation turns with no specific entity target.
 
 GIBBERISH DETECTION RULES:
 - Set is_gibberish=true ONLY when the input has NO semantic content: random letter sequences (e.g. "sadasdas", "asdfgh", "qwerty", "zxcvb"), keyboard mashing, or strings that form no recognisable word in any language.
 - Set is_gibberish=false for: real words (even misspelled), short queries ("food?", "hi", "ok"), numbers, punctuation-only, or anything that could be a genuine communication attempt.
-- When is_gibberish=true, set domain="general", sub_intent="general_inquiry", message_kind="fresh_request", confidence=0.1.
+- When is_gibberish=true, set domain="general", sub_intent="general_inquiry", message_kind="fresh_request", confidence=0.1, flow_type="concierge".
+
+FLOW TYPE RULES (flow_type field):
+- "factual": visitor wants an EXACT DATA answer — movie showtimes/listings, store hours, mall opening times, store/brand presence check ("is Nike here?"), facility location ("where is the prayer room?"), parking info, cross-mall availability.
+  Key signals: "what movies are showing", "when does the mall open", "where is X", "do you have X", "is X here", "what time does"
+- "concierge": visitor wants RECOMMENDATIONS, SUGGESTIONS, a PLAN, or experience curation — dining recommendations, shopping suggestions, activity planning, gift ideas, curated itineraries.
+  Key signals: "suggest", "recommend", "what can we do", "plan for", "something for", "what should we", gift/occasion/companion context.
+- Cross-mall queries (domain=cross_mall) → always "factual".
+- Navigation domain (domain=navigation) → always "factual" unless message_kind=context_setting.
+- Mall_info domain → usually "factual" (exact data about the mall).
+- When in doubt, prefer "concierge".
+
+SCENARIO VALUES (scenario field — extract the real-world context/occasion):
+- "wedding_related" — bridesmaid, bride, groom, wedding, bridal, engagement, hen party
+- "family_outing"   — with kids/child/son/daughter/family, family day/trip
+- "date"            — date night, anniversary, with girlfriend/boyfriend/wife/husband, romantic
+- "gift_shopping"   — gift for, present for, buying/shopping for someone
+- "before_movie"    — before the movie, something quick before, movie starts in X
+- "quick_visit"     — quick visit, in a hurry, short visit, not much time
+- "birthday"        — birthday, celebrating
+- "first_visit"     — first time here, never been, first visit
+- "group_outing"    — with friends, group of friends, with colleagues
+- "solo_visit"      — alone, by myself, solo, just me
+- ""                — no clear real-world scenario
+
+RESPONSE MODE RULES (response_mode field — how the bot should respond this turn):
+- "direct_factual"          — user wants EXACT DATA: movie times, store hours, location, brand presence check, parking info. Only when flow_type=factual and intent is a precise data lookup.
+- "guided_recommendation"   — user wants SUGGESTIONS or a SHORTLIST: recommend restaurants, suggest stores, curate options. The default for concierge flow with clear intent.
+- "hybrid_plan"             — user requests a PLAN, ITINERARY, or SCHEDULE spanning MULTIPLE domains. Signals: explicit "AND" joining two domains ("food AND movies", "dinner AND a show"), "plan for", "itinerary", "full day", "what order should we", "can we fit", "X-hour schedule". CRITICAL: any message with TWO or more distinct activities (dining + entertainment, shopping + food, movie + meal) → ALWAYS "hybrid_plan".
+- "best_effort_shortlist"   — user's intent is VAGUE or EXPLORATORY: "what can I do", "anything good", "surprise me", "i'm bored", first visit without clear intent. Present diverse safe options.
+- "context_acknowledgement" — user is DECLARING CONTEXT (message_kind=context_setting) without a specific request: "I'm here with my family", "it's my girlfriend's birthday". Acknowledge and offer next-step options.
+- "graceful_recovery"       — user's message is UNINTELLIGIBLE, completely off-topic, or intent cannot be determined (is_gibberish=true, domain=general with no intent).
+- "clarification_request"   — user is requesting something the bot CANNOT DO: book taxis, order food delivery, make phone calls, place orders. Not for vague/unclear requests.
+- ""                        — no strong signal; resolver will decide based on confidence
+
+RESPONSE MODE DECISION GUIDE:
+- flow_type=factual + specific data lookup → "direct_factual"
+- flow_type=concierge + clear shopping/dining/activity intent → "guided_recommendation"
+- message_kind=context_setting → "context_acknowledgement"
+- message_kind IN (greeting, howru, thanks, farewell, identity, crisis, emotional) → "context_acknowledgement"
+  (ALL smalltalk kinds are context acknowledgements — the bot acknowledges the visitor's state, not a request)
+- two domains in one query (movies AND food, dinner AND entertainment, shopping AND dining) or explicit planning request → "hybrid_plan"
+  Examples: "food and movies", "dinner and a show", "shopping and coffee", "catch a movie and eat", "movie then dinner", "food and maybe movies", "what should we eat before the movie" → "hybrid_plan"
+  CRITICAL RULE: if the visitor explicitly wants BOTH food/dining AND entertainment/movies in the SAME turn → "hybrid_plan" (not guided_recommendation)
+- vague/exploratory with no specific category → "best_effort_shortlist"
+- is_gibberish=true OR completely unclear → "graceful_recovery"
+- completely off-topic requests with NO mall relevance (jokes, riddles, trivia, non-mall questions) → "graceful_recovery"
+  Examples: "tell me a joke", "say something funny", "tell me a riddle", "what's 2+2", "who invented the telephone" → "graceful_recovery"
+  IMPORTANT: For off-topic/humor: set is_gibberish=false, domain=general, sub_intent=general_inquiry, message_kind=fresh_request, response_mode="graceful_recovery"
+- taxi/order/delivery/booking requests → "clarification_request"
+- pure context declarations with NO shopping/dining/activity request → "context_acknowledgement"
+  Examples: "i am a bridesmaid", "it's my anniversary", "i'm here with my family", "it's his birthday" → context_setting + "context_acknowledgement"
+  Key test: if the message ONLY declares who the visitor is or what the occasion is (no "show me", "recommend", "where is") → context_setting + context_acknowledgement
+- ambiguous (modifier queries, short refinements, follow-ups) → ""
 
 SECONDARY INTENTS (contextual filters — include all that apply given scene context):
 - family_filter       — companions include children/family; results should be family-appropriate
@@ -371,6 +231,8 @@ SECONDARY INTENTS (contextual filters — include all that apply given scene con
 - proximity_filter    — user wants options near a specific location (e.g. near cinema)
 - quick_filter        — short on time, needs fast options
 - group_filter        — visiting as a larger group
+- add_dining_step     — user wants to add a dining activity to a multi-step plan
+- add_coffee_step     — user wants to add a coffee/cafe stop to a multi-step plan
 
 MODIFIERS (semantic tags — include all that apply):
 - family_friendly, kid_friendly, parent_with_child — family/child context
@@ -385,19 +247,52 @@ MODIFIERS (semantic tags — include all that apply):
 - near_cinema — proximity to cinema constraint
 - fresh_start — user is re-engaging after disengagement; treat as new conversation
 
+DO YOU HAVE X? / IS THERE X? / DO YOU CARRY X? — DOMAIN DISPATCH (CRITICAL):
+The phrase "do you have X", "is there X", "do you carry X", "can I find X", "is X available",
+"do you sell X" must be routed by what X IS — NOT by the phrase pattern alone.
+
+• X is a BRAND or STORE NAME (H&M, Nike, Zara, Starbucks, McDonald's, Sephora,
+  Danube, Muvi, VOX, Adidas, Herfy, Kudu, Cinnabon, any recognisable retail/F&B brand)
+  → shopping/brand_availability (factual flow)
+
+• X is a FOOD ITEM, DISH, INGREDIENT, or CUISINE TYPE (shrimp, sushi, pizza, shawarma,
+  coffee, dessert, ice cream, burger, seafood, pasta, biryani, noodles, cake, chicken,
+  kebab, salad, rice, sandwich, smoothie, juice, any food or drink item)
+  → dining/general_dining (concierge flow)
+
+• X is a FACILITY or SERVICE (parking, valet, prayer room, musallah, ATM, wheelchair,
+  stroller, pram, baby room, nursing room, lost & found, information desk, wifi,
+  customer service, toilets, restrooms, lockers, changing room)
+  → services/service_info (factual) or services/parking_info specifically for parking/valet
+
+• X is an ENTERTAINMENT or ACTIVITY (cinema, movies, bowling, trampoline, arcade,
+  gaming, kids play area, yoga, gym, ice skating, go-kart, VR, escape room, any activity)
+  → entertainment/general_entertainment (factual for presence check)
+
+• X is a PRODUCT CATEGORY or TYPE that is NOT a brand name (perfume, jacket, shoes,
+  toys, jewelry, handbag, sportswear, watches, sunglasses, books, electronics, clothes)
+  → shopping/general_shopping (concierge flow)
+
+NEVER route food items, facilities, activities, or generic product types to brand_availability.
+brand_availability is ONLY for named brands and store chains.
+
 DOMAINS AND SUB-INTENTS:
-- cross_mall: cross_mall_search — visitor asks about brand/store availability beyond only the current mall.
+- cross_mall: cross_mall_search — visitor asks about brand/store/item availability beyond only the current mall.
   USE cross_mall when ANY of these apply:
-  • Explicit multi-mall wording: "which of your malls", "both malls", "any Cenomi mall", "Mall of Arabia", "across malls",
-    "at other malls", "where else", "all locations", "does [other mall] also have X".
+  • Explicit multi-mall wording: "which of your malls", "which all malls", "both malls", "any Cenomi mall",
+    "Mall of Arabia", "across malls", "at other malls", "where else", "all locations", "does [other mall] also have X".
+  • "which malls does/do/have X" — ANY phrasing where a visitor asks which mall(s) carry/have/sell something.
+    Examples: "which all malls does shrimp", "which malls do/have Starbucks", "which malls sell X".
   • Follow-up after a specific store/brand was discussed: "where else can I find it?", "is it at your other mall too?",
     "what about other Cenomi malls?" — use scene/last entity to infer the brand; still output cross_mall_search.
+  NOTE: cross_mall applies even for food items, ingredients, or categories (e.g. "which malls have sushi", 
+  "which all malls does shrimp", "where can I find seafood across your malls") — treat the food term as the search query.
   DO NOT use cross_mall for questions clearly about ONLY this mall with no multi-mall signal, e.g. "Do you have Nike?",
   "Is H&M here?", "Do you carry Zara?" (those → shopping/brand_availability).
 - mall_info: overview ("tell me about the mall", "what is this place"), facilities_summary ("what facilities"), opening_hours ("mall opening hours"), family_friendliness ("is this mall family friendly", "can I come with kids"), what_is_available ("what shops are in the mall")
 - exploration: open_exploration (vague "what can I do", "what's here"), activity_suggestion ("suggest something fun"), first_visit_guide ("first time here")
 - dining: general_dining, romantic_dining, quick_bite, family_dining, cafe_recommendation, dessert_recommendation
-- shopping: general_shopping, gift_recommendation, fashion_shopping, perfume_shopping, jewelry_shopping, accessories_shopping, offer_details, brand_availability ("do you have H&M?", "is Nike here?", "do you carry Zara?")
+- shopping: general_shopping, gift_recommendation, fashion_shopping, perfume_shopping, jewelry_shopping, accessories_shopping, offer_details, brand_availability ("do you have H&M?", "is Nike here?", "do you carry Zara?", "is there a Starbucks?") — brand_availability is ONLY for named brands/stores; food items, facilities, and activities use the domain-dispatch rules above.
 - entertainment: general_entertainment, movie_showtime
 - services: store_hours, parking_info, service_info, prayer_room, event_schedule, loyalty_info
 - navigation: location_query
@@ -527,6 +422,15 @@ MESSAGE KIND RULES:
   • active_topic=dining → "shopping" or "clothes" or "perfume" → topic_switch (NOT followup)
   • active_topic=entertainment → "food" or "restaurant" → topic_switch to dining (NOT followup)
   NEVER classify a clear domain-crossing query as followup just because it is short.
+  CATEGORY-WORD RULE: If the user sends a single word or short phrase that unambiguously
+  belongs to a specific domain — a food item ("shrimp", "sushi", "burger"), a facility
+  ("parking", "ATM", "prayer room"), or an activity ("cinema", "bowling", "trampoline") —
+  AND the active_topic is a DIFFERENT domain, always classify as topic_switch to the
+  correct domain using the DO YOU HAVE X? dispatch rules above.
+  Examples:
+  • active_topic=shopping, message="shrimp" → topic_switch, dining/general_dining
+  • active_topic=dining, message="parking" → topic_switch, services/parking_info
+  • active_topic=shopping, message="cinema" → topic_switch, entertainment/general_entertainment
 - followup: short response continuing current topic OR sequential query ("after that?", "what next?", "and then?", "coffee?", "dessert?")
   ALSO use followup when the visitor is CONFIRMING an action the bot offered or asked about.
   If the bot's most recent message contained a direct question or offer (e.g. "Want me to...?",
@@ -656,12 +560,23 @@ SMALLTALK AND SAFETY MESSAGE KINDS (new — use these when the message is purely
 For all of the above, set domain="general" and sub_intent="general_inquiry".
 These bypass the full pipeline and receive compassionate, context-appropriate responses.
 
-- "Hi" / "Hello" → general/general_inquiry with message_kind="greeting"
-- "How are you?" → general/general_inquiry with message_kind="howru"
-- "Thanks" / "Thank you" → general/general_inquiry with message_kind="thanks"
-- "Bye" → general/general_inquiry with message_kind="farewell"
-- "Who are you?" → general/general_inquiry with message_kind="identity"
-- "shall I jump off the roof" → general/general_inquiry with message_kind="crisis"
+- "Hi" / "Hello" → general/general_inquiry with message_kind="greeting", response_mode="context_acknowledgement"
+- "How are you?" → general/general_inquiry with message_kind="howru", response_mode="context_acknowledgement"
+- "Thanks" / "Thank you" → general/general_inquiry with message_kind="thanks", response_mode="context_acknowledgement"
+- "Bye" → general/general_inquiry with message_kind="farewell", response_mode="context_acknowledgement"
+- "Who are you?" → general/general_inquiry with message_kind="identity", response_mode="context_acknowledgement"
+- "shall I jump off the roof" → general/general_inquiry with message_kind="crisis", response_mode="context_acknowledgement"
+- "tell me a joke" → general/general_inquiry, message_kind="fresh_request", response_mode="graceful_recovery" (off-topic; mall cannot help)
+- "say something funny" → general/general_inquiry, message_kind="fresh_request", response_mode="graceful_recovery"
+- "tell me a riddle" → general/general_inquiry, message_kind="fresh_request", response_mode="graceful_recovery"
+- "i am a bridesmaid" → general/general_inquiry, message_kind="context_setting", response_mode="context_acknowledgement", scenario="wedding_related"
+- "it's my anniversary" → general/general_inquiry, message_kind="context_setting", response_mode="context_acknowledgement", scenario="date"
+- "food and movies" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
+- "dinner and entertainment" → entertainment/general_entertainment, response_mode="hybrid_plan"
+- "catch a movie and eat" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
+- "movie then dinner" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
+- "food and maybe movie also" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
+- "we want to watch a movie and grab dinner" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
 - "Where can I eat?" → dining/general_dining
 - "Show me all the shopping offers" → shopping/offer_details
 - "What offers are going on in Zara?" → shopping/offer_details
@@ -680,7 +595,7 @@ def _get_classifier_llm() -> ChatOpenAI:
             model=settings.classifier_model,
             temperature=0.0,
             api_key=settings.openai_api_key,
-            max_tokens=300,
+            max_tokens=350,
         )
     return _classifier_llm
 
@@ -688,11 +603,7 @@ def _get_classifier_llm() -> ChatOpenAI:
 @traced_node("interpret_turn")
 async def interpret_turn(state: ConciergeState) -> dict:
     raw_msg = state.normalized_user_message
-
-    # ── Pre-flight: normalize semantically equivalent queries ─────────
-    msg, canonical_pattern = normalize_query_with_pattern(raw_msg)
-    # Use normalized form for all downstream classification
-    # (the raw form is still in state.normalized_user_message)
+    msg = raw_msg  # No pre-normalization; LLM handles all phrasing variants
 
     has_history = bool(state.last_intent)
     history_len = 2 if has_history else 1
@@ -710,8 +621,6 @@ async def interpret_turn(state: ConciergeState) -> dict:
     }
 
     # ── Pre-flight: fast exit for trivially empty / single-char inputs ──
-    # Only the most obvious non-inputs bypass the LLM to save tokens.
-    # All other gibberish detection is handled by the LLM via is_gibberish.
     if is_likely_unsupported(raw_msg):
         intent = InterpretedIntent(
             domain="general",
@@ -720,6 +629,7 @@ async def interpret_turn(state: ConciergeState) -> dict:
             confidence=0.1,
             raw_signals={"classifier_source": "unsupported_detector", "unsupported": True},
             primary_intent="unsupported",
+            flow_type_candidate="concierge",
         )
         interp_contract = {
             "primary_intent": "unsupported",
@@ -729,20 +639,11 @@ async def interpret_turn(state: ConciergeState) -> dict:
             "flow_type": "concierge",
             "active_topic": "",
             "normalized_query": msg,
-            "canonical_query_pattern": "unsupported_input",
+            "canonical_query_pattern": "",
             "topic_lock": "",
             "topic_lock_confidence": 0.0,
             "fact_scope": "",
         }
-        brand_hint, brand_conf = maybe_correct_brand(raw_msg)
-        if brand_hint:
-            interp_contract["brand_correction_hint"] = brand_hint
-            interp_contract["brand_correction_confidence"] = brand_conf
-            intent.primary_intent = "brand_availability"
-            intent.domain = "services"
-            intent.sub_intent = "general_inquiry"
-            intent.confidence = brand_conf
-            intent.raw_signals["brand_correction_hint"] = brand_hint
         return {
             "intent": intent,
             "dominant_context_type": "general",
@@ -750,12 +651,9 @@ async def interpret_turn(state: ConciergeState) -> dict:
                 interpretation_contract=interp_contract,
                 primary_intent=intent.primary_intent,
                 normalized_query=msg,
-                canonical_query_pattern="unsupported_input",
+                canonical_query_pattern="",
             ),
-            "_trace_summary": (
-                f"Intent[unsupported]: trivially empty/single-char input. "
-                f"brand_hint={brand_hint or 'none'}"
-            ),
+            "_trace_summary": "Intent[unsupported]: trivially empty/single-char input.",
         }
 
     # ── LLM classification ────────────────────────────────────────────
@@ -769,45 +667,48 @@ async def interpret_turn(state: ConciergeState) -> dict:
             sub_intent="general_inquiry",
             message_kind="fresh_request",
             confidence=0.3,
+            flow_type_candidate="concierge",
         )
         intent.raw_signals["classifier_source"] = "error_fallback"
 
     # ── LLM-driven gibberish detection ────────────────────────────────
-    # If the LLM flagged the input as gibberish (random chars, keyboard mash)
-    # mark it as unsupported so downstream nodes route to graceful_recovery.
     if intent.raw_signals.get("is_gibberish"):
         intent.primary_intent = "unsupported"
         intent.confidence = 0.1
         intent.raw_signals["unsupported"] = True
         logger.info("LLM flagged input as gibberish: %r", raw_msg)
 
-    # Flow hints: still derived from domain/sub_intent (deterministic, not LLM)
-    flow_candidate, fact_scope, fact_entity_type = _detect_flow_type_candidate(
-        msg, intent.domain, intent.sub_intent, scene_ctx,
-    )
-    scenario = _extract_scenario_from_message(msg, scene_ctx)
+    # ── Flow type from LLM ────────────────────────────────────────────
+    flow_candidate = intent.flow_type_candidate  # set by _llm_classify
 
-    # On the LLM path, use LLM-returned secondary_intents and modifiers directly.
-    # _extract_hybrid_intent_bundle is NOT called here — it is keyword-only and
-    # would overwrite the LLM's contextual understanding of the scene.
+    # Force concierge for context-setting/acknowledgement/companion-correction turns
+    if intent.message_kind in ("context_setting", "companion_correction", "acknowledgement"):
+        flow_candidate = "concierge"
+
+    # ── Fact scope / entity type: deterministic lookup from sub_intent ──
+    fact_scope = ""
+    fact_entity_type = ""
+    if flow_candidate == "factual" or intent.domain == "cross_mall":
+        if intent.domain == "cross_mall" or intent.sub_intent == "cross_mall_search":
+            fact_scope, fact_entity_type = "cross_mall_availability", "brand"
+        else:
+            fact_scope, fact_entity_type = _SUB_INTENT_TO_FACT_SCOPE.get(
+                intent.sub_intent, ("", "")
+            )
+
+    # ── Scenario: from LLM output ─────────────────────────────────────
+    scenario = intent.raw_signals.get("scenario", "")
+
+    # ── Primary intent and dominant context type: deterministic maps ──
+    key = f"{intent.domain}/{intent.sub_intent}"
+    primary_intent = _PRIMARY_INTENT_MAP.get(key, "") or intent.domain or "general"
+    dominant_ctx = _DOMAIN_CONTEXT_TYPE.get(intent.domain, "general")
+
+    # LLM secondary_intents and modifiers are used directly
     secondary_intents: list[str] = list(intent.secondary_intents)
     modifiers: list[str] = list(intent.modifiers)
 
-    # Primary intent and dominant context type are still derived deterministically
-    # from the LLM-classified domain/sub_intent.
-    primary_intent_from_map, _, _, dominant_ctx = _extract_hybrid_intent_bundle(
-        msg, intent.domain, intent.sub_intent,
-    )
-    # Use only the primary_intent from the map; discard the keyword secondary_intents/modifiers.
-    primary_intent = primary_intent_from_map
-
-    # For context_setting / companion_correction / acknowledgement turns, force concierge hint.
-    if intent.message_kind in ("context_setting", "companion_correction", "acknowledgement"):
-        flow_candidate = "concierge"
-        fact_scope = ""
-        fact_entity_type = ""
-
-    # Topic lock handling (same as rule path)
+    # ── Topic lock confidence adjustment ─────────────────────────────
     topic_lock = state.scene.topic_lock
     topic_lock_confidence = state.scene.topic_lock_confidence
     if topic_lock:
@@ -815,6 +716,14 @@ async def interpret_turn(state: ConciergeState) -> dict:
             topic_lock_confidence = min(1.0, topic_lock_confidence + 0.1)
         elif intent.message_kind in ("topic_switch", "fresh_request") and primary_intent:
             topic_lock_confidence = max(0.0, topic_lock_confidence - 0.3)
+
+    # ── Set derived fields on intent ──────────────────────────────────
+    intent.flow_type_candidate = flow_candidate
+    intent.fact_scope_candidate = fact_scope
+    intent.fact_entity_type_candidate = fact_entity_type
+    intent.primary_intent = primary_intent
+    intent.secondary_intents = secondary_intents
+    intent.modifiers = modifiers
 
     interpretation_contract = {
         "primary_intent": primary_intent,
@@ -824,18 +733,12 @@ async def interpret_turn(state: ConciergeState) -> dict:
         "flow_type": flow_candidate or "tbd",
         "active_topic": scene_ctx.get("active_topic", ""),
         "normalized_query": msg,
-        "canonical_query_pattern": canonical_pattern,
+        "canonical_query_pattern": "",
         "topic_lock": topic_lock,
         "topic_lock_confidence": round(topic_lock_confidence, 2),
         "fact_scope": fact_scope,
         "classifier_source": intent.raw_signals.get("classifier_source", "llm"),
     }
-    intent.flow_type_candidate = flow_candidate
-    intent.fact_scope_candidate = fact_scope
-    intent.fact_entity_type_candidate = fact_entity_type
-    intent.primary_intent = primary_intent
-    intent.secondary_intents = secondary_intents
-    intent.modifiers = modifiers
     intent.raw_signals["interpretation_contract"] = interpretation_contract
 
     classifier_source = intent.raw_signals.get("classifier_source", "llm")
@@ -849,7 +752,7 @@ async def interpret_turn(state: ConciergeState) -> dict:
             modifiers=modifiers,
             dominant_context_type=dominant_ctx,
             normalized_query=msg,
-            canonical_query_pattern=canonical_pattern,
+            canonical_query_pattern="",
             topic_lock=topic_lock,
             topic_lock_confidence=round(topic_lock_confidence, 2),
         ),
@@ -857,8 +760,8 @@ async def interpret_turn(state: ConciergeState) -> dict:
             f"Intent[{classifier_source}]: "
             f"{intent.domain}/{intent.sub_intent} ({intent.message_kind}) "
             f"primary={primary_intent} secondary={secondary_intents} "
-            f"flow_hint={flow_candidate or 'tbd'} scenario={scenario or 'none'} "
-            f"norm={msg!r} pattern={canonical_pattern or 'none'}"
+            f"flow={flow_candidate or 'tbd'} scenario={scenario or 'none'} "
+            f"norm={msg!r}"
         ),
     }
 
@@ -896,9 +799,7 @@ async def _llm_classify(
     if state.scene.active_shortlist:
         context_parts.append(f"Previous suggestions: {', '.join(state.scene.active_shortlist)}")
 
-    # Active shopping task — CRITICAL for follow-up refinements like "for my kid"
-    # Without this the LLM cannot tell that "for my kid" refines an in-progress
-    # jacket search rather than opening a new gift query.
+    # Active shopping task
     st = state.scene.shopping_task
     if st.product_type:
         task_parts = [f"product_type={st.product_type}"]
@@ -914,7 +815,7 @@ async def _llm_classify(
             "NOT as new gift or general queries."
         )
 
-    # Visit plan context — critical for sequential follow-ups
+    # Visit plan context
     if state.scene.visit_plan:
         context_parts.append(
             f"Visit plan (planned sequence): {' → '.join(state.scene.visit_plan)}"
@@ -936,11 +837,7 @@ async def _llm_classify(
             f"Topic journey so far: {' → '.join(state.scene.topic_history[-5:])}"
         )
 
-    # ── Inject recent conversation history ───────────────────────────
-    # Pass the last 3 user/assistant exchanges so the LLM can resolve
-    # ambiguous queries ("what can I do?", "show me more") in the correct
-    # conversational context rather than treating them as fresh requests.
-    # Each message is capped at 150 chars to keep the prompt lean.
+    # Recent conversation history
     recent_msgs = [m for m in state.messages if m.role in ("user", "assistant")][-6:]
     if recent_msgs:
         dialogue_lines = [
@@ -949,10 +846,7 @@ async def _llm_classify(
         ]
         context_parts.append("Recent conversation (most recent last):\n" + "\n".join(dialogue_lines))
 
-    # ── Inject recent mood state ─────────────────────────────────────
-    # If the visitor was recently frustrated or disengaged, inform the LLM
-    # so it can apply a warmer recovery tone — but do NOT let it re-classify
-    # genuine requests or positive expressions as disengagement.
+    # Recent mood state
     if state.scene.recent_mood:
         context_parts.append(
             f"Visitor's recent emotional state: {state.scene.recent_mood}. "
@@ -987,29 +881,29 @@ async def _llm_classify(
     message_kind = parsed.get("message_kind", "fresh_request")
     confidence = float(parsed.get("confidence", 0.8))
     is_gibberish = bool(parsed.get("is_gibberish", False))
+    flow_type = parsed.get("flow_type", "concierge")
+    scenario = str(parsed.get("scenario", "") or "")
+    response_mode_hint = str(parsed.get("response_mode", "") or "")
 
     if domain not in VALID_DOMAINS:
         domain = "general"
     if sub_intent not in VALID_SUB_INTENTS:
         sub_intent = "general_inquiry"
 
-    # All message_kinds that interpret_turn can legitimately set.
     valid_kinds = {
         "fresh_request", "correction", "refinement", "constraint_refinement",
         "topic_switch", "followup", "context_setting",
         "disengagement", "category_negation", "emotional",
         "acknowledgement", "companion_correction",
-        # Smalltalk / safety kinds (previously handled by regex in smalltalk.py)
         "greeting", "howru", "thanks", "farewell", "identity", "crisis",
     }
     if message_kind not in valid_kinds:
         message_kind = "fresh_request"
 
+    if flow_type not in ("factual", "concierge"):
+        flow_type = "concierge"
+
     # Guard: continuation kinds require an established topic.
-    # Without an active topic and no meaningful prior domain, followup/refinement
-    # is impossible — the LLM is hallucinating context that doesn't exist yet.
-    # This covers: first turns, and turns immediately after greeting/smalltalk
-    # where no real topic was established (domain="general" resets active_topic).
     _CONTINUATION_KINDS = {"followup", "refinement", "constraint_refinement"}
     if (
         message_kind in _CONTINUATION_KINDS
@@ -1018,7 +912,7 @@ async def _llm_classify(
     ):
         message_kind = "fresh_request"
 
-    # Parse scene_corrections — only meaningful for companion_correction turns.
+    # Parse scene_corrections
     raw_corrections = parsed.get("scene_corrections", [])
     scene_corrections: list[str] = (
         [str(c) for c in raw_corrections if isinstance(c, str)]
@@ -1026,8 +920,7 @@ async def _llm_classify(
         else []
     )
 
-    # Parse secondary_intents and modifiers — LLM-reasoned from full context.
-    # These replace the keyword-only _extract_hybrid_intent_bundle on the LLM path.
+    # Parse secondary_intents and modifiers — LLM-reasoned from full context
     raw_secondary = parsed.get("secondary_intents", [])
     llm_secondary_intents: list[str] = (
         [str(s) for s in raw_secondary if isinstance(s, str)]
@@ -1042,6 +935,17 @@ async def _llm_classify(
         else []
     )
 
+    _VALID_RESPONSE_MODES = {
+        "direct_factual", "guided_recommendation", "hybrid_plan",
+        "best_effort_shortlist", "context_acknowledgement",
+        "graceful_recovery", "clarification_request", "",
+    }
+    if response_mode_hint not in _VALID_RESPONSE_MODES:
+        response_mode_hint = ""
+
+    # LLM-extracted entity — strip whitespace and punctuation only
+    entity_query = str(parsed.get("entity_query", "") or "").strip(" ?.,!")
+
     intent = InterpretedIntent(
         domain=domain,
         sub_intent=sub_intent,
@@ -1050,71 +954,11 @@ async def _llm_classify(
         scene_corrections=scene_corrections,
         secondary_intents=llm_secondary_intents,
         modifiers=llm_modifiers,
+        entity_query=entity_query,
+        flow_type_candidate=flow_type,
+        response_mode_hint=response_mode_hint,
     )
     if is_gibberish:
         intent.raw_signals["is_gibberish"] = True
+    intent.raw_signals["scenario"] = scenario
     return intent
-
-
-# ── Scenario extractor ──────────────────────────────────────────────────────
-# Derives the real-world situation/occasion from the message + scene context.
-# Used to populate the interpretation_contract "scenario" field consumed by
-# resolve_playbooks for situation-aware recommendations.
-
-_SCENARIO_SIGNALS: list[tuple[tuple[str, ...], str]] = [
-    # Wedding-related (highest priority — explicit role declarations)
-    (("bridesmaid", "bride", "groom", "wedding", "maid of honor", "brides maid",
-      "bridesmaids", "bridal", "engagement", "hen night", "bachelorette"), "wedding_related"),
-    # Family outing
-    (("with my kid", "with my kids", "with the kid", "with my child",
-      "with my son", "with my daughter", "with my family", "family outing",
-      "i am here with kid", "here with the kid", "with the children",
-      "with my toddler", "with my baby"), "family_outing"),
-    # Date / couple
-    (("date night", "date plan", "with my girlfriend", "with my boyfriend",
-      "with my wife", "with my husband", "anniversary", "romantic",
-      "for my girlfriend", "for my boyfriend", "for my wife", "for my husband"), "date"),
-    # Gift shopping
-    (("gift for", "present for", "buying for", "shopping for",
-      "looking for a gift", "looking for something for"), "gift_shopping"),
-    # Quick visit / before movie
-    (("before the movie", "before movie", "before our movie",
-      "quick bite before", "something quick before"), "before_movie"),
-    # Quick visit (standalone)
-    (("quick visit", "in a hurry", "not much time", "short visit",
-      "quickly", "just passing", "we are in a hurry", "short on time"), "quick_visit"),
-    # Birthday celebration
-    (("birthday", "celebrating", "celebrate"), "birthday"),
-    # First visit
-    (("first time", "first visit", "never been", "never visited"), "first_visit"),
-    # Group outing
-    (("with friends", "with my friends", "group of friends",
-      "with colleagues", "with my colleagues", "with a group"), "group_outing"),
-    # Solo
-    (("alone", "by myself", "solo", "just me"), "solo_visit"),
-]
-
-
-def _extract_scenario_from_message(msg: str, scene_ctx: dict) -> str:
-    """
-    Extract the real-world scenario from the current message + scene context.
-    Returns a scenario label or empty string.
-    """
-    lower = msg.lower()
-    for keywords, scenario in _SCENARIO_SIGNALS:
-        if any(kw in lower for kw in keywords):
-            return scenario
-    # Fallback: use existing scene occasion
-    occasion = scene_ctx.get("occasion", "")
-    if occasion == "anniversary":
-        return "date"
-    if occasion == "birthday":
-        return "birthday"
-    companions = scene_ctx.get("companions", [])
-    if any(c in ("son", "daughter", "child", "kids") for c in companions):
-        return "family_outing"
-    if any(c in ("girlfriend", "boyfriend", "wife", "husband") for c in companions):
-        return "date"
-    return ""
-
-

@@ -74,7 +74,10 @@ async def _generate_stream(
 
     # ── Session and state setup (identical to handle_chat) ────────────────
     try:
+        from app.runtime import ensure_mall_loaded
+
         store = get_session_store()
+        await ensure_mall_loaded(request.mall_id)
         mall_ctx = get_mall_context(request.mall_id)
 
         session_id = request.session_id or generate_session_id()

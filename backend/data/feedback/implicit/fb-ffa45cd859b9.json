@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-ffa45cd859b9",
+  "session_id": "cpx6-388adffd",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-9c20664b838a",
+  "user_message": "i need school bags, stationery, and shoes for all three \u2014 different sizes obviously",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-31 13:17:24.752575"
+}

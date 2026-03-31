@@ -11,15 +11,16 @@ This document maps every implemented component to its location in the codebase a
 | File | Purpose |
 |------|---------|
 | `api/chat.py` | `POST /api/chat` — receives messages, invokes the LangGraph pipeline, returns response + debug payload |
+| `api/stream.py` | `POST /api/chat/stream` — SSE streaming endpoint; emits `event: token` per chunk, `event: done` with suggestions; preserves `conversation_mode` across smalltalk turns; non-LLM paths emit `final_response_text` as a single token |
 | `api/feedback.py` | `POST /api/feedback` / `GET /api/feedback` — submit and retrieve feedback |
-| `api/health.py` | `GET /api/health` — server health check |
+| `api/health.py` | `GET /api/health` — server health check; returns `mall_ids` array |
 | `api/session.py` | `GET /api/session`, `POST /api/session/reset` — session state and reset |
 
 ### Configuration (`app/config/`)
 
 | File | Purpose |
 |------|---------|
-| `config/settings.py` | Pydantic-settings configuration; all env vars prefixed `BACKEND_` |
+| `config/settings.py` | Pydantic-settings configuration; all env vars prefixed `BACKEND_`; `classifier_model` (default `gpt-4o-mini`) for cost-efficient classification calls; `mall_ids` defaults to all five malls |
 | `config/constants.py` | Application-wide constants |
 
 ### Mall Context (`app/context/`)
@@ -39,7 +40,7 @@ This document maps every implemented component to its location in the codebase a
 
 | File | Purpose |
 |------|---------|
-| `models/state.py` | `ConciergeState` — the Pydantic state object that flows through the LangGraph pipeline |
+| `models/state.py` | `ConciergeState` — the Pydantic state object that flows through the LangGraph pipeline. Also defines `MessageKind` (str enum, 13 values incl. `CRISIS`, `IDENTITY`, `HOWRU`, `THANKS`, `FAREWELL`, `CATEGORY_NEGATION`, `COMPANION_CORRECTION`), `SMALLTALK_KINDS` frozenset, and `ShoppingTask` sub-model. `SceneMemory` extended with `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`, `greeting_streak`, `topic_lock`, `topic_lock_confidence`, `recent_mood`, `topic_history` |
 | `models/api.py` | `ChatRequest` / `ChatResponse` API contracts |
 | `models/tenant.py` | Canonical tenant entities and `TenantConfig` with tunable weights |
 | `models/mall.py` | `MallProfile`, zones, facilities |
@@ -52,12 +53,12 @@ This document maps every implemented component to its location in the codebase a
 
 | File | Node | Purpose |
 |------|------|---------|
-| `nodes/load_session.py` | `load_session` | Loads or creates session; assigns `turn_id`; normalises and optionally expands the query |
-| `nodes/interpret_turn.py` | `interpret_turn` | Hybrid intent classifier (rule-based fast path + LLM fallback); detects smalltalk for conditional routing. `_CONCIERGE_KEYWORD_SIGNALS` includes personal pronoun patterns (`"anything she"`, `"for her"`, etc.) to prevent pronoun mis-classification as entity lookup. |
-| `nodes/route_flow.py` | `route_flow` | Priority-ordered dual-flow router (11 rules). Routes each turn to `factual` or `concierge` flow based on intent, domain lock, scene context, and keyword signals. `_CONCIERGE_HARD_SIGNALS` includes pronoun patterns; Rule 0 `else` branch clears stale domain lock on topic switch; Rule 3 includes concierge override for pronoun/planning language in `mall_info` domain queries. |
-| `nodes/smalltalk.py` | `smalltalk` | Fast-path handler for greetings and casual messages — static responses, zero LLM cost, always steers to mall |
-| `nodes/update_scene_memory.py` | `update_scene_memory` | Extracts companion, occasion, budget, and area signals; updates persistent `SceneMemory` |
-| `nodes/resolve_playbooks.py` | `resolve_playbooks` | Matches the turn against scenario playbooks; outputs selected playbook and confidence |
+| `nodes/load_session.py` | `load_session` | Loads or creates session; assigns `turn_id`; normalises message; calls `expand_short_query()` to produce a richer `expanded_query` from scene context while preserving `normalized_user_message` |
+| `nodes/interpret_turn.py` | `interpret_turn` | Pure LLM classifier (`gpt-4o-mini`). Returns `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections` — no keyword overrides post-LLM. All `MessageKind` values (`CRISIS`, `IDENTITY`, `HOWRU`, `THANKS`, `FAREWELL`, `CATEGORY_NEGATION`, `COMPANION_CORRECTION`, etc.) are LLM-classified. Emits structured `interpretation_contract` to `debug_enrichment`. |
+| `nodes/route_flow.py` | `route_flow` | Thin policy layer — applies six business rules on top of `intent.flow_type_candidate`. Includes `_resolve_response_strategy()` helper and topic lock stability tracking. Keyword/regex tables removed. |
+| `nodes/smalltalk.py` | `smalltalk` | Rich fast-path handler. Three-tier progressive greeting pool keyed to `scene.greeting_streak`; LLM-generated personalised farewells (`gpt-4o-mini`); context-aware thanks responses suggesting unexplored domains; mood-plan emotional responses. Routes via `SMALLTALK_KINDS` — no regex. |
+| `nodes/update_scene_memory.py` | `update_scene_memory` | LLM-first delta extraction. Extracts `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`; applies `scene_corrections` from `interpret_turn`; handles abbreviation normalisation and wedding/event role disambiguation |
+| `nodes/resolve_playbooks.py` | `resolve_playbooks` | Matches the turn against scenario playbooks. Added occasion/wedding override, luxury playbook guard (against children), and shopping task scope checks |
 | `nodes/choose_strategy.py` | `choose_strategy` | Maps intent + playbook → response strategy and shape hint |
 | `nodes/compose_context.py` | `compose_context` | Selects topic blocks, ranks entities via playbook scoring, builds semantic signals. Includes vector search fallback for fuzzy queries with no category rule match. Before calling the fallback, augments the query with `build_scene_prefix(scene)` so the embedding reflects the visitor's actual context (occasion, companions, visit_type, budget). |
 | `nodes/decide_retrieval.py` | `decide_retrieval` | Gates exact-fact retrieval (hours, showtimes, offers) — most turns skip this |
@@ -84,6 +85,7 @@ This document maps every implemented component to its location in the codebase a
 | File | Purpose |
 |------|---------|
 | `services/concierge.py` | Orchestrates a single chat turn by invoking the compiled LangGraph pipeline; calls `ensure_mall_loaded()` at turn start |
+| `services/semantic_signals.py` | Pure lookup-table signal extraction — maps `SceneMemory` and `InterpretedIntent` fields to semantic tags; no regex or raw text matching |
 | `services/vector_store.py` | `VectorStoreService` — Chroma vector search with Redis result cache (`cenomi:vcache:{mall_id}:{hash}`). Embeds queries with `text-embedding-3-small`, caches results at `BACKEND_VECTOR_CACHE_TTL`. |
 | `services/clean_context.py` | Builds a contamination-free per-turn context (no raw LLM history — only structured scene + mall data) |
 | `services/context_builder.py` | Assembles `GlobalContextPack` from canonical, semantic, and playbook data layers |
@@ -99,7 +101,8 @@ This document maps every implemented component to its location in the codebase a
 | `services/session_tuning_engine.py` | Applies feedback-based parameter tuning per session |
 | `services/tenant_parameter_tuner.py` | Aggregates feedback across sessions to tune tenant-level weights |
 | `services/knowledge_gap_analyzer.py` | Identifies gaps in playbook coverage and canonical data |
-| `services/response_mode_resolver.py` | Determines `response_mode` (`direct_factual`, `guided_recommendation`, `graceful_recovery`, `hybrid_plan`, `best_effort_shortlist`, `context_acknowledgement`) and `confidence_level` (`high`/`medium`/`low`) from intent, scene, and raw message signals. Applies priority-ordered pattern matching, factual-flow recommendation overrides, and calibrated confidence rules for budget declarations, broad category openers, and vague constraint refinements. |
+| `services/response_mode_resolver.py` | Thin policy layer — trusts `intent.response_mode_hint` from the LLM; applies hard overrides only for out-of-scope requests, unsupported/gibberish input, or short factual follow-ups on a locked topic. Previous keyword pattern matching removed. |
+| `services/semantic_signals.py` | Simplified lookup-table based signal extraction. All regex and raw text matching removed; maps structured `SceneMemory` and `InterpretedIntent` fields directly to semantic tags via pure lookup tables |
 
 ### Observability (`app/observability/`)
 
@@ -119,7 +122,10 @@ This document maps every implemented component to its location in the codebase a
 
 | File | Purpose |
 |------|---------|
-| `scripts/ingest_vectors.py` | Offline vector ingestion — builds rich text descriptions for each entity, embeds with `text-embedding-3-small`, upserts into per-mall Chroma collection. Run once per mall or after data updates: `python scripts/ingest_vectors.py --mall-id al_nakheel_plaza_28` |
+| `scripts/ingest_vectors.py` | Offline vector ingestion — builds rich text descriptions for each entity, embeds with `text-embedding-3-small`, upserts into per-mall Chroma collection. Run once per mall or after data updates: `python scripts/ingest_vectors.py --mall-id al_nakheel_plaza_28` or `--all` |
+| `scripts/convert_to_canonical.py` | Deterministic ETL — converts `output_mall_N.json` → `data/canonical/{mall_id}.json`; no LLM required |
+| `scripts/synthesize_mall_data.py` | LLM synthesis — takes a canonical file and produces semantic, playbooks, tenant_config, and context_pack layers |
+| `scripts/generate_mall_data.py` | Full pipeline — `output_mall_N.json` → all five intelligence layers; supports `--dry-run`, `--canonical-only`, `--steps` |
 | `scripts/run_all_tests.py` | Comprehensive test runner — executes all three test suites (standard, broken, complex multi-turn) against the live backend, generates Markdown + JSON reports in `test-results/`. Supports `--suite all|standard|broken|complex` and `--no-wait` flags. |
 
 ---
@@ -128,13 +134,13 @@ This document maps every implemented component to its location in the codebase a
 
 | Directory / File | Purpose |
 |------------------|---------|
-| `canonical/al_nakheel_plaza_28.json` | Single source of truth — all stores, dining, cinemas, movies, services, events, offers |
-| `semantic/al_nakheel_plaza_28.json` | Derived semantic intelligence — tags, audience fit, priority scores, concierge notes |
-| `playbooks/al_nakheel_plaza_28.json` | Pre-built scenario playbooks (gift, family, romantic dinner, quick bite, movie night, budget) |
-| `context_packs/al_nakheel_plaza_28_context.json` | Pre-assembled context bundle for the mall |
+| `canonical/al_nakheel_plaza_{1,10,13,27,28}.json` | Single source of truth — all stores, dining, cinemas, movies, services, events, offers per mall |
+| `semantic/al_nakheel_plaza_{1,10,13,27,28}.json` | Derived semantic intelligence — tags, audience fit, priority scores, concierge notes per mall |
+| `playbooks/al_nakheel_plaza_{1,10,13,27,28}.json` | Pre-built scenario playbooks per mall |
+| `context_packs/al_nakheel_plaza_{1,10,13,27,28}_context.json` | Pre-assembled context bundles per mall |
 | `tenant_config/tenant_defaults.json` | Default tenant behavioral weights |
-| `tenant_config/al_nakheel_plaza_28.json` | Mall-specific tenant config overrides |
-| `chroma/` | Chroma vector DB persistence — per-mall collections (`cenomi_mall_al_nakheel_plaza_28`: 104 vectors, `cenomi_mall_al_nakheel_plaza_13`: 54 vectors) populated by `ingest_vectors.py`. Uses cosine distance HNSW index. Mounted as a Docker volume so embeddings survive image rebuilds. |
+| `tenant_config/al_nakheel_plaza_{1,10,13,27,28}.json` | Mall-specific tenant config overrides |
+| `chroma/` | Chroma vector DB persistence — per-mall HNSW collections populated by `ingest_vectors.py`. Cosine distance index. Mounted as a Docker volume so embeddings survive image rebuilds. |
 | `feedback/implicit/` | Auto-generated implicit feedback signal files |
 | `feedback/normalized/` | Normalized and aggregated feedback records |
 | `examples/example_turn_state.json` | Reference `ConciergeState` for development and testing |
@@ -158,7 +164,7 @@ This document maps every implemented component to its location in the codebase a
 
 | File | Purpose |
 |------|---------|
-| `components/TopBar.tsx` | Header — tenant/mall selectors, session ID, debug toggle, export, reset |
+| `components/TopBar.tsx` | Header — five-mall selector, session ID, debug toggle, export, reset |
 | `components/ChatInput.tsx` | Message textarea with send button (4 000-character limit) |
 | `components/ChatMessage.tsx` | Individual message bubble — AI response, cited sources, feedback controls |
 | `components/SuggestedChips.tsx` | Clickable suggestion chips for quick prompts |
@@ -167,8 +173,8 @@ This document maps every implemented component to its location in the codebase a
 | `components/TurnInspector.tsx` | Per-turn pipeline inspector — intent, strategy, context blocks, retrieval, scene snapshot |
 | `components/StrategyCard.tsx` | Displays selected playbook, confidence, strategy, and response shape |
 | `components/RetrievalCard.tsx` | Shows retrieval status, reason, targets, and result count |
-| `components/ContextBlocksCard.tsx` | Displays topic blocks, entities, semantic signals, and ranking notes |
-| `components/SceneSnapshotCard.tsx` | Key-value display of the current scene snapshot (companions, budget, occasion, etc.) |
+| `components/ContextBlocksCard.tsx` | Displays topic blocks, entities, semantic signals, and ranking notes (updated for v1.6 signal fields) |
+| `components/SceneSnapshotCard.tsx` | Key-value display of the current scene snapshot — updated for all v1.6 fields: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`, `greeting_streak`, `recent_mood` |
 | `components/RawDrawer.tsx` | Expandable raw JSON viewer for trace, state, and prompt data with copy functionality |
 
 ### Hooks (`src/hooks/`)
@@ -194,7 +200,7 @@ This document maps every implemented component to its location in the codebase a
 
 | File | Purpose |
 |------|---------|
-| `lib/constants.ts` | Application-wide frontend constants |
+| `lib/constants.ts` | Application-wide frontend constants — `MALLS` array now includes all five malls with their IDs, labels, and cities |
 | `mock/responses.ts` | Mock API responses for offline development |
 | `styles/index.css` | Tailwind imports and custom CSS variables |
 | `assets/hero.png` | Hero image asset |
@@ -206,6 +212,6 @@ This document maps every implemented component to its location in the codebase a
 | File | Purpose |
 |------|---------|
 | `backend/app/main.py` | FastAPI entrypoint — lifespan initialises mall context, session store, feedback services |
-| `backend/app/runtime.py` | Global singletons — `LRUMallContextRegistry` (three-tier RAM → Redis → disk), session store, feedback service, `VectorStoreService` |
+| `backend/app/runtime.py` | Global singletons — `LRUMallContextRegistry` (three-tier RAM → Redis → disk, capacity = `BACKEND_MALL_CACHE_SIZE` default 5), session store, feedback service, `VectorStoreService`. Async helpers `search_brand_across_configured_malls` and `build_merged_guard_canonical_for_configured_malls` handle LRU-safe multi-mall queries. |
 | `frontend/src/main.tsx` | React entry point — `createRoot`, `StrictMode` |
 | `frontend/src/App.tsx` | Root component with routing |

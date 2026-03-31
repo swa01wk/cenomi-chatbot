@@ -74,160 +74,6 @@
     "image": "",
     "gps_coordinates": "21.556682034755465, 39.18516633867169",
     "muvilist": {
-        "ar": [
-            {
-                "id": 3639,
-                "type": "COMING_SOON",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345754-c2a470a7-5053-4861-baa5-e6c4100e512f.webp",
-                "title": "الدوري السعودي للمحترفين ( القادسية vs الأهلي)",
-                "genres": [
-                    {
-                        "id": 17,
-                        "name": "رياضة"
-                    }
-                ],
-                "runtime": 180,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1772610345912-d449be0e-528b-4fd6-90ee-1dcc444da21f.webp",
-                "subtitle": "",
-                "synopsis": "الدوري السعودي للمحترفين: القادسية  vs الأهلي .. عِش تفاصيل المباراة على شاشات السينما!",
-                "titleTag": "الدوري السعودي للمحترفين ( القادسية vs الأهلي)",
-                "movieLang": "العربية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/saudi-pro-league-al-qadsiah-vs-al-ahli-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
-                "releaseDate": "2026-03-13T00:00:00.000Z",
-                "descriptionTag": "الدوري السعودي للمحترفين: القادسية  vs الأهلي .. عِش تفاصيل المباراة على شاشات السينما!",
-                "isAdvancedBooking": true
-            },
-            {
-                "id": 3638,
-                "type": "COMING_SOON",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772450664916-df6fe9af-2ef9-4269-9269-cc7391e7d239.webp",
-                "title": "الدوري السعودي للمحترفين ( النصر vs نيوم)",
-                "genres": [
-                    {
-                        "id": 17,
-                        "name": "رياضة"
-                    }
-                ],
-                "runtime": 180,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1772450665055-bd7b624d-6331-4652-bcd8-3ee8ca950775.webp",
-                "subtitle": "",
-                "synopsis": "الدوري السعودي للمحترفين: النصر  vs نيوم .. عِش تفاصيل المباراة على شاشات السينما!",
-                "titleTag": "الدوري السعودي للمحترفين ( النصر vs نيوم)",
-                "movieLang": "العربية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/saudi-pro-league-al-nassr-vs-neom-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
-                "releaseDate": "2026-03-07T00:00:00.000Z",
-                "descriptionTag": "الدوري السعودي للمحترفين: النصر  vs نيوم .. عِش تفاصيل المباراة على شاشات السينما!",
-                "isAdvancedBooking": true
-            },
-            {
-                "id": 3637,
-                "type": "COMING_SOON",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1772439987976-0b1234e5-1cc2-4b9f-8a22-90808aa0068c.webp",
-                "title": "الدوري السعودي للمحترفين ( الأهلي vs الاتحاد)",
-                "genres": [
-                    {
-                        "id": 17,
-                        "name": "رياضة"
-                    }
-                ],
-                "runtime": 180,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1772439988067-c71c2da8-b0fe-4852-892a-00bab8c181a2.webp",
-                "subtitle": "",
-                "synopsis": "الدوري السعودي للمحترفين: الأهلي vs الاتحاد .. عِش تفاصيل المباراة على شاشات السينما!",
-                "titleTag": "الدوري السعودي للمحترفين ( الأهلي vs الاتحاد)",
-                "movieLang": "العربية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/saudi-pro-league-al-ahli-vs-al-ittihad-?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://www.youtube.com/watch?v=ol6bRK2KSqw",
-                "releaseDate": "2026-03-06T00:00:00.000Z",
-                "descriptionTag": "الدوري السعودي للمحترفين: الأهلي vs الاتحاد .. عِش تفاصيل المباراة على شاشات السينما!",
-                "isAdvancedBooking": true
-            },
-            {
-                "id": 3585,
-                "type": "SHOWING_NOW",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1768734994521-f93a9af9-36ac-41a8-84e5-74d3a1281ebe.webp",
-                "title": "شِلتر",
-                "genres": [
-                    {
-                        "id": 3,
-                        "name": "أفلام الحركة"
-                    },
-                    {
-                        "id": 20,
-                        "name": "فيلم تشويق"
-                    }
-                ],
-                "runtime": 107,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1768734994659-53194bbd-0617-487e-a116-7b194814390d.webp",
-                "subtitle": "العربية",
-                "synopsis": "منعزل يعيش على جزيرة نائية ينقذ فتاة من البحر، فيطلق ذلك سلسلة خطيرة من الأحداث تنتهي بهجوم على منزله، ما يجبره على مواجهة ماضيه المضطرب.",
-                "titleTag": "شِلتر",
-                "movieLang": "الانجليزية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/shelter?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://youtu.be/XPyXlnaWRf4?si=J4HhUyn6awdlgiO3",
-                "releaseDate": "2026-01-29T00:00:00.000Z",
-                "descriptionTag": "منعزل يعيش على جزيرة نائية ينقذ فتاة من البحر، فيطلق ذلك سلسلة خطيرة من الأحداث تنتهي بهجوم على منزله، ما يجبره على مواجهة ماضيه المضطرب.",
-                "isAdvancedBooking": true
-            },
-            {
-                "id": 3582,
-                "type": "SHOWING_NOW",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1770804571363-0ba0d588-ac47-40d1-bb86-7ad83df6d822.webp",
-                "title": "كرايم 101",
-                "genres": [
-                    {
-                        "id": 8,
-                        "name": "أفلام الجريمة"
-                    },
-                    {
-                        "id": 3,
-                        "name": "أفلام الحركة"
-                    }
-                ],
-                "runtime": 140,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1770804571486-31ef2499-2ba1-4b31-9cd9-803c57293226.webp",
-                "subtitle": "العربية ",
-                "synopsis": "لصّ مراوغ يسعى لتنفيذ آخر وأكبر عملية سرقة في حياته، يلتقي بسمسارة تأمين فاقدة للأمل تقف عند مفترق طرق في حياتها. ومع تداخل مساريهما، يلاحقهما محقق لا يكلّ، آملًا أن يُحبط عملية السطو التي يخططان لها والتي تُقدَّر بملايين الدولارات.",
-                "titleTag": "كرايم 101",
-                "movieLang": "الانجليزية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/crime-101?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://youtu.be/zA3QmjiVnIk?si=u1W9gYP5Yr4vUdoD",
-                "releaseDate": "2026-02-11T00:00:00.000Z",
-                "descriptionTag": "لصّ مراوغ يسعى لتنفيذ آخر وأكبر عملية سرقة في حياته، يلتقي بسمسارة تأمين فاقدة للأمل تقف عند مفترق طرق في حياتها. ومع تداخل مساريهما، يلاحقهما محقق لا يكلّ، آملًا أن يُحبط عملية السطو التي يخططان لها والتي تُقدَّر بملايين الدولارات.",
-                "isAdvancedBooking": true
-            },
-            {
-                "id": 3503,
-                "type": "SHOWING_NOW",
-                "image": "https://d3th1nqbpcyfdw.cloudfront.net/1769673187695-00254980-eec7-4b59-8c09-5e82b605b2b7.webp",
-                "title": "ذا هاوسميد",
-                "genres": [
-                    {
-                        "id": 20,
-                        "name": "فيلم تشويق"
-                    }
-                ],
-                "runtime": 131,
-                "coverUrl": "https://d3th1nqbpcyfdw.cloudfront.net/1769673187870-db498e3f-b8aa-428e-9c79-de8c241b6238.webp",
-                "subtitle": "العربية",
-                "synopsis": "امرأة تعاني من صعوبات تبدأ عملاً جديداً كخادمة لدى زوجين ثريين من النخبة، سعيدة بفرصة بدء حياة جديدة. لكن سرعان ما تكتشف أن خلف واجهتهما الراقية أسراراً تهدد استقرارها.",
-                "titleTag": "ذا هاوسميد",
-                "movieLang": "الانجليزية",
-                "shareLink": "",
-                "bookingUrl": "https://www.muvicinemas.com/AR/movies/the-housemaid?cityId=20&utm_source=cenomi&utm_medium=apps&utm_campaign=cenomi",
-                "trailerUrl": "https://www.youtube.com/watch?v=j8HH6uGzNIs",
-                "releaseDate": "2026-02-05T00:00:00.000Z",
-                "descriptionTag": "امرأة تعاني من صعوبات تبدأ عملاً جديداً كخادمة لدى زوجين ثريين من النخبة، سعيدة بفرصة بدء حياة جديدة. لكن سرعان ما تكتشف أن خلف واجهتهما الراقية أسراراً تهدد استقرارها.",
-                "isAdvancedBooking": true
-            }
-        ],
         "en": [
             {
                 "id": 3639,
@@ -408,8 +254,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -460,8 +306,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -515,8 +361,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -554,8 +400,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -601,8 +447,8 @@
                     },
                     {
                         "content": "4:00 PM to 11:00 PM",
-                        "type": "time",
-                        "content_ar": "4:00 PM to 11:00 PM"
+                        "content_ar": "4:00 PM to 11:00 PM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -640,8 +486,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -683,8 +529,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -729,8 +575,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -772,8 +618,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",
@@ -814,8 +660,8 @@
                     },
                     {
                         "content": "9:00 AM - 12:00 AM",
-                        "type": "time",
-                        "content_ar": "9:00 AM - 12:00 AM"
+                        "content_ar": "9:00 AM - 12:00 AM",
+                        "type": "time"
                     },
                     {
                         "content": "Ground Floor",

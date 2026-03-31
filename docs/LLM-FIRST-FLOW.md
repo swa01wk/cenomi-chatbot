@@ -107,25 +107,32 @@ flowchart TD
 
 ### Node Change Registry
 
-| Node | Status | What Changes |
+> **Status as of v1.6 (2026-03-31): all proposed changes below have been implemented.**
+
+| Node | Status | What Changed (Implemented) |
 |---|---|---|
-| `load_session` | Unchanged | — |
-| `interpret_turn` | **Changed** | Threshold 0.75 → 0.92; LLM returns `secondary_intents` + `modifiers` in JSON output; model = `gpt-4o-mini`; `_extract_hybrid_intent_bundle` removed from LLM path |
-| `smalltalk` | Unchanged | — |
-| `route_flow` | **Changed** | Hard rules unchanged; LLM escape hatch added for ambiguous unresolved cases |
-| `update_scene_memory` | **Changed** | LLM structured JSON delta extraction replaces keyword scanner; keywords kept as fallback |
-| `resolve_playbooks` | Unchanged | — |
+| `load_session` | **Changed** | Calls `expand_short_query()` to build `expanded_query` from scene context; original `normalized_user_message` preserved unchanged |
+| `interpret_turn` | **Changed** | No rule classifier or keyword overrides post-LLM; LLM returns `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections` directly; new message_kinds: `category_negation`, `companion_correction`, `crisis`, `identity`, `howru`, `thanks`, `farewell`; `_extract_hybrid_intent_bundle` removed entirely |
+| `smalltalk` | **Changed** | Progressive 3-tier greeting (by `greeting_streak`); LLM-generated farewell; context-aware thanks with unexplored-domain nudge; mood-plan emotional responses; routing predicate reads `SMALLTALK_KINDS` enum (no regex) |
+| `route_flow` | **Changed** | All `_CONCIERGE_HARD_SIGNALS` keyword lists removed; six clean business-policy rules only; `_resolve_response_strategy()` added; topic lock confidence tracking (probabilistic, not binary) |
+| `update_scene_memory` | **Changed** | LLM structured JSON delta replaces keyword scanner; new fields: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`; `_apply_scene_corrections()` for companion-correction turns; fast-exit paths for `acknowledgement`, `companion_correction`, `category_negation`, `disengagement` |
+| `resolve_playbooks` | **Changed** | Occasion/wedding override (runs before family override); luxury playbook guard when child companions present; shopping task scope prevents family playbook from hijacking product tasks; `scenario` and `user_role` included in scene signals |
 | `choose_strategy` | Unchanged | — |
-| `compose_context` | Unchanged | — |
-| `rank_and_dedupe` | Unchanged | — |
+| `compose_context` | Minor | Uses `expanded_query` for vector search fallback |
+| `rank_and_dedupe` | **Changed** | Audience weight 0.15 → 0.30; semantic 0.20 → 0.15; playbook 0.20 → 0.10; hard audience mismatch penalty (0.2× multiplier); child-relief injection skipped when specific shopping task is active |
 | `decide_retrieval` | Unchanged | — |
 | `fetch_exact_facts` | Unchanged | — |
-| `resolve_fact_scope` | Unchanged | — |
+| `resolve_fact_scope` | **Changed** | Trusts `intent.fact_scope_candidate` (LLM-set) as primary signal; keyword rules are fallback only; `_SCOPE_DEFAULT_RESPONSE_MODE` mapping added |
 | `compose_fact_response_context` | Unchanged | — |
 | `generate_response` | Unchanged | — |
 | `update_memory` | Unchanged | — |
 | `emit_debug_payload` | Unchanged | — |
-| `settings.py` | **Changed** | `classifier_model` field added (default `gpt-4o-mini`) |
+| `semantic_signals.py` | **Changed** | All raw text/regex matching removed; purely maps structured `SceneMemory` fields to tags via lookup tables |
+| `response_mode_resolver.py` | **Changed** | Thin policy layer: trusts `intent.response_mode_hint` (LLM-set) as primary; hard overrides only for out-of-scope, unsupported capability, gibberish, topic-lock follow-ups |
+| `query_classifier.py` | **Changed** | Reduced to `is_likely_unsupported()` pre-flight only; all rule tables, thresholds, and keyword maps removed |
+| `stream.py` | **Changed** | `done` event includes `suggestions` (CTA chip text); smalltalk paths emit `final_response_text` as a token; `conversation_mode` preserved for transient smalltalk turns |
+| `state.py` | **Changed** | `MessageKind` enum + `SMALLTALK_KINDS` frozenset; `ShoppingTask` sub-model; new `SceneMemory` fields: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`, `greeting_streak`, `topic_lock`, `topic_lock_confidence`, `recent_mood`, `topic_history`; `response_mode_hint` on `InterpretedIntent` |
+| `settings.py` | **Changed** | `classifier_model` field (default `gpt-4o-mini`); `mall_ids` default includes five malls |
 
 ---
 

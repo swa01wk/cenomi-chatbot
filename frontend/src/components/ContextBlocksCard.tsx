@@ -48,7 +48,10 @@ export default function ContextBlocksCard({
                   .filter(([k]) => k !== "name")
                   .map(([k, v]) => (
                     <span key={k} className="text-slate-500">
-                      {k}: {String(v)}
+                      {k}:{" "}
+                      {typeof v === "object" && v !== null
+                        ? JSON.stringify(v)
+                        : String(v)}
                     </span>
                   ))}
               </div>

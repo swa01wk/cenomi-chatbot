@@ -13,7 +13,7 @@ export default function App() {
         mallId={chat.mallId}
         debugMode={chat.debugMode}
         sessionId={chat.sessionId}
-        onTenantChange={chat.setTenantId}
+        onTenantChange={chat.changeMallId}
         onMallChange={chat.changeMallId}
         onDebugToggle={chat.setDebugMode}
         onReset={chat.reset}

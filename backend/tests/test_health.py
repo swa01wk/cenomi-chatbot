@@ -14,4 +14,7 @@ async def test_health_returns_ok():
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "ok"
-    assert "mall_id" in data
+    # v1.6: single mall_id replaced by mall_ids list (all 5 configured malls)
+    assert "mall_ids" in data
+    assert isinstance(data["mall_ids"], list)
+    assert len(data["mall_ids"]) >= 1

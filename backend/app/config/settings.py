@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # --- Mall ---
     # Comma-separated list of mall IDs to load at startup.
     # Example: "al_nakheel_plaza_28,al_nakheel_plaza_13"
-    mall_ids: str = "al_nakheel_plaza_28,al_nakheel_plaza_13"
+    mall_ids: str = "al_nakheel_plaza_28,al_nakheel_plaza_13,al_nakheel_plaza_1,al_nakheel_plaza_10,al_nakheel_plaza_27"
 
     def get_mall_id_list(self) -> list[str]:
         return [m.strip() for m in self.mall_ids.split(",") if m.strip()]

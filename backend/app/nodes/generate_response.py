@@ -122,18 +122,25 @@ def _get_narrowing_llm() -> ChatOpenAI:
     return _narrowing_llm
 
 
-async def _generate_narrowing_question(state: "ConciergeState") -> str | None:
+async def _generate_narrowing_question(
+    state: "ConciergeState",
+    last_bot_text: str | None = None,
+) -> str | None:
     """
     Generate the single most relevant targeting question when the visitor has
     confirmed they want to narrow down recommendations.
 
-    Uses full scene context (occasion, companions, shopping_task, modifiers,
-    active_shortlist) so the question is specific to the visitor's actual
-    situation — e.g. "Ethnic, western, or designer?" for a fashion query with
-    a wedding occasion, rather than the generic "budget or style in mind?"
+    When `last_bot_text` is provided (the previous bot message that contained the
+    narrowing offer), the LLM reads it to discover which specific options were named
+    and echoes them back as a direct choice question — e.g. if the bot offered
+    "the absolute cheapest or the lightest bite", the response is
+    "Which one — cheapest or lightest?"
 
-    Returns the generated question string, or None on failure (caller falls
-    back to the topic-keyed static templates).
+    When no specific options were named in the prior message, the LLM falls back to
+    generating the most context-aware question it can from scene data.
+
+    Always returns a natural-language sentence. Never returns JSON or a list.
+    Returns None on LLM failure (caller falls back to topic-keyed static templates).
     """
     from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -167,26 +174,54 @@ async def _generate_narrowing_question(state: "ConciergeState") -> str | None:
     scene_str = "; ".join(context_parts) if context_parts else "no specific context"
 
     system_prompt = (
-        "You are a mall concierge. The visitor just confirmed they want you to "
-        "narrow down recommendations. Ask exactly ONE short, specific clarifying "
-        "question — one sentence only — that will most help you pick the right "
-        "option for this specific visitor right now.\n\n"
-        "Use the scene context to make the question precise and relevant. "
-        "Do NOT ask a generic question if context is available. "
-        "Do NOT make recommendations. Do NOT ask more than one question.\n\n"
-        "Examples of the RIGHT level of specificity:\n"
-        "- Fashion query + wedding occasion → 'Is this for the bride, groom, or a guest?'\n"
-        "- Fashion query + no occasion → 'Ethnic, western, or designer?'\n"
-        "- Gift query + no target → 'Who is it for — a partner, a child, or a friend?'\n"
-        "- Dining + with kids → 'Something quick or a proper sit-down meal?'\n"
-        "- Shopping + self + no budget → 'Any budget in mind, or going with what fits?'\n"
-        "- Entertainment + evening → 'A movie, or more interactive — bowling, arcade?'"
+        "You are a distinguished digital mall concierge. The guest has just replied "
+        "with a short affirmation (e.g. 'sure', 'okay', 'yes go for it').\n\n"
+        "STEP 1 — DETECTION (when a 'Last concierge message' is provided):\n"
+        "Decide whether that message contained an offer to narrow, filter, shortlist, "
+        "or categorise the recommendations. The offer can use ANY phrasing, for example:\n"
+        "  • 'I can narrow this down to …'\n"
+        "  • 'I can narrow these into the best …'\n"
+        "  • 'I can turn this into a … shortlist'\n"
+        "  • 'I can filter to …'\n"
+        "  • 'I can focus on …'\n"
+        "  • 'I can give you only …'\n"
+        "  • 'Shall I narrow …?'\n"
+        "If NO such offer appears in the last concierge message, output the single word PASS "
+        "and nothing else. Stop here.\n\n"
+        "STEP 2 — GENERATE (only if an offer was found):\n"
+        "Reply with exactly ONE short, polished question that moves the "
+        "conversation forward.\n"
+        "  • If the offer named specific options (e.g. 'quick meal, coffee stop, or "
+        "dessert spot'), echo them as a direct choice: "
+        "'Which would you prefer — a quick meal, a coffee stop, or a dessert spot?'\n"
+        "  • Strip filler words ('the best', 'a', 'an', 'the absolute') from labels.\n"
+        "  • If no specific options were named, use the scene context to ask the most "
+        "relevant, well-considered targeting question.\n\n"
+        "ABSOLUTE RULES:\n"
+        "- Output ONLY the question sentence or the word PASS. No preamble, no "
+        "explanation, no JSON, no list.\n"
+        "- Do NOT make recommendations. Do NOT ask more than one question.\n"
+        "- Maintain a polished, composed tone — never casual.\n\n"
+        "Examples:\n"
+        "- Last concierge: 'I can narrow this to quick meal, coffee stop, or dessert stop' "
+        "→ 'Which would you prefer — a quick meal, a coffee stop, or a dessert spot?'\n"
+        "- Last concierge: 'I can turn this into a quick lunch or coffee shortlist' "
+        "→ 'Which would suit you better — a quick lunch or coffee?'\n"
+        "- Last concierge: 'I can narrow to the absolute cheapest or the lightest bite' "
+        "→ 'Which appeals more — the most affordable option, or something lighter?'\n"
+        "- Last concierge: 'Here are the dining options: …' (no narrowing offer) → PASS\n"
+        "- Last concierge: 'My pleasure.' (no narrowing offer) → PASS\n"
+        "- No last concierge message, fashion + wedding scene "
+        "→ 'Is this for the bride, the groom, or another guest?'\n"
+        "- No last concierge message, dining + kids → 'Would you prefer something quick or a sit-down meal?'"
     )
 
     human_prompt = (
         f"Scene context: {scene_str}\n"
-        f"Visitor confirmed: {state.normalized_user_message or 'yes'}"
+        f"Guest confirmed: {state.normalized_user_message or 'yes'}"
     )
+    if last_bot_text:
+        human_prompt += f"\n\nLast bot message:\n{last_bot_text.strip()}"
 
     try:
         llm = _get_narrowing_llm()
@@ -209,48 +244,66 @@ async def _generate_narrowing_question(state: "ConciergeState") -> str | None:
 # model doesn't have to infer tone from a scenario label alone.
 _PLAYBOOK_TONE_MAP: dict[str, str] = {
     "family_day": (
-        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
-        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+        "TONE: Warm and reassuring, with the composure of a five-star concierge. "
+        "Use clear, accessible language — a parent managing children needs confident, "
+        "efficient guidance, not a lengthy exploration. Present safe, well-regarded choices "
+        "and keep the cognitive load light. Polished but never stiff."
     ),
     "family_outing": (
-        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
-        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+        "TONE: Warm and reassuring, with the composure of a five-star concierge. "
+        "Use clear, accessible language — a parent managing children needs confident, "
+        "efficient guidance, not a lengthy exploration. Present safe, well-regarded choices "
+        "and keep the cognitive load light. Polished but never stiff."
     ),
     "family_shopping": (
-        "TONE: Simple, friendly language. Quick, clear decisions — no overthinking. "
-        "Safe, well-known choices. Minimal cognitive load for a parent managing kids."
+        "TONE: Warm and reassuring, with the composure of a five-star concierge. "
+        "Use clear, accessible language — a parent managing children needs confident, "
+        "efficient guidance, not a lengthy exploration. Present safe, well-regarded choices "
+        "and keep the cognitive load light. Polished but never stiff."
     ),
     "date_night": (
-        "TONE: Warm, slightly romantic. Confident recommendations — no hesitation. "
-        "Suggest premium or special-occasion options. Frame as an experience."
+        "TONE: Refined and warmly romantic. Speak with quiet confidence — no hesitation, "
+        "no hedging. Lean toward premium, memorable, and occasion-worthy options. "
+        "Frame the experience as something to look forward to, not a list of alternatives."
     ),
     "gift_hunt": (
-        "TONE: Helpful and decisive. One clear recommendation, one strong alternative. "
-        "Explain gift-suitability in one sentence. Do not overwhelm with options."
+        "TONE: Thoughtful and decisive — a trusted adviser who knows exactly what to suggest. "
+        "Present one clear recommendation and one considered alternative. "
+        "Explain in a single, confident line why each is right for the occasion. "
+        "Never overwhelm with options; the guest wants a curated answer."
     ),
     "gift_shopping": (
-        "TONE: Helpful and decisive. One clear recommendation, one strong alternative. "
-        "Explain gift-suitability in one sentence. Do not overwhelm with options."
+        "TONE: Thoughtful and decisive — a trusted adviser who knows exactly what to suggest. "
+        "Present one clear recommendation and one considered alternative. "
+        "Explain in a single, confident line why each is right for the occasion. "
+        "Never overwhelm with options; the guest wants a curated answer."
     ),
     "quick_visit": (
-        "TONE: Efficient and direct. No fluff. Get to the point immediately. "
-        "Prioritise nearby, fast options. Respect the visitor's time constraint."
+        "TONE: Composed but efficient. Respect the guest's time entirely — "
+        "lead with the single best option, nearby and fast. "
+        "No preamble, no padding. Polished brevity is the highest form of service here."
     ),
     "solo_explorer": (
-        "TONE: Curious and encouraging. Highlight discovery. "
-        "Suggest a mix of familiar and new options."
+        "TONE: Quietly curious and encouraging. This guest is here to discover. "
+        "Highlight what is genuinely interesting or distinctive. "
+        "Blend familiar anchors with lesser-known gems — give them a reason to explore."
     ),
     "luxury_vip": (
-        "TONE: Refined, premium. Lean toward exclusive, high-end options. "
-        "Frame recommendations as curated, not generic."
+        "TONE: Impeccably refined. Every word should feel considered and exclusive. "
+        "Lean toward the highest-end, most curated options the mall offers. "
+        "Frame recommendations as bespoke selections — never generic, never rushed. "
+        "The guest expects — and deserves — a personalised, world-class experience."
     ),
     "budget_conscious": (
-        "TONE: Practical and reassuring. Lead with value-for-money picks. "
-        "Never suggest premium options for a budget query."
+        "TONE: Practical, reassuring, and respectful. Lead with excellent value-for-money picks — "
+        "present them with the same care and confidence as any premium recommendation. "
+        "Never suggest options outside the guest's stated budget. "
+        "Good value is not a compromise; frame it as a smart, satisfying choice."
     ),
     "wedding_related": (
-        "TONE: Elegant, occasion-appropriate. Emphasise quality and style. "
-        "Frame as helping with a special event."
+        "TONE: Elegant and occasion-aware. Every suggestion should feel worthy of the moment. "
+        "Emphasise quality, craftsmanship, and style. "
+        "Frame the visit as part of preparing for something truly special."
     ),
 }
 
@@ -345,7 +398,7 @@ def _build_assurance_instruction(state: ConciergeState) -> str:
 
     return (
         "ASSURANCE LINE: After your recommendations, add ONE brief, factual confidence "
-        "line that reduces the visitor's decision anxiety. Ground it in the mall — "
+        "line that reduces the guest's decision anxiety. Ground it in the mall — "
         "mention floor, proximity, range, or ease of access. Examples:\n"
         "  • 'Both stores are on the Ground floor — easy to reach from the main entrance.'\n"
         "  • 'Centrepoint carries a full kids' range — you'll find the right size.'\n"
@@ -544,22 +597,22 @@ def _build_scene_acknowledgment(state: ConciergeState) -> str:
     gendered_child_note = ""
     if child_label in ("daughter", "son"):
         gendered_child_note = (
-            f"IMPORTANT: The child companion is specifically the visitor's {child_label}. "
+            f"IMPORTANT: The child companion is specifically the guest's {child_label}. "
             f"ALWAYS use 'your {child_label}' in the response — do NOT say 'your child' or just 'your X-year-old'.\n"
         )
     return (
         "SCENE ACKNOWLEDGMENT REQUIRED:\n"
-        f"Visitor situation: {situation}.\n"
+        f"Guest situation: {situation}.\n"
         f"{gendered_child_note}"
         "Your opening sentence MUST acknowledge this situation naturally — "
         "but NEVER use 'Since you're...', 'Given you're...', 'As you're...', or 'Because you're...'.\n"
-        "Instead rotate through these opener styles:\n"
-        "  • Lead with the destination:   'Head to Centrepoint — great value kids' jackets on the Ground floor.'\n"
-        "  • Lead with the person/group:  'For your daughter, the best picks are in the Main Gallery.'\n"
-        "  • Lead with the need:          'For an affordable jacket, here are your top three options:'\n"
-        "  • Lead with an action:         'Start at Red Tag for solid budget picks, then swing by Max next door.'\n"
-        "  • Lead with a direct answer:   'Muvi Cinema on the Cinema Level is your best bet for a family film.'\n"
-        "Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Absolutely!', or any filler phrase.\n\n"
+        "Instead rotate through these polished opener styles:\n"
+        "  • Lead with the destination:   'Head to Centrepoint — an excellent selection of kids' jackets on the Ground Floor.'\n"
+        "  • Lead with the person/group:  'For your daughter, the finest picks are in the Main Gallery.'\n"
+        "  • Lead with the need:          'For something within budget, here are your three strongest options:'\n"
+        "  • Lead with an action:         'Start at Red Tag for strong value picks, then step into Max right next door.'\n"
+        "  • Lead with a direct answer:   'Muvi Cinema on the Cinema Level is the ideal choice for a family screening.'\n"
+        "Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Absolutely!', 'Hey', 'Hi there', or any casual phrase.\n\n"
     )
 
 
@@ -574,7 +627,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
     parts: list[str] = []
 
     if getattr(state.scene, "user_role", ""):
-        parts.append(f"Visitor role: {state.scene.user_role}")
+        parts.append(f"Guest role: {state.scene.user_role}")
     if getattr(state.scene, "scenario", ""):
         parts.append(f"Visit scenario: {state.scene.scenario.replace('_', ' ')}")
     if getattr(state.scene, "style_intent", []):
@@ -584,7 +637,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
             f"Target person (who this query is about): {state.scene.target_person}"
         )
     if state.scene.companions:
-        parts.append(f"Visitor is with: {', '.join(state.scene.companions)}")
+        parts.append(f"Guest is with: {', '.join(state.scene.companions)}")
         # Explicit gender guard — prevents LLM from inverting partner gender
         partner_found = [
             c for c in state.scene.companions
@@ -592,7 +645,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
         ]
         if partner_found:
             parts.append(
-                f"COMPANION GENDER: The visitor's partner is '{partner_found[0]}'. "
+                f"COMPANION GENDER: The guest's partner is '{partner_found[0]}'. "
                 f"Always refer to them as '{partner_found[0]}' — "
                 f"NEVER substitute with a different gendered term (e.g. do NOT say "
                 f"'boyfriend' if the partner is a 'girlfriend', and vice versa)."
@@ -604,7 +657,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
                 "COMPANION USAGE: Companion context above is for FILTERING only. "
                 "Do NOT explicitly say 'with your child', 'for you and your son', "
                 "'easy for a parent with a child', or similar phrases in the response. "
-                "The visitor knows who they are with — just tailor the recommendation silently."
+                "The guest is aware of who they are with — just tailor the recommendation silently."
             )
     if state.scene.companion_details:
         detail_strs = [
@@ -685,7 +738,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
     # ── Audience / target person directive ───────────────────────────
     if state.scene.target_person:
         frame_block += (
-            f"CRITICAL: The visitor's current focus is on '{state.scene.target_person}'. "
+            f"CRITICAL: The guest's current focus is on '{state.scene.target_person}'. "
             f"All recommendations MUST be appropriate for {state.scene.target_person}. "
         )
         if state.scene.target_person in ("child", "son", "daughter", "kids"):
@@ -712,11 +765,11 @@ def _build_conversation_context(state: ConciergeState) -> str:
         if _st.budget_preference:
             _task_parts.append(f"budget: {_st.budget_preference}")
         frame_block += (
-            f"ACTIVE SHOPPING TASK: The visitor is shopping for a "
+            f"ACTIVE SHOPPING TASK: The guest is shopping for a "
             f"{' '.join(_task_parts)}. "
             f"ALL recommendations MUST be stores that sell {_st.product_type}. "
             f"Do NOT pivot to gift shops, accessories, jewellery, or other product "
-            f"categories unless the visitor explicitly changes the request. "
+            f"categories unless the guest explicitly changes the request. "
             f"Context refinements like gender or age ('he is a boy') narrow "
             f"the {_st.product_type} search — they do NOT change the product type.\n\n"
         )
@@ -725,7 +778,7 @@ def _build_conversation_context(state: ConciergeState) -> str:
     if state.scene.visit_constraints:
         constraint_str = " and ".join(state.scene.visit_constraints)
         frame_block += (
-            f"CONSTRAINT: The visitor wants something {constraint_str}. "
+            f"CONSTRAINT: The guest's preference is for something {constraint_str}. "
             "Keep suggestions focused, concise, and appropriate to this constraint. "
             "Do NOT recommend elaborate full-course dining for a 'quick' or 'light' query.\n\n"
         )
@@ -738,14 +791,14 @@ def _build_conversation_context(state: ConciergeState) -> str:
         domains_str = " and ".join(state.scene.excluded_domains)
         plural = "these categories" if len(state.scene.excluded_domains) > 1 else "this category"
         frame_block += (
-            f"HARD CONSTRAINT — DOMAIN EXCLUSION: The visitor has EXPLICITLY refused "
+            f"HARD CONSTRAINT — DOMAIN EXCLUSION: The guest has EXPLICITLY declined "
             f"{domains_str} recommendations. "
             f"DO NOT suggest, mention, or allude to any {domains_str} options under ANY "
             f"circumstances, even indirectly. "
             f"If the entity list below contains {plural}, ignore them entirely. "
             f"If there are no suitable alternatives available outside {plural}, respond with a "
-            f"brief empathetic acknowledgement and ask the visitor what they are looking for "
-            f"instead — do NOT default back to {plural}.\n\n"
+            f"brief, composed acknowledgement and invite the guest to share what they are "
+            f"looking for instead — do NOT default back to {plural}.\n\n"
         )
 
     # ── Follow-up / sequential directive ─────────────────────────────
@@ -767,10 +820,10 @@ def _build_conversation_context(state: ConciergeState) -> str:
         if is_sequential and not has_category_results and not same_domain_retry:
             last_covered = last_completed or state.scene.active_topic or "previous topic"
             frame_block += (
-                f"SEQUENCE CONTINUATION: The visitor has already explored {last_covered}. "
+                f"SEQUENCE CONTINUATION: The guest has already explored {last_covered}. "
                 "This is a CONTINUATION — build on the visit journey already in progress. "
                 "Do NOT restart the conversation or re-suggest already covered topics. "
-                "Pick up exactly where we left off.\n\n"
+                "Continue seamlessly from where we left off.\n\n"
             )
         else:
             frame_block += (
@@ -865,14 +918,15 @@ def _build_conversation_context(state: ConciergeState) -> str:
         context_summary = f"{role_part}{scenario_part}{companion_part}{style_part}".strip()
         frame_block += (
             "CONTEXT-SETTING RESPONSE REQUIRED:\n"
-            f"The visitor is telling you about their situation{': ' + context_summary if context_summary else ''}.\n"
+            f"The guest is sharing their situation{': ' + context_summary if context_summary else ''}.\n"
             "Your response MUST:\n"
-            "  1. Acknowledge their context in ONE natural sentence (no 'Great!', 'Sure!', 'Absolutely!' filler).\n"
+            "  1. Acknowledge their context in ONE composed, natural sentence "
+            "(no 'Great!', 'Sure!', 'Absolutely!', 'Hey', or casual filler).\n"
             "  2. Offer 2-3 relevant next-step options they can choose from "
-            "(e.g. 'I can help with elegant accessories, gifts, or beauty — what would you like first?').\n"
-            "  3. Do NOT immediately jump into a specific recommendation list.\n"
+            "(e.g. 'I can assist with elegant accessories, gifts, or beauty — which would you like to explore first?').\n"
+            "  3. Do NOT immediately present a specific recommendation list.\n"
             "  4. Do NOT treat this as a product search or force a narrow category.\n"
-            "  5. Match the tone and style to their stated role/occasion.\n\n"
+            "  5. Match the tone and register to their stated role/occasion.\n\n"
         )
 
     # ── Constraint refinement directive ──────────────────────────────
@@ -880,16 +934,16 @@ def _build_conversation_context(state: ConciergeState) -> str:
         new_constraints = state.scene.visit_constraints
         if state.scene.active_shortlist:
             frame_block += (
-                "CONSTRAINT REFINEMENT: The visitor is refining a previous suggestion, NOT starting fresh.\n"
+                "CONSTRAINT REFINEMENT: The guest is refining a previous suggestion, NOT starting fresh.\n"
                 f"Previous suggestions: {', '.join(state.scene.active_shortlist)}\n"
                 f"New constraint to apply: {', '.join(new_constraints) if new_constraints else 'unstated'}\n"
                 "DO NOT discard the previous suggestions entirely. Instead, filter or replace them "
-                "with options that better meet the new constraint. Acknowledge the refinement naturally "
-                "e.g. 'For something quicker, I'd suggest...'\n\n"
+                "with options that better satisfy the new constraint. Acknowledge the refinement naturally — "
+                "e.g. 'For something a little quicker, I would suggest...'\n\n"
             )
         else:
             frame_block += (
-                "CONSTRAINT REFINEMENT: The visitor is adding a constraint to their current request. "
+                "CONSTRAINT REFINEMENT: The guest is adding a constraint to their current request. "
                 f"Constraints: {', '.join(new_constraints) if new_constraints else 'unstated'}\n"
                 "Adjust recommendations accordingly.\n\n"
             )
@@ -926,7 +980,7 @@ def _format_retrieval_results(state: ConciergeState) -> str:
     if is_discovery:
         parts.append(
             "[CURATED OPTIONS — present your TOP 5-6 recommendations with a brief "
-            "reason why each fits this visitor. Group by type if helpful.]"
+            "reason why each is the right choice for this guest. Group by type if helpful.]"
         )
     elif is_category:
         cat_key = entities[0].get("source", "").replace("category/", "") if entities else ""
@@ -942,7 +996,7 @@ def _format_retrieval_results(state: ConciergeState) -> str:
     elif not is_offer and len(entities) > 5:
         parts.append(
             f"[CURATED RECOMMENDATIONS — present your TOP {min(display_limit, 5)} picks with a brief "
-            "reason why each one fits the visitor's situation. Lead with your best 3, "
+            "reason why each one is right for this guest. Lead with your best 3, "
             "then naturally mention the remaining as further options.]"
         )
 
@@ -1031,6 +1085,23 @@ async def _build_factual_response(
     system_prompt = get_concierge_system_prompt(mall_context)
 
     scope = state.fact_scope or "store_lookup"
+
+    # For cross-mall availability queries, append a suppression directive to the
+    # system prompt so the LLM does not infer brand presence from zone description
+    # text (e.g. "Food Court: McDonald's, Kudu, Popeyes...") — it must rely solely
+    # on the structured CROSS-MALL BRAND AVAILABILITY data in the user prompt.
+    if scope == "cross_mall_availability" or state.intent.domain == "cross_mall":
+        system_prompt = (
+            system_prompt
+            + "\n\nCROSS-MALL AVAILABILITY MODE: The mall zone descriptions above "
+            "are for tone and persona only. To answer which malls carry something, "
+            "use ONLY the structured CROSS-MALL BRAND AVAILABILITY section in the "
+            "user message. Do NOT infer availability from zone description text. "
+            "When 'AT OTHER CENOMI MALLS' contains results, those ARE the answer — "
+            "present them clearly and do NOT add an apologetic opening paragraph. "
+            "Only say something is unavailable at the current mall as a brief "
+            "one-sentence note before listing where it IS found."
+        )
     response_mode = state.fact_response_mode or "direct_lookup"
     query_entity = state.fact_query_entity or ""
     fact_ctx = getattr(state, "fact_context", {}) or {}
@@ -1088,7 +1159,7 @@ async def _build_factual_response(
         no_data_note = (
             "\nNOTE: No exact data was retrieved for this query. "
             "Be honest — say you don't have that specific information available. "
-            "Do NOT invent data. If you can direct the visitor to ask staff, do so.\n"
+            "Do NOT invent data. If you can direct the guest to ask a member of staff, do so.\n"
         )
     else:
         no_data_note = ""
@@ -1100,7 +1171,7 @@ async def _build_factual_response(
     cta_instruction = get_cta_instruction(exp.cta_type)
 
     user_prompt = (
-        f"Visitor question: {query}\n\n"
+        f"Guest question: {query}\n\n"
         f"Fact scope: {scope}\n"
         f"Expected response mode: {response_mode}\n\n"
         f"Retrieved facts:\n{fact_block}\n\n"
@@ -1174,26 +1245,53 @@ def _format_fact_context(fact_ctx: dict, state) -> str:
         "cross_mall_at_home" in fact_ctx or "cross_mall_other" in fact_ctx
     ):
         brand = fact_ctx.get("cross_mall_brand_query") or fact_ctx.get("query_entity") or ""
-        parts.append("=== CROSS-MALL BRAND AVAILABILITY ===")
-        parts.append(f"Brand search: {brand}")
         at_home = fact_ctx.get("cross_mall_at_home") or []
         other = fact_ctx.get("cross_mall_other") or []
-        parts.append("AT YOUR CURRENT MALL (answer this section first):")
+
+        # Summary line — makes the hit/miss split unambiguous for the LLM
+        if at_home and other:
+            summary = f"FOUND at current mall ({len(at_home)}) AND at {len(other)} other Cenomi mall(s)"
+        elif at_home:
+            summary = f"FOUND at current mall ({len(at_home)} result(s)) — NOT at other malls"
+        elif other:
+            summary = f"NOT at current mall — FOUND at {len(other)} other Cenomi mall(s)"
+        else:
+            summary = "NOT found at any configured Cenomi mall"
+
+        parts.append("=== CROSS-MALL AVAILABILITY ===")
+        parts.append(f"Search query: \"{brand}\"")
+        parts.append(f"Summary: {summary}")
+        parts.append("")
+
+        parts.append("AT YOUR CURRENT MALL:")
         if at_home:
             for e in at_home:
-                floor = f" — {e['floor']}" if e.get("floor") else ""
-                parts.append(f"  • {e.get('name', '')} ({e.get('entity_type', '')}){floor}")
+                floor = e.get("floor", "")
+                floor_label = f"{floor} Floor" if floor and not floor.lower().endswith(("floor", "level")) else floor
+                loc_parts = [p for p in [floor_label, e.get("zone"), e.get("unit_number")] if p]
+                loc_str = f" — {', '.join(loc_parts)}" if loc_parts else ""
+                parts.append(f"  • {e.get('name', '')}{loc_str}")
         else:
-            parts.append("  (no listing for this brand at the active mall in available data)")
-        parts.append("AT OTHER CENOMI MALLS (only if listed — mention after current mall):")
+            parts.append(f"  Not found — \"{brand}\" is not at your current mall.")
+
+        parts.append("")
         if other:
+            parts.append(
+                "AT OTHER CENOMI MALLS "
+                "(these are the primary answer when current mall has no result):"
+            )
             for e in other:
-                floor = f" — {e['floor']}" if e.get("floor") else ""
+                floor = e.get("floor", "")
+                floor_label = f"{floor} Floor" if floor and not floor.lower().endswith(("floor", "level")) else floor
+                loc_parts = [p for p in [floor_label, e.get("zone"), e.get("unit_number")] if p]
+                loc_str = f" — {', '.join(loc_parts)}" if loc_parts else ""
                 parts.append(
-                    f"  • {e.get('name', '')} at {e.get('mall_name', '')}{floor}"
+                    f"  • {e.get('name', '')} at {e.get('mall_name', '')}{loc_str}"
                 )
         else:
-            parts.append("  (no other matches in available data)")
+            parts.append("AT OTHER CENOMI MALLS:")
+            parts.append("  No matches at other configured malls.")
+
         return "\n".join(parts)
 
     # Detect if family/kid filter is active — determines whether to group by genre
@@ -1427,21 +1525,21 @@ def _build_factual_mode_instruction(
         filter_notes: list[str] = []
         if has_family_filter:
             filter_notes.append(
-                "• FAMILY/KID FILTER ACTIVE: The visitor has a child with them.\n"
-                "  - Open with: 'For a child, the best family-friendly options right now are:'\n"
+                "• FAMILY/KID FILTER ACTIVE: The guest has a child with them.\n"
+                "  - Open with: 'For a young guest, the most suitable family-friendly options right now are:'\n"
                 "  - Lead with the Family / Animation category if present.\n"
-                "  - For each movie, briefly note if it is suitable for children "
-                "(e.g. '✓ Great for kids' or '⚠ Adult-only').\n"
-                "  - SPORTS BROADCASTS: Any movie entry flagged 'is_sports_broadcast: true' "
-                "or with genre 'Sport' is a live football/sports screening — "
-                "do NOT recommend these as family-friendly or children's movies.\n"
+                "  - For each film, briefly note its suitability for children "
+                "(e.g. '✓ Ideal for children' or '⚠ Adult content').\n"
+                "  - SPORTS BROADCASTS: Any entry flagged 'is_sports_broadcast: true' "
+                "or with genre 'Sport' is a live sports screening — "
+                "do NOT present these as family-friendly or children's films.\n"
                 "  - If NO film in the schedule belongs to the Animation/Family/Kids genre, "
-                "say so honestly: 'There's no children's film showing right now.' "
-                "Then suggest a kids' activity alternative available at the mall "
-                "(e.g. the kids' play area) instead of repurposing sports events.\n"
-                "  - Do NOT switch away from movies — this is still a movie query.\n"
-                "  - Close with one sentence noting which options are the safest family choice, "
-                "or direct the visitor to the kids' play area if no suitable film exists."
+                "acknowledge it with grace: 'There is no children's film showing at present.' "
+                "Then suggest a suitable kids' activity available at the mall "
+                "(e.g. the kids' play area) as an alternative.\n"
+                "  - Do NOT redirect away from movies — this remains a cinema query.\n"
+                "  - Close with one sentence noting the safest family choice, "
+                "or direct the guest to the kids' play area if no suitable film is available."
             )
         if has_budget_filter:
             filter_notes.append(
@@ -1500,7 +1598,7 @@ def _build_factual_mode_instruction(
             "Use a clean, scan-friendly format. "
             "Open with 'Here are the movies showing now:' or similar. "
             "Do NOT pad with dining suggestions or entertainment recommendations. "
-            "If the visitor asked about a specific movie, lead with that movie.\n\n"
+            "If the guest asked about a specific film, lead with that film.\n\n"
         )
 
     # ── Route hint template (experience layer: route_hint) ────────────────────
@@ -1541,11 +1639,15 @@ def _build_factual_mode_instruction(
     if scope == "cross_mall_availability":
         return (
             "RESPONSE MODE — CROSS-MALL AVAILABILITY:\n"
-            "Use ONLY the cross-mall sections above. Order is mandatory:\n"
-            "1) Answer for YOUR CURRENT MALL first (yes/no, then floor/location if listed).\n"
-            "2) Then, only if other malls are listed, mention those — never lead with another mall.\n"
-            "If the brand is only at other malls, say clearly it is not at the current mall, then say where it is.\n"
-            "Be concise and accurate; do not invent locations.\n\n"
+            "Use ONLY the structured data above. Follow this format strictly:\n"
+            "1) If AT OTHER CENOMI MALLS has results AND current mall does not:\n"
+            "   → One brief sentence: '[Query] isn't at your current mall, but I found [entity name(s)] at [N] other Cenomi mall(s):'\n"
+            "   → Then a clean bulleted list: '• [Entity name] — [Mall name], [Floor], [Zone] (Unit [unit])'\n"
+            "   → NEVER start with 'I do not have information' or an apology when results exist.\n"
+            "2) If current mall has results: confirm it first, then mention other malls.\n"
+            "3) If nothing found anywhere: acknowledge honestly in one sentence.\n"
+            "Be specific — always include mall name, floor, zone, and unit number when available.\n"
+            "Be conversational — write like a helpful concierge, not a database readout.\n\n"
         )
     return (
         "RESPONSE MODE — DIRECT ANSWER:\n"
@@ -1633,42 +1735,42 @@ async def _build_mall_info_response(
     focus_hint = ""
     if sub == "opening_hours":
         focus_hint = (
-            "The visitor is asking about opening hours. "
-            "Lead with the hours in a clear format. Keep it concise.\n"
+            "The guest is asking about opening hours. "
+            "Lead with the hours in a clear, well-formatted response. Keep it concise.\n"
         )
     elif sub == "facilities_summary":
         focus_hint = (
-            "The visitor is asking about facilities and services. "
-            "Focus on services and facilities. Use a brief grouped format.\n"
+            "The guest is asking about facilities and services. "
+            "Focus on services and facilities. Use a brief, grouped format.\n"
         )
     elif sub == "family_friendliness":
         focus_hint = (
-            "The visitor is asking if this mall is family-friendly. "
+            "The guest is asking whether this mall is family-friendly. "
             "Highlight family-friendly zones, play areas, and facilities.\n"
         )
     elif sub == "what_is_available":
         focus_hint = (
-            "The visitor wants to know what they can find here. "
+            "The guest would like to know what is available here. "
             "Mention key zones, categories, and 3–4 notable anchor tenants. "
-            "Keep it warm and inviting — make the mall sound exciting.\n"
+            "Keep it warm and inviting — paint a picture of a wonderful visit.\n"
         )
 
     # ── Structured overview template (experience layer) ───────────────
     overview_template = (
         "RESPONSE MODE — MALL OVERVIEW:\n"
-        "Structure your answer as a concise, friendly overview:\n"
-        "  1. One warm opening line about the mall\n"
+        "Structure your answer as a concise, polished overview:\n"
+        "  1. One composed opening line about the mall\n"
         "  2. Key highlights: major zones or categories (3–4 max)\n"
-        "  3. Practical info: hours and any key services (parking, prayer rooms, etc.)\n"
-        "Keep it scan-friendly and conversational. "
-        "Do NOT dump every detail — leave room for the visitor to ask follow-ups.\n\n"
+        "  3. Practical information: hours and key services (parking, prayer rooms, etc.)\n"
+        "Keep it scan-friendly and engaging. "
+        "Do NOT present every detail — leave room for the guest to ask further.\n\n"
     )
 
     # ── CTA for mall overview ─────────────────────────────────────────
     cta_instruction = get_cta_instruction("overview_continue")
 
     user_prompt = (
-        f"Visitor question:\n{query}\n\n"
+        f"Guest question:\n{query}\n\n"
         f"{focus_hint}"
         f"{overview_template}"
         f"{cta_instruction}"
@@ -1712,12 +1814,14 @@ async def _build_cross_mall_response(
     if home_entities:
         entity_lines.append("AT YOUR CURRENT MALL:")
         for e in home_entities:
-            floor_info = f" — {e['floor']}" if e.get("floor") else ""
+            loc_parts = [p for p in [e.get("floor"), e.get("zone"), e.get("unit_number")] if p]
+            floor_info = f" — {', '.join(loc_parts)}" if loc_parts else ""
             entity_lines.append(f"  • {e['name']} ({e.get('entity_type', 'store')}){floor_info}")
     if other_entities:
         entity_lines.append("AT OTHER CENOMI MALLS:")
         for e in other_entities:
-            floor_info = f" — {e['floor']}" if e.get("floor") else ""
+            loc_parts = [p for p in [e.get("floor"), e.get("zone"), e.get("unit_number")] if p]
+            floor_info = f" — {', '.join(loc_parts)}" if loc_parts else ""
             entity_lines.append(f"  • {e['name']} at {e['mall_name']}{floor_info}")
     if not entities:
         entity_lines.append("NO MATCHES FOUND in any loaded Cenomi mall.")
@@ -1726,21 +1830,21 @@ async def _build_cross_mall_response(
     query = state.normalized_user_message or state.raw_user_message
 
     cross_mall_instruction = (
-        "RESPONSE MODE — CROSS-MALL BRAND LOOKUP:\n"
-        "The visitor is asking about brand/store availability across Cenomi malls.\n"
-        "Rules:\n"
-        "- If the brand is at the visitor's current mall: lead with that "
-        "('Yes, [Brand] is right here...') then mention other malls if relevant.\n"
-        "- If NOT at the current mall but at another: say so clearly and direct them.\n"
-        "- If found nowhere: say honestly it's not at any Cenomi mall you have data for.\n"
-        "- Keep it concise — yes/no first, then location.\n"
-        "Never invent availability or locations.\n\n"
+        "RESPONSE MODE — CROSS-MALL AVAILABILITY:\n"
+        "Use ONLY the structured data above. Follow this format:\n"
+        "- If AT OTHER CENOMI MALLS has results AND current mall does not:\n"
+        "  One sentence: '[Query] isn't at your current mall, but I found [entity name(s)] at [N] other Cenomi mall(s):'\n"
+        "  Then a clean bulleted list: '• [Entity name] — [Mall name], [Floor], [Zone] (Unit [unit])'\n"
+        "  Do NOT start with 'I do not have information' when results exist.\n"
+        "- If current mall has results: confirm first, then mention other malls.\n"
+        "- If nowhere: one honest sentence.\n"
+        "Be specific (include mall name, floor, zone, unit). Be conversational.\n\n"
     )
 
     cta_instruction = get_cta_instruction("cross_mall")
 
     user_prompt = (
-        f"Visitor query: {query}\n\n"
+        f"Guest query: {query}\n\n"
         f"Brand/store availability across Cenomi malls:\n{entity_block}\n\n"
         f"{cross_mall_instruction}"
         f"{cta_instruction}"
@@ -1894,57 +1998,52 @@ async def generate_response(state: ConciergeState) -> dict:
                     )
                 )
                 if _is_bot_question:
-                    # Check if the bot offered to narrow/filter — if so, the visitor
-                    # confirmed that offer. Ask the actual narrowing question rather
-                    # than falling through to another round of recommendations.
-                    _narrowing_phrases = (
-                        "narrow it down", "narrow down", "narrow this",
-                        "narrow the", "narrow by",
+                    # LLM decides whether the last bot message contained a narrowing/
+                    # filtering offer (any phrasing) and returns the appropriate
+                    # choice question, or "PASS" when no such offer was found.
+                    # Keyword list removed — the LLM handles all phrasing variants.
+                    llm_question = await _generate_narrowing_question(
+                        state, last_bot_text=_last_bot
                     )
-                    _is_narrowing_offer = any(
-                        phrase in _last_bot.lower() for phrase in _narrowing_phrases
-                    )
-                    if _is_narrowing_offer:
-                        # LLM generates the most relevant one-sentence targeting
-                        # question using full scene context (occasion, companions,
-                        # shopping_task, modifiers, active_shortlist). Falls back
-                        # to topic-keyed static templates if the LLM call fails.
-                        llm_question = await _generate_narrowing_question(state)
-
-                        if llm_question:
-                            final_text = llm_question
+                    if llm_question and llm_question.strip().upper() != "PASS":
+                        final_text = llm_question
+                    elif not llm_question:
+                        # LLM call failed — use static topic-keyed fallback.
+                        _task = state.scene.shopping_task
+                        _active_topic = state.scene.active_topic or ""
+                        if _task and _task.product_type:
+                            _product = _task.product_type
+                            final_text = (
+                                f"Sure! To find the best {_product}, tell me: "
+                                f"who is it for, what's your budget, or any style preference? "
+                                f"Any one of those helps me point you to the right store."
+                            )
+                        elif _active_topic in ("dining", "food"):
+                            final_text = (
+                                "Of course! Quick question — do you prefer a sit-down meal, "
+                                "something fast, or a light snack? And any cuisine in mind?"
+                            )
+                        elif _active_topic == "shopping":
+                            final_text = (
+                                "Happy to narrow it down! Is this for you or someone else, "
+                                "and do you have a budget or style in mind?"
+                            )
+                        elif _active_topic == "entertainment":
+                            final_text = (
+                                "Sure! Any preference — a specific genre, age group, "
+                                "or something to do right now vs. later?"
+                            )
                         else:
-                            # Static fallback keyed by active topic
-                            _task = state.scene.shopping_task
-                            _active_topic = state.scene.active_topic or ""
-                            if _task and _task.product_type:
-                                _product = _task.product_type
-                                final_text = (
-                                    f"Sure! To find the best {_product}, tell me: "
-                                    f"who is it for, what's your budget, or any style preference? "
-                                    f"Any one of those helps me point you to the right store."
-                                )
-                            elif _active_topic in ("dining", "food"):
-                                final_text = (
-                                    "Of course! Quick question — do you prefer a sit-down meal, "
-                                    "something fast, or a light snack? And any cuisine in mind?"
-                                )
-                            elif _active_topic == "shopping":
-                                final_text = (
-                                    "Happy to narrow it down! Is this for you or someone else, "
-                                    "and do you have a budget or style in mind?"
-                                )
-                            elif _active_topic == "entertainment":
-                                final_text = (
-                                    "Sure! Any preference — a specific genre, age group, "
-                                    "or something to do right now vs. later?"
-                                )
-                            else:
-                                final_text = (
-                                    "Of course! Tell me a bit more — who is it for, "
-                                    "what's your budget, or any preference you have in mind?"
-                                )
+                            final_text = (
+                                "Of course! Tell me a bit more — who is it for, "
+                                "what's your budget, or any preference you have in mind?"
+                            )
+                    else:
+                        # LLM returned PASS — no narrowing offer in last bot message.
+                        # Fall through: rewrite to followup and let main pipeline run.
+                        final_text = None
 
+                    if final_text is not None:
                         assistant_msg = Message(
                             role="assistant",
                             content=final_text,
@@ -2127,6 +2226,154 @@ async def generate_response(state: ConciergeState) -> dict:
             "_trace_summary": "Generated disengagement recovery response",
         }
 
+    # ── Followup: intercept simple affirmations confirming a bot offer ──────
+    # When the visitor replies "sure", "ok", "okay", "sure do it" etc. to a
+    # bot offer, the LLM correctly classifies it as `followup` (per the
+    # "affirmative after a bot offer → followup" rule).  The main concierge
+    # pipeline downstream doesn't know to ask a narrowing question — it just
+    # regenerates the same recommendation list.  This block intercepts BEFORE
+    # the main pipeline to return the right response.
+    #
+    # Two sub-cases:
+    #   A) Bot offered to NARROW recommendations → ask the narrowing question.
+    #   B) Bot offered a TOPIC SWITCH (e.g. "want me to point you to stores?")
+    #      after discussing a different domain → return a clarifying prompt
+    #      for the offered topic (retrieval has already run for the old topic
+    #      so we cannot regenerate; a clarifying question is the safe path).
+    if state.intent.message_kind == "followup":
+        _SIMPLE_AFFIRM_F = frozenset({
+            "sure", "yes", "yeah", "yep", "ok", "okay", "please", "go ahead",
+            "do it", "sounds good", "perfect", "of course", "absolutely",
+            "why not", "love that", "great idea", "go for it",
+        })
+        _msg_lower_f = (state.normalized_user_message or "").lower().strip().rstrip("!.,")
+        _first_word_f = _msg_lower_f.split()[0] if _msg_lower_f.split() else ""
+        _is_short_affirm_f = (
+            _msg_lower_f in _SIMPLE_AFFIRM_F or _first_word_f in _SIMPLE_AFFIRM_F
+        ) and len(_msg_lower_f.split()) <= 4
+
+        if _is_short_affirm_f:
+            _prior_asst = [m for m in state.messages if m.role == "assistant"]
+            if _prior_asst:
+                _last_bot_f = _prior_asst[-1].content.strip()
+
+                # ── Case A: Bot offered to narrow recommendations ──────
+                # LLM decides whether the last bot message contained any
+                # narrowing/filtering offer (any phrasing) and returns either:
+                #   • a natural-language question to ask the visitor, OR
+                #   • "PASS" meaning no narrowing offer was found — fall through.
+                # Keyword lists removed; the LLM handles all phrasing variants.
+                _nq = await _generate_narrowing_question(
+                    state, last_bot_text=_last_bot_f
+                )
+                if _nq and _nq.strip().upper() == "PASS":
+                    # No narrowing offer found — continue to Case B and beyond.
+                    pass
+                else:
+                    # Either LLM returned a question, or the call failed (None).
+                    if _nq:
+                        _nq_text = _nq
+                    else:
+                        # Static topic-keyed fallback on LLM failure.
+                        _task_f = state.scene.shopping_task
+                        _atopic_f = state.scene.active_topic or ""
+                        if _task_f and _task_f.product_type:
+                            _nq_text = (
+                                f"Sure! To find the best {_task_f.product_type}, "
+                                f"tell me: who is it for, what's your budget, "
+                                f"or any style preference?"
+                            )
+                        elif _atopic_f in ("dining", "food"):
+                            _nq_text = (
+                                "Of course! Quick question — do you prefer a sit-down "
+                                "meal, something fast, or a light snack? Any cuisine in mind?"
+                            )
+                        elif _atopic_f == "shopping":
+                            _nq_text = (
+                                "Happy to narrow it down! Is this for you or someone else, "
+                                "and do you have a budget or style in mind?"
+                            )
+                        elif _atopic_f == "entertainment":
+                            _nq_text = (
+                                "Sure! Any preference — a specific genre, age group, "
+                                "or something to do right now vs. later?"
+                            )
+                        else:
+                            _nq_text = (
+                                "Of course! Tell me a bit more — who is it for, "
+                                "what's your budget, or any preference you have in mind?"
+                            )
+                    _nq_msg = Message(
+                        role="assistant",
+                        content=_nq_text,
+                        turn_id=state.turn_id,
+                        metadata={
+                            "strategy": "narrowing_clarification",
+                            "experience_mode": "clarification",
+                        },
+                    )
+                    return {
+                        "final_response_text": _nq_text,
+                        "response_debug_summary": "strategy=narrowing_clarification (followup affirmation)",
+                        "messages": [_nq_msg],
+                        "debug_enrichment": state.debug_enrichment.model_copy(
+                            update={"response_experience_mode": "narrowing_clarification"}
+                        ),
+                        "_trace_summary": "Followup affirmation confirmed narrowing offer: returned clarifying question",
+                    }
+
+                # ── Case B: Bot offered a different topic ──────────────
+                # Maps signal phrases in last bot message → (topic, clarifying text)
+                _last_bot_f_lower = _last_bot_f.lower()
+                _TOPIC_OFFER_MAP: list[tuple[tuple[str, ...], str]] = [
+                    (
+                        (
+                            "point you to any stores", "point you to stores",
+                            "suggest what's worth checking", "explore the shops",
+                            "i can suggest what", "feel like browsing",
+                        ),
+                        "Of course! What kind of stores are you looking for? "
+                        "Fashion, beauty, accessories, or something else?",
+                    ),
+                    (
+                        (
+                            "what's showing", "what is showing", "muvi cinema",
+                            "cinema here if", "up for a film",
+                            "in the mood for entertainment",
+                        ),
+                        "Sure! Muvi Cinema is here. Want me to list what's showing, "
+                        "or are you looking for something else in entertainment?",
+                    ),
+                    (
+                        (
+                            "grab a bite", "point you to a good spot to eat",
+                            "suggest something quick to eat", "getting hungry",
+                        ),
+                        "Happy to! What are you in the mood for — something quick, "
+                        "a sit-down meal, coffee, or dessert?",
+                    ),
+                ]
+                for _offer_signals, _offer_text in _TOPIC_OFFER_MAP:
+                    if any(sig in _last_bot_f_lower for sig in _offer_signals):
+                        _offer_msg = Message(
+                            role="assistant",
+                            content=_offer_text,
+                            turn_id=state.turn_id,
+                            metadata={
+                                "strategy": "topic_offer_clarification",
+                                "experience_mode": "clarification",
+                            },
+                        )
+                        return {
+                            "final_response_text": _offer_text,
+                            "response_debug_summary": "strategy=topic_offer_clarification",
+                            "messages": [_offer_msg],
+                            "debug_enrichment": state.debug_enrichment.model_copy(
+                                update={"response_experience_mode": "topic_offer_clarification"}
+                            ),
+                            "_trace_summary": "Followup affirmation confirmed topic-switch offer: returned clarifying prompt",
+                        }
+
     is_mall_info = (
         state.response_plan.chosen_strategy == "mall_overview"
         or state.intent.domain == "mall_info"
@@ -2147,18 +2394,20 @@ async def generate_response(state: ConciergeState) -> dict:
         system_prompt = get_concierge_system_prompt(mall_context)
 
         # ── Emotional recovery tone modifier ──────────────────────────
-        # When the visitor was recently frustrated or disengaged, append a
+        # When the guest was recently frustrated or disengaged, append a
         # tone instruction so the LLM opens with brief, genuine empathy
         # before moving into recommendations.  This keeps the first sentence
         # warm without turning the entire response into an apology.
         if state.scene.recent_mood in ("emotional", "disengagement"):
             system_prompt += (
-                "\n\nTONE OVERRIDE — EMOTIONAL RECOVERY: The visitor was recently "
-                "frustrated or disengaged. Begin your response with ONE brief, "
-                "genuine sentence acknowledging their experience (e.g. 'Let me try "
-                "to make this easier for you.' or 'Happy to help you find the right "
-                "spot.'). Do NOT over-apologise or dwell on it — pivot quickly to "
-                "the recommendation. Keep the rest of the response warm but practical."
+                "\n\nTONE OVERRIDE — EMOTIONAL RECOVERY: The guest was recently "
+                "frustrated or disengaged. Open your response with ONE brief, "
+                "sincere sentence that acknowledges their experience with warmth and "
+                "composure (e.g. 'Allow me to make this a little easier for you.' or "
+                "'Let me point you in the right direction.'). "
+                "Do NOT over-apologise or dwell on the difficulty — pivot smoothly and "
+                "confidently into your recommendation. "
+                "Maintain the polished, reassuring register of a five-star concierge throughout."
             )
 
         query = state.normalized_user_message or state.raw_user_message
@@ -2206,43 +2455,66 @@ async def generate_response(state: ConciergeState) -> dict:
         category_instruction = ""
         if is_offer_query:
             category_instruction = (
-                "IMPORTANT: The visitor is asking about offers, deals, or discounts. "
+                "IMPORTANT: The guest is asking about offers, deals, or discounts. "
                 "The 'Relevant tenants' section contains active offers and events. "
                 "Present ALL offers with the store name, discount details, validity "
                 "dates, and terms. If no offers matched for a specific store, "
-                "acknowledge that gracefully (e.g. 'I don't have a current offer for "
-                "that store') and then list any other active offers from the context — "
-                "do NOT leave the visitor empty-handed. "
+                "acknowledge it with grace (e.g. 'I do not have a current offer on file "
+                "for that store') and then present any other active offers from the context — "
+                "do NOT leave the guest without options. "
                 "If genuinely no offers exist in the context, say: 'There are no "
-                "active promotions listed right now, but it's worth asking individual "
-                "stores directly — many run in-store deals not listed centrally.' "
+                "active promotions listed at present, though it is worth asking individual "
+                "stores directly — many run in-store deals not published centrally.' "
                 "NEVER say you don't have offer information if the context contains offers.\n\n"
             )
         elif is_broad_discovery:
             category_instruction = (
                 "IMPORTANT: This is a broad shopping query. The 'Relevant tenants' "
                 "section contains stores across multiple categories. Group them by "
-                "category (e.g. Fashion, Beauty, Electronics, Jewelry) and present "
+                "category (e.g. Fashion, Beauty, Electronics, Jewellery) and present "
                 "4-6 curated suggestions with a brief description and location. "
-                "Make the mall feel rich and diverse.\n\n"
+                "Present the mall as a rich, diverse destination worth exploring.\n\n"
             )
         elif is_expanded_discovery:
             category_instruction = (
                 "IMPORTANT: The 'Relevant tenants' section includes both direct "
                 "matches and related suggestions. Present the direct matches first, "
-                "then naturally suggest the related options (e.g. 'You might also "
-                "enjoy...' or 'To pair with that...'). Aim for 4-6 total suggestions "
-                "so the visitor has plenty of choice.\n\n"
+                "then gracefully introduce the related options "
+                "(e.g. 'You may also enjoy...' or 'To complement that...'). "
+                "Aim for 4-6 total suggestions to give the guest a considered selection.\n\n"
             )
         elif is_category_turn:
-            category_instruction = (
-                "IMPORTANT: This is a category lookup. The 'Relevant tenants' "
-                "section contains ALL matching tenants for the requested category. "
-                "You MUST list ALL of them with a brief description and location. "
-                "Do NOT add stores from other categories. Do NOT pad with "
-                "unrelated suggestions like 'grab a coffee' or 'enjoy dessert'. "
-                "Keep your answer focused on exactly what was asked.\n\n"
-            )
+            # When a specific target person is set (e.g. "men", "son", "girlfriend"),
+            # this is a targeted recommendation, not a directory lookup.
+            # Override to shortlist mode so the LLM presents 2–3 best fits,
+            # not a full category dump.
+            _task = getattr(state.scene, "shopping_task", None)
+            _target_person = (
+                getattr(_task, "target_person", "") if _task else ""
+            ) or ""
+            _has_specific_target = _target_person not in ("", "self")
+
+            if _has_specific_target:
+                _product = getattr(_task, "product_type", "") or "items"
+                category_instruction = (
+                    f"IMPORTANT: The guest is shopping for {_product} for "
+                    f"{_target_person}. The 'Relevant tenants' section contains "
+                    f"stores that carry {_target_person}'s options. "
+                    f"Present your 2–3 best recommendations — the stores most "
+                    f"suited to this specific request. Do NOT list every store. "
+                    "Choose the strongest fits, include the floor/zone for each, "
+                    "and briefly explain in one line why each is the right choice. "
+                    "Do NOT pad with stores from unrelated categories.\n\n"
+                )
+            else:
+                category_instruction = (
+                    "IMPORTANT: This is a category lookup. The 'Relevant tenants' "
+                    "section contains ALL matching tenants for the requested category. "
+                    "You MUST list ALL of them with a brief description and location. "
+                    "Do NOT add stores from other categories. Do NOT pad with "
+                    "unrelated suggestions like 'grab a coffee' or 'enjoy dessert'. "
+                    "Keep your answer focused on exactly what was asked.\n\n"
+                )
 
         conversation_context = _build_conversation_context(state)
         scene_ack = ""
@@ -2401,14 +2673,14 @@ def _build_concierge_experience_instruction(
         domains_str = " and ".join(excluded) if excluded else "the excluded category"
         return (
             f"{ack_prefix}"
-            "CATEGORY EXCLUSION MODE: The visitor has explicitly refused a category.\n"
+            "CATEGORY EXCLUSION MODE: The guest has explicitly declined a category.\n"
             f"Excluded domains: {domains_str}\n"
             "Rules:\n"
             "  1. Do NOT suggest anything from the excluded domains — not even as a passing mention\n"
-            "  2. Acknowledge the exclusion briefly (e.g. 'Understood — no dining.')\n"
-            "  3. Pivot to alternatives: ask what the visitor IS looking for, "
+            "  2. Acknowledge the exclusion briefly and graciously (e.g. 'Of course — I will keep that in mind.')\n"
+            "  3. Pivot to alternatives: invite the guest to share what they are looking for, "
             "or suggest non-excluded options (shopping, entertainment, services)\n"
-            "  4. Keep the response short — 2-3 sentences maximum\n\n"
+            "  4. Keep the response concise — 2-3 sentences maximum\n\n"
         )
 
     # ── Mode: constraint refinement (highest priority) ────────────────
@@ -2416,12 +2688,12 @@ def _build_concierge_experience_instruction(
         constraints = state.scene.visit_constraints
         return (
             f"{ack_prefix}"
-            "CONSTRAINT REFINEMENT MODE: The visitor is refining a prior recommendation.\n"
+            "CONSTRAINT REFINEMENT MODE: The guest is refining a prior recommendation.\n"
             f"Applied constraints: {', '.join(constraints) if constraints else 'see previous context'}\n"
             "Do NOT restart from scratch. Instead:\n"
-            "  1. Acknowledge the constraint naturally (e.g. 'For something quicker...')\n"
+            "  1. Acknowledge the constraint naturally and composedly (e.g. 'For something a little quicker...')\n"
             "  2. Suggest 2-3 options that satisfy the new constraint\n"
-            "  3. Be direct and concise — no long lists\n\n"
+            "  3. Be direct and concise — no lengthy lists\n\n"
         )
 
     # ── Mode: micro-itinerary ─────────────────────────────────────────
@@ -2447,30 +2719,30 @@ def _build_concierge_experience_instruction(
             f"(2–4 steps max, using at most {entity_cap} places).\n"
             f"{visit_plan_note}"
             "Rules:\n"
-            "  1. Open with ONE sentence acknowledging the visitor's situation\n"
-            "     — Do NOT start with 'Great!', 'Sure!', 'Of course!', or filler phrases\n"
-            "  2. Present each step as a natural transition: "
-            "'Start at [X]...', 'Then head to [Y]...', 'Finish with [Z]...'\n"
+            "  1. Open with ONE composed sentence acknowledging the guest's situation\n"
+            "     — Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Hey', or any casual filler\n"
+            "  2. Present each step as a natural, purposeful transition: "
+            "'Begin at [X]...', 'From there, head to [Y]...', 'Close the visit at [Z]...'\n"
             "  3. Include store name, floor/zone, and ONE reason why it fits\n"
             "  4. Weave it into a narrative — NOT a bullet dump\n"
-            "Speak like a knowledgeable friend walking them through the mall.\n\n"
+            "Speak like a knowledgeable concierge guiding a guest through a curated experience.\n\n"
         )
 
     # ── Mode: guided plan ─────────────────────────────────────────────
     if strategy == "guided_plan":
         return (
             f"{ack_prefix}"
-            "GUIDED PLAN MODE: The visitor has shared their situation — give them a concierge plan.\n"
+            "GUIDED PLAN MODE: The guest has shared their situation — give them a curated concierge plan.\n"
             "Your response MUST:\n"
-            f"  1. Open with ONE sentence acknowledging their situation\n"
-            "     — Do NOT start with 'Great!', 'Sure!', 'Of course!', or filler\n"
-            f"  2. Give a compact 3–4 step plan (max {entity_cap} stores)\n"
+            f"  1. Open with ONE composed sentence acknowledging their situation\n"
+            "     — Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Hey', or any casual filler\n"
+            f"  2. Deliver a compact 3–4 step plan (max {entity_cap} stores)\n"
             "  3. Weave store names into a natural narrative — NOT a bullet dump\n"
-            "  4. Close with ONE brief offer to extend or refine the plan\n"
+            "  4. Close with ONE brief, gracious offer to extend or refine the plan\n"
             "Example openers (vary each time — NEVER repeat the same pattern):\n"
-            "  'Head to [X] first — it's the best fit. Then [Y] for [reason]. Want to add a dining stop?'\n"
-            "  'For [situation], [X] is your strongest option. [Y] is a solid backup. Here's the plan:'\n"
-            "  'Perfect for [situation]: start at [X], then [Y], and wrap up at [Z].'\n\n"
+            "  'Head to [X] first — the strongest fit for your visit. Then [Y] for [reason].'\n"
+            "  'For [situation], [X] is your best option. [Y] is an excellent alternative.'\n"
+            "  'Here is a plan for [situation]: begin at [X], then [Y], and finish at [Z].'\n\n"
         )
 
     # ── Mode: curated shortlist ───────────────────────────────────────
@@ -2493,8 +2765,8 @@ def _build_concierge_experience_instruction(
             f"{ack_prefix}"
             "QUICK ANSWER MODE: Brief and direct.\n"
             "  • Maximum 3 options\n"
-            "  • The visitor has a constraint — honour it immediately\n"
-            "  • Acknowledge the constraint, give the shortlist, done\n\n"
+            "  • The guest has a constraint — honour it immediately\n"
+            "  • Acknowledge the constraint composedly, give the shortlist, done\n\n"
         )
 
     # ── Sequential continuation ───────────────────────────────────────
@@ -2519,10 +2791,10 @@ def _build_concierge_experience_instruction(
                 )
         return (
             f"{ack_prefix}"
-            f"SEQUENCE CONTINUATION: The visitor has already covered {last_covered}. "
-            "Continue their visit journey naturally — do NOT re-suggest anything "
+            f"SEQUENCE CONTINUATION: The guest has already explored {last_covered}. "
+            "Continue their visit journey seamlessly — do NOT re-suggest anything "
             f"from previous steps.{next_steps} "
-            "Respond as if you are walking them through the next part of the mall.\n\n"
+            "Respond as a concierge guiding them gracefully to the next part of the visit.\n\n"
         )
 
     # ── Playbook itinerary mode ───────────────────────────────────────
@@ -2546,9 +2818,9 @@ def _build_concierge_experience_instruction(
         )
         return (
             f"{ack_prefix}"
-            f"VISIT PLAN MODE: The visitor has a multi-step plan: {plan_str}.\n"
-            "Structure your response as a mini-itinerary that honours this sequence. "
-            "Use natural transitions. Do NOT reorder the planned steps.\n\n"
+            f"VISIT PLAN MODE: The guest has a multi-step plan: {plan_str}.\n"
+            "Structure your response as a curated mini-itinerary that honours this sequence. "
+            "Use natural, flowing transitions. Do NOT reorder the planned steps.\n\n"
         )
 
     # ── Default: experience guidance when context is present ─────────
@@ -2562,10 +2834,10 @@ def _build_concierge_experience_instruction(
     if has_context:
         return (
             f"{ack_prefix}"
-            "EXPERIENCE GUIDANCE: The visitor has shared context about their situation. "
-            "Frame your response as a guided suggestion flow — not a flat list. "
-            "Lead with what fits them best, briefly explain why, "
-            "and close with one natural follow-up offer.\n\n"
+            "EXPERIENCE GUIDANCE: The guest has shared context about their visit. "
+            "Frame your response as a guided, curated experience — not a flat list. "
+            "Lead with what fits them best, explain why in one line, "
+            "and close with one gracious follow-up offer.\n\n"
         )
 
     return ack_prefix  # May still carry a refinement note
@@ -2589,10 +2861,10 @@ def _build_hybrid_filter_instruction(fact_ctx: dict, state: ConciergeState) -> s
 
     if fact_ctx.get("family_filter_active"):
         lines.append(
-            "• FAMILY FILTER: The visitor has a child/kid with them. "
-            "Lead with the factual answer (e.g. movie schedule). "
+            "• FAMILY FILTER: The guest has a child with them. "
+            "Lead with the factual answer (e.g. film schedule). "
             "You MAY add ONE brief sentence about which options are most "
-            "family-friendly or kid-suitable — but do NOT replace the facts."
+            "family-friendly or suited for children — but do NOT replace the facts."
         )
     if fact_ctx.get("budget_filter_active"):
         lines.append(
@@ -2606,8 +2878,8 @@ def _build_hybrid_filter_instruction(fact_ctx: dict, state: ConciergeState) -> s
         )
     if fact_ctx.get("romantic_filter_active"):
         lines.append(
-            "• ROMANTIC FILTER: The visitor is with a partner. "
-            "Note any couples-friendly aspects where relevant."
+            "• ROMANTIC FILTER: The guest is with a partner. "
+            "Note any couple-friendly or occasion-worthy aspects where relevant."
         )
 
     if len(lines) == 1:
@@ -2666,21 +2938,21 @@ def _build_decision_response_directive(state: ConciergeState) -> str:
     if needs_clarification and clarification_topic == "gift_target":
         parts.append(
             "INVESTIGATIVE MODE — VAGUE GIFT QUERY:\n"
-            "The visitor asked about a gift but has not indicated who it is for.\n"
+            "The guest is asking about a gift but has not indicated who it is for.\n"
             "Follow this approach:\n"
-            "  1. Give 2 broad gift suggestions as an immediate opener — show you can help.\n"
+            "  1. Offer 2 broad gift suggestions as an immediate opener — demonstrate you are ready to help.\n"
             "  2. Ask exactly ONE targeting question, e.g.: 'Is this for a partner, "
-            "a child, or a friend? That'll help me narrow it down.'\n"
+            "a child, or a friend? That will help me narrow things down for you.'\n"
             "Do NOT ask about budget yet. Do NOT ask more than one question.\n"
-            "Keep the opener concise — 2 options max before the question.\n"
+            "Keep the opener concise — 2 options at most before the question.\n"
         )
         return "\n".join(parts) + "\n"
     elif needs_clarification and clarification_topic == "shopping_target":
         parts.append(
             "INVESTIGATIVE MODE — VAGUE SHOPPING QUERY:\n"
-            "The visitor's shopping query is open-ended without enough context.\n"
-            "Give 2–3 broad suggestions across different categories, then ask:\n"
-            "'Are you shopping for someone specific, or just browsing?'\n"
+            "The guest's shopping query is open-ended without enough context.\n"
+            "Offer 2–3 broad suggestions across different categories, then ask:\n"
+            "'Are you shopping for someone in particular, or simply browsing?'\n"
             "One question only.\n"
         )
         return "\n".join(parts) + "\n"
@@ -2689,10 +2961,10 @@ def _build_decision_response_directive(state: ConciergeState) -> str:
     scene_sufficient = getattr(state.debug_enrichment, "scene_sufficient", False)
     if scene_sufficient:
         parts.append(
-            "SCENE CONTEXT IS SUFFICIENT: The visitor's context (companions, budget, "
+            "SCENE CONTEXT IS SUFFICIENT: The guest's context (companions, budget, "
             "target person, or occasion) is already known. "
             "DO NOT ask a clarifying question. Infer any remaining details and "
-            "respond directly with a recommendation.\n"
+            "respond directly with a well-considered recommendation.\n"
         )
 
     # ── 4-part decision structure ──────────────────────────────────────
@@ -2704,17 +2976,17 @@ def _build_decision_response_directive(state: ConciergeState) -> str:
     ):
         parts.append(
             "DECISION STRUCTURE — shape your response as follows:\n"
-            "  1. PRIMARY RECOMMENDATION: Your single best pick. "
-            "One sentence explaining exactly why it fits this visitor.\n"
-            "  2. SECONDARY OPTION: One solid alternative / fallback. "
-            "One sentence on the tradeoff vs. the primary.\n"
-            "  3. ACTION PLAN: Tell the visitor what to do next — "
+            "  1. PRIMARY RECOMMENDATION: Your single best selection. "
+            "One sentence explaining precisely why it is the right choice for this guest.\n"
+            "  2. SECONDARY OPTION: One considered alternative / fallback. "
+            "One sentence on how it differs from the primary and when it suits better.\n"
+            "  3. ACTION PLAN: Tell the guest exactly what to do next — "
             "where to go first, what to look for.\n"
-            "  4. OPTIONAL FOLLOW-UP: Add ONE short question ONLY if it would "
+            "  4. OPTIONAL FOLLOW-UP: Add ONE brief question ONLY if it would "
             "meaningfully improve the next recommendation. Omit entirely if the "
-            "plan is already clear.\n"
+            "plan is already clear and complete.\n"
             "HARD RULES: Max 2–3 stores total. Max 2 lines per item. "
-            "No generic brand descriptions. No catalog-style lists.\n"
+            "No generic brand descriptions. No catalogue-style lists.\n"
         )
 
     return "\n".join(parts) + "\n" if parts else ""
@@ -2740,12 +3012,12 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
     if mode == "clarification_request":
         return (
             "RESPONSE MODE — CLARIFICATION REQUEST:\n"
-            "The visitor asked for something outside the bot's capabilities, "
+            "The guest has asked for something outside our current capabilities, "
             "or the input was unclear. Rules:\n"
-            "  1. Politely acknowledge that this isn't something the bot can do.\n"
-            "  2. Briefly redirect to what the bot CAN help with.\n"
-            "  3. Do NOT pretend to attempt the unsupported action.\n"
-            "  4. Keep it friendly and brief — one or two sentences max.\n\n"
+            "  1. Acknowledge the limitation graciously — briefly and without dwelling on it.\n"
+            "  2. Redirect to what the concierge CAN assist with.\n"
+            "  3. Do NOT attempt the unsupported action.\n"
+            "  4. Keep it composed and brief — one or two sentences at most.\n\n"
         )
 
     # ── graceful_recovery (low-confidence, non-unsupported) ───────────
@@ -2755,13 +3027,13 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
     if mode == "graceful_recovery":
         return (
             "RESPONSE MODE — GRACEFUL RECOVERY:\n"
-            "The visitor's query is unclear or outside supported topics. "
+            "The guest's query is unclear or outside supported topics. "
             "Rules:\n"
             "  1. Do NOT hallucinate stores, services, or details.\n"
-            "  2. Offer 3–4 supported directions "
-            "(e.g. dining, shopping, movies, services).\n"
-            "  3. Ask ONE short, focused clarifying question if it would help.\n"
-            "  4. Never claim information you don't have.\n\n"
+            "  2. Offer 3–4 supported directions graciously "
+            "(e.g. dining, shopping, cinema, services).\n"
+            "  3. Ask ONE short, focused clarifying question if it would genuinely help.\n"
+            "  4. Never claim information you do not have.\n\n"
         )
 
     # ── context_acknowledgement ───────────────────────────────────────
@@ -2773,13 +3045,13 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
     if mode == "hybrid_plan":
         return (
             "RESPONSE MODE — HYBRID PLAN:\n"
-            "The visitor's query spans more than one goal (e.g. food AND movies). "
+            "The guest's query covers more than one goal (e.g. dining AND cinema). "
             "Rules:\n"
-            "  1. Produce ONE unified answer — NOT two disconnected lists.\n"
+            "  1. Produce ONE unified, seamless answer — NOT two disconnected lists.\n"
             "  2. Lead with the dominant intent; weave the secondary goal in naturally.\n"
-            "  3. Use a structured mini-plan format (2–3 steps max).\n"
-            "  4. Example: 'Here's a plan: catch a movie at [Cinema], "
-            "then grab dinner at [Restaurant] nearby.'\n\n"
+            "  3. Use a structured mini-plan format (2–3 steps at most).\n"
+            "  4. Example: 'Here is a plan: enjoy a film at [Cinema], "
+            "then a wonderful dinner at [Restaurant] just nearby.'\n\n"
         )
 
     # ── best_effort_shortlist ─────────────────────────────────────────
@@ -2808,9 +3080,9 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
         if confidence == "medium":
             return (
                 "RESPONSE MODE — GUIDED RECOMMENDATION:\n"
-                "Present a focused shortlist (3–5 options) with a brief reason "
-                "why each one fits the visitor. "
-                "Acknowledge any scenario or companion context naturally.\n\n"
+                "Present a focused, curated shortlist (3–5 options) with a brief reason "
+                "why each one is the right choice for this guest. "
+                "Acknowledge any scenario or companion context naturally and graciously.\n\n"
             )
         # high confidence — minimal overlay; experience layer already handles it
         return ""
@@ -2838,7 +3110,7 @@ def _build_hybrid_concierge_instruction(state: ConciergeState) -> str:
         lines.append("\nHYBRID INTENT CONTEXT:")
         if primary_intent:
             lines.append(
-                f"• PRIMARY GOAL: {primary_intent} — this is what the visitor fundamentally wants. "
+                f"• PRIMARY GOAL: {primary_intent} — this is what the guest fundamentally wants. "
                 "Shape the primary answer around this."
             )
         if secondary_intents:
@@ -2856,15 +3128,15 @@ def _build_hybrid_concierge_instruction(state: ConciergeState) -> str:
     # Specific guidance for common patterns
     if "family_filter" in secondary_intents or "kid_friendly" in modifiers:
         lines.append(
-            "• Since a child is with the visitor, prioritise family-friendly options "
-            "and briefly note why they're kid-suitable. "
-            "Do NOT switch the entire response to 'kids entertainment' unless that "
-            "is what was explicitly asked."
+            "• Since a child is with the guest, prioritise family-friendly options "
+            "and briefly note why each is suited for children. "
+            "Do NOT redirect the entire response to 'kids entertainment' unless that "
+            "is what was explicitly requested."
         )
     if "before_movie_constraint" in secondary_intents or "near_cinema" in modifiers:
         lines.append(
-            "• TIMING CONTEXT: The visitor has a time/location constraint relative to cinema. "
-            "Prioritise options that are quick and close to the cinema area."
+            "• TIMING CONTEXT: The guest has a time/location constraint relative to the cinema. "
+            "Prioritise options that are efficient and close to the cinema area."
         )
     if "gift_for" in secondary_intents or "gift_friendly" in modifiers:
         lines.append(

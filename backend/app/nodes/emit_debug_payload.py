@@ -15,7 +15,7 @@ CONTRACT
 
 from __future__ import annotations
 
-from app.models.state import ConciergeState
+from app.models.state import ConciergeState, SMALLTALK_KINDS
 from app.nodes._tracing import traced_node
 from app.observability.logger import log_turn_summary
 
@@ -94,11 +94,17 @@ async def emit_debug_payload(state: ConciergeState) -> dict:
     )
 
     # ── Response Mode Resolver debug lines ───────────────────────────
-    if de.response_mode or state.response_plan.response_mode:
-        rm = de.response_mode or state.response_plan.response_mode
+    _is_smalltalk_turn = state.intent.message_kind in SMALLTALK_KINDS
+    _rm = (
+        de.response_mode
+        or state.response_plan.response_mode
+        or ("direct_factual" if state.flow_type == "factual" else "")
+        or ("context_acknowledgement" if _is_smalltalk_turn else "")
+    )
+    if _rm:
         cl = de.confidence_level or state.response_plan.confidence_level
         debug_lines.extend([
-            f"response_mode: {rm}",
+            f"response_mode: {_rm}",
             f"confidence_level: {cl or 'n/a'}",
             f"response_mode_reason: {de.response_mode_reason or 'n/a'}",
             f"fallback_applied: {de.fallback_applied}",
@@ -142,10 +148,13 @@ async def emit_debug_payload(state: ConciergeState) -> dict:
         "retrieval_priority": state.retrieval_priority or "",
         # ── Response Mode Resolver fields ─────────────────────────────
         # For factual flow, choose_strategy is not called; infer mode from flow_type.
+        # For smalltalk turns (greeting/thanks/farewell/identity/etc.), infer from
+        # message_kind since choose_strategy is skipped entirely for those turns.
         "response_mode": (
             de.response_mode
             or state.response_plan.response_mode
             or ("direct_factual" if state.flow_type == "factual" else "")
+            or ("context_acknowledgement" if state.intent.message_kind in SMALLTALK_KINDS else "")
         ),
         "confidence_level": (
             de.confidence_level
@@ -157,7 +166,9 @@ async def emit_debug_payload(state: ConciergeState) -> dict:
             )
         ),
         "response_mode_reason": de.response_mode_reason or (
-            "factual flow — direct_factual inferred" if state.flow_type == "factual" else ""
+            "factual flow — direct_factual inferred" if state.flow_type == "factual" else
+            ("smalltalk — context_acknowledgement inferred from message_kind"
+             if state.intent.message_kind in SMALLTALK_KINDS else "")
         ),
         "fallback_applied": de.fallback_applied,
         # ── Experience Layer fields ───────────────────────────────────

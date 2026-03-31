@@ -62,43 +62,46 @@
 - Expands short queries (≤3 words) via `query_expander` for richer downstream matching
 
 ### 2. `interpret_turn`
-- **Hybrid classifier**: rule-based fast path + LLM fallback
-- Short/common queries resolved from static lookup tables (zero LLM cost)
-- Keyword patterns match domain + sub_intent for mid-length queries
-- LLM invoked only when rule confidence falls below threshold
-- **Query normalization** (`normalize_query_with_pattern`): semantically equivalent variants ("now showing", "what's playing", "what can i watch") are mapped to a canonical form before classification; also emits a `canonical_query_pattern` label (e.g., `"movie_lookup"`) for debug tracing
-- **Unsupported input detection** (`is_likely_unsupported`): gibberish, keyboard mashing (e.g., `"asdf"`), and high-consonant/low-vowel strings are detected early; the node sets `is_unsupported=True` and bypasses the LLM path entirely. **Important:** The character-diversity check (`_MIN_UNIQUE_CHAR_RATIO`) only fires on inputs with ≤ 4 tokens — natural English sentences always have low unique-char ratios (~0.25–0.35) due to repeated common letters, so applying the check to longer text causes false positives on valid multi-word queries.
-- **Brand misspelling correction** (`maybe_correct_brand`): fuzzy-matches common brand misspellings (e.g., `"nkie"` → `"Nike"`) and injects a correction hint into the debug payload
-- Outputs: `domain`, `sub_intent`, `message_kind` (fresh_request, correction, refinement, followup, topic_switch, **context_setting**)
+- **Pure LLM classifier** (`gpt-4o-mini`): no rule-based fast path, no keyword overrides after LLM response
+- Prompt instructs the LLM to return a structured JSON with: `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections`, `domain`, `sub_intent`, `message_kind`, `confidence`, `fact_scope_candidate`
+- **`is_gibberish`** flag replaces `is_likely_unsupported` — the LLM itself decides if input is non-sensical
+- **`scene_corrections`** dict allows the classifier to patch `SceneMemory` directly (e.g. correct companion type) before `update_scene_memory` runs
+- **`response_mode`** hint is passed forward to `response_mode_resolver` as the primary signal
+- All 15 `MessageKind` values are LLM-classified; `SMALLTALK_KINDS` frozenset gates the fast-path
 - **Interpretation contract** emitted on every turn (stored in `debug_enrichment`):
   ```json
   {
     "primary_intent": "",
     "scenario": "",
     "modifiers": [],
-    "message_kind": "",
+    "message_kind": "FRESH_REQUEST",
     "flow_type": "",
+    "response_mode": "",
+    "is_gibberish": false,
+    "secondary_intents": [],
+    "scene_corrections": {},
     "active_topic": "",
     "fact_scope": "",
-    "normalized_query": "",
-    "canonical_query_pattern": "",
     "topic_lock": false,
     "topic_lock_confidence": 0.0
   }
   ```
 
 ### 3. `update_scene_memory`
-- Extracts visitor context signals from the message
-- Tracks: companions, occasion, budget, audience, current area, active topic
-- Persists across turns for personalization
-- Scene signals feed directly into playbook resolution and entity ranking
-- **`_infer_goal` uses word-boundary matching** (`\bsignal\b` regex) when checking `_GOAL_SIGNALS`. Bare substring matching was causing false positives (e.g. `"eat"` matching inside `"weather"`, setting `scene.goal = "dining"` on an off-topic first turn). Word boundaries prevent these contamination cases.
+- **LLM-first delta extraction**: a structured `gpt-4o-mini` call returns only the fields that changed this turn — no full-scene rewrite
+- First applies `scene_corrections` from `interpret_turn` (atomic patches for companion corrections, topic resets, etc.)
+- New fields extracted: `scenario`, `user_role`, `style_intent`, `excluded_domains`, `visit_plan`, `shopping_task`
+- Handles abbreviation normalisation (e.g. `"bday"` → `"birthday"`) and wedding/event role disambiguation (`"groom"` → `user_role=groom`)
+- `ShoppingTask` sub-model tracks `item`, `recipient`, `budget_hint`, `urgency` when a specific purchase is identified
+- Scene signals feed directly into playbook resolution, entity ranking, and semantic signal generation
 
 ### 4. `resolve_playbooks`
 - Matches the turn against pre-defined scenario playbooks using `trigger_domains`, `trigger_sub_intents`, and `required_scene_signals`
 - Each playbook defines preferred tags, ranking boosts/penalties, must-include entity types, and response shape
+- **Occasion/wedding override**: when `scene.scenario` is a wedding-type event, wedding-aligned playbooks are boosted
+- **Luxury playbook guard**: playbooks tagged `luxury_only` are blocked when child companions are present
+- **Shopping task scope check**: when `scene.shopping_task` is active with a specific item, family signal biases apply only as soft boosts rather than overriding the task
 - Movie/cinema intent playbooks carry override priority to prevent shopping drift
-- Before/after movie playbooks bias toward `near_cinema` and `quick_stop` entities
 
 ### 5. `choose_strategy`
 - Maps intent + playbook → response strategy
@@ -651,37 +654,38 @@ Each turn flows through the LangGraph pipeline with a shared state object:
 
 ### Query Normalization
 
-Before classification, semantically equivalent phrasings are mapped to a canonical form via `_NORMALIZATION_TABLE` in `query_classifier.py`:
+`query_classifier.py` in v1.6 contains only the `is_likely_unsupported()` pre-flight check (a lightweight character-diversity heuristic for ≤4-token inputs). Full semantic normalization is handled by the LLM classifier, which returns `domain`, `sub_intent`, and a normalised interpretation without requiring explicit variant tables.
 
-| Variant | Canonical Form |
-|---------|---------------|
-| "now showing", "what's playing", "what can i watch", "what films are on" | "what movies are showing" |
-| "what's in this mall", "what does this mall have" | "what is available in this mall" |
-| "i want to eat", "looking for food", "hungry" | "where can i eat" |
-| "any deals", "any promotions", "current offers" | "what offers are available" |
+The `_NORMALIZATION_TABLE` and `normalize_query_with_pattern()` remain available for backward compatibility but are no longer called in the main pipeline path.
 
-`normalize_query_with_pattern` returns both the normalized query string and a `canonical_query_pattern` label (e.g., `"movie_lookup"`) for debug tracing.
+### Classification Priority (v1.6 — LLM-first)
 
-### Classification Priority
+1. **LLM classification** (`gpt-4o-mini`) → returns `flow_type`, `response_mode`, `message_kind`, `is_gibberish`, `scenario`, `scene_corrections`, etc.
+2. **`is_gibberish` guard** → if `True`, `generate_response` uses deterministic unsupported recovery path (no GPT-4.1 call)
+3. **`SMALLTALK_KINDS` check** → if `message_kind` in frozenset → smalltalk fast-path
+4. **Business policy rules** in `route_flow` → apply six hard rules on top of `flow_type_candidate`
 
-1. **Unsupported input detection** (`is_likely_unsupported`) → early exit with graceful recovery, no LLM
-2. **Smalltalk detection** (greetings, thanks, goodbye) → static responses, no LLM
-3. **Query normalization** → map variants to canonical form
-4. **Rule-based keyword matching** → zero LLM cost, high confidence for common patterns
-5. **LLM fallback** → only when rules fall below confidence threshold
+Previous rule-based keyword tables and the hybrid confidence threshold have been removed.
 
-### Message Kinds
+### Message Kinds (v1.6 — `MessageKind` str enum, all LLM-classified)
 
-| Kind | When Used |
-|------|-----------|
-| `fresh_request` | New standalone question |
-| `followup` | Short continuation of active topic |
-| `refinement` | Adding to current topic ("also", "what about") |
-| `constraint_refinement` | Tightening a prior suggestion ("something quicker", "not expensive") |
-| `correction` | Correcting a previous answer |
-| `topic_switch` | Changing topic explicitly |
-| `context_setting` | User declares scene context without asking a question — *"I'm here with my kid"*, *"it's our anniversary"*, *"solo visit"*. Routes to concierge for scene acknowledgement. Never routes to factual even if companion signals are present |
-| `greeting` / `smalltalk` | Casual chat, greetings |
+| Kind | Routes to Smalltalk? | When Used |
+|------|------|-----------|
+| `FRESH_REQUEST` | No | New standalone question |
+| `FOLLOWUP` | No | Short continuation of active topic |
+| `REFINEMENT` | No | Adding to current topic ("also", "what about") |
+| `CONSTRAINT_REFINEMENT` | No | Tightening a prior suggestion ("something quicker", "not expensive") |
+| `CORRECTION` | No | Correcting a previous answer |
+| `TOPIC_SWITCH` | No | Changing topic explicitly |
+| `CONTEXT_SETTING` | No | User declares scene context without asking a question — routes to concierge for acknowledgement |
+| `CATEGORY_NEGATION` | No | Rejecting a category ("not fast food") |
+| `COMPANION_CORRECTION` | No | Correcting who they're with |
+| `GREETING` | Yes | Hello, hi, welcome |
+| `HOWRU` | Yes | "How are you?" |
+| `THANKS` | Yes | "Thanks", "That's helpful" |
+| `FAREWELL` | Yes | "Bye", "Goodbye" — triggers LLM-personalised farewell |
+| `CRISIS` | Yes | Emotional distress signals |
+| `IDENTITY` | Yes | "Who are you?", "What can you do?" |
 
 ### Intent Override Priority (from tenant config)
 
@@ -702,57 +706,33 @@ When multiple domains could match, tenant config `intent_override_priority` reso
 
 ## Dual-Flow Architecture
 
-**File:** `backend/app/nodes/route_flow.py`
+**File:** `backend/app/nodes/route_flow.py` (v1.6 — thin policy layer)
 
-Every query is routed to one of two execution flows before `compose_context` runs:
+Every query is routed to one of two execution flows before `compose_context` runs. In v1.6, `route_flow` no longer contains keyword tables or regex patterns. It receives `intent.flow_type_candidate` from the LLM and applies six ordered business rules to confirm or override it.
 
 | Flow | When Used | Behaviour |
 |------|-----------|-----------|
 | `factual` | Exact data lookup needed — showtimes, hours, brand presence, offer details | Retrieval-first; entities sourced from canonical lookup; LLM only polishes the structured result |
 | `concierge` | Planning, recommendations, exploration, scenario-rich queries | Full playbook + entity ranking pipeline; LLM drives the narrative |
 
-### Priority-Ordered Routing Rules
+### Priority-Ordered Routing Rules (v1.6 — six business rules)
+
+`route_flow` receives `intent.flow_type_candidate` from the LLM and applies these rules in order. Keyword tables and regex signals have been removed.
 
 | Rule | Trigger | Result |
 |------|---------|--------|
-| 0 — Domain lock | Previous turn was factual + no explicit topic switch | Stay factual (continuity) |
-| 0 (else) — Domain lock release | Explicit topic switch detected (see switch signals below) | Sets `primary_intent = "concierge_recommendation"` so `update_memory` clears the lock for the next turn |
-| 0b — Near-cinema dining | Dining intent + proximity phrase ("near cinema", "near the food court") | Concierge — proximity acts as a location modifier, not a cinema intent override |
-| 1 — Cross-mall | `cross_mall` domain or `cross_mall_search` sub-intent | Always factual |
-| 2 — Factual sub-intent | `sub_intent` ∈ `_FACTUAL_SUB_INTENTS` | Factual — unless clear planning overlay |
-| 3 — Factual domain | `domain` ∈ `navigation`, `cross_mall`, `mall_info` | Factual — **unless** `_CONCIERGE_HARD_SIGNALS` present (pronoun/planning language overrides) |
-| 4 — Hard factual signals | Keyword match: "now showing", "where is the", "is X here", etc. | Factual |
-| 5 — Strong concierge sub-intent | `sub_intent` ∈ `_CONCIERGE_SUB_INTENTS` | Concierge |
-| 6 — Scene context | Companions/occasion/visit_type present AND primary intent not factual | Concierge |
-| 7 — Concierge hard signals | Planning keywords detected | Concierge (with factual primary intent override) |
-| 7b — Context-setting | `message_kind == "context_setting"` | Concierge (scene acknowledgement) |
-| 8 — Follow-up continuity | Prior turn was factual + `message_kind` is followup/refinement | Stay factual |
-| 9 — Constraint refinement | `message_kind == "constraint_refinement"` | Inherit prior flow |
+| 1 — Cross-mall override | `domain == "cross_mall"` or `sub_intent == "cross_mall_search"` | Always factual |
+| 2 — Gibberish / unsupported | `intent.is_gibberish == True` | Concierge with recovery flag |
+| 3 — Context-setting | `message_kind == "CONTEXT_SETTING"` | Concierge (scene acknowledgement) |
+| 4 — SMALLTALK_KINDS | `message_kind` in `SMALLTALK_KINDS` | Redirect to smalltalk fast-path |
+| 5 — Topic lock continuity | Active topic lock + follow-up/refinement kind | Inherit previous flow |
+| 6 — LLM candidate | Default | Trust `intent.flow_type_candidate` from LLM |
 
-### Domain Lock — Explicit Switch Signals
+`_resolve_response_strategy()` is called after routing to apply any response strategy override based on `intent.response_mode_hint`.
 
-Rule 0 bypasses the domain lock when any of the following is true:
+### Factual Sub-Intents
 
-- `intent.message_kind == "topic_switch"`
-- `_has_explicit_domain_switch(msg)` — matches `_EXPLICIT_DOMAIN_SWITCH_SIGNALS`
-- `intent.sub_intent ∈ _DOMAIN_SWITCH_SUB_INTENTS` — includes `family_filter`, `companion_context`, dining sub-intents, and activity/exploration intents
-- Any signal in `_CONCIERGE_HARD_SIGNALS` is present in the message — **includes personal pronoun references** (`"anything she"`, `"for her"`, `"she would"`, etc.)
-
-When the lock releases (explicit switch), `primary_intent` is immediately set to `"concierge_recommendation"` so `update_memory` writes a non-factual value and the domain lock cannot re-fire on subsequent turns.
-
-### Concierge Hard Signals (`_CONCIERGE_HARD_SIGNALS`)
-
-These keywords in the user message force concierge routing regardless of domain or sub-intent. Includes:
-
-- Planning language: `"suggest"`, `"before the movie"`, `"after the movie"`, `"date plan"`, `"gift for"`, etc.
-- Companion declarations: `"with my kid"`, `"with my daughter"`, `"with my wife"`, `"with my 7"`, etc.
-- Route/optimisation: `"most efficient order"`, `"best order to visit"`, `"value for money"`, etc.
-- Movie recommendations (not raw listings): `"show me movies"`, `"good movie for"`, `"recommend a movie"`, etc.
-- **Personal pronoun references** *(added v1.4)*: `"anything she"`, `"anything he"`, `"she would"`, `"he would"`, `"for her"`, `"for him"`, `"for them"`, etc. — ensures `"anything she would like"` routes to `guided_recommendation`, not entity lookup.
-
-### Factual Sub-Intents (`_FACTUAL_SUB_INTENTS`)
-
-These sub-intents always route to factual flow regardless of scene context:
+The LLM classifier recognises these sub-intents and returns `flow_type="factual"` for them:
 
 | Sub-Intent | Query Pattern |
 |-----------|---------------|
@@ -763,10 +743,6 @@ These sub-intents always route to factual flow regardless of scene context:
 | `cross_mall_search` | Cross-mall brand lookup |
 | `offer_details` | What offers/deals are available |
 | `brand_availability` | Do you have X / Is X here |
-
-### Pure Lookup Recognition (`_is_pure_lookup`)
-
-When a query contains companion or context signals alongside a factual question (e.g., *"any movies with my kid"*), `_is_pure_lookup` identifies it as a filtered factual lookup — the companion acts as a **filter**, not an intent replacement. Recognized patterns include: `"what movies"`, `"any movies"`, `"movies with"`, `"now showing"`, `"where is the"`, `"do you have "`, `"is there a "`, etc.
 
 ---
 
@@ -917,12 +893,15 @@ if scene_prefix:
 
 ### Live Collection State
 
-| Collection | Stores | Dining | Services | Cinemas | Total |
-|---|---|---|---|---|---|
-| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
-| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+| Collection | Mall | City | Total |
+|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | Al Nakheel Plaza | Buraidah | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | Mall of Arabia | Jeddah | **54** |
+| `cenomi_mall_al_nakheel_plaza_1` | Al Ahsa Mall | Al Ahsa | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_10` | The View Mall | Riyadh | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_27` | Al Nakheel Mall | Riyadh | *(see canonical)* |
 
-Re-run `ingest_vectors.py` after any canonical data refresh.
+Re-run `ingest_vectors.py --all` after any canonical data refresh.
 
 ---
 
@@ -931,16 +910,18 @@ Re-run `ingest_vectors.py` after any canonical data refresh.
 | Layer | Technology |
 |-------|------------|
 | Runtime | Python 3.11+, FastAPI, Uvicorn |
-| Pipeline | LangGraph StateGraph |
-| LLM | OpenAI GPT-4.1 (configurable model, temperature) |
+| Pipeline | LangGraph StateGraph (12 nodes + conditional edges) |
+| LLM — Generation | OpenAI GPT-4.1 (configurable model, temperature) |
+| LLM — Classification | OpenAI GPT-4o-mini (`classifier_model` setting, ~30× cheaper) |
 | Embeddings | OpenAI `text-embedding-3-small` |
-| Vector Store | Chroma (local, persistent) |
+| Vector Store | Chroma (local, persistent, cosine HNSW) |
 | Models | Pydantic v2 |
-| Sessions | In-memory (LRU, max 1000) + Redis (optional) |
+| Sessions | In-memory (LRU, max 1000) + Redis (optional, `BACKEND_REDIS_URL`) |
 | Cache | Redis — sessions, mall contexts, vector search results |
+| Streaming | SSE via `POST /api/chat/stream` — token-by-token with `suggestions` in `done` event |
 | Frontend | React 19, Vite 7, TypeScript 5.9, Tailwind v4 |
-| Data | JSON files (canonical, semantic, playbooks, context_packs, tenant_config) |
-| Data Pipeline | Deterministic ETL (convert_to_canonical.py) + LLM synthesis (generate_mall_data.py) |
+| Data | JSON files (canonical, semantic, playbooks, context_packs, tenant_config) — five malls |
+| Data Pipeline | Deterministic ETL (`convert_to_canonical.py`) + LLM synthesis (`generate_mall_data.py`) |
 
 ---
 
@@ -954,8 +935,8 @@ Re-run `ingest_vectors.py` after any canonical data refresh.
 | `app/runtime.py` | Global singletons (mall context, session store) |
 | `app/graph/builder.py` | LangGraph pipeline compilation |
 | `app/nodes/generate_response.py` | LLM prompt assembly and response generation (incl. unsupported recovery path and offer honesty guard) |
-| `app/nodes/interpret_turn.py` | Hybrid intent classifier — query normalization, unsupported detection, brand correction, context_setting kind |
-| `app/nodes/route_flow.py` | Dual-flow routing — factual vs. concierge decision with priority-ordered rules |
+| `app/nodes/interpret_turn.py` | Pure LLM classifier (`gpt-4o-mini`) — returns `flow_type`, `response_mode`, `is_gibberish`, `secondary_intents`, `modifiers`, `scenario`, `scene_corrections`; emits `interpretation_contract` |
+| `app/nodes/route_flow.py` | Thin policy layer — six business rules on top of `intent.flow_type_candidate`; `_resolve_response_strategy()` helper |
 | `app/nodes/compose_context.py` | Entity selection and context building |
 | `app/nodes/rank_and_dedupe.py` | Semantic ranking, normalized canonical dedup, entity capping, normalization debug notes |
 | `app/nodes/decide_retrieval.py` | Retrieval gate — populates `retrieval_discipline_reason` in debug |
@@ -969,7 +950,9 @@ Re-run `ingest_vectors.py` after any canonical data refresh.
 | `llm/prompts/concierge_prompt.py` | Concierge system prompt with grounding rules |
 | `guardrails/hallucination_guard.py` | Post-generation hallucination validation |
 | `response/concierge_composer.py` | Deterministic response blueprints |
-| `intent/query_classifier.py` | Rule-based classifier — `_NORMALIZATION_TABLE`, `SHORT_QUERY_INTENTS`, `normalize_query_with_pattern`, `is_likely_unsupported`, `maybe_correct_brand` |
+| `intent/query_classifier.py` | Minimal pre-flight check — `is_likely_unsupported()` only; all other classification delegated to LLM in `interpret_turn` |
+| `app/services/semantic_signals.py` | Pure lookup-table signal extraction — no regex; maps structured `SceneMemory` / `InterpretedIntent` to semantic tags |
+| `app/services/response_mode_resolver.py` | Thin policy layer — trusts `intent.response_mode_hint`; hard overrides for out-of-scope, gibberish, and locked-topic follow-ups only |
 | `tests/test_stability.py` | 80-test stability suite covering all 14 acceptance criteria categories |
 
 ### Data Pipeline Scripts

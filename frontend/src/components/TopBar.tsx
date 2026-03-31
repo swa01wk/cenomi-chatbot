@@ -4,8 +4,9 @@ import {
   Bug,
   BugOff,
   ChevronDown,
+  MapPin,
 } from "lucide-react";
-import { TENANTS, MALLS } from "../lib/constants";
+import { MALLS } from "../lib/constants";
 
 interface TopBarProps {
   tenantId: string;
@@ -20,35 +21,42 @@ interface TopBarProps {
 }
 
 export default function TopBar({
-  tenantId,
   mallId,
   debugMode,
   sessionId,
-  onTenantChange,
   onMallChange,
   onDebugToggle,
   onReset,
   onExport,
 }: TopBarProps) {
+  const activeMall = MALLS.find((m) => m.id === mallId) ?? MALLS[0];
+
   return (
     <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2.5">
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
           C
         </div>
-        <div className="flex items-center gap-2">
-          <Selector
-            value={tenantId}
-            options={TENANTS.map((t) => ({ value: t.id, label: t.label }))}
-            onChange={onTenantChange}
-          />
-          <span className="text-gray-300">/</span>
-          <Selector
+
+        {/* Active Mall selector */}
+        <div className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-blue-600">
+            <MapPin size={10} />
+            Active Mall
+          </span>
+          <MallSelector
             value={mallId}
-            options={MALLS.map((m) => ({ value: m.id, label: m.label }))}
+            options={MALLS.map((m) => ({
+              value: m.id,
+              label: `${m.label} — ${m.city}`,
+            }))}
             onChange={onMallChange}
           />
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-blue-100">
+            {activeMall.city}
+          </span>
         </div>
+
         {sessionId && (
           <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-[10px] text-gray-400">
             {sessionId.slice(0, 16)}
@@ -90,7 +98,7 @@ export default function TopBar({
   );
 }
 
-function Selector({
+function MallSelector({
   value,
   options,
   onChange,
@@ -104,7 +112,7 @@ function Selector({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none rounded-md border border-gray-200 bg-gray-50 py-1 pl-3 pr-7 text-xs font-medium text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+        className="appearance-none rounded-md border border-blue-200 bg-blue-50 py-1 pl-3 pr-7 text-xs font-semibold text-blue-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -114,7 +122,7 @@ function Selector({
       </select>
       <ChevronDown
         size={12}
-        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-blue-400"
       />
     </div>
   );

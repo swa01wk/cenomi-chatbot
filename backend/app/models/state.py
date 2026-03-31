@@ -141,6 +141,18 @@ class InterpretedIntent(BaseModel):
     # Valid tokens: "all_family_context", "companion:<name>", "visit_type:<value>",
     #               "target_person", "scenario", "visit_type:solo", "audience:family"
     scene_corrections: list[str] = Field(default_factory=list)
+    # ── Response mode hint from the LLM classifier ───────────────────────────
+    # Consumed by response_mode_resolver as the primary signal.
+    # One of: direct_factual, guided_recommendation, hybrid_plan,
+    #         best_effort_shortlist, context_acknowledgement, graceful_recovery,
+    #         clarification_request
+    response_mode_hint: str = ""
+    # ── LLM-extracted entity for factual/cross-mall queries ──────────────────
+    # The LLM classifier extracts the target entity/term directly from the message
+    # (e.g. "which all malls does shrimp" → "shrimp",
+    #       "where is Starbucks" → "Starbucks").
+    # Avoids regex-based post-processing for entity extraction.
+    entity_query: str = ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════

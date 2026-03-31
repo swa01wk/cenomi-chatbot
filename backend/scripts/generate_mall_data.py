@@ -118,7 +118,7 @@ def step_canonical(raw_data: dict, output_dir: Path) -> tuple[dict, str]:
 # ---------------------------------------------------------------------------
 def _get_llm(model: str):
     from langchain_openai import ChatOpenAI  # type: ignore
-    return ChatOpenAI(model=model, temperature=0.3, max_tokens=16384)
+    return ChatOpenAI(model=model, temperature=0.3, max_tokens=32768)
 
 
 def _llm_json(llm, system: str, user: str, tag: str) -> dict | list:
@@ -344,29 +344,42 @@ Generate 28 scenario playbooks for the given mall. Cover ALL of these scenarios:
   pb-child-activity, pb-service-lookup, pb-route-refinement, pb-quick-snack,
   pb-teen-hangout, pb-exploration, pb-after-movie
 
-Each playbook MUST include all of these fields:
-  playbook_id, name, description,
-  trigger_domains (list of domain strings),
-  trigger_sub_intents (list of sub_intent strings),
+Each playbook MUST include ALL of these fields (use EXACTLY these field names):
+  playbook_id          (string — use the pb-* id from the list above),
+  scenario             (string — human-readable scenario label, e.g. "family_visit_plan"),
+  description          (string),
+  trigger_domains      (list of domain strings),
+  trigger_sub_intents  (list of sub_intent strings),
+  trigger_conditions   (list of natural-language trigger condition strings),
   required_scene_signals (list — can be empty),
   optional_scene_signals (list),
   required_semantic_signals (list),
-  ranking_boost_tags (list of semantic tags to boost),
+  preferred_entity_types   (list of entity type strings, e.g. ["dining", "store"]),
+  preferred_semantic_tags  (list of semantic tag strings to prefer),
+  ranking_biases       (dict of tag→float boost values, e.g. {"family_friendly": 0.3}),
+  ranking_boost_tags   (list of semantic tags to boost),
   ranking_penalty_tags (list of semantic tags to penalize),
-  excluded_tags (list — can be empty),
+  excluded_tags        (list — can be empty),
+  do_not_include       (list of entity_ids or tag patterns to exclude),
   preferred_response_shape ("direct_fact" | "concise_shortlist" | "guided_plan" | "itinerary"),
-  preferred_strategy ("exact_retrieval" | "direct_lookup" | "direct_fact" |
-                      "shortlist_recommendation" | "gift_formula" | "movie_plus_food" |
-                      "mini_itinerary" | "family_plan" | "guided_plan" |
-                      "proximity_guided_shortlist" | "budget_plan" |
-                      "mall_overview" | "exploration_overview"),
-  entity_cap (integer 1-6),
+  preferred_strategy   ("exact_retrieval" | "direct_lookup" | "direct_fact" |
+                        "shortlist_recommendation" | "gift_formula" | "movie_plus_food" |
+                        "mini_itinerary" | "family_plan" | "guided_plan" |
+                        "proximity_guided_shortlist" | "budget_plan" |
+                        "mall_overview" | "exploration_overview"),
+  response_shape_hint  (string — extra instruction on how to format the response),
+  entity_cap           (integer 1-6),
+  shortlist_size_hint  (integer — suggested number of results, typically 3-8),
   must_include_entity_types (list — can be empty),
   fallback_entity_types (list — can be empty),
-  itinerary_template (string or null),
-  retrieval_triggers (list of source strings, e.g. "canonical.movies"),
-  priority (integer 1-10, lower = higher priority),
+  fallback_rules       (list of fallback instruction strings),
+  itinerary_template   (string or null),
+  retrieval_triggers   (list of source strings, e.g. "canonical.movies"),
+  priority             (integer 1-10, lower = higher priority),
+  next_step_hint       (string — suggested follow-up or CTA for the concierge),
   concierge_reasoning_notes (string — reference actual entity names, zones, pairings)
+
+IMPORTANT: Use "scenario" NOT "name". The field is called "scenario".
 
 Critical rules:
 - pb-movie-showtime-lookup: priority=1, strategy=exact_retrieval, must trigger canonical.movies
@@ -384,19 +397,26 @@ Output ONLY a valid JSON array of 28 playbook objects. No commentary.
 def step_playbooks(canonical: dict, llm, output_dir: Path) -> list:
     mall_id = canonical["mall_profile"]["mall_id"]
     example = _load_json(EXAMPLE_PLAYBOOKS)
-    example_condensed = example[:3]
+    example_condensed = example[:1]  # One full example is enough to show the schema
+
+    # Cap entity lists to keep prompt within model token limits
+    stores_all = canonical.get("stores", [])
+    # Prioritise anchor/featured stores, then sample the rest
+    anchor_stores = [s for s in stores_all if s.get("anchor_brand") or s.get("features")]
+    other_stores = [s for s in stores_all if s not in anchor_stores]
+    stores_sample = (anchor_stores + other_stores)[:50]
 
     entity_summary = {
         "stores": [
             {"id": s["entity_id"], "name": s.get("name"), "category": s.get("category"),
              "subcategory": s.get("subcategory"), "price_range": s.get("price_range"),
              "zone": s.get("location", {}).get("zone")}
-            for s in canonical.get("stores", [])
+            for s in stores_sample
         ],
         "dining": [
             {"id": d["entity_id"], "name": d.get("name"), "dining_style": d.get("dining_style"),
              "price_range": d.get("price_range"), "zone": d.get("location", {}).get("zone")}
-            for d in canonical.get("dining", [])
+            for d in canonical.get("dining", [])[:25]
         ],
         "cinemas": [
             {"id": c["entity_id"], "name": c.get("name"),
@@ -414,6 +434,7 @@ def step_playbooks(canonical: dict, llm, output_dir: Path) -> list:
              "zone": s.get("location", {}).get("zone")}
             for s in canonical.get("services", [])
         ],
+        "_note": f"Showing {len(stores_sample)}/{len(stores_all)} stores (anchors prioritised). Full store count: {len(stores_all)}.",
     }
 
     # Summarize movie lineup for cinema-specific notes

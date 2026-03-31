@@ -343,23 +343,30 @@ Output ONLY a valid JSON array. No commentary.
 
 def generate_playbooks(canonical: dict, llm: ChatOpenAI) -> list:
     example = _load_json(EXAMPLE_PLAYBOOKS)
-    example_condensed = example[:3]
+    example_condensed = example[:1]  # One full example is enough to show the schema
 
     # Build a compact entity list so the prompt stays manageable
+    # Cap stores to avoid exceeding token limits for large malls
+    stores_all = canonical.get("stores", [])
+    anchor_stores = [s for s in stores_all if s.get("anchor_brand") or s.get("features")]
+    other_stores = [s for s in stores_all if s not in anchor_stores]
+    stores_sample = (anchor_stores + other_stores)[:50]
+
     entity_summary = {
         "stores": [
             {"id": s["entity_id"], "name": s.get("name"), "category": s.get("category"),
              "subcategory": s.get("subcategory"), "price_range": s.get("price_range"),
              "zone": s.get("location", {}).get("zone"), "floor": s.get("location", {}).get("floor")}
-            for s in canonical.get("stores", [])
+            for s in stores_sample
         ],
         "dining": [
             {"id": d["entity_id"], "name": d.get("name"), "dining_style": d.get("dining_style"),
              "price_range": d.get("price_range"), "zone": d.get("location", {}).get("zone")}
-            for d in canonical.get("dining", [])
+            for d in canonical.get("dining", [])[:25]
         ],
         "cinemas": [{"id": c["entity_id"], "name": c.get("name")} for c in canonical.get("cinemas", [])],
         "movies": [{"id": m["entity_id"], "title": m.get("title"), "genre": m.get("genre"), "status": m.get("status")} for m in canonical.get("movies", [])],
+        "_note": f"Showing {len(stores_sample)}/{len(stores_all)} stores (anchors prioritised).",
     }
     mall_name = canonical["mall_profile"].get("name", "")
     city = canonical["mall_profile"].get("city", "")
@@ -664,7 +671,7 @@ def main() -> None:
         sys.exit(0)
 
     # Init LLM (only when not dry-run)
-    llm = ChatOpenAI(model=args.model, temperature=0.3, max_tokens=16384)
+    llm = ChatOpenAI(model=args.model, temperature=0.3, max_tokens=32768)
 
     # Generate canonical from raw if needed
     if args.from_raw:

@@ -1,8 +1,26 @@
 import { useState, useCallback, useRef } from "react";
 import { streamMessage, submitFeedback, resetSession } from "../api/client";
 import { getMockResponse } from "../mock/responses";
-import { DEFAULT_TENANT_ID, DEFAULT_MALL_ID } from "../lib/constants";
+import { DEFAULT_MALL_ID } from "../lib/constants";
 import type { ChatMessage, DebugPayload, MessageFeedback } from "../types/chat";
+
+const STORAGE_KEY = "cenomi_active_mall";
+
+function getStoredMallId(): string {
+  try {
+    return localStorage.getItem(STORAGE_KEY) || DEFAULT_MALL_ID;
+  } catch {
+    return DEFAULT_MALL_ID;
+  }
+}
+
+function storeActiveMall(mallId: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, mallId);
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 const USE_MOCK = false;
 
@@ -16,8 +34,9 @@ export function useChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
-  const [tenantId, setTenantId] = useState(DEFAULT_TENANT_ID);
-  const [mallId, setMallId] = useState(DEFAULT_MALL_ID);
+  const [mallId, setMallId] = useState<string>(getStoredMallId);
+  // tenantId always mirrors mallId in this system
+  const tenantId = mallId;
   const turnCountRef = useRef(0);
 
   const send = useCallback(
@@ -226,11 +245,12 @@ export function useChat() {
     turnCountRef.current = 0;
   }, [sessionId, mallId]);
 
-  /** Switch active mall: clears chat session so scene/history stay mall-consistent (multi-mall v1). */
+  /** Switch active mall: clears chat session so scene/history stay mall-consistent. */
   const changeMallId = useCallback(
     async (nextMallId: string) => {
       if (nextMallId === mallId) return;
       await reset();
+      storeActiveMall(nextMallId);
       setMallId(nextMallId);
     },
     [mallId, reset],
@@ -280,8 +300,6 @@ export function useChat() {
     handleFeedback,
     exportConversation,
     setDebugMode,
-    setTenantId,
-    setMallId,
     changeMallId,
     setSelectedTurnId,
   };

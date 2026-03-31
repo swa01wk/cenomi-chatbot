@@ -1,1205 +1,2341 @@
 [
   {
-    "playbook_id": "pb-family-visit",
-    "scenario": "family_visit_plan",
-    "description": "A full family visit plan covering shopping, dining, and entertainment for families with children.",
-    "trigger_conditions": [
-      "User mentions family, kids, or children",
-      "User asks for things to do as a family",
-      "User mentions visiting with spouse and kids",
-      "Detected intent: family_outing, family_plan"
+    "playbook_id": "pb-mall-overview",
+    "scenario": "mall_overview_snapshot",
+    "description": "Provide a concise overview of the mall, its zones, key services, and major anchor brands.",
+    "trigger_domains": [
+      "overview",
+      "mall_info",
+      "navigation"
     ],
-    "trigger_domains": ["family", "kids", "shopping", "dining"],
-    "trigger_sub_intents": ["family_outing", "family_plan", "family_day", "what_to_do_family"],
+    "trigger_sub_intents": [
+      "mall_overview",
+      "what_is_here",
+      "mall_summary",
+      "guide_me_around"
+    ],
+    "trigger_conditions": [
+      "User asks what's in the mall or requests a general overview",
+      "User wants a quick summary of stores, dining, cinema, and services",
+      "User is new to the mall and wants orientation"
+    ],
     "required_scene_signals": [],
-    "optional_scene_signals": ["companions_include_children", "child_age", "budget_signal"],
-    "preferred_entity_types": ["store", "dining", "cinema", "service"],
-    "preferred_semantic_tags": ["family_friendly", "kid_friendly", "child_activity", "family_entertainment", "has_kids_menu"],
-    "required_semantic_signals": ["family_friendly"],
+    "optional_scene_signals": [
+      "new_visit",
+      "seeking_orientation",
+      "time_limited"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store",
+      "dining",
+      "cinema",
+      "service"
+    ],
+    "preferred_semantic_tags": [
+      "mall_anchor",
+      "zone_summary",
+      "family_friendly",
+      "easy_browse"
+    ],
+    "ranking_biases": {
+      "mall_anchor": 0.7,
+      "easy_browse": 0.6,
+      "family_friendly": 0.4
+    },
+    "ranking_boost_tags": [
+      "mall_anchor",
+      "easy_browse",
+      "zone_summary"
+    ],
+    "ranking_penalty_tags": [
+      "high_attention_demand",
+      "adult_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "mall_overview",
+    "response_shape_hint": "Summarize by zone: Main Gallery, Food Court, Kiosk Row, Entertainment Wing, Hypermarket Area, and Cinema Zone; mention a few anchors in each.",
+    "entity_cap": 6,
+    "shortlist_size_hint": 6,
+    "must_include_entity_types": [
+      "store",
+      "dining",
+      "service"
+    ],
+    "fallback_entity_types": [
+      "cinema"
+    ],
+    "fallback_rules": [
+      "If a zone has no strong anchors, mention the nearest available categories instead",
+      "Always include at least one service and one dining reference",
+      "If asked for more detail, offer to narrow by shopping, dining, or entertainment"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.mall_overview",
+      "zone.directory"
+    ],
+    "priority": 6,
+    "next_step_hint": "Ask if they'd like a store category, food option, or movie recommendation next.",
+    "concierge_reasoning_notes": "Reference Main Gallery anchors like Nike, Sephora, Zara Home, and Starbucks; Food Court options like KFC, TEXAS CHICKEN, and Baskin Robbins; services like Information Desk, Parking, Free WiFi, and prayer rooms."
+  },
+  {
+    "playbook_id": "pb-brand-lookup",
+    "scenario": "brand_lookup",
+    "description": "Find a specific brand, store, or named venue and return its location and category.",
+    "trigger_domains": [
+      "store_lookup",
+      "brand",
+      "navigation"
+    ],
+    "trigger_sub_intents": [
+      "brand_search",
+      "store_lookup",
+      "find_store",
+      "where_is_brand"
+    ],
+    "trigger_conditions": [
+      "User names a specific brand or store",
+      "User asks where a store is located",
+      "User wants a direct brand match"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "brand_name_provided",
+      "zone_hint"
+    ],
+    "required_semantic_signals": [
+      "named_entity"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining",
+      "service",
+      "cinema"
+    ],
+    "preferred_semantic_tags": [
+      "brand_exact_match",
+      "location_info",
+      "mall_anchor"
+    ],
+    "ranking_biases": {
+      "brand_exact_match": 1.0,
+      "location_info": 0.7,
+      "mall_anchor": 0.4
+    },
+    "ranking_boost_tags": [
+      "brand_exact_match",
+      "location_info"
+    ],
+    "ranking_penalty_tags": [
+      "similar_category_but_not_named"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "direct_fact",
+    "preferred_strategy": "direct_lookup",
+    "response_shape_hint": "Return the matched entity first, then its zone and category in one line.",
+    "entity_cap": 2,
+    "shortlist_size_hint": 1,
+    "must_include_entity_types": [],
+    "fallback_entity_types": [
+      "store",
+      "dining"
+    ],
+    "fallback_rules": [
+      "If exact brand is unavailable, provide the closest named match",
+      "If multiple locations exist, prefer the most prominent zone or list both briefly"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.services"
+    ],
+    "priority": 4,
+    "next_step_hint": "Offer to guide them to the brand or suggest nearby alternatives.",
+    "concierge_reasoning_notes": "Use exact names such as Nike, Sephora, Barnes-like equivalents not present here, or Muvi Cinema; anchor zones like Main Gallery, Food Court, Kiosk Row, and Service Area."
+  },
+  {
+    "playbook_id": "pb-category-shopping",
+    "scenario": "category_shopping_shortlist",
+    "description": "Recommend stores by shopping category such as fashion, beauty, sportswear, accessories, or home.",
+    "trigger_domains": [
+      "shopping",
+      "store_category",
+      "retail"
+    ],
+    "trigger_sub_intents": [
+      "shop_by_category",
+      "browse_stores",
+      "category_lookup",
+      "shopping_recommendation"
+    ],
+    "trigger_conditions": [
+      "User asks for stores in a category",
+      "User wants shopping options for a type of product",
+      "User is browsing fashion, beauty, sportswear, or home"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "category_specified",
+      "budget_signal",
+      "brand_style_signal"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store"
+    ],
+    "preferred_semantic_tags": [
+      "category_match",
+      "shopping_shortlist",
+      "easy_browse"
+    ],
+    "ranking_biases": {
+      "category_match": 1.0,
+      "easy_browse": 0.7,
+      "mall_anchor": 0.5
+    },
+    "ranking_boost_tags": [
+      "category_match",
+      "easy_browse",
+      "mall_anchor"
+    ],
+    "ranking_penalty_tags": [
+      "off_category",
+      "high_attention_demand"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "shortlist_recommendation",
+    "response_shape_hint": "Return 3-5 stores in the requested category, with zone and price range if useful.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store"
+    ],
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "If the exact category is sparse, suggest adjacent categories",
+      "Prefer Main Gallery anchors unless the user asks for food-adjacent or kiosk options"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores"
+    ],
+    "priority": 5,
+    "next_step_hint": "Ask whether they want premium, mid-range, or budget picks.",
+    "concierge_reasoning_notes": "Fashion examples include Zara Home, Massimo Dutti, Pull&Bear, TOMMY HILFIGER, and NewYorker; beauty examples include Sephora, Bath & Body Works, L'Occitane, Bloom, and Match."
+  },
+  {
+    "playbook_id": "pb-family-shopping",
+    "scenario": "family_shopping_plan",
+    "description": "Plan a family-friendly shopping run with practical stores and an easy dining break.",
+    "trigger_domains": [
+      "family",
+      "shopping",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "family_shopping",
+      "shopping_with_kids",
+      "family_day_out",
+      "family_visit"
+    ],
+    "trigger_conditions": [
+      "User mentions shopping with family or children",
+      "User asks for a family-friendly mall plan",
+      "User wants shopping plus food for a group"
+    ],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "stroller",
+      "budget_signal",
+      "time_limited"
+    ],
+    "required_semantic_signals": [
+      "family_friendly"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "family_friendly",
+      "easy_browse",
+      "budget_friendly",
+      "kid_friendly"
+    ],
     "ranking_biases": {
       "family_friendly": 1.0,
       "kid_friendly": 0.9,
-      "child_activity": 0.85,
-      "has_kids_menu": 0.8,
-      "near_kids_zone": 0.7
+      "easy_browse": 0.8,
+      "budget_friendly": 0.6
     },
-    "ranking_boost_tags": ["family_friendly", "kid_friendly", "child_relief_anchor", "entertainment_anchor", "easy_browse"],
-    "ranking_penalty_tags": ["adult_only", "premium_only", "high_attention_demand"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no kid-friendly dining found, suggest casual dining with broad menus",
-      "If no kids entertainment available, suggest cinema (Kids screen)",
-      "Always include at least one dining option and one entertainment option"
+    "ranking_boost_tags": [
+      "family_friendly",
+      "kid_friendly",
+      "easy_browse"
     ],
-    "response_shape_hint": "Provide a structured itinerary: 1) Shopping stops, 2) Dining recommendation, 3) Entertainment/activity, 4) Practical tips (family room, stroller, prayer times)",
+    "ranking_penalty_tags": [
+      "premium_only",
+      "adult_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-store-030",
+      "t-store-087",
+      "t-store-153"
+    ],
     "preferred_response_shape": "guided_plan",
     "preferred_strategy": "family_plan",
-    "shortlist_size_hint": 9,
-    "entity_cap": 6,
-    "must_include_entity_types": ["entertainment", "dining"],
-    "fallback_entity_types": ["store", "service"],
-    "itinerary_template": "1) Family shopping (Centrepoint/MINISO) → 2) Kids play at Fun Time → 3) Family meal at Food Court → 4) Optional: kids movie at Muvi Cinema",
-    "retrieval_triggers": ["kids_entertainment_entity", "family_dining"],
-    "next_step_hint": "Ask if they'd like to add a movie or specific shopping categories",
-    "do_not_include": [
-      "Luxury-only stores without family appeal",
-      "Fine dining restaurants without kids menus",
-      "Adult-oriented entertainment"
+    "response_shape_hint": "Suggest a simple route with 2-3 shopping stops and one easy meal stop, all in nearby zones.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 5,
+    "must_include_entity_types": [
+      "store",
+      "dining"
     ],
-    "priority": 7,
-    "concierge_reasoning_notes": "Start with practical needs (Danube HyperMarket for snacks, Centrepoint for value fashion), entertainment (Fun Time in Entertainment Wing for kids), then dining (Kudu or Popeyes in Food Court for kid-friendly meals), and end with a treat (Baskin Robbins in Kiosk Row). Mention prayer rooms and family rooms if asked. Can also suggest ZOOTROPOLIS 2 or SPONGEBOB at Muvi Cinema."
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "If family-friendly stores are limited, prioritize broad-appeal fashion, sportswear, and home stores",
+      "Prefer Food Court dining for convenience",
+      "Add service options only if they help the family visit"
+    ],
+    "itinerary_template": "1) Main Gallery shopping stop → 2) Nearby family meal in Food Court → 3) Optional dessert in Kiosk Row",
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "zone.directory"
+    ],
+    "priority": 4,
+    "next_step_hint": "Ask if they want a stroller-friendly route or budget version.",
+    "concierge_reasoning_notes": "Use accessible family-shopping anchors like Nike, PUMA, Zara Home, Flying Tiger, and food options such as KFC, TEXAS CHICKEN, or Baskin Robbins after shopping."
   },
   {
-    "playbook_id": "pb-solo-visit",
-    "scenario": "solo_visit_plan",
-    "description": "A relaxed solo visit plan for individual shoppers — browsing, coffee, and personal shopping.",
+    "playbook_id": "pb-solo-browse",
+    "scenario": "solo_browse_discovery",
+    "description": "Help a solo visitor browse relaxed shopping, coffee, or light exploration options.",
+    "trigger_domains": [
+      "shopping",
+      "browse",
+      "solo"
+    ],
+    "trigger_sub_intents": [
+      "solo_browse",
+      "casual_browsing",
+      "window_shop",
+      "walk_and_browse"
+    ],
     "trigger_conditions": [
-      "User visiting alone",
-      "No mention of companions or family",
-      "User wants to browse or explore",
-      "Detected intent: solo_visit, personal_shopping"
+      "User is shopping alone",
+      "User wants to browse without a fixed purchase",
+      "User asks for a relaxed solo mall experience"
     ],
-    "trigger_domains": ["shopping", "dining"],
-    "trigger_sub_intents": ["solo_visit", "personal_shopping", "browse_explore", "solo_outing"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["budget_signal", "interest_category"],
-    "preferred_entity_types": ["store", "dining"],
-    "preferred_semantic_tags": ["solo_friendly", "solo_browsing", "coffee_spot", "self_treat", "trendy"],
-    "required_semantic_signals": ["solo_friendly"],
-    "ranking_biases": {
-      "solo_friendly": 1.0,
-      "coffee_spot": 0.7,
-      "self_treat": 0.65,
-      "trendy": 0.6
-    },
-    "ranking_boost_tags": ["solo_friendly", "easy_browse", "calm_browse", "coffee_spot"],
-    "ranking_penalty_tags": ["kids_only", "group_activity"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Default to popular fashion stores and a coffee recommendation",
-      "Suggest browsing path through well-known brands"
+    "optional_scene_signals": [
+      "alone",
+      "time_to_kill",
+      "coffee_stop"
     ],
-    "response_shape_hint": "Suggest a relaxed itinerary: coffee first, then browsing route through key zones, ending with a treat or meal",
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "easy_browse",
+      "linger_friendly",
+      "coffee_stop",
+      "mall_anchor"
+    ],
+    "ranking_biases": {
+      "easy_browse": 1.0,
+      "linger_friendly": 0.7,
+      "coffee_stop": 0.6,
+      "mall_anchor": 0.5
+    },
+    "ranking_boost_tags": [
+      "easy_browse",
+      "coffee_stop",
+      "mall_anchor"
+    ],
+    "ranking_penalty_tags": [
+      "group_activity",
+      "high_attention_demand"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
     "preferred_response_shape": "concise_shortlist",
     "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 8,
-    "entity_cap": 5,
-    "must_include_entity_types": ["store", "dining"],
-    "fallback_entity_types": [],
-    "itinerary_template": "1) Coffee at Starbucks → 2) Browse Main Gallery (Zara, L'Occitane, Stradivarius) → 3) Optional movie at Muvi Cinema",
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about specific interests (fashion, electronics, beauty) to narrow recommendations",
-    "do_not_include": ["Kids-only stores", "Group-only activities"],
-    "priority": 5,
-    "concierge_reasoning_notes": "Solo visitors appreciate efficiency and discovery. Start with Starbucks in Main Gallery for coffee. Suggest browsing Zara, NINE WEST, and L'Occitane for personal shopping. Mention WiFi and quiet seating at Starbucks."
-  },
-  {
-    "playbook_id": "pb-anniversary",
-    "scenario": "anniversary_plan",
-    "description": "A curated anniversary experience combining luxury shopping, romantic dining, and possibly cinema.",
-    "trigger_conditions": [
-      "User mentions anniversary, wedding anniversary",
-      "User planning a special couples outing",
-      "Detected intent: anniversary, celebration, romantic"
+    "response_shape_hint": "Offer a few low-pressure stops: one or two stores and one café/dessert option.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [],
+    "fallback_entity_types": [
+      "service"
     ],
-    "trigger_domains": ["gift", "dining", "entertainment"],
-    "trigger_sub_intents": ["anniversary", "celebration", "romantic_outing", "special_occasion"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["companion_context", "budget_signal"],
-    "preferred_entity_types": ["store", "dining", "cinema"],
-    "preferred_semantic_tags": ["romantic", "special_occasion", "premium", "luxury", "date_spot", "elegant", "gift_friendly"],
-    "required_semantic_signals": ["romantic", "special_occasion"],
-    "ranking_biases": {
-      "romantic": 1.0,
-      "special_occasion": 0.95,
-      "premium": 0.85,
-      "elegant": 0.8,
-      "date_spot": 0.9,
-      "gift_friendly": 0.7
-    },
-    "ranking_boost_tags": ["romantic", "special_occasion", "premium", "elegant", "gift_friendly"],
-    "ranking_penalty_tags": ["budget", "kids_only", "fast_food"],
-    "excluded_tags": [],
     "fallback_rules": [
-      "If no premium jewelry available, suggest beauty/fragrance as gift alternative",
-      "If no fine dining available, suggest best casual dining with private seating",
-      "Always include a gift component and a dining component"
+      "If no ideal browsing store is found, recommend a café in Main Gallery",
+      "Prefer places with a relaxed walkable feel in Main Gallery or Kiosk Row"
     ],
-    "response_shape_hint": "Present as a curated experience: 1) Gift shopping (jewelry/beauty), 2) Romantic dinner, 3) Optional movie (Muvi Cinema). Add a heartfelt concierge touch.",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "mini_itinerary",
-    "shortlist_size_hint": 8,
-    "entity_cap": 5,
-    "must_include_entity_types": ["store", "dining"],
-    "fallback_entity_types": ["cinema"],
-    "itinerary_template": "1) Gift at Swarovski/Tous/L'Occitane → 2) Relax at Starbucks → 3) Optional movie at Muvi Cinema",
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about budget range and whether they'd like to add cinema",
-    "do_not_include": [
-      "Budget stores",
-      "Fast food / quick service",
-      "Kids-focused entities",
-      "Practical/utilitarian stores"
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining"
     ],
     "priority": 7,
-    "concierge_reasoning_notes": "Anniversary plans should feel special. Recommend Swarovski or Tous in Main Gallery for jewelry, L'Occitane for luxury beauty gifts, and Starbucks for a cozy coffee date. Suggest Muvi Cinema for a romantic movie — HAMNET (drama) or EL SELEM W EL THOBAN (romantic comedy) are good options."
+    "next_step_hint": "Ask if they want fashion, beauty, or coffee-focused browsing.",
+    "concierge_reasoning_notes": "Relaxed solo picks include Sephora, Bath & Body Works, Flying Tiger, Starbucks, COSTA COFFEE, and Freshi Ice Sticks in Main Gallery or Kiosk Row."
   },
   {
     "playbook_id": "pb-gift-girlfriend",
     "scenario": "gift_for_girlfriend",
-    "description": "Help the user find a thoughtful gift for their girlfriend, with options for jewelry, beauty, and accessories.",
+    "description": "Recommend romantic or thoughtful gifts for a girlfriend, with beauty, jewelry, and fashion options.",
+    "trigger_domains": [
+      "gifts",
+      "romance",
+      "shopping"
+    ],
+    "trigger_sub_intents": [
+      "gift_girlfriend",
+      "romantic_gift",
+      "present_for_partner",
+      "special_gift"
+    ],
     "trigger_conditions": [
-      "User mentions girlfriend, partner, or significant other",
-      "User asks for gift ideas for girlfriend",
-      "Detected intent: gift_girlfriend, romantic_gift"
+      "User asks for a gift for girlfriend",
+      "User wants romantic gift ideas",
+      "User mentions partner, girlfriend, or date gift"
     ],
-    "trigger_domains": ["gift", "shopping"],
-    "trigger_sub_intents": ["gift_girlfriend", "romantic_gift", "buy_for_partner", "gift_for_her"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["budget_signal", "style_preference"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["gift_friendly", "romantic", "trendy", "premium", "beauty", "jewelry", "accessories"],
-    "required_semantic_signals": ["gift_friendly"],
-    "ranking_biases": {
-      "jewelry": 1.0,
-      "beauty": 0.9,
-      "premium": 0.85,
-      "trendy": 0.8,
-      "gift_friendly": 0.75
-    },
-    "ranking_boost_tags": ["romantic", "gift_friendly", "premium", "trendy", "special_occasion"],
-    "ranking_penalty_tags": ["men_only", "home_only", "kids_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no jewelry, suggest beauty or fashion accessories",
-      "If user requests budget, include mid-range beauty options"
+    "optional_scene_signals": [
+      "romantic_occasion",
+      "budget_signal",
+      "style_preference"
     ],
-    "response_shape_hint": "Present 3-5 gift options with store names, locations, and a short description of each",
+    "required_semantic_signals": [
+      "gift_intent"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "romantic",
+      "giftable",
+      "beauty",
+      "jewelry",
+      "fashion"
+    ],
+    "ranking_biases": {
+      "romantic": 1.0,
+      "giftable": 0.9,
+      "beauty": 0.8,
+      "jewelry": 0.8,
+      "fashion": 0.6
+    },
+    "ranking_boost_tags": [
+      "romantic",
+      "giftable",
+      "beauty",
+      "jewelry"
+    ],
+    "ranking_penalty_tags": [
+      "budget_only",
+      "adult_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-store-030",
+      "t-store-087",
+      "t-store-153"
+    ],
     "preferred_response_shape": "concise_shortlist",
     "preferred_strategy": "gift_formula",
-    "shortlist_size_hint": 5,
-    "entity_cap": 4,
-    "must_include_entity_types": ["store"],
-    "fallback_entity_types": [],
-    "itinerary_template": "1) Jewelry (Swarovski/Tous) → 2) Beauty (L'Occitane/The Body Shop) → 3) Accessories (Aldo/Season Accessorize)",
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about her preferences (jewelry, fragrance, fashion) and budget",
-    "do_not_include": ["Kids stores", "Men's only stores", "Practical or utilitarian stores"],
-    "priority": 8,
-    "concierge_reasoning_notes": "Highlight Swarovski and Tous (Main Gallery) for jewelry, L'Occitane and The Body Shop for beauty, and Stradivarius or Bershka for trendy accessories. Suggest Baskin Robbins for a sweet treat."
+    "response_shape_hint": "Offer 3-5 gift ideas and note where they are in the mall; include one premium and one mid-range option.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "If jewelry is too premium, pivot to beauty or accessories",
+      "If the user wants something quick, prefer giftable beauty items in Main Gallery",
+      "If the request is vague, include a mix of fragrance, accessories, and small fashion items"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores"
+    ],
+    "priority": 4,
+    "next_step_hint": "Ask about her style, favorite color, or budget to refine the gift.",
+    "concierge_reasoning_notes": "Strong fits include Fayendra in Main Gallery for jewelry, Sephora and L'Occitane for beauty, and Aldo Accessories, DKNY, or Massimo Dutti for stylish add-ons."
   },
   {
     "playbook_id": "pb-gift-family",
     "scenario": "gift_for_family",
-    "description": "Assist the user in finding suitable gifts for family members, covering a range of ages and preferences.",
+    "description": "Help choose a suitable family gift such as home, beauty, fashion, or dessert items.",
+    "trigger_domains": [
+      "gifts",
+      "family",
+      "shopping"
+    ],
+    "trigger_sub_intents": [
+      "gift_family",
+      "family_present",
+      "gift_for_parents",
+      "gift_for_relatives"
+    ],
     "trigger_conditions": [
-      "User mentions buying gifts for family",
-      "User asks for family gift ideas",
-      "Detected intent: gift_family, family_present"
+      "User wants a gift for family members",
+      "User asks for a family present",
+      "User mentions parents, siblings, or relatives"
     ],
-    "trigger_domains": ["gift", "shopping", "family"],
-    "trigger_sub_intents": ["gift_family", "family_present", "gift_for_parents", "gift_for_siblings"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["recipient_age", "budget_signal"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["gift_friendly", "family_friendly", "variety", "value"],
-    "required_semantic_signals": ["gift_friendly"],
-    "ranking_biases": {
-      "gift_friendly": 1.0,
-      "family_friendly": 0.9,
-      "variety": 0.8,
-      "value": 0.7
-    },
-    "ranking_boost_tags": ["gift_friendly", "family_friendly", "variety"],
-    "ranking_penalty_tags": ["luxury_only", "adult_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no dedicated gift store, suggest stores with wide variety (Centrepoint, MINISO)",
-      "Include at least one beauty/fragrance and one fashion option"
+    "optional_scene_signals": [
+      "occasion",
+      "budget_signal",
+      "recipient_age"
     ],
-    "response_shape_hint": "List 4-6 stores with a brief on what gifts are suitable for which family member",
+    "required_semantic_signals": [
+      "gift_intent"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "giftable",
+      "home",
+      "beauty",
+      "family_friendly",
+      "practical"
+    ],
+    "ranking_biases": {
+      "giftable": 1.0,
+      "practical": 0.8,
+      "home": 0.7,
+      "beauty": 0.6,
+      "family_friendly": 0.5
+    },
+    "ranking_boost_tags": [
+      "giftable",
+      "practical",
+      "home",
+      "beauty"
+    ],
+    "ranking_penalty_tags": [
+      "adult_only",
+      "luxury_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
     "preferred_response_shape": "concise_shortlist",
     "preferred_strategy": "gift_formula",
-    "shortlist_size_hint": 6,
-    "entity_cap": 4,
-    "must_include_entity_types": ["store"],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about age groups and preferences of family members",
-    "do_not_include": ["Luxury-only stores", "Adult-only or kids-only stores"],
-    "priority": 6,
-    "concierge_reasoning_notes": "Centrepoint (Entertainment Wing) for value gifts, MINISO (Main Gallery) for fun and practical items, Ajmal Perfumes and The Body Shop for fragrance, and Aldo Accessories for fashion gifts."
-  },
-  {
-    "playbook_id": "pb-movie-food",
-    "scenario": "movie_plus_food",
-    "description": "Plan a visit that combines watching a movie and enjoying a meal.",
-    "trigger_conditions": [
-      "User mentions movie and food",
-      "User asks for dinner and a movie",
-      "Detected intent: movie_food_combo, cinema_dining"
-    ],
-    "trigger_domains": ["movie", "entertainment", "dining"],
-    "trigger_sub_intents": ["movie_food_combo", "cinema_dining", "movie_and_meal", "movie_and_food"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["companion_context", "food_preference"],
-    "preferred_entity_types": ["cinema", "dining"],
-    "preferred_semantic_tags": ["movie", "dining", "combo", "casual", "date_spot", "group_friendly"],
-    "required_semantic_signals": ["cinema", "movie_night"],
-    "ranking_biases": {
-      "movie": 1.0,
-      "dining": 0.9,
-      "combo": 0.8,
-      "casual": 0.7
-    },
-    "ranking_boost_tags": ["movie_night", "near_cinema", "before_movie", "after_movie"],
-    "ranking_penalty_tags": ["shopping", "kids_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no restaurant near cinema, suggest food court options",
-      "If no movie showing, offer coming soon options"
-    ],
-    "response_shape_hint": "Suggest a movie at Muvi Cinema and 2-3 dining options nearby (with cuisine type and location)",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "mini_itinerary",
-    "shortlist_size_hint": 4,
+    "response_shape_hint": "Suggest gifts with broad appeal: home décor, beauty sets, accessories, or dessert treats.",
     "entity_cap": 5,
-    "must_include_entity_types": ["cinema", "dining"],
-    "fallback_entity_types": ["dining"],
-    "itinerary_template": "1) Movie at Muvi Cinema → 2) Meal at Kudu/Popeyes (Food Court) → 3) Dessert at Baskin Robbins",
-    "retrieval_triggers": ["movie_list", "cinema_entity"],
-    "next_step_hint": "Ask about movie genre and food preferences",
-    "do_not_include": ["Dessert-only places", "Stores unrelated to food or cinema"],
-    "priority": 8,
-    "concierge_reasoning_notes": "Recommend Muvi Cinema (Cinema Zone) for the latest movies. Currently showing: SHELTER (Action), THE HOUSEMAID (Thriller), SEND HELP (Horror/Thriller), ZOOTROPOLIS 2 (Animation), HAMNET (Drama), SPONGEBOB (Animation). Then suggest Kudu Restaurant or Popeyes (Food Court) for a quick meal, or Starbucks (Main Gallery) for a light bite."
-  },
-  {
-    "playbook_id": "pb-kid-movie-food",
-    "scenario": "kid_friendly_movie_plus_food",
-    "description": "A plan for families or groups with children to enjoy a kid-friendly movie and a meal.",
-    "trigger_conditions": [
-      "User mentions kids and movie",
-      "User asks for child-appropriate cinema and food",
-      "Detected intent: kid_movie_food, family_movie_dining"
-    ],
-    "trigger_domains": ["movie", "kids", "family", "dining"],
-    "trigger_sub_intents": ["kids_movie_food", "family_movie_dining", "kids_cinema", "family_movie"],
-    "required_scene_signals": ["companions_include_children"],
-    "optional_scene_signals": ["child_age", "food_preference"],
-    "preferred_entity_types": ["cinema", "movie", "dining"],
-    "preferred_semantic_tags": ["kid_friendly", "family_friendly", "animation", "casual_dining", "has_kids_menu"],
-    "required_semantic_signals": ["kid_friendly", "cinema"],
-    "ranking_biases": {
-      "kid_friendly": 1.0,
-      "animation": 0.9,
-      "family_friendly": 0.85,
-      "has_kids_menu": 0.8
-    },
-    "ranking_boost_tags": ["kid_friendly", "family_friendly", "has_kids_menu", "child_relief_anchor"],
-    "ranking_penalty_tags": ["adult_only", "horror", "thriller", "premium_dining"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no animation movie, suggest comedy or adventure",
-      "If no kids menu, recommend fast food"
-    ],
-    "response_shape_hint": "Suggest a showing at Muvi Cinema (with movie title) and 2 dining options with kids menus",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "guided_plan",
-    "shortlist_size_hint": 3,
-    "entity_cap": 4,
-    "must_include_entity_types": ["cinema", "dining"],
-    "fallback_entity_types": ["entertainment", "dining"],
-    "itinerary_template": "1) ZOOTROPOLIS 2 or SPONGEBOB at Muvi Cinema → 2) Family meal at Kudu/Popeyes → 3) Dessert at Baskin Robbins",
-    "retrieval_triggers": ["movie_list", "kid_friendly_movies", "cinema_entity"],
-    "next_step_hint": "Ask about kids' ages and food allergies/preferences",
-    "do_not_include": ["Thriller/horror movies", "Fine dining"],
-    "priority": 8,
-    "concierge_reasoning_notes": "Great news — kid-friendly movies are currently showing at Muvi Cinema! Recommend 'ZOOTROPOLIS 2' (Animation/Comedy, 108 min) for all ages, or 'THE SPONGEBOB MOVIE: SEARCH FOR SQUAREPANTS' (Animation/Adventure, 89 min). Then McDonald's or Kudu Restaurant in Food Court for kid-friendly meals. Finish with Baskin Robbins ice cream."
-  },
-  {
-    "playbook_id": "pb-quick-lunch",
-    "scenario": "quick_lunch",
-    "description": "Guide users to fast, convenient lunch options for a short mall visit.",
-    "trigger_conditions": [
-      "User mentions short time, quick lunch, or fast meal",
-      "User asks for lunch recommendations",
-      "Detected intent: quick_lunch, fast_food"
-    ],
-    "trigger_domains": ["dining"],
-    "trigger_sub_intents": ["quick_lunch", "lunch_in_a_rush", "fast_meal", "quick_meal"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["time_constraint", "food_preference", "budget_signal"],
-    "preferred_entity_types": ["dining"],
-    "preferred_semantic_tags": ["fast_food", "quick_service", "budget", "lunch"],
-    "required_semantic_signals": [],
-    "ranking_biases": {
-      "fast_food": 1.0,
-      "quick_service": 0.9,
-      "budget": 0.8
-    },
-    "ranking_boost_tags": ["quick_stop", "fast_food", "low_commitment"],
-    "ranking_penalty_tags": ["sit_down_dining", "high_wait_time"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no fast food, suggest cafes with ready-to-go options"
-    ],
-    "response_shape_hint": "List 2-3 fast food or quick service dining options with location",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
-    "must_include_entity_types": ["dining"],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about cuisine preference (burger, chicken, sandwiches)",
-    "do_not_include": ["Fine dining", "Dessert-only places"],
-    "priority": 6,
-    "concierge_reasoning_notes": "Highlight Kudu Restaurant and Popeyes (Food Court) for quick meals, and Corn World (Kiosk Row) for snacks. Starbucks (Main Gallery) for a quick sandwich or salad."
-  },
-  {
-    "playbook_id": "pb-shopping-dessert",
-    "scenario": "shopping_plus_dessert_combo",
-    "description": "Pair a shopping session with a sweet treat or dessert break.",
-    "trigger_conditions": [
-      "User mentions shopping and dessert",
-      "User asks for a treat after shopping",
-      "Detected intent: shopping_dessert_combo"
-    ],
-    "trigger_domains": ["shopping", "dining"],
-    "trigger_sub_intents": ["shopping_dessert_combo", "shop_and_treat", "shopping_and_sweet"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["companion_context", "budget_signal"],
-    "preferred_entity_types": ["store", "dining"],
-    "preferred_semantic_tags": ["dessert", "self_treat", "shopping", "trendy"],
-    "required_semantic_signals": [],
-    "ranking_biases": {
-      "dessert": 1.0,
-      "self_treat": 0.9,
-      "shopping": 0.8
-    },
-    "ranking_boost_tags": ["dessert_spot", "reward_stop", "self_treat", "trendy"],
-    "ranking_penalty_tags": ["full_meal", "sit_down_dining"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no dessert, suggest cafes with sweet menu items"
-    ],
-    "response_shape_hint": "Suggest 2-3 shopping stops and a dessert place with location",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
     "shortlist_size_hint": 4,
-    "entity_cap": 4,
-    "must_include_entity_types": ["store", "dining"],
-    "fallback_entity_types": [],
-    "itinerary_template": "1) Browse Zara/Bershka/MINISO (Main Gallery) → 2) Dessert at Baskin Robbins (Kiosk Row) or Starbucks",
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about preferred dessert type (ice cream, cake, coffee)",
-    "do_not_include": ["Savory-only dining", "Stores unrelated to fashion, beauty, or gifts"],
-    "priority": 6,
-    "concierge_reasoning_notes": "Recommend browsing Zara or Bershka (Main Gallery), then enjoy Baskin Robbins (Kiosk Row) for ice cream or Starbucks (Main Gallery) for cake and coffee."
-  },
-  {
-    "playbook_id": "pb-date-plan",
-    "scenario": "date_plan",
-    "description": "Curate a romantic or fun date experience with shopping, dining, and entertainment.",
-    "trigger_conditions": [
-      "User mentions date, outing with partner, or romantic plan",
-      "User asks for date ideas",
-      "Detected intent: date_plan, romantic_outing"
+    "must_include_entity_types": [
+      "store"
     ],
-    "trigger_domains": ["entertainment", "dining", "gift"],
-    "trigger_sub_intents": ["date_plan", "romantic_outing", "couple_activity", "date_ideas"],
-    "required_scene_signals": ["companion_is_partner"],
-    "optional_scene_signals": ["budget_signal", "genre_preference"],
-    "preferred_entity_types": ["store", "dining", "cinema"],
-    "preferred_semantic_tags": ["date_spot", "romantic", "trendy", "premium", "entertainment"],
-    "required_semantic_signals": ["romantic", "couple_friendly"],
-    "ranking_biases": {
-      "date_spot": 1.0,
-      "romantic": 0.95,
-      "premium": 0.85,
-      "trendy": 0.8
-    },
-    "ranking_boost_tags": ["romantic", "date_spot", "couple_friendly", "movie_night", "near_cinema"],
-    "ranking_penalty_tags": ["kids_only", "fast_food_only", "hypermarket"],
-    "excluded_tags": [],
+    "fallback_entity_types": [
+      "dining"
+    ],
     "fallback_rules": [
-      "If no romantic dining, suggest cafes with cozy ambiance",
-      "If no movie, suggest dessert or shopping"
+      "If the family member is hard to match, choose practical gifts with broad appeal",
+      "Include a dessert option if the user wants a shared gift",
+      "Favor Main Gallery options unless the user wants a quick pickup"
     ],
-    "response_shape_hint": "Suggest a 3-step plan: shopping, dining, and optional movie or dessert",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "mini_itinerary",
-    "shortlist_size_hint": 5,
-    "entity_cap": 5,
-    "must_include_entity_types": ["cinema", "dining"],
-    "fallback_entity_types": ["dining", "store"],
-    "itinerary_template": "1) Gift at Swarovski/Tous → 2) Coffee at Starbucks → 3) Movie at Muvi Cinema → 4) Dessert at Baskin Robbins",
-    "retrieval_triggers": ["movie_list", "cinema_entity"],
-    "next_step_hint": "Ask about preferred cuisine or movie genre",
-    "do_not_include": ["Kids stores", "Budget-only dining"],
-    "priority": 8,
-    "concierge_reasoning_notes": "Lead with experiences. For movie: HAMNET (Drama/Romance) or EL SELEM W EL THOBAN (Comedy/Romance) are great date picks. For dining: Starbucks for coffee. For gifts: Swarovski or Tous (Main Gallery). Finish with Baskin Robbins or Corn World for a sweet ending."
-  },
-  {
-    "playbook_id": "pb-budget-family",
-    "scenario": "budget_family_outing",
-    "description": "Plan a cost-effective family outing with shopping, food, and entertainment.",
-    "trigger_conditions": [
-      "User mentions budget, affordable, or value",
-      "User asks for low-cost family options",
-      "Detected intent: budget_family, value_outing"
-    ],
-    "trigger_domains": ["family", "shopping", "dining"],
-    "trigger_sub_intents": ["budget_family", "value_outing", "affordable_family", "cheap_family"],
-    "required_scene_signals": ["budget_signal"],
-    "optional_scene_signals": ["companions_include_children"],
-    "preferred_entity_types": ["store", "dining", "cinema"],
-    "preferred_semantic_tags": ["budget", "family_friendly", "value", "kid_friendly"],
-    "required_semantic_signals": ["family_friendly"],
-    "ranking_biases": {
-      "budget": 1.0,
-      "family_friendly": 0.9,
-      "value": 0.85
-    },
-    "ranking_boost_tags": ["budget_friendly", "value_shopping", "family_friendly", "kid_friendly"],
-    "ranking_penalty_tags": ["premium", "luxury"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no budget dining, suggest food court options",
-      "If no free entertainment, suggest window shopping"
-    ],
-    "response_shape_hint": "List 2-3 budget stores, 1-2 budget dining, and a low-cost activity",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "family_plan",
-    "shortlist_size_hint": 6,
-    "entity_cap": 5,
-    "must_include_entity_types": ["store", "dining"],
-    "fallback_entity_types": ["entertainment"],
-    "itinerary_template": "1) Centrepoint/MINISO → 2) Kudu/Popeyes → 3) Fun Time or kids matinee at Muvi Cinema",
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about specific interests (shopping, food, entertainment)",
-    "do_not_include": ["Luxury-only stores", "Premium dining"],
-    "priority": 6,
-    "concierge_reasoning_notes": "Centrepoint (Entertainment Wing) and MINISO (Main Gallery) for value shopping, Kudu Restaurant and Popeyes (Food Court) for budget meals, and Fun Time or a matinee at Muvi Cinema (ZOOTROPOLIS 2 is great for budget family fun) for affordable entertainment."
-  },
-  {
-    "playbook_id": "pb-luxury-shopping",
-    "scenario": "luxury_shopping_plan",
-    "description": "Guide users seeking a premium shopping experience with luxury brands and upscale amenities.",
-    "trigger_conditions": [
-      "User mentions luxury, premium, or high-end brands",
-      "User asks for luxury shopping or gifts",
-      "Detected intent: luxury_shopping, premium_experience"
-    ],
-    "trigger_domains": ["shopping", "gift"],
-    "trigger_sub_intents": ["luxury_shopping", "premium_brands", "high_end_shopping"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["budget_signal", "category_preference"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["luxury", "premium", "elegant", "exclusive"],
-    "required_semantic_signals": ["premium"],
-    "ranking_biases": {
-      "luxury": 1.0,
-      "premium": 0.95,
-      "elegant": 0.9,
-      "exclusive": 0.85
-    },
-    "ranking_boost_tags": ["premium", "luxury", "elegant", "gift_friendly"],
-    "ranking_penalty_tags": ["budget", "value_fashion"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no luxury brand in category, suggest premium alternatives"
-    ],
-    "response_shape_hint": "List 4-5 luxury stores with location and highlight their exclusivity",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 5,
-    "entity_cap": 4,
-    "must_include_entity_types": ["store"],
-    "fallback_entity_types": [],
     "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about preferred category (jewelry, fashion, accessories)",
-    "do_not_include": ["Budget stores", "Food court dining"],
-    "priority": 6,
-    "concierge_reasoning_notes": "Highlight Swarovski, Tous, Cardial, COLE HAAN, and Season Accessorize (Main Gallery/Kiosk Row) for luxury shopping."
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining"
+    ],
+    "priority": 5,
+    "next_step_hint": "Ask who the gift is for and whether they prefer practical or indulgent items.",
+    "concierge_reasoning_notes": "Good family gifts include Zara Home, Bath & Body Works, Sephora, Flying Tiger, and sweets like Baskin Robbins or Farah."
   },
   {
-    "playbook_id": "pb-last-minute-gift",
-    "scenario": "last_minute_gift",
-    "description": "Help users quickly find a suitable gift with minimal time for browsing.",
+    "playbook_id": "pb-family-food",
+    "scenario": "family_food_plan",
+    "description": "Recommend family-friendly dining options that work for different ages and appetites.",
+    "trigger_domains": [
+      "family",
+      "dining",
+      "food"
+    ],
+    "trigger_sub_intents": [
+      "family_dining",
+      "where_to_eat_family",
+      "kids_meal",
+      "group_meal"
+    ],
     "trigger_conditions": [
-      "User mentions last minute, urgent, or quick gift",
-      "User asks for fast gift ideas",
-      "Detected intent: last_minute_gift, urgent_gift"
+      "User wants to eat with family",
+      "User asks for a family meal option",
+      "User needs food for adults and children"
     ],
-    "trigger_domains": ["gift", "shopping"],
-    "trigger_sub_intents": ["last_minute_gift", "urgent_gift", "quick_gift", "fast_gift"],
-    "required_scene_signals": ["time_constraint"],
-    "optional_scene_signals": ["budget_signal", "recipient_type"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["gift_friendly", "quick_pick", "convenient", "ready_to_gift"],
-    "required_semantic_signals": ["gift_friendly"],
-    "ranking_biases": {
-      "quick_pick": 1.0,
-      "gift_friendly": 0.95,
-      "convenient": 0.9
-    },
-    "ranking_boost_tags": ["quick_stop", "gift_friendly", "kiosk", "low_commitment"],
-    "ranking_penalty_tags": ["high_browse_time", "custom_order"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no dedicated gift store, suggest beauty or accessories stores with ready-to-gift items"
+    "required_scene_signals": [
+      "companions_include_children"
     ],
-    "response_shape_hint": "List 3-4 stores with fast gift options and their locations",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 4,
-    "entity_cap": 3,
-    "must_include_entity_types": ["store"],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask about recipient type and budget",
-    "do_not_include": ["Stores requiring custom orders", "Kids-only stores"],
-    "priority": 8,
-    "concierge_reasoning_notes": "MINISO (Main Gallery) for quick, fun gifts, Ajmal Perfumes and The Body Shop (Main Gallery) for beauty/fragrance, and Aldo Accessories for ready-to-gift fashion items."
-  },
-  {
-    "playbook_id": "pb-child-activity",
-    "scenario": "child_activity_while_parents_shop",
-    "description": "Recommend supervised or engaging activities for children while parents shop.",
-    "trigger_conditions": [
-      "User asks for child activity while shopping",
-      "User mentions kids need to be occupied",
-      "Detected intent: child_activity, kids_zone"
+    "optional_scene_signals": [
+      "budget_signal",
+      "dietary_preference",
+      "time_limited"
     ],
-    "trigger_domains": ["kids", "family", "shopping"],
-    "trigger_sub_intents": ["child_activity_parents_shop", "kids_occupied", "kids_drop_off"],
-    "required_scene_signals": ["companions_include_children"],
-    "optional_scene_signals": ["child_age"],
-    "preferred_entity_types": ["service", "cinema", "store"],
-    "preferred_semantic_tags": ["child_activity", "kid_friendly", "supervised", "entertainment"],
-    "required_semantic_signals": ["kid_friendly", "child_relief_anchor"],
-    "ranking_biases": {
-      "child_activity": 1.0,
-      "kid_friendly": 0.95,
-      "supervised": 0.9
-    },
-    "ranking_boost_tags": ["child_relief_anchor", "kids_entertainment", "entertainment_anchor"],
-    "ranking_penalty_tags": ["adult_only", "unsupervised"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If no supervised activity, suggest kid-friendly movies at Muvi Cinema",
-      "If no entertainment, suggest browsing toy sections at Centrepoint"
+    "required_semantic_signals": [
+      "family_friendly"
     ],
-    "response_shape_hint": "Suggest 1-2 activities or locations for kids, with supervision info and location",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "guided_plan",
-    "shortlist_size_hint": 2,
-    "entity_cap": 3,
-    "must_include_entity_types": ["entertainment"],
-    "fallback_entity_types": ["cinema", "store"],
-    "itinerary_template": "1) Kids at Fun Time (Entertainment Wing) → 2) OR kids movie at Muvi Cinema (ZOOTROPOLIS 2/SPONGEBOB) → 3) Parents shop at Centrepoint/Main Gallery",
-    "retrieval_triggers": ["kids_entertainment_entity"],
-    "next_step_hint": "Ask about kids' ages and duration needed",
-    "do_not_include": ["Adult-only entertainment", "Unsupervised play areas"],
-    "priority": 7,
-    "concierge_reasoning_notes": "Recommend Fun Time (Entertainment Wing) for supervised play, or a kids' movie like 'ZOOTROPOLIS 2' or 'THE SPONGEBOB MOVIE' at Muvi Cinema. Centrepoint (Entertainment Wing) has a toy section for browsing."
-  },
-  {
-    "playbook_id": "pb-family-shopping",
-    "scenario": "family_shopping_with_child",
-    "description": "Practical shopping trip for a parent with young child — balances shopping efficiency with child engagement and relief.",
-    "trigger_conditions": [
-      "Parent mentions child or kids",
-      "User wants to do shopping with a child present",
-      "family_visit + shopping domain",
-      "Detected companions: child, son, daughter, kids",
-      "Detected intent: general_shopping, fashion_shopping while child present"
+    "preferred_entity_types": [
+      "dining"
     ],
-    "trigger_domains": ["family", "shopping", "kids"],
-    "trigger_sub_intents": ["family_shopping", "shopping_with_child", "parent_shopping", "shopping_with_kids"],
-    "required_scene_signals": ["companions_include_children"],
-    "optional_scene_signals": ["child_age", "shopping_category", "budget_signal"],
-    "preferred_entity_types": ["store", "entertainment", "dining"],
-    "preferred_semantic_tags": ["family_friendly", "kid_friendly", "practical_shopping", "easy_browse", "child_activity", "near_kids_zone", "stroller_friendly", "quick_stop"],
-    "required_semantic_signals": ["family_friendly", "kid_friendly"],
+    "preferred_semantic_tags": [
+      "family_friendly",
+      "kid_friendly",
+      "budget_friendly",
+      "quick_service"
+    ],
     "ranking_biases": {
       "family_friendly": 1.0,
-      "kid_friendly": 0.95,
-      "practical_shopping": 0.85,
-      "easy_browse": 0.8,
-      "child_activity": 0.9,
-      "near_kids_zone": 0.75,
-      "stroller_friendly": 0.7,
-      "value_shopping": 0.65,
-      "quick_stop": 0.6
+      "kid_friendly": 0.9,
+      "budget_friendly": 0.8,
+      "quick_service": 0.7
     },
-    "ranking_boost_tags": ["family_friendly", "kid_friendly", "child_relief_anchor", "easy_browse", "stroller_friendly", "practical_shopping"],
-    "ranking_penalty_tags": ["luxury_only", "high_attention_demand", "adult_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Always include at least one child-relief or entertainment option",
-      "Prefer stores with wide aisles and family-friendly environments",
-      "If no kid activity found, suggest cinema kids section or indoor play area",
-      "End with a food or treat stop to reward the child"
+    "ranking_boost_tags": [
+      "family_friendly",
+      "kid_friendly",
+      "quick_service"
     ],
-    "response_shape_hint": "guided_plan: 1) Start at easy family-friendly stores, 2) Keep a child-relief option nearby, 3) Do quick practical shopping, 4) End with a snack or treat. Max 4 recommendations.",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "family_plan",
-    "shortlist_size_hint": 4,
-    "entity_cap": 4,
-    "must_include_entity_types": ["entertainment", "store"],
-    "fallback_entity_types": ["dining"],
-    "itinerary_template": "1) Easy family stores (Zara/MINISO/Centrepoint) → 2) Fun Time as child relief anchor → 3) Quick shopping → 4) Snack at Food Court",
-    "retrieval_triggers": ["kids_entertainment_entity"],
-    "next_step_hint": "Ask if they need a break spot for the child or want to add dining",
+    "ranking_penalty_tags": [
+      "fine_dining",
+      "adult_only"
+    ],
+    "excluded_tags": [],
     "do_not_include": [
-      "Luxury-only stores without family appeal",
-      "Fine dining restaurants without kids options",
-      "High-attention-demand adult-only boutiques"
+      "t-dining-024"
     ],
-    "priority": 9,
-    "concierge_reasoning_notes": "Start with practical easy-browse stores. Include a kids zone or entertainment as a break anchor. End with a snack at the food court. Keep it short and action-oriented."
-  },
-  {
-    "playbook_id": "pb-before-movie",
-    "scenario": "activity_before_movie",
-    "description": "Quick activity or snack before a cinema visit — time-sensitive, near-cinema focus.",
-    "trigger_conditions": [
-      "User mentions before movie, before the movie",
-      "Occasion = before_movie",
-      "Time-sensitive shopping or dining near cinema"
-    ],
-    "trigger_domains": ["movie", "dining", "routing"],
-    "trigger_sub_intents": ["before_movie", "pre_movie", "quick_before_cinema", "near_cinema_dining"],
-    "required_scene_signals": ["occasion_before_movie"],
-    "optional_scene_signals": ["time_available", "food_preference", "companion_context"],
-    "preferred_entity_types": ["dining", "store"],
-    "preferred_semantic_tags": ["near_cinema", "quick_stop", "time_sensitive", "before_movie", "quick_bite", "low_commitment", "easy_browse"],
-    "required_semantic_signals": ["near_cinema", "quick_stop"],
-    "ranking_biases": {
-      "near_cinema": 1.0,
-      "quick_stop": 0.95,
-      "before_movie": 0.9,
-      "time_sensitive": 0.85,
-      "quick_bite": 0.8,
-      "low_commitment": 0.75
-    },
-    "ranking_boost_tags": ["near_cinema", "quick_stop", "before_movie", "time_sensitive", "low_commitment"],
-    "ranking_penalty_tags": ["sit_down_dining", "high_browse_time", "deep_navigation"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Keep recommendations within easy walking distance of cinema",
-      "Maximum 3 suggestions",
-      "Prefer quick-service dining over sit-down restaurants"
-    ],
-    "response_shape_hint": "concise_shortlist: Max 3 options. Lead with fastest/nearest.",
     "preferred_response_shape": "concise_shortlist",
     "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
-    "must_include_entity_types": ["dining"],
-    "fallback_entity_types": ["store"],
-    "itinerary_template": null,
-    "retrieval_triggers": ["zone_proximity"],
-    "next_step_hint": "Ask how much time they have before the movie",
-    "do_not_include": [
-      "Sit-down restaurants requiring long waits",
-      "Activities incompatible with time constraints"
-    ],
-    "priority": 9,
-    "concierge_reasoning_notes": "Focus on near-cinema quick options. Food Court (Kudu, Popeyes) is closest to Cinema Level. Kiosk Row snacks (Corn World, Baskin Robbins) for lighter bites. Respect the time constraint above all else."
-  },
-  {
-    "playbook_id": "pb-after-movie",
-    "scenario": "activity_after_movie",
-    "description": "Casual winding-down activity or dessert after the cinema.",
-    "trigger_conditions": [
-      "User mentions after movie, after the movie",
-      "Occasion = after_movie",
-      "Post-cinema dining or dessert"
-    ],
-    "trigger_domains": ["movie", "dining"],
-    "trigger_sub_intents": ["after_movie", "post_movie", "post_cinema", "dessert_after_movie"],
-    "required_scene_signals": ["occasion_after_movie"],
-    "optional_scene_signals": ["companion_context", "food_preference"],
-    "preferred_entity_types": ["dining", "store"],
-    "preferred_semantic_tags": ["near_cinema", "after_movie", "dessert_spot", "casual", "reward_stop", "coffee_spot", "sit_down_dining"],
-    "required_semantic_signals": ["after_movie", "reward_stop"],
-    "ranking_biases": {
-      "after_movie": 1.0,
-      "dessert_spot": 0.9,
-      "near_cinema": 0.85,
-      "casual": 0.8,
-      "coffee_spot": 0.75,
-      "reward_stop": 0.7
-    },
-    "ranking_boost_tags": ["after_movie", "dessert_spot", "near_cinema", "reward_stop", "coffee_spot"],
-    "ranking_penalty_tags": ["intensive_shopping", "high_browse_time"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Suggest dessert as natural post-movie reward",
-      "Coffee or casual dining also works well"
-    ],
-    "response_shape_hint": "concise_shortlist: 2-3 casual options. Lead with dessert or coffee.",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
-    "must_include_entity_types": ["dining"],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": ["zone_proximity"],
-    "next_step_hint": "Ask if they want dessert, a full meal, or just a quick coffee",
-    "do_not_include": ["Heavy fine dining immediately after a movie"],
-    "priority": 9,
-    "concierge_reasoning_notes": "Natural post-movie: dessert → coffee → light snack. Baskin Robbins (Kiosk Row), Corn World, or Starbucks (Main Gallery) are ideal. Keep it relaxed."
-  },
-  {
-    "playbook_id": "pb-quick-errand",
-    "scenario": "quick_errand_shopping",
-    "description": "Fast, focused shopping for someone with limited time.",
-    "trigger_conditions": [
-      "User indicates they are in a hurry or have limited time",
-      "Quick constraint detected with shopping intent"
-    ],
-    "trigger_domains": ["shopping"],
-    "trigger_sub_intents": ["quick_errand", "time_pressed_shopping", "fast_shopping", "one_stop"],
-    "required_scene_signals": ["time_constraint"],
-    "optional_scene_signals": ["shopping_category", "budget_signal"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["quick_stop", "easy_browse", "low_commitment", "practical_shopping", "time_sensitive", "near_main_entrance"],
-    "required_semantic_signals": ["quick_stop"],
-    "ranking_biases": {
-      "quick_stop": 1.0,
-      "easy_browse": 0.9,
-      "low_commitment": 0.85,
-      "practical_shopping": 0.8,
-      "time_sensitive": 0.75
-    },
-    "ranking_boost_tags": ["quick_stop", "easy_browse", "low_commitment", "near_main_entrance"],
-    "ranking_penalty_tags": ["deep_mall_navigation", "high_browse_time"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Maximum 2-3 suggestions",
-      "Prefer stores near entrance or easy to find"
-    ],
-    "response_shape_hint": "concise_shortlist: 2-3 quick picks with floor/location. Be direct.",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
-    "must_include_entity_types": [],
-    "fallback_entity_types": ["dining", "store"],
-    "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask what specific item they need so we can direct them precisely",
-    "do_not_include": ["Large department stores requiring extensive navigation"],
-    "priority": 8,
-    "concierge_reasoning_notes": "Get them in and out efficiently. Identify the nearest relevant store. Provide floor and zone info so they can go straight there."
-  },
-  {
-    "playbook_id": "pb-mall-overview",
-    "scenario": "mall_overview",
-    "description": "Provides a concise overview of the mall — what it is, what's there, hours, facilities, zones.",
-    "trigger_conditions": [
-      "User asks about the mall in general",
-      "User says 'tell me about the mall'",
-      "User asks about opening hours, address, or floors",
-      "User asks what facilities are available",
-      "Detected intent: mall_overview, mall_info, opening_hours"
-    ],
-    "trigger_domains": ["mall_info"],
-    "trigger_sub_intents": ["mall_overview", "opening_hours", "address_lookup", "facilities_query", "zone_query", "what_is_here", "mall_description"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["is_first_time_visitor"],
-    "preferred_entity_types": ["service"],
-    "preferred_semantic_tags": [],
-    "required_semantic_signals": [],
-    "ranking_biases": {},
-    "ranking_boost_tags": [],
-    "ranking_penalty_tags": [],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Answer directly from mall_profile_summary",
-      "Lead with name, city, key stats",
-      "Mention hours, parking, key services"
-    ],
-    "response_shape_hint": "direct_fact with contextual overview",
-    "preferred_response_shape": "direct_fact",
-    "preferred_strategy": "direct_fact",
-    "shortlist_size_hint": 0,
-    "entity_cap": 0,
-    "must_include_entity_types": [],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": ["mall_profile", "operating_hours", "address", "zone_map"],
-    "next_step_hint": "Ask if they need directions to a specific area or want recommendations",
-    "do_not_include": [],
-    "priority": 10,
-    "concierge_reasoning_notes": "Mall overview must be concise and answer-first. Lead with: Mall of Arabia, Jeddah (Medina Road, An Nuzhah). 2 floors: Ground + Cinema Level. 6 zones: Main Gallery, Kiosk Row, Food Court, Entertainment Wing, Hypermarket Area, Cinema Zone. Highlights: Muvi Cinema, Danube HyperMarket, Fun Time, 100+ stores, free parking. Hours: Sun-Thu & Sat 09:00 AM-11:59 PM, Fri 09:00 PM-11:59 PM. Do NOT list every store."
-  },
-  {
-    "playbook_id": "pb-brand-lookup",
-    "scenario": "brand_store_lookup",
-    "description": "Direct lookup for a specific brand or store — is it here, where is it, what floor/zone.",
-    "trigger_conditions": [
-      "User asks if a specific brand is present",
-      "User asks where a specific store is",
-      "User mentions a specific store by name",
-      "Detected intent: brand_lookup, store_query, store_direction"
-    ],
-    "trigger_domains": ["shopping"],
-    "trigger_sub_intents": ["brand_lookup", "store_query", "store_direction", "store_availability", "where_is_brand"],
-    "required_scene_signals": ["brand_name_mentioned"],
-    "optional_scene_signals": [],
-    "preferred_entity_types": ["store", "dining", "service"],
-    "preferred_semantic_tags": [],
-    "required_semantic_signals": [],
-    "ranking_biases": {"exact_name_match": 1.0},
-    "ranking_boost_tags": [],
-    "ranking_penalty_tags": [],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "If brand not found, say honestly and suggest alternatives in same category",
-      "Always include floor/zone/unit when found"
-    ],
-    "response_shape_hint": "direct_fact with floor and zone",
-    "preferred_response_shape": "direct_fact",
-    "preferred_strategy": "direct_fact",
-    "shortlist_size_hint": 1,
-    "entity_cap": 1,
-    "must_include_entity_types": [],
-    "fallback_entity_types": [],
-    "itinerary_template": null,
-    "retrieval_triggers": ["store_name", "brand_name", "entity_name_exact"],
-    "next_step_hint": "Confirm they found what they need or offer nearby alternatives",
-    "do_not_include": [],
-    "priority": 10,
-    "concierge_reasoning_notes": "Answer directly: 'Yes, [Brand] is on Ground floor, [Zone], Unit [X].' If not present: 'We don't have [Brand] at this mall, but [Similar store] in [Zone] offers similar products.' Never leave a brand query without a direct answer or a helpful alternative."
-  },
-  {
-    "playbook_id": "pb-category-shopping",
-    "scenario": "category_shopping",
-    "description": "Category-based shopping when user wants a type of product, not a specific brand.",
-    "trigger_conditions": [
-      "User wants shoes, clothes, perfume, accessories, etc.",
-      "User asks for fashion stores, beauty options, etc.",
-      "Detected intent: category_shopping, product_lookup"
-    ],
-    "trigger_domains": ["shopping"],
-    "trigger_sub_intents": ["category_shopping", "product_lookup", "fashion_query", "beauty_query", "perfume_query", "footwear_query", "gift_category"],
-    "required_scene_signals": ["product_category_mentioned"],
-    "optional_scene_signals": ["budget_signal", "companion_context", "gender_signal"],
-    "preferred_entity_types": ["store"],
-    "preferred_semantic_tags": ["style_shopping", "gift_friendly", "practical_shopping"],
-    "required_semantic_signals": [],
-    "ranking_biases": {"category_match": 1.0, "anchor_brand": 0.8},
-    "ranking_boost_tags": ["easy_browse", "practical_shopping", "anchor_brand"],
-    "ranking_penalty_tags": [],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Group by category if multiple categories requested",
-      "Highlight 2-3 best options per category",
-      "Always include floor/zone location"
-    ],
-    "response_shape_hint": "concise_shortlist with category grouping",
-    "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
+    "response_shape_hint": "List 3-5 family meal options with zone and why they fit families.",
+    "entity_cap": 5,
     "shortlist_size_hint": 4,
-    "entity_cap": 4,
-    "must_include_entity_types": ["store"],
-    "fallback_entity_types": [],
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "If no dedicated kids menu is known, pick broad fast-food chains in Food Court",
+      "Prefer a mix of budget and mid-range options",
+      "Add dessert only if there is room for a second stop"
+    ],
     "itinerary_template": null,
-    "retrieval_triggers": ["category_name"],
-    "next_step_hint": "Ask if they want to narrow by budget, brand, or specific style",
-    "do_not_include": ["Unrelated categories"],
-    "priority": 7,
-    "concierge_reasoning_notes": "Match product category to the right zone. Fashion → Main Gallery (Zara, NINE WEST, Stradivarius, Bershka). Perfumes → Kiosk Row (Ajmal, Osma, Doknah, Zohoor Al Reef). Shoes → Main Gallery (NINE WEST, Charles & Keith, COLE HAAN). Beauty → Main Gallery (L'Occitane, The Body Shop). Value → Entertainment Wing (Centrepoint, Brands For Less). Keep to 3-4 strong options."
+    "retrieval_triggers": [
+      "canonical.dining"
+    ],
+    "priority": 3,
+    "next_step_hint": "Ask if they want the quickest family meal or a sit-down cafe break.",
+    "concierge_reasoning_notes": "Use Food Court options like KFC, TEXAS CHICKEN, Popeyes Restaurant, Arby’s, Kudu Restaurant, and La Casa Pasta for easy family meals."
+  },
+  {
+    "playbook_id": "pb-quick-bite",
+    "scenario": "quick_bite_now",
+    "description": "Find a fast, convenient bite to eat with minimal wait and easy access.",
+    "trigger_domains": [
+      "dining",
+      "food",
+      "quick_service"
+    ],
+    "trigger_sub_intents": [
+      "quick_bite",
+      "grab_food",
+      "fast_meal",
+      "eat_now"
+    ],
+    "trigger_conditions": [
+      "User needs something fast to eat",
+      "User is in a hurry",
+      "User asks for a quick meal near them"
+    ],
+    "required_scene_signals": [
+      "time_limited"
+    ],
+    "optional_scene_signals": [
+      "near_food",
+      "before_event"
+    ],
+    "required_semantic_signals": [
+      "quick_service"
+    ],
+    "preferred_entity_types": [
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "quick_service",
+      "budget_friendly",
+      "near_food",
+      "easy_order"
+    ],
+    "ranking_biases": {
+      "quick_service": 1.0,
+      "budget_friendly": 0.8,
+      "near_food": 0.7,
+      "easy_order": 0.6
+    },
+    "ranking_boost_tags": [
+      "quick_service",
+      "budget_friendly",
+      "near_food"
+    ],
+    "ranking_penalty_tags": [
+      "slow_service",
+      "fine_dining"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Keep it to 3 quick options, prioritizing Food Court and easy pickup points.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "If Food Court options are unavailable, suggest Main Gallery cafes with takeaway",
+      "Keep the list small and practical",
+      "Avoid dessert-only suggestions unless the user asks for sweet snacks"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.dining",
+      "zone.directory"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask whether they want chicken, shawarma, burgers, or coffee.",
+    "concierge_reasoning_notes": "Fast picks include KFC, TEXAS CHICKEN, Shawarma Jassas, Hardee's, Arby’s, and Kudu Restaurant in the Food Court, with Coffee options like Starbucks or COSTA COFFEE nearby."
   },
   {
     "playbook_id": "pb-movie-showtime-lookup",
     "scenario": "movie_showtime_lookup",
-    "description": "Explicit movie/showtime lookup — what's playing now, all movies, cinema info.",
+    "description": "Return current movie options and showtimes-related lookup for the cinema lineup.",
+    "trigger_domains": [
+      "cinema",
+      "movies",
+      "showtimes"
+    ],
+    "trigger_sub_intents": [
+      "movie_showtimes",
+      "now_showing",
+      "coming_soon",
+      "cinema_lookup"
+    ],
     "trigger_conditions": [
       "User asks what movies are playing",
-      "User asks about showtimes",
-      "User asks for all movies or what they can watch",
-      "Detected intent: movie_lookup, showtime_query, cinema_info, whats_playing"
+      "User asks for showtimes or cinema lineup",
+      "User wants current or coming soon movie details"
     ],
-    "trigger_domains": ["movie", "entertainment"],
-    "trigger_sub_intents": ["movie_lookup", "showtime_query", "whats_playing", "cinema_info", "all_movies_list", "movie_schedule"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["companion_context", "genre_preference", "language_preference"],
-    "preferred_entity_types": ["cinema", "movie"],
-    "preferred_semantic_tags": ["cinema", "movies", "entertainment", "cinema_now"],
-    "required_semantic_signals": ["cinema", "movies"],
-    "ranking_biases": {"cinema": 1.0, "movies": 1.0},
-    "ranking_boost_tags": ["cinema_now", "entertainment_anchor", "showtime_lookup", "movie_night"],
-    "ranking_penalty_tags": ["shopping", "family_friendly_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Always list all SHOWING_NOW movies first",
-      "Then list COMING_SOON",
-      "Always include Muvi Cinema details and booking URL",
-      "Flag kid-friendly movies (ZOOTROPOLIS 2, SPONGEBOB) when user has children"
+    "optional_scene_signals": [
+      "movie_preference",
+      "language_preference",
+      "age_group"
     ],
-    "response_shape_hint": "direct_fact: list movies with genre and brief note on audience suitability",
+    "required_semantic_signals": [
+      "movie_request"
+    ],
+    "preferred_entity_types": [
+      "cinema",
+      "movie"
+    ],
+    "preferred_semantic_tags": [
+      "movie_lineup",
+      "showing_now",
+      "coming_soon",
+      "family_friendly"
+    ],
+    "ranking_biases": {
+      "movie_lineup": 1.0,
+      "showing_now": 0.9,
+      "coming_soon": 0.7,
+      "family_friendly": 0.4
+    },
+    "ranking_boost_tags": [
+      "movie_lineup",
+      "showing_now",
+      "coming_soon"
+    ],
+    "ranking_penalty_tags": [
+      "adult_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-movie-006",
+      "t-movie-010"
+    ],
     "preferred_response_shape": "direct_fact",
-    "preferred_strategy": "direct_fact",
-    "shortlist_size_hint": 7,
-    "entity_cap": 10,
-    "must_include_entity_types": ["cinema", "movie"],
-    "fallback_entity_types": [],
+    "preferred_strategy": "exact_retrieval",
+    "response_shape_hint": "List the cinema and the matching movies exactly from the current lineup; if asked, distinguish NOW SHOWING vs COMING SOON.",
+    "entity_cap": 6,
+    "shortlist_size_hint": 6,
+    "must_include_entity_types": [
+      "cinema",
+      "movie"
+    ],
+    "fallback_entity_types": [
+      "movie"
+    ],
+    "fallback_rules": [
+      "If the requested title is not found, provide the nearest matching now-showing title",
+      "If the user asks for family viewing, prioritize animated or comedy titles",
+      "Do not invent showtimes; provide lineup-only lookup"
+    ],
     "itinerary_template": null,
-    "retrieval_triggers": ["movie_list", "showtimes", "cinema_entity", "movies_showing_now"],
-    "next_step_hint": "Ask about genre preference or companion type to suggest the best pick",
-    "do_not_include": ["Shopping", "Non-entertainment entities"],
-    "priority": 10,
-    "concierge_reasoning_notes": "EXPLICIT movie query — do NOT drift to shopping. Lead with Muvi Cinema (Cinema Level, Cinema Zone, CNL001). Currently showing: SHELTER (Action/Thriller), THE HOUSEMAID (Thriller), SEND HELP (Horror/Thriller), ZOOTROPOLIS 2 (Animation/Comedy — great for kids!), HAMNET (Drama/Biography), SPONGEBOB MOVIE (Animation — great for families!), EL SELEM W EL THOBAN (Comedy/Romance, Arabic). Book at muvicinemas.com. Highlight family-friendly picks if companions include children."
+    "retrieval_triggers": [
+      "canonical.movies"
+    ],
+    "priority": 1,
+    "next_step_hint": "Ask if they want family-friendly, action, comedy, or Arabic-language picks.",
+    "concierge_reasoning_notes": "Muvi Cinema in Cinema Zone is the relevant venue; current options include HOPPERS, HOPPERS (EGYPTIAN DUBBED), FAMILY BUSINESS (ARABIC), SHABAB EL BOMB 3 (ARABIC), PROJECT HAIL MARY, and coming soon THE SUPER MARIO GALAXY MOVIE."
   },
   {
     "playbook_id": "pb-movie-night",
     "scenario": "movie_night_plan",
-    "description": "Evening movie night plan — cinema + dining, for couples, friends, or solo visitors.",
+    "description": "Plan a movie night with a suitable film, snack, and optionally a dessert or coffee stop.",
+    "trigger_domains": [
+      "cinema",
+      "movies",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "movie_night",
+      "cinema_outing",
+      "movie_plus_snack",
+      "night_out"
+    ],
     "trigger_conditions": [
-      "User wants to plan a movie night",
-      "User asks about movie and dinner",
-      "Evening entertainment intent",
-      "Detected intent: movie_night, evening_out, movie_and_dining"
+      "User wants a movie night plan",
+      "User asks for a film plus food combo",
+      "User wants an evening outing around the cinema"
     ],
-    "trigger_domains": ["movie", "entertainment", "dining"],
-    "trigger_sub_intents": ["movie_night", "evening_plan", "movie_and_dinner", "movie_outing", "evening_out"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["companion_context", "budget_signal", "genre_preference"],
-    "preferred_entity_types": ["cinema", "dining"],
-    "preferred_semantic_tags": ["movie", "evening_out", "dining", "date_spot"],
-    "required_semantic_signals": ["cinema", "movie_night"],
-    "ranking_biases": {"movie_night": 1.0, "cinema": 1.0, "dining": 0.85, "dessert_spot": 0.7},
-    "ranking_boost_tags": ["movie_night", "near_cinema", "after_movie", "reward_stop"],
-    "ranking_penalty_tags": ["shopping", "kids_only"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Always include cinema + at least 1 dining option",
-      "Lead with movie selection, then dining"
+    "optional_scene_signals": [
+      "evening_outing",
+      "couple_or_friends",
+      "snack_preference"
     ],
-    "response_shape_hint": "mini_itinerary: movie pick → dining recommendation",
-    "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "mini_itinerary",
-    "shortlist_size_hint": 4,
+    "required_semantic_signals": [
+      "movie_request"
+    ],
+    "preferred_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "movie_night",
+      "snack_pairing",
+      "easy_evening",
+      "date_friendly"
+    ],
+    "ranking_biases": {
+      "movie_night": 1.0,
+      "snack_pairing": 0.9,
+      "easy_evening": 0.7,
+      "date_friendly": 0.6
+    },
+    "ranking_boost_tags": [
+      "movie_night",
+      "snack_pairing",
+      "easy_evening"
+    ],
+    "ranking_penalty_tags": [
+      "family_only",
+      "high_attention_demand"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-movie-006",
+      "t-dining-024"
+    ],
+    "preferred_response_shape": "itinerary",
+    "preferred_strategy": "movie_plus_food",
+    "response_shape_hint": "Recommend one movie, one pre/post-movie snack, and one optional dessert or coffee stop near Cinema Zone/Food Court.",
     "entity_cap": 5,
-    "must_include_entity_types": ["cinema", "dining"],
-    "fallback_entity_types": ["dining"],
-    "itinerary_template": "1) Pick a movie at Muvi Cinema → 2) Meal at Food Court before OR dessert after → 3) Optional coffee at Starbucks",
-    "retrieval_triggers": ["movie_list", "cinema_entity"],
-    "next_step_hint": "Ask if they prefer to eat before or after the movie",
-    "do_not_include": ["Heavy shopping", "Kids-only activities"],
-    "priority": 9,
-    "concierge_reasoning_notes": "Movie night — great lineup available! For adults: SHELTER (action/thriller), THE HOUSEMAID (thriller), SEND HELP (horror). For a more relaxed evening: HAMNET (drama) or EL SELEM W EL THOBAN (Arabic comedy/romance). Suggest Kudu or Popeyes (Food Court) before the movie. After: Baskin Robbins or Corn World for dessert. Book at muvicinemas.com."
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "Prefer food in the Food Court or Kiosk Row to keep the plan simple",
+      "If the film is unavailable, suggest a similar genre now showing",
+      "Keep the plan compact and easy to execute"
+    ],
+    "itinerary_template": "1) Snack in Food Court → 2) Movie at Muvi Cinema → 3) Dessert or coffee nearby",
+    "retrieval_triggers": [
+      "canonical.movies",
+      "canonical.dining",
+      "canonical.cinemas"
+    ],
+    "priority": 3,
+    "next_step_hint": "Ask whether they want action, comedy, romance, or animation.",
+    "concierge_reasoning_notes": "Pair Muvi Cinema with Food Court bites like KFC, Shawarma Jassas, or TEXAS CHICKEN, and dessert from Baskin Robbins or Freshi Ice Sticks."
   },
   {
     "playbook_id": "pb-family-movie",
     "scenario": "family_movie_plan",
-    "description": "Family movie plan — finding a suitable movie for the whole family, especially with kids.",
+    "description": "Recommend family-friendly movies and nearby food choices for a family cinema outing.",
+    "trigger_domains": [
+      "family",
+      "cinema",
+      "movies"
+    ],
+    "trigger_sub_intents": [
+      "family_movie",
+      "kids_movie",
+      "movie_for_family",
+      "family_cinema"
+    ],
     "trigger_conditions": [
-      "Family with kids wants to watch a movie",
-      "User asks for a kid-friendly or family movie",
-      "Detected intent: family_movie, kids_movie, family_cinema"
+      "User asks for a movie for the family",
+      "User wants a kid-friendly cinema choice",
+      "User asks what family films are available"
     ],
-    "trigger_domains": ["movie", "family", "kids"],
-    "trigger_sub_intents": ["family_movie", "kids_movie", "family_cinema", "animation_lookup", "kids_film"],
-    "required_scene_signals": ["companions_include_children"],
-    "optional_scene_signals": ["child_age", "movie_genre_preference"],
-    "preferred_entity_types": ["cinema", "movie", "dining"],
-    "preferred_semantic_tags": ["kid_friendly", "family_friendly", "movie"],
-    "required_semantic_signals": ["cinema"],
-    "ranking_biases": {"kid_friendly": 1.0, "family_friendly": 0.9, "cinema": 0.85},
-    "ranking_boost_tags": ["family_movie", "kid_friendly", "has_kids_menu", "child_relief_anchor"],
-    "ranking_penalty_tags": ["adult_only", "horror", "thriller"],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "language_preference",
+      "age_group",
+      "snack_preference"
+    ],
+    "required_semantic_signals": [
+      "family_friendly"
+    ],
+    "preferred_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "family_friendly",
+      "kid_friendly",
+      "animation",
+      "comedy"
+    ],
+    "ranking_biases": {
+      "family_friendly": 1.0,
+      "kid_friendly": 1.0,
+      "animation": 0.9,
+      "comedy": 0.7,
+      "near_food": 0.5
+    },
+    "ranking_boost_tags": [
+      "family_friendly",
+      "kid_friendly",
+      "animation",
+      "near_food"
+    ],
+    "ranking_penalty_tags": [
+      "horror",
+      "thriller",
+      "adult_only"
+    ],
     "excluded_tags": [],
-    "fallback_rules": [
-      "ZOOTROPOLIS 2 and SPONGEBOB are currently showing — always prioritize these for families",
-      "Always include a family-friendly dining option",
-      "Mention Cinema Level location"
+    "do_not_include": [
+      "t-movie-006",
+      "t-movie-010"
     ],
-    "response_shape_hint": "guided_plan: recommend kid-friendly movies → family dining",
     "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "guided_plan",
-    "shortlist_size_hint": 4,
+    "preferred_strategy": "movie_plus_food",
+    "response_shape_hint": "List family-friendly now-showing movies first; note that no animation films are currently showing if applicable, otherwise include animation titles.",
     "entity_cap": 5,
-    "must_include_entity_types": ["cinema", "dining"],
-    "fallback_entity_types": ["entertainment"],
-    "itinerary_template": "1) ZOOTROPOLIS 2 or SPONGEBOB at Muvi Cinema → 2) Family meal at Food Court (Kudu/Popeyes) → 3) Ice cream at Baskin Robbins",
-    "retrieval_triggers": ["movie_list", "kid_friendly_movies", "cinema_entity"],
-    "next_step_hint": "Ask child's age to better suggest age-appropriate options",
-    "do_not_include": ["Horror/Thriller movies for kids", "Fine dining"],
-    "priority": 9,
-    "concierge_reasoning_notes": "Great news — family-friendly movies are now showing! ZOOTROPOLIS 2 (Animation/Comedy, 108 min) is perfect for all ages. THE SPONGEBOB MOVIE: SEARCH FOR SQUAREPANTS (Animation/Adventure, 89 min) is a shorter, fun option. After the movie, head to the Food Court (Kudu or Popeyes for kids' meals) then Baskin Robbins for ice cream!"
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "cinema",
+      "movie"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "Prioritize animated or comedy titles that are suitable for families",
+      "If no animation is available, say so explicitly and recommend the closest family-safe comedy",
+      "Add a nearby kid-friendly food option in Food Court"
+    ],
+    "itinerary_template": "1) Choose family-safe film at Muvi Cinema → 2) Grab Food Court meal → 3) Dessert in Food Court or Kiosk Row",
+    "retrieval_triggers": [
+      "canonical.movies",
+      "canonical.dining",
+      "canonical.cinemas"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask whether they prefer Arabic, dubbed, or English family films.",
+    "concierge_reasoning_notes": "Family-safe now showing options include HOPPERS, HOPPERS (EGYPTIAN DUBBED), FAMILY BUSINESS (ARABIC), SHABAB EL BOMB 3 (ARABIC), and AADU 3 (MALAYALAM). Muvi Cinema is in Cinema Zone; food nearby includes KFC and Baskin Robbins."
   },
   {
     "playbook_id": "pb-kids-entertainment",
-    "scenario": "kids_entertainment_plan",
-    "description": "Dedicated kids entertainment plan — Fun Time play area, kid-friendly movies, family dining.",
+    "scenario": "kids_entertainment_picker",
+    "description": "Find entertainment options for children and anchor the plan around relief and easy supervision.",
+    "trigger_domains": [
+      "kids",
+      "entertainment",
+      "family"
+    ],
+    "trigger_sub_intents": [
+      "kids_activity",
+      "child_entertainment",
+      "play_area",
+      "family_fun"
+    ],
     "trigger_conditions": [
-      "User asks for something for kids to do",
-      "User asks about play area, kids zone, or kids activities",
-      "User mentions child is bored or needs entertainment",
-      "Detected intent: kids_activity, kids_entertainment, play_area"
+      "User asks what kids can do",
+      "User is looking for child entertainment",
+      "User needs an activity to keep children occupied"
     ],
-    "trigger_domains": ["kids", "family", "entertainment"],
-    "trigger_sub_intents": ["kids_activity", "kids_entertainment", "play_area", "indoor_play", "child_activity", "something_for_kids"],
-    "required_scene_signals": ["companions_include_children"],
-    "optional_scene_signals": ["child_age", "time_available"],
-    "preferred_entity_types": ["entertainment", "store", "dining"],
-    "preferred_semantic_tags": ["kid_friendly", "child_activity", "kids_entertainment", "child_relief_anchor"],
-    "required_semantic_signals": ["kid_friendly", "kids_entertainment"],
-    "ranking_biases": {"child_relief_anchor": 1.0, "kid_friendly": 0.95, "kids_entertainment": 0.9},
-    "ranking_boost_tags": ["child_relief_anchor", "kids_entertainment", "entertainment_anchor", "near_food"],
-    "ranking_penalty_tags": ["adult_only", "premium", "quiet_browse"],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "child_age",
+      "time_limited",
+      "parent_needs_break"
+    ],
+    "required_semantic_signals": [
+      "child_activity"
+    ],
+    "preferred_entity_types": [
+      "kids_entertainment",
+      "dining",
+      "service"
+    ],
+    "preferred_semantic_tags": [
+      "child_activity",
+      "kid_friendly",
+      "family_friendly",
+      "child_relief_anchor"
+    ],
+    "ranking_biases": {
+      "child_activity": 1.0,
+      "kid_friendly": 1.0,
+      "family_friendly": 0.9,
+      "child_relief_anchor": 0.9
+    },
+    "ranking_boost_tags": [
+      "child_activity",
+      "kid_friendly",
+      "family_friendly",
+      "child_relief_anchor"
+    ],
+    "ranking_penalty_tags": [
+      "adult_only",
+      "quiet_only"
+    ],
     "excluded_tags": [],
-    "fallback_rules": [
-      "Fun Time is the primary kids anchor — always include it",
-      "Also mention ZOOTROPOLIS 2 or SPONGEBOB at Muvi Cinema",
-      "Pair with Food Court dining for family convenience",
-      "Mention stroller loans for younger children"
-    ],
-    "response_shape_hint": "guided_plan: Fun Time AND/OR kids movies → nearby dining → practical tips",
+    "do_not_include": [],
     "preferred_response_shape": "guided_plan",
-    "preferred_strategy": "guided_plan",
-    "shortlist_size_hint": 3,
+    "preferred_strategy": "family_plan",
+    "response_shape_hint": "If a dedicated kids_entertainment entity exists, lead with it; otherwise pair family food and cinema as the relief anchor.",
     "entity_cap": 4,
-    "must_include_entity_types": ["entertainment"],
-    "fallback_entity_types": ["cinema", "dining"],
-    "itinerary_template": "1) Fun Time (Entertainment Wing) for kids play → 2) OR ZOOTROPOLIS 2/SPONGEBOB at Muvi Cinema → 3) Family meal at Food Court",
-    "retrieval_triggers": ["kids_entertainment_entity", "kid_friendly_movies"],
-    "next_step_hint": "Ask about child's age and whether they need dining nearby",
-    "do_not_include": ["Adult-only venues", "Luxury stores"],
-    "priority": 9,
-    "concierge_reasoning_notes": "Two great kids options here! Fun Time in Entertainment Wing for hands-on play. PLUS — ZOOTROPOLIS 2 (Animation/Comedy) and SPONGEBOB MOVIE (Animation/Adventure) are currently showing at Muvi Cinema on Cinema Level. Pair either with Kudu or Popeyes (Food Court) for a kids' meal, and end with Baskin Robbins ice cream."
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "kids_entertainment"
+    ],
+    "fallback_entity_types": [
+      "dining",
+      "cinema",
+      "service"
+    ],
+    "fallback_rules": [
+      "If no dedicated kids entertainment exists, use Muvi Cinema family titles plus a snack stop",
+      "Use a nearby café or dessert stop as a calm break for parents",
+      "Keep the route short and easy to manage"
+    ],
+    "itinerary_template": "1) Kids activity → 2) Snack/dessert → 3) Optional family movie or café break",
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.cinemas",
+      "canonical.services"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask the child's age and whether they want active play or calm browsing.",
+    "concierge_reasoning_notes": "There is no explicit kids_entertainment anchor in the listed entities, so fall back to Muvi Cinema family titles like HOPPERS and nearby kid-friendly food such as Baskin Robbins, KFC, or TEXAS CHICKEN."
+  },
+  {
+    "playbook_id": "pb-movie-food",
+    "scenario": "movie_with_food_pairing",
+    "description": "Pair a movie choice with suitable food before or after the screening.",
+    "trigger_domains": [
+      "cinema",
+      "movies",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "movie_food_pairing",
+      "snack_before_movie",
+      "dinner_after_movie",
+      "movie_and_meal"
+    ],
+    "trigger_conditions": [
+      "User wants a movie and food recommendation",
+      "User asks what to eat before or after a film",
+      "User asks for cinema dining nearby"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "before_movie",
+      "after_movie",
+      "snack_preference"
+    ],
+    "required_semantic_signals": [
+      "movie_request"
+    ],
+    "preferred_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "near_cinema",
+      "snack_pairing",
+      "quick_service",
+      "dessert"
+    ],
+    "ranking_biases": {
+      "near_cinema": 1.0,
+      "snack_pairing": 0.9,
+      "quick_service": 0.8,
+      "dessert": 0.6
+    },
+    "ranking_boost_tags": [
+      "near_cinema",
+      "snack_pairing",
+      "quick_service"
+    ],
+    "ranking_penalty_tags": [
+      "slow_service"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "itinerary",
+    "preferred_strategy": "movie_plus_food",
+    "response_shape_hint": "Recommend a compact combo: movie, meal/snack, and optional dessert, preferably in Food Court, Kiosk Row, or Main Gallery close to Cinema Zone.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "Prefer Food Court if the user wants full meal options",
+      "Prefer Kiosk Row or Main Gallery cafés for lighter pre-movie stops",
+      "Do not overcomplicate the plan"
+    ],
+    "itinerary_template": "1) Quick bite in Food Court → 2) Movie at Muvi Cinema → 3) Dessert near the cinema",
+    "retrieval_triggers": [
+      "canonical.movies",
+      "canonical.dining"
+    ],
+    "priority": 3,
+    "next_step_hint": "Ask if they want a light snack, full meal, or dessert-only pairing.",
+    "concierge_reasoning_notes": "Pairs well with Food Court options like Shawarma Jassas, KFC, or Popeyes Restaurant, plus dessert at Baskin Robbins, Freshi Ice Sticks, or Nespresso in Kiosk Row."
+  },
+  {
+    "playbook_id": "pb-kid-movie-food",
+    "scenario": "kid_movie_and_food",
+    "description": "Suggest a child-friendly movie plus food that works well for kids and parents.",
+    "trigger_domains": [
+      "kids",
+      "cinema",
+      "dining",
+      "family"
+    ],
+    "trigger_sub_intents": [
+      "kid_movie_food",
+      "children_cinema_meal",
+      "family_film_snack",
+      "kids_day_out"
+    ],
+    "trigger_conditions": [
+      "User asks for kids movie and food",
+      "User wants a family film with child-friendly eating options",
+      "User is planning a child-focused outing"
+    ],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "child_age",
+      "snack_preference",
+      "time_limited"
+    ],
+    "required_semantic_signals": [
+      "family_friendly"
+    ],
+    "preferred_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "kid_friendly",
+      "family_friendly",
+      "animation",
+      "quick_service"
+    ],
+    "ranking_biases": {
+      "kid_friendly": 1.0,
+      "family_friendly": 1.0,
+      "animation": 0.9,
+      "quick_service": 0.8
+    },
+    "ranking_boost_tags": [
+      "kid_friendly",
+      "family_friendly",
+      "animation",
+      "quick_service"
+    ],
+    "ranking_penalty_tags": [
+      "horror",
+      "thriller",
+      "adult_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-movie-006",
+      "t-movie-010"
+    ],
+    "preferred_response_shape": "guided_plan",
+    "preferred_strategy": "movie_plus_food",
+    "response_shape_hint": "Choose the most child-safe now showing title first, then add a simple meal or dessert from Food Court.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "cinema",
+      "movie",
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "Use animated titles if available; otherwise pick the safest comedy",
+      "Add ice cream or dessert as a reward stop",
+      "Prefer shortest walking route from Food Court to Cinema Zone"
+    ],
+    "itinerary_template": "1) Family-safe movie at Muvi Cinema → 2) Food Court meal → 3) Ice cream or dessert",
+    "retrieval_triggers": [
+      "canonical.movies",
+      "canonical.dining",
+      "canonical.cinemas"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask the child's age or whether they want Arabic or English audio.",
+    "concierge_reasoning_notes": "Best child-safe movies now showing are HOPPERS, HOPPERS (EGYPTIAN DUBBED), FAMILY BUSINESS (ARABIC), SHABAB EL BOMB 3 (ARABIC), and AADU 3 (MALAYALAM); pair with KFC, TEXAS CHICKEN, or Baskin Robbins."
+  },
+  {
+    "playbook_id": "pb-date-night",
+    "scenario": "date_night_plan",
+    "description": "Create a polished date night with dinner, a movie, or a dessert finish.",
+    "trigger_domains": [
+      "romance",
+      "cinema",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "date_night",
+      "romantic_evening",
+      "couple_plan",
+      "night_out_couple"
+    ],
+    "trigger_conditions": [
+      "User asks for a date night idea",
+      "User wants a romantic dinner and movie plan",
+      "User mentions going out as a couple"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "couple",
+      "evening_outing",
+      "special_occasion"
+    ],
+    "required_semantic_signals": [
+      "romantic"
+    ],
+    "preferred_entity_types": [
+      "dining",
+      "cinema",
+      "movie"
+    ],
+    "preferred_semantic_tags": [
+      "romantic",
+      "date_friendly",
+      "dessert",
+      "movie_night"
+    ],
+    "ranking_biases": {
+      "romantic": 1.0,
+      "date_friendly": 0.9,
+      "dessert": 0.7,
+      "movie_night": 0.7
+    },
+    "ranking_boost_tags": [
+      "romantic",
+      "date_friendly",
+      "dessert"
+    ],
+    "ranking_penalty_tags": [
+      "family_only",
+      "high_noise"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-dining-003",
+      "t-dining-019"
+    ],
+    "preferred_response_shape": "itinerary",
+    "preferred_strategy": "mini_itinerary",
+    "response_shape_hint": "Provide a compact two- or three-stop evening plan with one meal and one optional dessert.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "cinema",
+      "movie"
+    ],
+    "fallback_rules": [
+      "Prefer Main Gallery cafés or dessert spots for a softer date vibe",
+      "If the user wants a movie, pair it with Muvi Cinema in Cinema Zone",
+      "Keep the pace relaxed and easy"
+    ],
+    "itinerary_template": "1) Dinner or café in Main Gallery → 2) Movie at Muvi Cinema → 3) Dessert in Kiosk Row or Food Court",
+    "retrieval_triggers": [
+      "canonical.dining",
+      "canonical.movies",
+      "canonical.cinemas"
+    ],
+    "priority": 4,
+    "next_step_hint": "Ask if they want upscale, casual, or dessert-forward dating options.",
+    "concierge_reasoning_notes": "Date-friendly options include Starbucks, COSTA COFFEE, Barn's Cafe, Mikel, Douh L'Douh Bakery Cafe, and a movie at Muvi Cinema; finish with Baskin Robbins or Freshi Ice Sticks."
+  },
+  {
+    "playbook_id": "pb-shopping-dessert",
+    "scenario": "shopping_with_dessert",
+    "description": "Combine shopping with a dessert stop for a pleasant browsing break.",
+    "trigger_domains": [
+      "shopping",
+      "dessert",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "shopping_and_dessert",
+      "treat_after_shopping",
+      "browse_and_sweet",
+      "dessert_break"
+    ],
+    "trigger_conditions": [
+      "User wants shopping plus dessert",
+      "User asks for a sweet stop during a shopping trip",
+      "User wants a treat after browsing stores"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "sweet_tooth",
+      "time_to_kill",
+      "shopping_bag"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "dessert",
+      "easy_browse",
+      "reward_stop",
+      "linger_friendly"
+    ],
+    "ranking_biases": {
+      "dessert": 1.0,
+      "easy_browse": 0.7,
+      "reward_stop": 0.7,
+      "linger_friendly": 0.5
+    },
+    "ranking_boost_tags": [
+      "dessert",
+      "easy_browse",
+      "reward_stop"
+    ],
+    "ranking_penalty_tags": [
+      "heavy_meal"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Suggest nearby dessert options after a shopping stop, keeping the list short and easy.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "store"
+    ],
+    "fallback_rules": [
+      "Prefer dessert spots in Main Gallery or Food Court",
+      "If the user wants a full shopping plan, keep dessert as the final stop",
+      "Avoid overly heavy dining recommendations"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining"
+    ],
+    "priority": 6,
+    "next_step_hint": "Ask whether they want ice cream, coffee, or a bakery-style dessert.",
+    "concierge_reasoning_notes": "Dessert anchors include Baskin Robbins, Freshi Ice Sticks, Usul alhala, Wokkong, Farah, Gelato Divino, and Nespresso; pair with nearby Main Gallery stores like Sephora or Zara Home."
+  },
+  {
+    "playbook_id": "pb-budget-family",
+    "scenario": "budget_family_plan",
+    "description": "Plan an economical family outing with budget-friendly food and value shopping.",
+    "trigger_domains": [
+      "family",
+      "budget",
+      "shopping",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "budget_family",
+      "value_plan",
+      "cheap_family_outing",
+      "family_on_budget"
+    ],
+    "trigger_conditions": [
+      "User mentions budget or saving money",
+      "User wants an affordable family plan",
+      "User asks for cheap family dining or shopping"
+    ],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "budget_signal",
+      "time_limited"
+    ],
+    "required_semantic_signals": [
+      "budget_friendly"
+    ],
+    "preferred_entity_types": [
+      "dining",
+      "store"
+    ],
+    "preferred_semantic_tags": [
+      "budget_friendly",
+      "family_friendly",
+      "quick_service",
+      "value"
+    ],
+    "ranking_biases": {
+      "budget_friendly": 1.0,
+      "family_friendly": 0.9,
+      "quick_service": 0.8,
+      "value": 0.7
+    },
+    "ranking_boost_tags": [
+      "budget_friendly",
+      "family_friendly",
+      "quick_service"
+    ],
+    "ranking_penalty_tags": [
+      "premium_only",
+      "luxury_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [
+      "t-store-078",
+      "t-store-136",
+      "t-store-189",
+      "t-store-085"
+    ],
+    "preferred_response_shape": "guided_plan",
+    "preferred_strategy": "budget_plan",
+    "response_shape_hint": "Keep it practical: affordable meal first, then low-cost browsing or a treat if budget allows.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "store",
+      "service"
+    ],
+    "fallback_rules": [
+      "Favor Food Court budget chains",
+      "If a store is needed, prioritize value-oriented options over premium brands",
+      "Avoid premium jewelry, fragrance, and footwear"
+    ],
+    "itinerary_template": "1) Budget meal in Food Court → 2) Value shopping in Main Gallery → 3) Optional low-cost dessert",
+    "retrieval_triggers": [
+      "canonical.dining",
+      "canonical.stores"
+    ],
+    "priority": 3,
+    "next_step_hint": "Ask for the max budget or whether they want meals, snacks, or shopping only.",
+    "concierge_reasoning_notes": "Budget-friendly family choices include Arby’s, Popeyes Restaurant, Shobak Restaurant, KFC, Hardee's, TEXAS CHICKEN, and value stops like Flying Tiger or NewYorker."
+  },
+  {
+    "playbook_id": "pb-luxury-shopping",
+    "scenario": "luxury_shopping_premium",
+    "description": "Recommend premium and luxury-leaning stores for high-end shopping.",
+    "trigger_domains": [
+      "luxury",
+      "shopping",
+      "fashion",
+      "beauty"
+    ],
+    "trigger_sub_intents": [
+      "luxury_shopping",
+      "premium_browse",
+      "high_end_purchase",
+      "designer_search"
+    ],
+    "trigger_conditions": [
+      "User asks for luxury brands",
+      "User wants premium shopping options",
+      "User mentions high-end gifts or designer items"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "premium_budget",
+      "brand_focus",
+      "gift_intent"
+    ],
+    "required_semantic_signals": [
+      "premium"
+    ],
+    "preferred_entity_types": [
+      "store"
+    ],
+    "preferred_semantic_tags": [
+      "premium",
+      "luxury",
+      "designer",
+      "high_end"
+    ],
+    "ranking_biases": {
+      "premium": 1.0,
+      "luxury": 1.0,
+      "designer": 0.8,
+      "high_end": 0.7
+    },
+    "ranking_boost_tags": [
+      "premium",
+      "luxury",
+      "designer"
+    ],
+    "ranking_penalty_tags": [
+      "budget_friendly",
+      "mass_market"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "shortlist_recommendation",
+    "response_shape_hint": "Return only premium-leaning stores, ideally 3-5, with zone and why they fit a luxury request.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store"
+    ],
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "Prefer premium fashion, jewelry, and fragrance",
+      "If luxury fashion is limited, include premium accessories and beauty",
+      "Do not include budget or fast-food entities unless explicitly requested"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores"
+    ],
+    "priority": 5,
+    "next_step_hint": "Ask whether they want jewelry, fragrance, or clothing.",
+    "concierge_reasoning_notes": "Premium anchors include Fayendra for fine jewelry, Aigner for watches, COLE HAAN for footwear, and L'Occitane for premium beauty; Massimo Dutti and Ralph Lauren can serve as upscale fashion options."
+  },
+  {
+    "playbook_id": "pb-anniversary",
+    "scenario": "anniversary_celebration",
+    "description": "Plan an anniversary outing with romantic shopping, dinner, and dessert or cinema.",
+    "trigger_domains": [
+      "anniversary",
+      "romance",
+      "dining",
+      "shopping"
+    ],
+    "trigger_sub_intents": [
+      "anniversary_plan",
+      "special_occasion",
+      "celebration_outing",
+      "romantic_plan"
+    ],
+    "trigger_conditions": [
+      "User mentions anniversary",
+      "User wants a special romantic outing",
+      "User asks for celebration ideas for a couple"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "special_occasion",
+      "couple",
+      "budget_signal"
+    ],
+    "required_semantic_signals": [
+      "romantic"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining",
+      "cinema"
+    ],
+    "preferred_semantic_tags": [
+      "romantic",
+      "premium",
+      "dessert",
+      "giftable"
+    ],
+    "ranking_biases": {
+      "romantic": 1.0,
+      "premium": 0.7,
+      "dessert": 0.6,
+      "giftable": 0.5
+    },
+    "ranking_boost_tags": [
+      "romantic",
+      "premium",
+      "dessert",
+      "giftable"
+    ],
+    "ranking_penalty_tags": [
+      "budget_only",
+      "high_noise"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "itinerary",
+    "preferred_strategy": "mini_itinerary",
+    "response_shape_hint": "Build a polished 2-3 stop anniversary plan: gift or shopping, meal, then dessert or movie.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "store",
+      "cinema"
+    ],
+    "fallback_rules": [
+      "Prefer premium or romantic-feeling stops in Main Gallery",
+      "If no movie is desired, finish with dessert",
+      "Keep the route elegant and simple"
+    ],
+    "itinerary_template": "1) Gift or boutique stop → 2) Romantic cafe/dinner → 3) Dessert or movie at Muvi Cinema",
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.movies",
+      "canonical.cinemas"
+    ],
+    "priority": 4,
+    "next_step_hint": "Ask if they want a gift-first, dinner-first, or movie-first anniversary plan.",
+    "concierge_reasoning_notes": "Good anniversary pairings include Fayendra or L'Occitane, dinner at Mikel, Starbucks, or Barn's Cafe, and dessert at Baskin Robbins or Gelato Divino; Muvi Cinema works for a movie finish."
+  },
+  {
+    "playbook_id": "pb-last-minute-gift",
+    "scenario": "last_minute_gift_pickup",
+    "description": "Find a fast gift with minimal browsing, focusing on easily accessible and giftable items.",
+    "trigger_domains": [
+      "gifts",
+      "urgent",
+      "shopping"
+    ],
+    "trigger_sub_intents": [
+      "last_minute_gift",
+      "urgent_gift",
+      "quick_present",
+      "gift_now"
+    ],
+    "trigger_conditions": [
+      "User needs a gift quickly",
+      "User is short on time before an event",
+      "User asks for an easy last-minute present"
+    ],
+    "required_scene_signals": [
+      "time_limited"
+    ],
+    "optional_scene_signals": [
+      "gift_intent",
+      "budget_signal"
+    ],
+    "required_semantic_signals": [
+      "gift_intent"
+    ],
+    "preferred_entity_types": [
+      "store",
+      "dining"
+    ],
+    "preferred_semantic_tags": [
+      "giftable",
+      "easy_browse",
+      "quick_pickup",
+      "practical"
+    ],
+    "ranking_biases": {
+      "giftable": 1.0,
+      "easy_browse": 0.9,
+      "quick_pickup": 0.9,
+      "practical": 0.6
+    },
+    "ranking_boost_tags": [
+      "giftable",
+      "easy_browse",
+      "quick_pickup"
+    ],
+    "ranking_penalty_tags": [
+      "custom_order",
+      "slow_service"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Give a short list of giftable stores near Main Gallery and one dessert add-on if helpful.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store"
+    ],
+    "fallback_entity_types": [
+      "dining"
+    ],
+    "fallback_rules": [
+      "Prefer obvious gift categories like beauty, accessories, or home",
+      "If a store is not enough, add a dessert treat as a backup gift",
+      "Keep the response actionable and fast"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask who the gift is for and their style preference.",
+    "concierge_reasoning_notes": "Fast gift options include Sephora, Bath & Body Works, Flying Tiger, Aldo Accessories, Zara Home, and premium backups like Fayendra; dessert from Baskin Robbins or Freshi Ice Sticks can serve as an extra gesture."
+  },
+  {
+    "playbook_id": "pb-child-activity",
+    "scenario": "child_activity_picker",
+    "description": "Find an activity or nearby option that keeps a child occupied and happy.",
+    "trigger_domains": [
+      "kids",
+      "activity",
+      "family"
+    ],
+    "trigger_sub_intents": [
+      "child_activity",
+      "kids_to_do",
+      "keep_child_busy",
+      "family_activity"
+    ],
+    "trigger_conditions": [
+      "User asks for something for a child to do",
+      "User wants an activity for kids during the visit",
+      "User needs a child-friendly break"
+    ],
+    "required_scene_signals": [
+      "companions_include_children"
+    ],
+    "optional_scene_signals": [
+      "child_age",
+      "parent_needs_break",
+      "time_limited"
+    ],
+    "required_semantic_signals": [
+      "child_activity"
+    ],
+    "preferred_entity_types": [
+      "kids_entertainment",
+      "dining",
+      "store"
+    ],
+    "preferred_semantic_tags": [
+      "child_activity",
+      "kid_friendly",
+      "family_friendly",
+      "child_relief_anchor"
+    ],
+    "ranking_biases": {
+      "child_activity": 1.0,
+      "kid_friendly": 0.9,
+      "family_friendly": 0.8,
+      "child_relief_anchor": 0.9
+    },
+    "ranking_boost_tags": [
+      "child_activity",
+      "kid_friendly",
+      "child_relief_anchor"
+    ],
+    "ranking_penalty_tags": [
+      "adult_only",
+      "quiet_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "guided_plan",
+    "preferred_strategy": "family_plan",
+    "response_shape_hint": "If no dedicated kids venue is available, suggest a nearby family movie, snack, or browse stop.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "kids_entertainment"
+    ],
+    "fallback_entity_types": [
+      "dining",
+      "cinema",
+      "store"
+    ],
+    "fallback_rules": [
+      "Use Muvi Cinema family-friendly titles as the anchor if there is no explicit kids venue",
+      "Add a treat or snack stop to keep the child engaged",
+      "Keep walking distance short"
+    ],
+    "itinerary_template": "1) Child activity or family movie → 2) Snack/dessert → 3) Easy browse stop",
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.cinemas"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask the child's age and whether they prefer active or calm activities.",
+    "concierge_reasoning_notes": "Because explicit kids_entertainment entities are not listed, use HOPPERS at Muvi Cinema, plus Baskin Robbins, Freshi Ice Sticks, or Flying Tiger for a simple kid-friendly loop."
   },
   {
     "playbook_id": "pb-service-lookup",
-    "scenario": "service_lookup",
-    "description": "Direct service lookup — ATM, stroller, wheelchair, prayer room, information desk, lost & found.",
+    "scenario": "service_direct_lookup",
+    "description": "Return a direct fact lookup for mall services such as ATM, parking, prayer rooms, accessibility, WiFi, or restrooms.",
+    "trigger_domains": [
+      "services",
+      "amenities",
+      "navigation"
+    ],
+    "trigger_sub_intents": [
+      "service_lookup",
+      "where_is_service",
+      "find_amenity",
+      "mall_service_info"
+    ],
     "trigger_conditions": [
-      "User asks for a specific service or facility",
-      "User mentions ATM, stroller, wheelchair, prayer room",
-      "User asks where the information desk is",
-      "Detected intent: service_lookup, facility_query"
+      "User asks where a service is",
+      "User needs a mall amenity or facility",
+      "User wants ATM, prayer room, parking, restroom, wheelchair, or WiFi info"
     ],
-    "trigger_domains": ["service"],
-    "trigger_sub_intents": ["atm_lookup", "stroller_lookup", "wheelchair_lookup", "prayer_room_lookup", "information_desk", "lost_found", "washroom_lookup", "parking_query"],
     "required_scene_signals": [],
-    "optional_scene_signals": ["accessibility_need", "has_infant"],
-    "preferred_entity_types": ["service"],
-    "preferred_semantic_tags": [],
-    "required_semantic_signals": [],
-    "ranking_biases": {"service_type_match": 1.0},
-    "ranking_boost_tags": [],
-    "ranking_penalty_tags": [],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Answer with exact location (floor, zone, directions hint)",
-      "If hours differ from mall hours, mention them",
-      "If service unavailable, suggest nearest alternative"
+    "optional_scene_signals": [
+      "urgent_need",
+      "accessibility_need"
     ],
-    "response_shape_hint": "direct_fact: service name → exact location → hours if relevant",
+    "required_semantic_signals": [
+      "service_request"
+    ],
+    "preferred_entity_types": [
+      "service"
+    ],
+    "preferred_semantic_tags": [
+      "service_info",
+      "location_info",
+      "direct_fact"
+    ],
+    "ranking_biases": {
+      "service_info": 1.0,
+      "location_info": 0.8,
+      "direct_fact": 0.9
+    },
+    "ranking_boost_tags": [
+      "service_info",
+      "location_info"
+    ],
+    "ranking_penalty_tags": [
+      "store",
+      "dining",
+      "cinema"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
     "preferred_response_shape": "direct_fact",
     "preferred_strategy": "direct_fact",
-    "shortlist_size_hint": 1,
+    "response_shape_hint": "Return only the relevant service entities, their zones, and a short factual note; no shortlist or extra options.",
     "entity_cap": 2,
-    "must_include_entity_types": ["service"],
-    "fallback_entity_types": [],
+    "shortlist_size_hint": 1,
+    "must_include_entity_types": [
+      "service"
+    ],
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "If the exact service is unavailable, return the closest relevant service",
+      "Keep the answer minimal and factual",
+      "Do not add stores or dining suggestions"
+    ],
     "itinerary_template": null,
-    "retrieval_triggers": ["service_type", "service_entity"],
-    "next_step_hint": "Ask if they need anything else",
-    "do_not_include": ["Non-service entities"],
-    "priority": 10,
-    "concierge_reasoning_notes": "Services need direct answers. ATM: Kiosk Row (GFK16A, Saudi Investment Bank). Prayer rooms: Men's near Gate 1/Lavalle Store; Women's in Main Gallery. Stroller: Gate 2, near Doknah Kiosk (4PM-11PM). Wheelchair: Gate 2, Information Desk. Information Desk: Gate 2. WiFi: Mobily (throughout mall). Lost & Found: Gate 2, Customer Service."
+    "retrieval_triggers": [
+      "canonical.services"
+    ],
+    "priority": 1,
+    "next_step_hint": "Offer the next closest service or the fastest route if needed.",
+    "concierge_reasoning_notes": "Services include ATM, Wheelchair, Lost & Found, Information Desk, Parking, Men's Prayer Room, Women's Prayer Room, Men's Washroom, Women's Washroom, and Free WiFi, mostly in Main Gallery; Al Jawwal is in Service Area."
   },
   {
     "playbook_id": "pb-route-refinement",
-    "scenario": "route_proximity_refinement",
-    "description": "Proximity and routing refinement — 'near cinema', 'closer to entrance', 'something close by'.",
+    "scenario": "route_refinement_nearby",
+    "description": "Refine a route by prioritizing entities close to cinema and food areas.",
+    "trigger_domains": [
+      "navigation",
+      "route",
+      "proximity"
+    ],
+    "trigger_sub_intents": [
+      "route_refinement",
+      "nearby_options",
+      "closest_matches",
+      "route_adjustment"
+    ],
     "trigger_conditions": [
-      "User asks for something near a landmark",
-      "User asks for closer options",
-      "User mentions 'near cinema', 'near entrance'",
-      "User requests routing refinement",
-      "Detected intent: proximity_query, route_refinement, location_constraint"
+      "User wants something near the cinema",
+      "User asks for nearby food or shopping along a route",
+      "User wants a tighter walking path"
     ],
-    "trigger_domains": ["routing", "shopping", "dining"],
-    "trigger_sub_intents": ["near_cinema", "near_entrance", "proximity_query", "closer_to", "route_refinement", "location_filter"],
-    "required_scene_signals": ["location_anchor_mentioned"],
-    "optional_scene_signals": ["time_constraint", "companion_context"],
-    "preferred_entity_types": ["store", "dining", "service"],
-    "preferred_semantic_tags": ["near_cinema", "quick_stop", "low_commitment"],
-    "required_semantic_signals": ["near_cinema"],
-    "ranking_biases": {"near_cinema": 1.0, "quick_stop": 0.85, "low_commitment": 0.7},
-    "ranking_boost_tags": ["near_cinema", "quick_stop", "easy_browse", "before_movie", "low_commitment"],
-    "ranking_penalty_tags": ["deep_mall_navigation", "high_attention_demand"],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "near_cinema",
+      "near_food",
+      "time_limited"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "dining",
+      "store",
+      "cinema"
+    ],
+    "preferred_semantic_tags": [
+      "near_cinema",
+      "near_food",
+      "short_walk",
+      "easy_access"
+    ],
+    "ranking_biases": {
+      "near_cinema": 1.0,
+      "near_food": 1.0,
+      "short_walk": 0.8,
+      "easy_access": 0.7
+    },
+    "ranking_boost_tags": [
+      "near_cinema",
+      "near_food",
+      "short_walk"
+    ],
+    "ranking_penalty_tags": [
+      "far_from_cinema",
+      "far_from_food"
+    ],
     "excluded_tags": [],
-    "fallback_rules": [
-      "Use floor/zone proximity to identify nearest options",
-      "Food Court and Kiosk Row are closest to Cinema Zone",
-      "Always mention specific floor/zone"
-    ],
-    "response_shape_hint": "concise_shortlist: max 3 options ordered by proximity to anchor",
+    "do_not_include": [],
     "preferred_response_shape": "concise_shortlist",
-    "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Bias suggestions toward Food Court, Kiosk Row, Cinema Zone, and nearby Main Gallery items that reduce walking.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
     "must_include_entity_types": [],
-    "fallback_entity_types": ["dining", "store"],
+    "fallback_entity_types": [
+      "dining",
+      "service"
+    ],
+    "fallback_rules": [
+      "Choose the closest food stop first if the user is near the cinema",
+      "Include the cinema only if it helps with wayfinding",
+      "Favor easy-access entities over niche options"
+    ],
     "itinerary_template": null,
-    "retrieval_triggers": ["zone_proximity", "landmark_proximity"],
-    "next_step_hint": "Ask what they need (dining, shopping, service) to give a more precise suggestion",
-    "do_not_include": ["Destinations requiring extensive navigation", "Unrelated zones"],
-    "priority": 9,
-    "concierge_reasoning_notes": "For 'near cinema': Food Court (Kudu, Popeyes) is closest to Cinema Level. Kiosk Row snacks and Baskin Robbins are also very accessible. For 'near entrance': Main Gallery stores near Gate 1 and Gate 2 are fastest to access from parking."
+    "retrieval_triggers": [
+      "zone.directory",
+      "canonical.dining",
+      "canonical.stores",
+      "canonical.cinemas"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask whether they are standing near Food Court, Main Gallery, or Cinema Zone.",
+    "concierge_reasoning_notes": "Boost nearby Food Court options like KFC, Shawarma Jassas, Baskin Robbins, and Texas Chicken, plus Main Gallery cafés like Starbucks or COSTA COFFEE; keep Muvi Cinema in mind for Cinema Zone proximity."
   },
   {
     "playbook_id": "pb-quick-snack",
-    "scenario": "quick_snack",
-    "description": "Quick, light snack or treat — faster and lighter than a full meal, often before a movie or as a break.",
+    "scenario": "quick_snack_now",
+    "description": "Find a very small snack or sweet bite with minimal delay.",
+    "trigger_domains": [
+      "dining",
+      "snack",
+      "food"
+    ],
+    "trigger_sub_intents": [
+      "quick_snack",
+      "small_bite",
+      "light_snack",
+      "sweet_snack"
+    ],
     "trigger_conditions": [
-      "User wants a quick snack",
-      "User asks for a light bite",
-      "User wants something fast and not a full meal",
-      "Detected intent: quick_snack, light_bite, grab_and_go"
+      "User wants a snack",
+      "User needs a light bite",
+      "User asks for something small and fast to eat"
     ],
-    "trigger_domains": ["dining"],
-    "trigger_sub_intents": ["quick_snack", "light_bite", "grab_and_go", "sweet_treat", "quick_coffee", "before_movie_snack"],
-    "required_scene_signals": [],
-    "optional_scene_signals": ["time_constraint", "budget_signal", "near_cinema"],
-    "preferred_entity_types": ["dining"],
-    "preferred_semantic_tags": ["quick_stop", "grab_and_go", "before_movie", "low_commitment"],
+    "required_scene_signals": [
+      "time_limited"
+    ],
+    "optional_scene_signals": [
+      "sweet_tooth",
+      "before_movie",
+      "after_shopping"
+    ],
     "required_semantic_signals": [],
-    "ranking_biases": {"quick_stop": 1.0, "before_movie": 0.85, "low_commitment": 0.8},
-    "ranking_boost_tags": ["quick_stop", "low_commitment", "before_movie", "near_cinema", "dessert_spot"],
-    "ranking_penalty_tags": ["sit_down_dining", "full_meal", "high_wait_time"],
-    "excluded_tags": [],
-    "fallback_rules": [
-      "Prefer kiosk and quick-service options",
-      "Corn World, Baskin Robbins, Cinnabon are ideal",
-      "Maximum 3 suggestions"
+    "preferred_entity_types": [
+      "dining"
     ],
-    "response_shape_hint": "concise_shortlist: 2-3 fast snack options with location",
+    "preferred_semantic_tags": [
+      "snack",
+      "quick_service",
+      "dessert",
+      "near_food"
+    ],
+    "ranking_biases": {
+      "snack": 1.0,
+      "quick_service": 0.9,
+      "dessert": 0.7,
+      "near_food": 0.7
+    },
+    "ranking_boost_tags": [
+      "snack",
+      "quick_service",
+      "near_food"
+    ],
+    "ranking_penalty_tags": [
+      "heavy_meal",
+      "slow_service"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Suggest 3-4 snack stops, ideally in Food Court, Kiosk Row, or easy Main Gallery spots.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "service"
+    ],
+    "fallback_rules": [
+      "Prefer dessert or coffee snacks over full meals",
+      "Keep it immediate and easy to grab",
+      "If no snack-specific entity is ideal, use dessert kiosks"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.dining",
+      "zone.directory"
+    ],
+    "priority": 2,
+    "next_step_hint": "Ask if they want sweet, salty, or coffee-based snacks.",
+    "concierge_reasoning_notes": "Best quick snacks include Baskin Robbins, Freshi Ice Sticks, Gelato Divino, Nespresso, Corn World, and Wokkong, with Food Court and Kiosk Row as the strongest snack zones."
+  },
+  {
+    "playbook_id": "pb-teen-hangout",
+    "scenario": "teen_hangout_plan",
+    "description": "Recommend cool, casual spots for teens to hang out, browse, eat, or catch a movie.",
+    "trigger_domains": [
+      "teen",
+      "hangout",
+      "dining",
+      "shopping"
+    ],
+    "trigger_sub_intents": [
+      "teen_hangout",
+      "friends_outing",
+      "casual_social",
+      "youth_browse"
+    ],
+    "trigger_conditions": [
+      "User wants a place for teens to hang out",
+      "User mentions friends or youth outing",
+      "User wants casual food and shopping for teens"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "group_of_friends",
+      "time_to_kill",
+      "budget_signal"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store",
+      "dining",
+      "cinema"
+    ],
+    "preferred_semantic_tags": [
+      "teen_friendly",
+      "casual",
+      "easy_browse",
+      "movie_night"
+    ],
+    "ranking_biases": {
+      "teen_friendly": 1.0,
+      "casual": 0.8,
+      "easy_browse": 0.8,
+      "movie_night": 0.6
+    },
+    "ranking_boost_tags": [
+      "teen_friendly",
+      "casual",
+      "easy_browse"
+    ],
+    "ranking_penalty_tags": [
+      "formal",
+      "quiet_only"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
     "preferred_response_shape": "concise_shortlist",
     "preferred_strategy": "shortlist_recommendation",
-    "shortlist_size_hint": 3,
-    "entity_cap": 3,
-    "must_include_entity_types": ["dining"],
-    "fallback_entity_types": [],
+    "response_shape_hint": "Focus on relaxed, social stops in Main Gallery and a food or movie finish.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store",
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "cinema"
+    ],
+    "fallback_rules": [
+      "Use casual fashion, sportswear, beauty, or dessert stops",
+      "If the group wants activity, include Muvi Cinema as a fallback anchor",
+      "Avoid premium-only or formal venues"
+    ],
     "itinerary_template": null,
-    "retrieval_triggers": [],
-    "next_step_hint": "Ask if they want sweet or savory",
-    "do_not_include": ["Full-service restaurants", "Long-wait dining"],
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.movies"
+    ],
+    "priority": 6,
+    "next_step_hint": "Ask whether the group prefers shopping, food, or a movie.",
+    "concierge_reasoning_notes": "Teen-friendly hangout anchors include Pull&Bear, Bershka, NewYorker, PUMA, Nike, Flying Tiger, Starbucks, and Baskin Robbins; Muvi Cinema works for a group movie finish."
+  },
+  {
+    "playbook_id": "pb-exploration",
+    "scenario": "exploration_overview",
+    "description": "Offer a discovery-style exploration plan for a visitor who wants to roam the mall and see interesting spots.",
+    "trigger_domains": [
+      "explore",
+      "browse",
+      "shopping",
+      "dining"
+    ],
+    "trigger_sub_intents": [
+      "exploration",
+      "discover_spots",
+      "mall_walk",
+      "browse_and_find"
+    ],
+    "trigger_conditions": [
+      "User wants to explore the mall",
+      "User asks for interesting places to discover",
+      "User is open to suggestions without a specific category"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "open_to_explore",
+      "time_to_kill",
+      "new_visit"
+    ],
+    "required_semantic_signals": [],
+    "preferred_entity_types": [
+      "store",
+      "dining",
+      "cinema",
+      "service"
+    ],
+    "preferred_semantic_tags": [
+      "exploration",
+      "mall_anchor",
+      "easy_browse",
+      "zone_diverse"
+    ],
+    "ranking_biases": {
+      "exploration": 1.0,
+      "mall_anchor": 0.8,
+      "easy_browse": 0.7,
+      "zone_diverse": 0.6
+    },
+    "ranking_boost_tags": [
+      "exploration",
+      "mall_anchor",
+      "zone_diverse"
+    ],
+    "ranking_penalty_tags": [
+      "high_attention_demand"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "itinerary",
+    "preferred_strategy": "exploration_overview",
+    "response_shape_hint": "Create a light exploration path across a few zones with one shopping stop, one food stop, and one optional entertainment stop.",
+    "entity_cap": 5,
+    "shortlist_size_hint": 4,
+    "must_include_entity_types": [
+      "store",
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "cinema",
+      "service"
+    ],
+    "fallback_rules": [
+      "Mix categories so the user gets a feel for the mall",
+      "Prefer prominent brands and easy-to-find stops",
+      "Keep the route flexible and low commitment"
+    ],
+    "itinerary_template": "1) Browse Main Gallery anchor store → 2) Coffee or dessert stop → 3) Optional cinema or service pit stop",
+    "retrieval_triggers": [
+      "canonical.stores",
+      "canonical.dining",
+      "canonical.cinemas",
+      "canonical.services",
+      "zone.directory"
+    ],
     "priority": 7,
-    "concierge_reasoning_notes": "Quick snack options: Corn World (Kiosk Row, savory/popcorn-style), Baskin Robbins (Kiosk Row, ice cream), Cinnabon (Food Court, cinnamon rolls). For a quick coffee and snack: Starbucks (Main Gallery). All fast and perfect before a movie or as a shopping break."
+    "next_step_hint": "Ask whether they want a shopping-focused, food-focused, or mixed exploration route.",
+    "concierge_reasoning_notes": "A mixed route could include Sephora or Flying Tiger in Main Gallery, Starbucks or COSTA COFFEE for a pause, and Muvi Cinema or Information Desk as optional stops."
+  },
+  {
+    "playbook_id": "pb-after-movie",
+    "scenario": "after_movie_dining",
+    "description": "Suggest what to do after a movie, usually food, dessert, or a relaxed browse.",
+    "trigger_domains": [
+      "cinema",
+      "dining",
+      "post_movie"
+    ],
+    "trigger_sub_intents": [
+      "after_movie",
+      "post_cinema",
+      "movie_exit",
+      "after_show_plan"
+    ],
+    "trigger_conditions": [
+      "User asks what to do after a movie",
+      "User wants dinner or dessert after cinema",
+      "User needs a post-film follow-up plan"
+    ],
+    "required_scene_signals": [],
+    "optional_scene_signals": [
+      "post_movie",
+      "evening_outing",
+      "hungry"
+    ],
+    "required_semantic_signals": [
+      "movie_request"
+    ],
+    "preferred_entity_types": [
+      "dining",
+      "store"
+    ],
+    "preferred_semantic_tags": [
+      "after_movie",
+      "dessert",
+      "quick_service",
+      "relaxed"
+    ],
+    "ranking_biases": {
+      "after_movie": 1.0,
+      "dessert": 0.9,
+      "quick_service": 0.7,
+      "relaxed": 0.6
+    },
+    "ranking_boost_tags": [
+      "after_movie",
+      "dessert",
+      "quick_service"
+    ],
+    "ranking_penalty_tags": [
+      "heavy_meal",
+      "high_attention_demand"
+    ],
+    "excluded_tags": [],
+    "do_not_include": [],
+    "preferred_response_shape": "concise_shortlist",
+    "preferred_strategy": "proximity_guided_shortlist",
+    "response_shape_hint": "Keep options close to Muvi Cinema and favor dessert or light food over heavy dining.",
+    "entity_cap": 4,
+    "shortlist_size_hint": 3,
+    "must_include_entity_types": [
+      "dining"
+    ],
+    "fallback_entity_types": [
+      "store"
+    ],
+    "fallback_rules": [
+      "Prefer Food Court and Kiosk Row for post-movie convenience",
+      "If the user wants to linger, offer a café",
+      "Avoid starting a complex itinerary after the film"
+    ],
+    "itinerary_template": null,
+    "retrieval_triggers": [
+      "canonical.dining",
+      "canonical.stores",
+      "canonical.cinemas"
+    ],
+    "priority": 3,
+    "next_step_hint": "Ask if they want dessert, coffee, or a proper late meal.",
+    "concierge_reasoning_notes": "Best post-movie options include Baskin Robbins, Freshi Ice Sticks, Gelato Divino, Starbucks, COSTA COFFEE, and quick meals like KFC or Shawarma Jassas in the Food Court."
   }
 ]

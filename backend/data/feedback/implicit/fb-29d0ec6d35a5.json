@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-29d0ec6d35a5",
+  "session_id": "session-272b3ab6c85e494b",
+  "tenant_id": "al_nakheel_plaza_13",
+  "mall_id": "al_nakheel_plaza_13",
+  "turn_id": "msg-a49d6e4b68d4",
+  "user_message": "quick seafood",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-03-31 10:27:27.809493"
+}

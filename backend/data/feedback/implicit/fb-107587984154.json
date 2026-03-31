@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-107587984154",
+  "session_id": "v6-neg1-f4ea6b34",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-2f8514478a8a",
+  "user_message": "something else then",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "recommendation_scope_error"
+  ],
+  "correction_details": {
+    "recommendation_scope_error": {
+      "matched_pattern": "\\bsomething\\s+(?:else|different)\\b",
+      "confidence": 0.7
+    }
+  },
+  "confidence": 0.7,
+  "timestamp": "2026-03-31 16:55:56.839077"
+}

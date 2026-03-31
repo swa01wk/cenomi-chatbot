@@ -1,0 +1,113 @@
+{
+  "run_timestamp": "2026-03-31 13:22:49 UTC",
+  "run_id": "f8592f0c",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 6,
+    "passed": 5,
+    "failed": 1,
+    "errors": 0,
+    "pass_pct": 83,
+    "avg_latency_ms": 6352
+  },
+  "suites": {
+    "session-scenario.json": [
+      {
+        "id": "SS1.2",
+        "query": "I need to buy a jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 6836,
+        "reply_snippet": "For a jacket, start in the Ground Floor Main Gallery — that is where the strongest fashion options are concentrated.  \n\n**Fashion picks for "
+      },
+      {
+        "id": "SS1.3",
+        "query": "I am here with my 5 yearold kid and girlfriend. I want the jacket for him",
+        "status": "FAIL",
+        "mode_ok": false,
+        "conf_ok": true,
+        "expected_mode": "context_acknowledgement",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 6784,
+        "reply_snippet": "For your 5-year-old, the best jacket search starts in the Ground Floor Main Gallery and the Entertainment Wing — both keep the search practi"
+      },
+      {
+        "id": "SS1.4",
+        "query": "yes",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 4867,
+        "reply_snippet": "Which type of jacket would you prefer — warm, casual, or dressy?"
+      },
+      {
+        "id": "SS1.5",
+        "query": "I want an affordable jacket",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 6994,
+        "reply_snippet": "For an affordable jacket, **Red Tag, Max, and Centrepoint** remain your strongest starting points. They are the best-fit options in this mal"
+      },
+      {
+        "id": "SS1.6",
+        "query": "Okay, cool. Where shall I go grab some food?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-family-shopping",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 6474,
+        "reply_snippet": "For a budget-friendly, family-quick meal, **start with the Food Court on the Ground Floor** — it gives you the cleanest choice of **McDonald"
+      },
+      {
+        "id": "SS1.7",
+        "query": "What movie would you suggest?",
+        "status": "PASS",
+        "mode_ok": true,
+        "conf_ok": true,
+        "expected_mode": "guided_recommendation",
+        "actual_mode": "guided_recommendation",
+        "expected_conf": "high",
+        "actual_conf": "high",
+        "flow_type": "concierge",
+        "playbook_used": "pb-date-plan",
+        "topic_lock": "shopping_recommendation",
+        "latency_ms": 6156,
+        "reply_snippet": "For a family movie stop, **Muvi Cinema on the Cinema Level** is the best place to head next — it keeps the plan focused on entertainment and"
+      }
+    ]
+  }
+}

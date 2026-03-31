@@ -12,7 +12,14 @@ if TYPE_CHECKING:
     from app.models.state import ConciergeState
 
 _CROSS_MALL_STRIP_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r"which (?:of (?:your|the) |cenomi )?malls? (?:has|have|carries|carry|offer[s]?)\s+", re.I),
+    # "which [all/of your/cenomi] malls does/do/have/has/carries/carry/offers/sells X"
+    re.compile(
+        r"which (?:all |of (?:your|the) |cenomi )?malls? "
+        r"(?:does|do|have|has|carries?|carry|offer[s]?|sell[s]?)\s+",
+        re.I,
+    ),
+    # "in which malls [can I find/do you have] X" / "at which mall does X"
+    re.compile(r"(?:in|at) which (?:cenomi )?malls?\s+(?:can i find|do you have|is|are|does|do)?\s*", re.I),
     re.compile(r"do(?:es)? (?:any|other) (?:of (?:your|the) |cenomi )?malls? (?:have|carry|offer|has)\s+", re.I),
     re.compile(r"(?:in|at) (?:both|all|other) (?:your )?malls?", re.I),
     re.compile(r"across (?:all |your |the )?malls?", re.I),
@@ -32,12 +39,20 @@ _CROSS_MALL_STRIP_PATTERNS: list[re.Pattern[str]] = [
 
 
 def extract_brand_query_from_message(message: str) -> str:
-    """Strip cross-mall trigger phrases; return a fragment suitable for substring brand search."""
+    """
+    Fallback: strip cross-mall trigger phrases from the raw message and return
+    the remaining fragment as a search term.
+
+    This is only called when the LLM classifier did not populate entity_query
+    (e.g. very short follow-up turns like "what about other malls?").
+    For primary queries the LLM-extracted entity_query is used instead.
+    """
     result = message
     for pattern in _CROSS_MALL_STRIP_PATTERNS:
         result = pattern.sub(" ", result)
     result = re.sub(
-        r"\b(also|too|any|both|other|all|the|your|cenomi|malls?|please|here|find)\b",
+        r"\b(also|too|any|both|other|all|the|your|cenomi|malls?|please|here|find"
+        r"|which|does|do|is|are|have|has|can|i|in|at|for|from|get)\b",
         " ",
         result,
         flags=re.I,
@@ -53,26 +68,44 @@ _USELESS_TOKENS = frozenset({
 
 def resolve_cross_mall_brand_query(state: ConciergeState) -> str:
     """
-    Resolve brand/store string for cross-mall canonical search.
+    Resolve brand/store/item string for cross-mall canonical search.
 
-    Order: stripped message → fact_query_entity → last_resolved_entity → active_shortlist[0].
-    Returns empty string if nothing usable (caller should ask for clarification).
+    Resolution order (highest confidence first):
+      1. LLM-extracted entity_query via fact_query_entity (set by resolve_fact_scope
+         from InterpretedIntent.entity_query — the LLM classifier extracts this directly)
+      2. Regex-stripped message (fallback for turns where LLM left entity_query empty)
+      3. last_resolved_entity from scene (follow-up turns: "where else?")
+      4. active_shortlist[0] (last concierge recommendation)
+
+    Returns empty string when nothing usable (caller will ask for clarification).
     """
+    # 1. LLM-extracted entity (preferred — no regex fragility)
+    fe = (getattr(state, "fact_query_entity", None) or "").strip()
+    if fe and fe.lower() not in _USELESS_TOKENS and len(fe) >= 2:
+        return fe
+
+    # 2. Also check intent.entity_query directly in case resolve_fact_scope
+    #    hasn't run yet (concierge cross-mall path in compose_context)
+    intent = getattr(state, "intent", None)
+    if intent:
+        eq = (getattr(intent, "entity_query", None) or "").strip()
+        if eq and eq.lower() not in _USELESS_TOKENS and len(eq) >= 2:
+            return eq
+
+    # 3. Regex fallback — strip cross-mall trigger phrases from raw message
     raw = (state.normalized_user_message or state.raw_user_message or "").strip()
     stripped = extract_brand_query_from_message(raw)
     cand = stripped.lower()
     if cand and cand not in _USELESS_TOKENS and len(cand) >= 2:
         return stripped
 
-    fe = (getattr(state, "fact_query_entity", None) or "").strip()
-    if fe and fe.lower() not in _USELESS_TOKENS:
-        return fe
-
+    # 4. Scene memory: entity from last resolved turn (handles "where else?")
     scene = state.scene
     lr = (getattr(scene, "last_resolved_entity", None) or "").strip()
     if lr and lr.lower() not in _USELESS_TOKENS:
         return lr
 
+    # 5. Last concierge shortlist item
     shortlist = getattr(scene, "active_shortlist", None) or []
     if shortlist:
         first = str(shortlist[0]).strip()

@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-b6560ee33cbe",
+  "session_id": "cpx7-1f19b4a2",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-b4e1d195087c",
+  "user_message": "where should I have lunch \u2014 i want exceptional food, not just fine dining for its own sake",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.75
+    }
+  },
+  "confidence": 0.75,
+  "timestamp": "2026-03-31 19:31:57.215696"
+}

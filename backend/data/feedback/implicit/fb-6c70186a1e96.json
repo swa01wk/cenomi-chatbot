@@ -1,0 +1,25 @@
+{
+  "event_id": "fb-6c70186a1e96",
+  "session_id": "session-35c0b6004c6944d0",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_27",
+  "turn_id": "msg-1c55c4d061b7",
+  "user_message": "I need a gift for my girlfriend, budget around 300 SAR",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch",
+    "preference_override"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bbudget\\b",
+      "confidence": 0.8
+    },
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-03-30 17:38:19.635094"
+}

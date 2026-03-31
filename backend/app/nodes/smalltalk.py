@@ -32,7 +32,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
 from app.config.settings import get_settings
-from app.models.state import ConciergeState, Message, MessageKind, SMALLTALK_KINDS
+from app.models.state import ConciergeState, Message, MessageKind, ResponsePlan, SMALLTALK_KINDS
 from app.nodes._tracing import traced_node
 
 logger = logging.getLogger(__name__)
@@ -84,14 +84,15 @@ async def _generate_farewell(state: ConciergeState) -> str:
     )
 
     system_prompt = (
-        "You are a warm mall concierge saying goodbye to a departing visitor. "
-        "Write exactly ONE short farewell — 2 sentences maximum. "
+        "You are a distinguished digital mall concierge bidding farewell to a departing guest. "
+        "Write exactly ONE gracious farewell — 2 sentences maximum. "
         "If scene context is available, personalise the first sentence naturally: "
-        "reference who they are with or what they were looking for. "
-        "The final sentence must tell them you are still available if they need "
-        "anything else during their visit. "
+        "acknowledge who they were with or what they came to do, without repeating details verbatim. "
+        "The closing sentence must warmly assure them that you remain available should they "
+        "need anything further during their visit. "
         "Do NOT mention specific store names. Do NOT make new recommendations. "
-        "Sound warm and natural, like a real person — not corporate."
+        "Maintain a polished, warm, and composed tone — the register of a five-star concierge. "
+        "Never use casual language: no 'See you!', 'Take care!', 'Bye!', or informal phrases."
     )
 
     human_prompt = (
@@ -121,145 +122,168 @@ async def _generate_farewell(state: ConciergeState) -> str:
 #   streak >= 2: third+ greeting — gently ask what they're actually looking for
 
 _GREETING_FIRST: list[str] = [
-    "Hey, welcome! I'm your mall guide — ask me anything about shops, dining, "
-    "movies, or services like parking and prayer rooms. What brings you in today?",
+    "Welcome. I am your personal mall concierge — here to help you make the very most "
+    "of your visit. Whether you are looking for a restaurant, a particular store, "
+    "cinema times, or any of our facilities, I am at your service. "
+    "What can I arrange for you today?",
 
-    "Hi there! Good to have you here. Whether you're after a meal, some shopping, "
-    "a film, or you're just exploring — I can point you in the right direction. "
-    "What are you in the mood for?",
+    "Welcome to the mall. I am your dedicated concierge for today's visit — "
+    "shopping, dining, entertainment, or any services you may need. "
+    "How may I assist you?",
 
-    "Hello! I'm here to help you make the most of your visit. "
-    "Shops, restaurants, cinema, kids' spots, or practical things like ATMs and parking — "
-    "just ask. What's on your mind?",
+    "A warm welcome to you. I am here to guide your visit from start to finish — "
+    "whether that means finding the right store, the perfect place to dine, "
+    "a film for the family, or simply getting your bearings. "
+    "What would you like to explore first?",
 
-    "Ahlan! Welcome to the mall. I can help you discover great stores, find a place to eat, "
-    "check movie times, or sort out any services. What would you like to do today?",
+    "Welcome. Your concierge is here. I can help you discover stores, "
+    "plan a meal, check what's on at the cinema, or assist with any of "
+    "our facilities and services. What brings you in today?",
 ]
 
 _GREETING_RETURNING: list[str] = [
-    "Hey again! Still finding your footing? No worries — it's a big place. "
-    "The ground floor has most of the shops and food spots, the cinema is upstairs, "
-    "and I'm here to make it easy. What are you actually looking for?",
+    "Still with you — take all the time you need. It is a generous space. "
+    "The ground floor is home to most of the retail and dining, the cinema is on the "
+    "upper level, and I am here to guide you effortlessly. What are you looking for?",
 
-    "Back again — that's fine, take your time! Quick heads-up: fashion and accessories "
-    "are mostly in the Main Gallery, dining is near the central atrium, and entertainment "
-    "is on the upper level. Anything specific catch your interest?",
+    "Still here whenever you are ready. A brief orientation: fashion and accessories "
+    "are centred in the Main Gallery, dining is near the central atrium, and entertainment "
+    "is on the upper level. Is there something specific I can help you with?",
 
-    "Still here, ready when you are! The mall has a lot going on today — "
-    "if you're not sure where to start, tell me one thing you enjoy "
-    "(shopping, food, a film, something for the kids?) and I'll build from there.",
+    "At your service. If you are not quite sure where to begin, simply tell me one thing "
+    "you have in mind — shopping, a meal, a film, something for the family — "
+    "and I will put together a plan from there.",
 ]
 
 _GREETING_PERSISTENT: list[str] = [
-    "I'm with you — no rush at all. What's one thing you'd like to do or find today? "
-    "Even something vague like 'food' or 'gifts' works and I'll take it from there.",
+    "I am right here — there is absolutely no rush. "
+    "What is one thing you would like to do or find during your visit? "
+    "Even something as simple as 'food' or 'a gift' is all I need to get started.",
 
-    "Still here! Sometimes the easiest way is to just tell me the first thing "
-    "that comes to mind — a store you're looking for, something to eat, or even "
-    "just 'I don't know, suggest something'. What do you feel like?",
+    "Whenever you are ready. Sometimes the easiest place to begin is the first "
+    "thing that comes to mind — a store, something to eat, or simply "
+    "'I am not sure, suggest something'. I will take it from there.",
 
-    "Whenever you're ready. If it helps to narrow it down: "
-    "are you here mainly to shop, eat, catch a film, or is this more of a browse? "
-    "That's enough for me to give you a decent starting point.",
+    "I am entirely at your disposal. If it helps to frame it: "
+    "are you here primarily to shop, to dine, to catch a film, or simply to explore? "
+    "Any of those is a fine starting point and I will take care of the rest.",
 ]
 
 # ── Other response pools ───────────────────────────────────────────────
 
 _IDENTITY_RESPONSES: list[str] = [
-    "I'm your mall concierge assistant — here to help you get the most out of your visit. "
-    "Ask me about shops, dining, movies, entertainment, or any services like parking and prayer rooms.",
+    "I am your personal digital concierge for this mall — here to ensure your visit is "
+    "as smooth and enjoyable as possible. Stores, dining, cinema, family activities, "
+    "parking, facilities — simply ask and I will take care of the rest.",
 
-    "I'm an AI assistant for this mall. I can help you find stores, restaurants, movie times, "
-    "kids' activities, or practical things like ATMs and directions. What are you looking for?",
+    "Think of me as your dedicated mall concierge, powered by the latest technology. "
+    "I have complete knowledge of every store, restaurant, and service here. "
+    "What would you like help with today?",
 
-    "Think of me as your personal mall guide — powered by AI. I know every shop, restaurant, "
-    "and service here. Just tell me what you need and I'll point you in the right direction.",
+    "I am a digital concierge — designed to make your visit exceptional. "
+    "Whether you need directions, a dining recommendation, the latest offers, "
+    "or help planning your time, I am here for you. How may I assist?",
 ]
 
 _CRISIS_RESPONSES: list[str] = [
-    "That doesn't sound like a good place to be right now, and I want you to know that matters. "
-    "Please talk to someone you trust — or reach out to a crisis helpline for immediate support. "
-    "You don't have to figure this out alone.",
+    "What you have shared matters, and I want you to know that. "
+    "Please reach out to someone you trust, or contact a crisis support line — "
+    "you do not need to face this alone, and real help is available to you.",
 
-    "I hear you, and I'm genuinely concerned. Please reach out to someone who can help — "
-    "a friend, a family member, or a crisis support line. Your wellbeing is what matters most right now.",
+    "I hear you, and your wellbeing is what matters most right now. "
+    "Please speak to a trusted person in your life or reach out to a crisis helpline. "
+    "You deserve proper support, and I genuinely hope you find it.",
 
-    "That sounds really hard. Please don't go through this alone — reach out to a crisis helpline "
-    "or someone close to you. I'm just a mall assistant, but I want you to get the real support you deserve.",
+    "That sounds very difficult, and I am sorry. Please do not carry this alone — "
+    "a crisis helpline or someone close to you can offer the care and support you deserve. "
+    "I am only a mall concierge, but I care that you get the help you need.",
 ]
 
 _RESPONSES: dict[str, list[str]] = {
     "howru": [
-        "Doing well, thanks for asking! What are you looking for today?",
-        "All good over here — ready to help. Shopping, food, a film, or something else?",
-        "Great, and happy to assist! What can I point you to?",
+        "Very well, thank you for asking. What can I help you with today?",
+        "All is well — and I am fully at your service. Shopping, dining, a film, or something else?",
+        "Doing wonderfully, thank you. What may I assist you with?",
     ],
     "thanks": [
-        "Of course! Anything else I can help with?",
-        "Happy to help — let me know if you need anything else.",
-        "Anytime! Got more questions? Just ask.",
+        "It is my pleasure. Is there anything else I can help you with?",
+        "My pleasure entirely — please do not hesitate to ask if anything else comes to mind.",
+        "You are most welcome. I am here whenever you need me.",
     ],
     # Context-aware thanks variants — used when scene has meaningful context.
-    # These append a proactive nudge toward something the visitor hasn't explored yet.
+    # These append a proactive nudge toward something the guest hasn't explored yet.
     "thanks_with_dining_suggestion": [
-        "Glad that helped! If you haven't eaten yet, there are some great options in the Food Court — just say the word.",
-        "Happy to help! And if you're getting hungry, I can point you to a good spot to eat.",
-        "Of course! Still time to grab a bite? Just ask and I'll suggest something quick.",
+        "My pleasure. If you have not yet had a chance to dine, there are some wonderful options "
+        "at the Food Court — I would be happy to recommend something.",
+        "It was my pleasure to assist. Should you be looking for somewhere to eat, "
+        "I can point you to an excellent spot — just say the word.",
+        "Of course. If you find yourself wanting a bite to eat, I can suggest something "
+        "that suits your taste perfectly.",
     ],
     "thanks_with_shopping_suggestion": [
-        "Glad that helped! There's plenty of shopping here too — want me to point you to any stores?",
-        "Happy to help! If you feel like browsing, I can suggest what's worth checking out.",
-        "Of course! And if you want to explore the shops while you're here, just say the word.",
+        "My pleasure. There is a great deal of wonderful shopping here as well — "
+        "shall I point you to any particular stores?",
+        "It was a pleasure. If you feel like exploring the retail offering, "
+        "I can suggest what is well worth your time.",
+        "Of course. And if you would like to browse the shops while you are here, "
+        "I am happy to guide you.",
     ],
     "thanks_with_entertainment_suggestion": [
-        "Glad that helped! Muvi Cinema is here too if you're up for a film — want to know what's showing?",
-        "Happy to help! And if you're in the mood for entertainment, there's plenty on offer — just ask.",
-        "Of course! There's a cinema here if you want to wind down with a film — let me know.",
+        "My pleasure. Should you be in the mood for a film, the cinema is right here — "
+        "would you like to know what is currently showing?",
+        "It was a pleasure to assist. If you are looking for entertainment, "
+        "there is a great deal on offer — just ask.",
+        "Of course. There is a cinema here if you would like to round off your visit "
+        "with a film — I can pull up the listings for you.",
     ],
     "thanks_with_generic_suggestion": [
-        "Happy to help! Still exploring? I can suggest dining, shopping, movies, or any services you need.",
-        "Of course! There's plenty more to discover here — just tell me what sounds good next.",
-        "Anytime! If there's anything else on your list — food, shops, a film, services — just ask.",
+        "My pleasure. There is still much to discover here — "
+        "dining, shopping, entertainment, or any services you may need. Just ask.",
+        "Of course. Whenever you are ready to explore further — "
+        "a meal, a store, a film, or anything else — I am right here.",
+        "You are most welcome. If there is anything else on your list today, "
+        "I am delighted to help.",
     ],
     "farewell": [
-        "Enjoy the rest of your visit! I'll be right here if you need directions, "
-        "recommendations, or anything else — just send a message.",
+        "It has been a pleasure assisting you. Enjoy the rest of your visit — "
+        "I am right here should you need directions, a recommendation, or anything at all.",
 
-        "Have a great time! If you change your mind or need help finding anything, "
-        "I'm always here — no need to start over.",
+        "Wishing you a wonderful time. Should anything come up during your visit, "
+        "do not hesitate to reach out — I am always available.",
 
-        "See you around! And if something comes up while you're still in the mall — "
-        "a store you can't find, a bite to eat, anything — just ask.",
+        "Until next time. And if you need anything further while you are still here — "
+        "a store to find, somewhere to eat, any service at all — just send a message.",
     ],
     "emotional": [
-        "That's fair — let's make this simpler. Tell me one thing you came here for, "
-        "even something vague, and I'll take it from there. "
-        "No need to figure it all out at once.",
+        "I understand — let us make this simpler. Tell me one thing you came here for, "
+        "even something general, and I will take it from there. "
+        "There is no need to have it all figured out.",
 
-        "Totally get it. Big malls can feel like a lot. "
-        "If it helps, just pick one thing — grab a bite, browse a store, catch a film — "
-        "and I'll guide you straight to it. What sounds appealing?",
+        "Large spaces can sometimes feel a little overwhelming — that is perfectly natural. "
+        "If it helps, simply choose one thing: a bite to eat, a particular store, a film — "
+        "and I will guide you there directly. What appeals to you most?",
 
-        "I hear you. Let me help cut through the noise — what did you originally come here to do? "
-        "Even a rough idea works and I'll narrow it down for you.",
+        "I hear you. Let me help bring some clarity — what was the one thing you originally "
+        "came here to do? Even a general idea is all I need to point you in the right direction.",
 
-        "Sorry to hear that. I'm here to make the visit easier, not harder. "
-        "Tell me what's on your mind — whether it's finding something specific "
-        "or just needing a quiet spot to regroup — and we'll sort it.",
+        "I am sorry to hear that. I am here to make your visit easier, not more complicated. "
+        "Tell me what is on your mind — whether it is finding something specific "
+        "or simply needing a moment to regroup — and we will sort it together.",
     ],
     "emotional_mood_plan": [
-        "Let's fix that. Quick mood-booster plan: grab something delicious from the Food Court, "
-        "browse a few shops to unwind, and if you want to switch off completely — there's a cinema here too. "
-        "Want me to build a proper feel-good route for you?",
+        "Allow me to put something together for you. A restorative visit might look like this: "
+        "begin with something delicious at the Food Court, take a leisurely browse through the stores, "
+        "and if you want to switch off completely, the cinema is here too. "
+        "Shall I build a proper feel-good route for you?",
 
-        "Sounds like you need a good visit, not just directions. "
-        "Here's a simple pick-me-up loop: a treat from the Food Court, "
-        "a browse through the shops, and a film if you fancy it. "
-        "Tell me what sounds most appealing and I'll plan it out.",
+        "It sounds as though you could do with a truly enjoyable visit today. "
+        "Here is a simple plan: a treat from the Food Court, a relaxed browse through the shops, "
+        "and a film to close the evening if you fancy it. "
+        "Which part of that sounds most appealing to start with?",
 
-        "I've got you. Mall therapy: start with something tasty to eat, "
-        "do a bit of browsing at the shops, and end with a film or a good coffee. "
-        "What's the one thing that sounds most appealing right now?",
+        "Consider it handled. Start with something wonderful to eat, "
+        "take your time with the shops, and end with a good film or a quiet coffee. "
+        "What sounds most appealing to you right now?",
     ],
 }
 
@@ -398,4 +422,9 @@ async def smalltalk(state: ConciergeState) -> dict:
         "response_debug_summary": f"smalltalk/{category} [{experience_mode}]",
         "messages": [assistant_msg],
         "_trace_summary": f"Small talk ({category}): {len(response_text)} chars",
+        # Propagate response_mode so emit_debug_payload reflects context_acknowledgement
+        # for all smalltalk turns (greetings, thanks, farewell, identity, crisis, etc.)
+        "response_plan": state.response_plan.model_copy(
+            update={"response_mode": "context_acknowledgement", "confidence_level": "high"}
+        ),
     }

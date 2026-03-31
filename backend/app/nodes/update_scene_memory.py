@@ -75,7 +75,12 @@ Available scene fields you may return:
   "goal": "dining"|"shopping"|"entertainment"|"gift_shopping"|"exploration"|"kids_activity"|"browsing" or null,
   "visit_type": "couple"|"family_visit"|"solo"|"group" or null,
   "budget": "budget"|"mid_range"|"premium"|"luxury" or null,
-  "visit_constraints": ["quick"|"kid_friendly_required"|"near_cinema_preferred"|"budget_sensitive"|"light"|"healthy"],
+  "visit_constraints": ["quick"|"kid_friendly_required"|"near_cinema_preferred"|"budget_sensitive"|"light"|"healthy"|"affordable"],
+  "scenario": "wedding_related"|"family_outing"|"date"|"gift_shopping"|"before_movie"|"quick_visit"|"birthday"|"first_visit"|"group_outing"|"solo_visit" or null,
+  "user_role": "bridesmaid"|"bride"|"groom"|"maid_of_honor"|"best_man"|"mother_of_bride"|"father_of_bride"|"tourist"|"first_time_visitor" or null,
+  "style_intent": ["elegant"|"occasion_wear"|"romantic"|"casual"|"practical"|"quick"|"luxury"|"premium"|"budget"|"fun"],
+  "excluded_domains": ["dining"|"cafe"|"shopping"|"entertainment"],
+  "visit_plan": ["dining"|"coffee"|"shopping"|"movie"|"entertainment"|"dessert"|"kids_activity"],
   "shopping_task": {
     "product_type": string or null,
     "target_person": string or null,
@@ -90,11 +95,16 @@ Available scene fields you may return:
 RULES:
 - companions: ADD to existing list unless this is a fresh_start or correction.
 - visit_constraints: ADD to existing list (constraints accumulate across turns).
+- excluded_domains: ADD to list when user explicitly negates a domain ("no food", "no shopping", "no cinema", "skip dining", "avoid coffee", "without food", "strictly no food"). Never remove previously excluded domains.
 - inferred_scene_notes: always include 1-2 brief notes about the visitor's intent.
 - If the message is about someone else ("she's into", "for my wife"), set target_person.
 - "a bit special", "something nice", "treat ourselves" → budget=premium (implicit premium signal).
 - "not too expensive", "affordable", "budget" → budget=budget or visit_constraints+=budget_sensitive.
 - If message_kind is "fresh_start" (re-engagement after frustration), clear shopping_task and stale constraints.
+- scenario: set to the real-world context. "wedding_related" for bridal/wedding roles; "family_outing" for visits with kids/family; "date" for couples/anniversary; "gift_shopping" for buying gifts; "before_movie" for pre-movie visits; "quick_visit" for time-constrained; "birthday" for celebrations; "first_visit" for first-timers; "group_outing" for friend groups; "solo_visit" for solo visitors.
+- user_role: set explicitly declared roles (bridesmaid, tourist, etc.). Do not override once set.
+- style_intent: extract from style signals ("elegant", "luxury", "casual", "budget", etc.).
+- visit_plan: extract from explicit multi-step plans ("shopping then coffee then a movie" → ["shopping", "coffee", "movie"]).
 - PRONOUN DISAMBIGUATION (CRITICAL — read before setting target_person):
   "for him" / "for his" / "him" — resolve based on who is present:
     If companions include a child (son, child, kids) AND a female partner (girlfriend, wife):
@@ -189,7 +199,7 @@ async def _llm_extract_scene_delta(
         return delta if isinstance(delta, dict) else {}
 
     except Exception as exc:
-        logger.warning("LLM scene extractor failed, using keyword fallback: %s", exc)
+        logger.warning("LLM scene extractor failed: %s", exc)
         return {}
 
 
@@ -260,6 +270,37 @@ def _apply_llm_scene_delta(
                 scene.visit_constraints.append(c)
                 changes.append(f"+constraint:{c}(llm)")
 
+    # ── New LLM-extracted fields ──────────────────────────────────────────────
+
+    if "scenario" in delta:
+        val = delta["scenario"]
+        if val and not scene.scenario:
+            scene.scenario = val
+            changes.append(f"scenario={val}(llm)")
+
+    if "user_role" in delta:
+        val = delta["user_role"]
+        if val and not scene.user_role:
+            scene.user_role = val
+            changes.append(f"user_role={val}(llm)")
+
+    if "style_intent" in delta and isinstance(delta["style_intent"], list):
+        for si in delta["style_intent"]:
+            if si and si not in scene.style_intent:
+                scene.style_intent.append(si)
+                changes.append(f"+style_intent:{si}(llm)")
+
+    if "excluded_domains" in delta and isinstance(delta["excluded_domains"], list):
+        for domain in delta["excluded_domains"]:
+            if domain and domain not in scene.excluded_domains:
+                scene.excluded_domains.append(domain)
+                changes.append(f"+excluded_domain:{domain}(llm)")
+
+    if "visit_plan" in delta and isinstance(delta["visit_plan"], list):
+        if delta["visit_plan"] and not scene.visit_plan:
+            scene.visit_plan = [s for s in delta["visit_plan"] if s]
+            changes.append(f"visit_plan={scene.visit_plan}(llm)")
+
     if delta.get("clear_shopping_task"):
         scene.shopping_task = ShoppingTask()
         changes.append("shopping_task cleared(llm:topic_switch)")
@@ -291,357 +332,6 @@ def _apply_llm_scene_delta(
 # Matches: "5 yr old", "5 year old", "5 years old", "5-year-old"
 _AGE_PATTERN = re.compile(r"(\d+)\s*[-\s]?(?:yr|year|years)[-\s]?old", re.I)
 
-_COMPANION_SIGNALS: dict[str, str] = {
-    "girlfriend": "girlfriend",
-    "boyfriend": "boyfriend",
-    "wife": "wife",
-    "husband": "husband",
-    # Abbreviation expansions — always normalized to canonical form
-    " gf ": "girlfriend",
-    "my gf": "girlfriend",
-    "my bf": "boyfriend",
-    "hubby": "husband",
-    "wifey": "wife",
-    "kids": "kids",
-    "children": "kids",
-    "son": "son",
-    "daughter": "daughter",
-    "family": "family",
-    "friend": "friend",
-    "friends": "friends",
-    "alone": "solo",
-    "solo": "solo",
-    "by myself": "solo",
-    # Child age-indicator phrases
-    "yr old": "child",
-    "year old": "child",
-    "years old": "child",
-    "toddler": "child",
-    "baby": "child",
-    "infant": "child",
-    "little one": "child",
-    "little kid": "child",
-}
-
-_TARGET_PERSON_SIGNALS: dict[str, str] = {
-    "5 year old": "child",
-    "year old son": "child",
-    "year old daughter": "child",
-    "year old kid": "child",
-    "my son": "child",
-    "my daughter": "child",
-    "my kid": "child",
-    "my child": "child",
-    "for kids": "child",
-    "for children": "child",
-    "for my girlfriend": "girlfriend",
-    "for my boyfriend": "boyfriend",
-    "for my gf": "girlfriend",
-    "for my bf": "boyfriend",
-    "for my wife": "wife",
-    "for my husband": "husband",
-    "for my hubby": "husband",
-    # NOTE: "for him" and "for her" are NOT in this static map because they
-    # require context to resolve correctly (child vs partner). They are handled
-    # by the context-aware pronoun resolution in _infer_target_person().
-    "for my mom": "parent",
-    "for my mother": "parent",
-    "for my dad": "parent",
-    "for my father": "parent",
-    "for my parents": "parent",
-    "for myself": "self",
-}
-
-_VISIT_TYPE_SIGNALS: dict[str, str] = {
-    "family": "family_visit",
-    "kids": "family_visit",
-    "children": "family_visit",
-    "son": "family_visit",
-    "daughter": "family_visit",
-    "child": "family_visit",
-    "toddler": "family_visit",
-    "baby": "family_visit",
-    "girlfriend": "couple",
-    "boyfriend": "couple",
-    "my gf": "couple",
-    "my bf": "couple",
-    "hubby": "couple",
-    "wifey": "couple",
-    "wife": "couple",
-    "husband": "couple",
-    "date": "couple",
-    "romantic": "couple",
-    "anniversary": "couple",
-    "alone": "solo",
-    "solo": "solo",
-    "by myself": "solo",
-    "friends": "group",
-    "friend": "group",
-}
-
-_GOAL_SIGNALS: dict[str, str] = {
-    "buy": "shopping",
-    "shopping": "shopping",
-    "shop": "shopping",
-    "gift": "gift_shopping",
-    "present": "gift_shopping",
-    "eat": "dining",
-    "food": "dining",
-    "hungry": "dining",
-    "movie": "entertainment",
-    "cinema": "entertainment",
-    "fun": "entertainment",
-    "play": "kids_activity",
-    "explore": "exploration",
-    "browse": "browsing",
-}
-
-_BUDGET_SIGNALS: dict[str, str] = {
-    "cheap": "budget",
-    "affordable": "budget",
-    "budget": "budget",
-    "mid range": "mid_range",
-    "moderate": "mid_range",
-    "nice": "premium",
-    "premium": "premium",
-    "upscale": "premium",
-    "luxury": "luxury",
-    "expensive": "luxury",
-    "high end": "luxury",
-}
-
-_OCCASION_SIGNALS: dict[str, str] = {
-    "birthday": "birthday",
-    "anniversary": "anniversary",
-    "date": "date",
-    "romantic": "date",
-    "casual": "casual",
-    "just browsing": "casual",
-    "quick": "quick_visit",
-    "before movie": "before_movie",
-    "before the movie": "before_movie",
-    "after movie": "after_movie",
-    "after the movie": "after_movie",
-    "celebration": "celebration",
-    "wedding": "wedding",
-    "bridesmaid": "wedding",
-    "bridal": "wedding",
-    "engagement": "wedding",
-}
-
-# Pace signals
-_PACE_FAST_SIGNALS: frozenset[str] = frozenset({
-    "quick", "hurry", "hurrying", "short visit", "fast", "rushed",
-    "not much time", "in a hurry", "limited time",
-})
-_PACE_LEISURELY_SIGNALS: frozenset[str] = frozenset({
-    "leisurely", "relaxed", "relax", "chill", "chilling", "slow",
-    "take our time", "no rush", "all day",
-})
-
-# Visit constraint signals — ordered longest-match first to avoid partial matches
-_VISIT_CONSTRAINT_SIGNALS: list[tuple[str, str]] = [
-    # Proximity
-    ("closer to the cinema", "near_cinema_preferred"),
-    ("closer to cinema", "near_cinema_preferred"),
-    ("near the cinema", "near_cinema_preferred"),
-    ("near cinema", "near_cinema_preferred"),
-    ("next to cinema", "near_cinema_preferred"),
-    ("close to cinema", "near_cinema_preferred"),
-    # Time-sensitive / movie-anchored
-    ("before the movie", "time_sensitive"),
-    ("before movie", "time_sensitive"),
-    ("after the movie", "time_sensitive"),
-    ("after movie", "time_sensitive"),
-    # Kid-friendly requirement
-    ("kid friendly", "kid_friendly_required"),
-    ("kid-friendly", "kid_friendly_required"),
-    ("child friendly", "kid_friendly_required"),
-    ("child-friendly", "kid_friendly_required"),
-    # Quick / fast
-    ("quick stop", "quick_stop_preferred"),
-    ("quick visit", "quick_stop_preferred"),
-    ("quick lunch", "quick"),
-    ("quick bite", "quick"),
-    ("quick meal", "quick"),
-    ("quick coffee", "quick"),
-    ("just a quick", "quick"),
-    ("in a hurry", "quick"),
-    ("short visit", "quick"),
-    ("not much time", "quick"),
-    ("something quick", "quick_stop_preferred"),
-    ("something quicker", "quick_stop_preferred"),
-    ("quicker", "quick_stop_preferred"),
-    # Budget sensitivity
-    ("not too expensive", "budget_sensitive"),
-    ("not expensive", "budget_sensitive"),
-    ("not too pricey", "budget_sensitive"),
-    ("something affordable", "budget_sensitive"),
-    ("more affordable", "budget_sensitive"),
-    ("budget friendly", "budget_sensitive"),
-    ("budget-friendly", "budget_sensitive"),
-    # Light
-    ("something light", "light"),
-    ("light lunch", "light"),
-    ("light meal", "light"),
-    ("light food", "light"),
-    ("light snack", "light"),
-    ("not too heavy", "light"),
-    ("not too much", "light"),
-    ("just a snack", "light"),
-    ("something small", "light"),
-    # Healthy
-    ("healthy", "healthy"),
-    ("something healthy", "healthy"),
-    # Affordable (legacy)
-    ("affordable", "affordable"),
-]
-
-# Domain exclusion signals — user explicitly refuses an entire category/domain.
-# Ordered longest-match first to prevent partial matches.
-# Each entry: (phrase, domain_label_to_exclude)
-_EXCLUSION_SIGNALS: list[tuple[str, str]] = [
-    # Food / dining exclusions
-    ("strictly no food", "dining"),
-    ("no food at all", "dining"),
-    ("without any food", "dining"),
-    ("avoid dining", "dining"),
-    ("avoid food", "dining"),
-    ("skip dining", "dining"),
-    ("skip food", "dining"),
-    ("not food", "dining"),
-    ("no dining", "dining"),
-    ("no restaurant", "dining"),
-    ("no restaurants", "dining"),
-    ("without food", "dining"),
-    ("no food", "dining"),
-    ("no eating", "dining"),
-    ("no meal", "dining"),
-    # Cafe / coffee exclusions
-    ("no coffee", "cafe"),
-    ("no cafe", "cafe"),
-    ("no caffee", "cafe"),
-    # Shopping exclusions
-    ("no shopping", "shopping"),
-    ("skip shopping", "shopping"),
-    ("avoid shopping", "shopping"),
-    ("no stores", "shopping"),
-    # Entertainment exclusions
-    ("no entertainment", "entertainment"),
-    ("no cinema", "entertainment"),
-    ("no movies", "entertainment"),
-]
-
-
-def _extract_exclusions(
-    msg: str,
-    scene: "SceneMemory",
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """Detect and store domain exclusions from negation phrases like 'no food', 'strictly no food'."""
-    msg_lower = msg.lower()
-    for phrase, domain in _EXCLUSION_SIGNALS:
-        if phrase in msg_lower:
-            if domain not in scene.excluded_domains:
-                scene.excluded_domains.append(domain)
-                changes.append(f"+excluded_domain:{domain}")
-                scene_notes.append(
-                    f"Excluded domain '{domain}' — user said '{phrase}'"
-                )
-
-
-# ── User role signals ────────────────────────────────────────────────────────
-# Maps message signals to canonical user_role labels.
-
-_USER_ROLE_SIGNALS: list[tuple[tuple[str, ...], str, list[str]]] = [
-    # (trigger phrases, role, style_intents)
-    (("bridesmaid", "brides maid", "bridesmaids"), "bridesmaid", ["elegant", "occasion_wear"]),
-    (("bride",), "bride", ["elegant", "occasion_wear", "premium"]),
-    (("groom",), "groom", ["elegant", "occasion_wear"]),
-    (("maid of honor", "maid of honour"), "maid_of_honor", ["elegant", "occasion_wear"]),
-    (("best man",), "best_man", ["elegant", "occasion_wear"]),
-    (("mother of the bride", "mother of bride"), "mother_of_bride", ["elegant", "occasion_wear"]),
-    (("father of the bride", "father of bride"), "father_of_bride", ["elegant", "occasion_wear"]),
-    (("tourist",), "tourist", ["exploration"]),
-    (("first time visitor", "first time here", "first visit"), "first_time_visitor", ["exploration"]),
-]
-
-# ── Scenario signals ──────────────────────────────────────────────────────────
-# Scenario is the overarching real-world context.
-
-_SCENARIO_MAP: list[tuple[tuple[str, ...], str]] = [
-    # Wedding-related (highest priority for role-based detection)
-    (("bridesmaid", "bride", "groom", "wedding", "maid of honor", "bridal",
-      "engagement", "hen party", "bachelorette"), "wedding_related"),
-    # Family outing
-    (("with my kid", "with my kids", "with the kid", "with my child",
-      "with my son", "with my daughter", "with my family",
-      "family outing", "family trip", "family day"), "family_outing"),
-    # Date / couple
-    (("date night", "date plan", "anniversary", "romantic evening",
-      "just the two of us"), "date"),
-    # Birthday
-    (("birthday", "celebrating", "birthday party"), "birthday"),
-    # Quick visit
-    (("quick visit", "short visit", "in a hurry", "not much time",
-      "just passing", "quick stop"), "quick_visit"),
-    # First visit
-    (("first time", "first visit", "never been here"), "first_visit"),
-    # Gift shopping
-    (("gift for", "present for", "buying a gift"), "gift_shopping"),
-]
-
-# ── Style intent signals ──────────────────────────────────────────────────────
-
-_STYLE_INTENT_SIGNALS: list[tuple[tuple[str, ...], list[str]]] = [
-    (("elegant", "classy", "sophisticated", "upscale", "refined"), ["elegant"]),
-    (("occasion", "occasion wear", "formal", "dressy", "event"), ["occasion_wear"]),
-    (("romantic", "intimate", "cozy"), ["romantic"]),
-    (("casual", "relaxed", "laid back", "chill"), ["casual"]),
-    (("practical", "functional", "everyday"), ["practical"]),
-    (("quick", "fast", "hurry", "efficient"), ["quick"]),
-    (("luxury", "premium", "high end", "designer"), ["luxury", "premium"]),
-    (("budget", "affordable", "cheap", "value"), ["budget"]),
-    (("fun", "playful", "exciting", "lively"), ["fun"]),
-]
-
-
-# ── Shopping task signals ─────────────────────────────────────────────────
-# Maps keyword lists → (product_type, base_category)
-_PRODUCT_TYPE_SIGNALS: list[tuple[tuple[str, ...], str, str]] = [
-    (("jacket", "jackets"), "jacket", "outerwear"),
-    (("coat", "coats", "overcoat"), "coat", "outerwear"),
-    (("shoes", "shoe", "sneakers", "sneaker", "boots", "boot", "footwear", "sandals"), "shoes", "footwear"),
-    (("dress", "dresses", "gown", "gowns"), "dress", "womenswear"),
-    (("shirt", "shirts", "blouse", "blouses", "top", "tops"), "shirt", "topwear"),
-    (("pants", "trousers", "jeans", "chinos"), "pants", "bottomwear"),
-    (("bag", "bags", "handbag", "handbags", "purse", "tote"), "bag", "accessories"),
-    (("perfume", "fragrance", "cologne", "oud", "bakhoor"), "perfume", "fragrance"),
-    (("watch", "watches"), "watch", "accessories"),
-    (("jewelry", "jewellery", "necklace", "ring", "bracelet", "earrings"), "jewelry", "jewelry"),
-    (("toy", "toys", "game", "games"), "toy", "toys"),
-    (("makeup", "cosmetics", "skincare", "lipstick", "foundation"), "beauty", "beauty"),
-    (("sportswear", "sports wear", "athletic", "workout gear"), "sportswear", "sportswear"),
-    (("abaya", "abayas"), "abaya", "modest_fashion"),
-    (("hijab", "hijabs", "scarf", "scarves"), "headwear", "modest_fashion"),
-]
-
-# Signals that advance the shopping stage
-_SHOPPING_STAGE_SIGNALS: list[tuple[tuple[str, ...], str]] = [
-    (("price", "how much", "cost", "costs", "how much does", "what does it cost"), "price_guidance"),
-    (("affordable", "cheap", "cheaper", "budget", "less expensive", "not too expensive", "not expensive"), "budget_refinement"),
-    (("for my", "for him", "for her", "for the", "for a", "as a gift", "year old", "years old"), "refinement"),
-    (("buy", "get", "purchase", "looking for", "want to get", "find", "need"), "discovery"),
-]
-
-# Stage progression order (can only advance, never retreat)
-_STAGE_ORDER: list[str] = ["discovery", "refinement", "price_guidance", "budget_refinement"]
-
-# Gender indicators for children (used in shopping task)
-_BOY_SIGNALS: tuple[str, ...] = ("son", "boy", "his", " he ")
-_GIRL_SIGNALS: tuple[str, ...] = ("daughter", "girl", "her", " she ")
-
 # Message kinds that should preserve existing topic/scenario continuity
 _CONTINUITY_PRESERVING_KINDS: frozenset[str] = frozenset({
     "followup", "refinement", "constraint_refinement", "context_setting",
@@ -665,365 +355,6 @@ def _should_preserve_topic_continuity(intent, msg: str) -> bool:
     if len(words) <= 4 and intent.message_kind not in ("fresh_request",):
         return True
     return False
-
-
-def _extract_shopping_task(
-    msg: str,
-    scene: SceneMemory,
-    intent,
-    changes: list[str],
-    scene_notes: list[str],
-) -> list[str]:
-    """
-    Extract and update the structured shopping_task object from the current message.
-
-    Activates when the scene has a shopping goal or an existing shopping_task,
-    or the message contains an explicit product word.  Safe to call on any
-    message kind — purely additive.
-
-    Returns list of field names that were updated.
-    """
-    task = scene.shopping_task
-    updates: list[str] = []
-
-    # Determine whether shopping task context is relevant
-    is_shopping_context = (
-        scene.goal in ("shopping", "gift_shopping")
-        or scene.active_topic in ("shopping",)
-        or bool(task.product_type)          # already active from a prior turn
-        or any(                              # explicit product word in message
-            any(kw in msg for kw in kws)
-            for kws, _, _ in _PRODUCT_TYPE_SIGNALS
-        )
-    )
-    if not is_shopping_context:
-        return updates
-
-    # ── 1. Detect product type (only if not already set) ─────────────
-    if not task.product_type:
-        for keywords, prod_type, category in _PRODUCT_TYPE_SIGNALS:
-            if any(kw in msg for kw in keywords):
-                task.product_type = prod_type
-                task.product_category = category
-                if not task.shopping_stage:
-                    task.shopping_stage = "discovery"
-                updates.extend([f"product_type={prod_type}", f"product_category={category}"])
-                changes.append(f"shopping_task.product_type={prod_type}")
-                scene_notes.append(
-                    f"ShoppingTask: product_type='{prod_type}' category='{category}'"
-                )
-                break
-
-    # ── 2. Detect age and derive target_person / gender / category upgrade ──
-    age_match = _AGE_PATTERN.search(msg)
-    if age_match:
-        age = int(age_match.group(1))
-        task.target_age = age
-        updates.append(f"target_age={age}")
-        changes.append(f"shopping_task.target_age={age}")
-
-        # Infer gender
-        if any(s in msg for s in _BOY_SIGNALS):
-            task.target_gender = "boy"
-            if not task.target_person:
-                task.target_person = "son"
-            updates.extend(["target_gender=boy"])
-            changes.append("shopping_task.target_gender=boy")
-        elif any(s in msg for s in _GIRL_SIGNALS):
-            task.target_gender = "girl"
-            if not task.target_person:
-                task.target_person = "daughter"
-            updates.extend(["target_gender=girl"])
-            changes.append("shopping_task.target_gender=girl")
-
-        # Upgrade product category to kids variant when age < 14
-        if age < 14 and task.product_category and not task.product_category.startswith("kids_"):
-            task.product_category = f"kids_{task.product_category}"
-            updates.append(f"product_category={task.product_category}")
-            changes.append(f"shopping_task.product_category={task.product_category}")
-            scene_notes.append(
-                f"ShoppingTask: upgraded category to '{task.product_category}' "
-                f"(child age {age})"
-            )
-
-        scene_notes.append(
-            f"ShoppingTask: target_age={age} target_person={task.target_person}"
-        )
-
-    # ── 3. Target person — explicit signals without age ───────────────
-    _child_persons = {"child", "son", "daughter"}
-    _male_partner_set = {"boyfriend", "husband"}
-    _female_partner_set = {"girlfriend", "wife"}
-    if not task.target_person:
-        if "son" in msg:
-            task.target_person = "son"
-            task.target_gender = task.target_gender or "boy"
-            updates.append("target_person=son")
-            changes.append("shopping_task.target_person=son")
-        elif "daughter" in msg:
-            task.target_person = "daughter"
-            task.target_gender = task.target_gender or "girl"
-            updates.append("target_person=daughter")
-            changes.append("shopping_task.target_person=daughter")
-        else:
-            # Context-aware pronoun resolution before static signals.
-            # "for him" with a child companion → child (not boyfriend/husband).
-            _has_child_companion = bool(
-                {"son", "daughter", "kids", "child"} & set(scene.companions)
-                or any(d.get("type") == "child" for d in scene.companion_details)
-            )
-            if "for him" in msg or " him " in msg:
-                if _has_child_companion:
-                    task.target_person = "child"
-                    task.target_gender = task.target_gender or "boy"
-                    updates.append("target_person=child (pronoun 'him' → child companion)")
-                    changes.append("shopping_task.target_person=child(pronoun_him)")
-                else:
-                    male_partner = next(
-                        (c for c in scene.companions if c in _male_partner_set), ""
-                    )
-                    if male_partner:
-                        task.target_person = male_partner
-                        updates.append(f"target_person={male_partner}")
-                        changes.append(f"shopping_task.target_person={male_partner}(pronoun_him)")
-            elif "for her" in msg or " her " in msg:
-                if "daughter" in scene.companions:
-                    task.target_person = "child"
-                    task.target_gender = task.target_gender or "girl"
-                    updates.append("target_person=child (pronoun 'her' → daughter)")
-                    changes.append("shopping_task.target_person=child(pronoun_her)")
-                else:
-                    female_partner = next(
-                        (c for c in scene.companions if c in _female_partner_set), ""
-                    )
-                    if female_partner:
-                        task.target_person = female_partner
-                        updates.append(f"target_person={female_partner}")
-                        changes.append(f"shopping_task.target_person={female_partner}(pronoun_her)")
-            else:
-                for signal, person in _TARGET_PERSON_SIGNALS.items():
-                    if signal in msg and person not in ("child",):
-                        task.target_person = person
-                        updates.append(f"target_person={person}")
-                        changes.append(f"shopping_task.target_person={person}")
-                        break
-
-    # Upgrade product_category to kids_ variant when target is a child but
-    # no explicit age was detected (e.g. "for my kid" without mentioning an age).
-    # This ensures "jacket for my kid" → product_category="kids_outerwear"
-    # even when the age pattern (_AGE_PATTERN) didn't match.
-    if (
-        task.target_person in _child_persons
-        and task.product_category
-        and not task.product_category.startswith("kids_")
-        and not task.target_age  # age-based upgrade already handled above
-    ):
-        task.product_category = f"kids_{task.product_category}"
-        updates.append(f"product_category={task.product_category}")
-        changes.append(f"shopping_task.product_category={task.product_category}(child_upgrade)")
-        scene_notes.append(
-            f"ShoppingTask: upgraded category to '{task.product_category}' "
-            "(child target without explicit age)"
-        )
-
-    # ── 4. Budget preference ──────────────────────────────────────────
-    budget_signals: list[tuple[tuple[str, ...], str]] = [
-        (("affordable", "cheap", "budget", "value", "not expensive", "not too expensive",
-          "not pricey", "less expensive", "inexpensive", "low price"), "affordable"),
-        (("mid range", "moderate", "reasonable", "middle price"), "mid_range"),
-        (("premium", "luxury", "high end", "designer", "expensive"), "premium"),
-    ]
-    for signals, budget_val in budget_signals:
-        if any(s in msg for s in signals):
-            if task.budget_preference != budget_val:
-                task.budget_preference = budget_val
-                updates.append(f"budget_preference={budget_val}")
-                changes.append(f"shopping_task.budget_preference={budget_val}")
-            break
-
-    # ── 5. Shopping stage (advance only, never retreat) ───────────────
-    for stage_triggers, stage in _SHOPPING_STAGE_SIGNALS:
-        if any(t in msg for t in stage_triggers):
-            cur_idx = _STAGE_ORDER.index(task.shopping_stage) if task.shopping_stage in _STAGE_ORDER else -1
-            new_idx = _STAGE_ORDER.index(stage) if stage in _STAGE_ORDER else -1
-            if new_idx > cur_idx:
-                task.shopping_stage = stage
-                updates.append(f"shopping_stage={stage}")
-                changes.append(f"shopping_task.shopping_stage={stage}")
-            break
-
-    # ── 6. Fill defaults for unspecified fields ───────────────────────
-    # Only applied when the shopping task is active (product_type set) and
-    # the field has not been explicitly set this turn or in a prior turn.
-    # Defaults represent the most neutral assumptions: shopping for yourself,
-    # mid-range budget, casual everyday use.
-    _fill_shopping_task_defaults(task, updates, changes)
-
-    # Update the scene's shopping_task in place
-    scene.shopping_task = task
-    return updates
-
-
-def _fill_shopping_task_defaults(
-    task,  # ShoppingTask
-    updates: list[str],
-    changes: list[str],
-) -> None:
-    """
-    Apply neutral defaults to unspecified ShoppingTask fields.
-
-    Only fires when product_type is already set (i.e. a real shopping task
-    is active).  Fields that were explicitly set — either this turn or in a
-    prior turn — are never overwritten.
-    """
-    if not task.product_type:
-        return  # No active shopping task — do not infer defaults
-
-    if not task.target_person:
-        task.target_person = "self"
-        updates.append("target_person=self(default)")
-        changes.append("shopping_task.target_person=self(default)")
-
-    if not task.budget_preference:
-        task.budget_preference = "mid_range"
-        updates.append("budget_preference=mid_range(default)")
-        changes.append("shopping_task.budget_preference=mid_range(default)")
-
-    if not task.use_case:
-        task.use_case = "casual"
-        updates.append("use_case=casual(default)")
-        changes.append("shopping_task.use_case=casual(default)")
-
-
-def _extract_user_role(
-    msg: str,
-    scene: SceneMemory,
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """Extract user_role and associated style_intent from message."""
-    if scene.user_role:
-        return  # Don't override an already-set role
-    for triggers, role, style_intents in _USER_ROLE_SIGNALS:
-        if any(t in msg for t in triggers):
-            scene.user_role = role
-            changes.append(f"user_role={role}")
-            scene_notes.append(f"Detected user_role='{role}' from message")
-            # Add style intents
-            for si in style_intents:
-                if si not in scene.style_intent:
-                    scene.style_intent.append(si)
-            if style_intents:
-                changes.append(f"style_intent={style_intents}")
-            return
-
-
-def _extract_scenario(
-    msg: str,
-    scene: SceneMemory,
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """
-    Extract the overarching visit scenario.
-
-    Priority: explicit message signals > existing occasion > companion inference.
-    Does NOT override a more specific scenario already set.
-    """
-    # Wedding/role scenario always wins (highest priority)
-    if scene.user_role in ("bridesmaid", "bride", "groom", "maid_of_honor",
-                           "best_man", "mother_of_bride", "father_of_bride"):
-        if scene.scenario != "wedding_related":
-            scene.scenario = "wedding_related"
-            changes.append("scenario=wedding_related(from_user_role)")
-            scene_notes.append("Scenario set to wedding_related from user_role")
-        return
-
-    if scene.scenario:
-        return  # Already set — preserve it
-
-    for triggers, scenario in _SCENARIO_MAP:
-        if any(t in msg for t in triggers):
-            scene.scenario = scenario
-            changes.append(f"scenario={scenario}")
-            scene_notes.append(f"Detected scenario='{scenario}'")
-            return
-
-
-def _extract_style_intent(
-    msg: str,
-    scene: SceneMemory,
-    changes: list[str],
-) -> None:
-    """Extract style_intent modifiers from message."""
-    for triggers, intents in _STYLE_INTENT_SIGNALS:
-        for trigger in triggers:
-            if trigger in msg:
-                for si in intents:
-                    if si not in scene.style_intent:
-                        scene.style_intent.append(si)
-                        changes.append(f"+style_intent:{si}")
-
-
-# Activity label normalization for visit plan extraction
-_ACTIVITY_LABELS: dict[str, str] = {
-    # Dining
-    "eat": "dining",
-    "food": "dining",
-    "lunch": "dining",
-    "dinner": "dining",
-    "breakfast": "dining",
-    "meal": "dining",
-    "restaurant": "dining",
-    "bite": "dining",
-    # Café / dessert
-    "coffee": "coffee",
-    "cafe": "coffee",
-    "café": "coffee",
-    "dessert": "dessert",
-    "sweet": "dessert",
-    "ice cream": "dessert",
-    "sweets": "dessert",
-    # Shopping
-    "shop": "shopping",
-    "shopping": "shopping",
-    "buy": "shopping",
-    "browse": "shopping",
-    "gift": "shopping",
-    "gifts": "shopping",
-    "store": "shopping",
-    # Entertainment
-    "movie": "movie",
-    "cinema": "movie",
-    "film": "movie",
-    "fun": "entertainment",
-    "play": "entertainment",
-    "entertainment": "entertainment",
-    "kids zone": "entertainment",
-    # Kids activities
-    "kids": "kids_activity",
-    "children": "kids_activity",
-    "play area": "kids_activity",
-}
-
-# Patterns that indicate sequential multi-activity plans
-_SEQUENCE_PATTERNS: list[re.Pattern] = [
-    re.compile(r"\b(?:and\s+then|then)\b", re.I),
-    re.compile(r"\b(?:followed\s+by|after\s+that|after\s+which)\b", re.I),
-    re.compile(r"\band\b.*\bafter\b", re.I),
-    re.compile(r"\+", re.I),
-]
-
-# Sequential query signals — queries that mean "next step in the plan"
-_SEQUENTIAL_QUERY_PATTERNS: list[re.Pattern] = [
-    re.compile(r"^after\s+that\?*$", re.I),
-    re.compile(r"^what\s+(about\s+)?next\?*$", re.I),
-    re.compile(r"^and\s+then\?*$", re.I),
-    re.compile(r"^then\s+what\?*$", re.I),
-    re.compile(r"^what\s+else\?*$", re.I),
-    re.compile(r"^next\?*$", re.I),
-    re.compile(r"^after\s+\w+\?*$", re.I),  # "after lunch?"
-]
 
 
 def _apply_scene_corrections(
@@ -1130,20 +461,21 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     changes: list[str] = []
     scene_notes: list[str] = []
 
-    # ── Apply LLM scene corrections first (before any additive extraction) ──
-    # This ensures explicit user denials ("I don't have kids", "I'm alone")
-    # always override subsequent keyword-based companion additions.
+    # ── Apply LLM scene corrections first ────────────────────────────────────
+    # Explicit user denials ("I don't have kids", "I'm alone") come through
+    # the classifier as scene_corrections and must override anything extracted.
     if intent.scene_corrections:
         _apply_scene_corrections(intent.scene_corrections, scene, changes, scene_notes)
 
-    # ── LLM-first scene extraction ────────────────────────────────────────
-    # Run for all non-trivial message kinds (skip acknowledgement / corrections
-    # which have dedicated fast-exit paths below).
-    # The LLM delta is applied before the keyword scanner so it gets first-write
-    # priority on fields it understands from natural language.  Keyword scanner
-    # runs afterward as a supplement for anything the LLM left empty.
+    # ── LLM scene extraction ─────────────────────────────────────────────────
+    # Run for all message kinds except those with dedicated fast-exit paths.
+    # The LLM handles all field extraction: companions, occasion, budget,
+    # scenario, user_role, style_intent, excluded_domains, visit_plan, etc.
+    # category_negation is intentionally NOT skipped: the scene-extractor LLM
+    # is the correct mechanism to detect and populate excluded_domains when the
+    # user explicitly refuses a category (e.g. "no food", "skip dining").
     _SKIP_LLM_EXTRACTION_KINDS = frozenset({
-        "acknowledgement", "companion_correction", "disengagement", "category_negation",
+        "acknowledgement", "companion_correction", "disengagement",
     })
     if intent.message_kind not in _SKIP_LLM_EXTRACTION_KINDS:
         llm_delta = await _llm_extract_scene_delta(
@@ -1154,8 +486,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
         )
         _apply_llm_scene_delta(llm_delta, scene, changes, scene_notes)
 
-    # ── Acknowledgement: preserve scene exactly as-is, no extraction ─────────
-    # The bot should respond with a clarifying question, not infer new context.
+    # ── Acknowledgement: preserve scene exactly, no extraction ───────────────
     if intent.message_kind == "acknowledgement":
         if scene.current_need:
             scene.previous_need = scene.current_need
@@ -1173,27 +504,23 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             "_trace_summary": "Acknowledgement: scene preserved, clarification needed",
         }
 
-    # ── Companion correction: apply corrections, then preserve rest of scene ─
+    # ── Companion correction: corrections already applied above ──────────────
     if intent.message_kind == "companion_correction":
-        # Always also try to extract solo/alone signal explicitly
         if any(sig in msg for sig in ("alone", "solo", "by myself", "just me")):
             if "solo" not in scene.companions:
                 scene.companions.append("solo")
                 changes.append("+companion:solo(companion_correction)")
-            if not scene.visit_type or scene.visit_type not in ("solo",):
+            if not scene.visit_type or scene.visit_type != "solo":
                 scene.visit_type = "solo"
                 changes.append("visit_type=solo(companion_correction)")
 
         if scene.current_need:
             scene.previous_need = scene.current_need
         scene.current_need = state.normalized_user_message
-
-        correction_note = (
+        scene_notes.append(
             f"Companion correction applied: corrections={intent.scene_corrections}, "
             f"companions now={scene.companions}, visit_type={scene.visit_type}"
         )
-        scene_notes.append(correction_note)
-
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
@@ -1207,10 +534,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             ),
         }
 
-    # ── Factual flow: light scene update ─────────────────────────────
-    # In factual flow, we preserve topic continuity AND extract companion
-    # signals so that hybrid queries ("any movies with the kid?") still
-    # populate scene memory correctly for follow-up filtering.
+    # ── Factual flow: light topic update, LLM delta already applied ──────────
     if state.flow_type == "factual":
         if scene.current_need:
             scene.previous_need = scene.current_need
@@ -1219,20 +543,6 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             scene.previous_topic = scene.active_topic
             scene.active_topic = intent.domain
             changes.append(f"light_topic → {intent.domain}")
-
-        # Still extract companion/child signals so hybrid queries work.
-        # Also extract role/scenario in case user declares context on factual turn.
-        _extract_user_role(msg, scene, changes, scene_notes)
-        _extract_scenario(msg, scene, changes, scene_notes)
-        _extract_style_intent(msg, scene, changes)
-        _extract_hybrid_companions(msg, scene, changes, scene_notes)
-        _infer_audience(msg, scene, changes, scene_notes)
-        _infer_target_person(msg, scene, changes)
-        _extract_visit_constraints(msg, scene, changes, scene_notes)
-        _extract_exclusions(msg, scene, changes, scene_notes)
-        # Shopping task is also updated on factual turns (e.g. product refinements)
-        _extract_shopping_task(msg, scene, intent, changes, scene_notes)
-
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
@@ -1241,48 +551,27 @@ async def update_scene_memory(state: ConciergeState) -> dict:
                 continuity_preserved=True,
             ),
             "_trace_summary": (
-                f"SceneMemory[factual]: light + companion update — "
-                f"{', '.join(changes) or 'no changes'}"
+                f"SceneMemory[factual]: {', '.join(changes) or 'no changes'}"
             ),
         }
 
-    # ── Constraint refinement: preserve scene, add constraints + refine task ─
+    # ── Constraint refinement: LLM delta already applied above ───────────────
     if intent.message_kind == "constraint_refinement":
-        # Always extract visit constraints and any domain exclusions
-        _extract_visit_constraints(msg, scene, changes, scene_notes)
-        _extract_exclusions(msg, scene, changes, scene_notes)
-
-        # Also run extractions that constraint_refinement turns commonly carry:
-        # age ("for my 5 year old son"), companion, target_person, budget.
-        # These must NOT be skipped just because message_kind == constraint_refinement.
-        _extract_child_age(msg, scene, changes, scene_notes)
-        _extract_hybrid_companions(msg, scene, changes, scene_notes)
-        _infer_target_person(msg, scene, changes)
-        _infer_audience(msg, scene, changes, scene_notes)
-        _infer_budget(msg, scene, changes)
-
-        # Shopping task refinement — the primary fix for "for my 5 year old son"
-        shopping_updates = _extract_shopping_task(msg, scene, intent, changes, scene_notes)
-
         new_constraints = [c for c in scene.visit_constraints if c not in state.scene.visit_constraints]
         refinement_note = (
-            f"Constraint refinement applied: constraints={new_constraints} "
-            f"shopping_task_updates={shopping_updates}"
-            if new_constraints or shopping_updates
-            else "Constraint refinement: no changes"
+            f"Constraint refinement applied: constraints={new_constraints}"
+            if new_constraints
+            else "Constraint refinement: no new constraints"
         )
         scene_notes.append(refinement_note)
-
         if scene.current_need:
             scene.previous_need = scene.current_need
         scene.current_need = state.normalized_user_message
-
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
                 inferred_scene_notes=scene_notes,
                 last_refinement_applied=refinement_note,
-                shopping_task_updates=shopping_updates,
                 continuity_preserved=True,
                 scene_update_reason="constraint_refinement",
                 scenario_persisted=bool(scene.scenario),
@@ -1294,22 +583,17 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             ),
         }
 
-    # ── Category negation: extract domain exclusions, preserve scene ─────────
+    # ── Category negation: excluded_domains handled by LLM delta ─────────────
     if intent.message_kind == "category_negation":
-        _extract_exclusions(msg, scene, changes, scene_notes)
-        _extract_visit_constraints(msg, scene, changes, scene_notes)
-
         if scene.current_need:
             scene.previous_need = scene.current_need
         scene.current_need = state.normalized_user_message
-
         exclusion_note = (
             f"Category negation: excluded_domains={scene.excluded_domains}"
             if scene.excluded_domains
             else "Category negation detected but no domain matched"
         )
         scene_notes.append(exclusion_note)
-
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
@@ -1326,19 +610,13 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             ),
         }
 
-    # ── Disengagement: preserve scene, note frustration ───────────────────────
+    # ── Disengagement: preserve scene, note frustration ──────────────────────
     if intent.message_kind == "disengagement":
-        # Always run exclusion extraction in case the message contains both
-        # disengagement AND a negation (e.g. "nevermind, no food please")
-        _extract_exclusions(msg, scene, changes, scene_notes)
-
         if scene.current_need:
             scene.previous_need = scene.current_need
         scene.current_need = state.normalized_user_message
-
         disengagement_note = "Disengagement detected — visitor frustrated or dismissing prior content"
         scene_notes.append(disengagement_note)
-
         return {
             "scene": scene,
             "debug_enrichment": DebugEnrichment(
@@ -1354,7 +632,7 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             ),
         }
 
-    # ── Topic management ──────────────────────────────────────────────
+    # ── Topic management ──────────────────────────────────────────────────────
     topic_switch_detected = False
     continuity_preserved = False
 
@@ -1363,15 +641,12 @@ async def update_scene_memory(state: ConciergeState) -> dict:
         scene.previous_topic = scene.active_topic
         scene.active_topic = intent.domain
         scene.active_shortlist = []
-        if any(sig in msg for sig in _TARGET_PERSON_SIGNALS):
-            pass  # will be re-set by _infer_target_person below
         changes.append(f"topic_switch → {intent.domain}")
     elif intent.message_kind == "correction":
         changes.append("correction: strongly overriding scene")
     else:
         preserve = _should_preserve_topic_continuity(intent, msg)
         if preserve and scene.active_topic:
-            # Keep current topic — this is a refinement / follow-up / context-setting turn
             continuity_preserved = True
             changes.append(f"topic preserved: {scene.active_topic} (continuity turn)")
         elif intent.domain and intent.domain != scene.active_topic:
@@ -1379,115 +654,34 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             scene.active_topic = intent.domain
             changes.append(f"topic → {intent.domain}")
 
-    # ── Age extraction (must run before companion detection) ────────
-    _extract_child_age(msg, scene, changes, scene_notes)
-
-    # ── User role extraction (must run early — influences scenario) ──
-    _extract_user_role(msg, scene, changes, scene_notes)
-
-    # ── Scenario extraction (depends on user_role being set first) ──
-    _extract_scenario(msg, scene, changes, scene_notes)
-
-    # ── Style intent extraction ────────────────────────────────────
-    _extract_style_intent(msg, scene, changes)
-
-    # ── Enhanced hybrid companion extraction (catches "with the kid" etc.) ──
-    _extract_hybrid_companions(msg, scene, changes, scene_notes)
-
-    # ── Companion detection (simple keyword dict, additive) ───────────
-    for signal, companion in _COMPANION_SIGNALS.items():
-        if signal in msg and companion not in scene.companions:
-            if intent.message_kind == "correction":
-                scene.companions = [companion]
-            else:
-                scene.companions.append(companion)
-            changes.append(f"+companion:{companion}")
-
-    # ── Budget detection ──────────────────────────────────────────────
-    _infer_budget(msg, scene, changes)
-
-    # ── Occasion detection (keyword scanner — only fills if LLM left it empty) ──
-    if not scene.occasion:
-        for signal, occasion in _OCCASION_SIGNALS.items():
-            if signal in msg:
-                scene.occasion = occasion
-                changes.append(f"occasion={occasion}")
-                break
-
-    # ── Audience inference ────────────────────────────────────────────
-    _infer_audience(msg, scene, changes, scene_notes)
-
-    # ── Target person inference ────────────────────────────────────────
-    _infer_target_person(msg, scene, changes)
-
-    # ── Visit type inference ──────────────────────────────────────────
-    _infer_visit_type(msg, scene, changes, scene_notes)
-
-    # ── Pace inference ────────────────────────────────────────────────
-    _infer_pace(msg, scene, changes)
-
-    # ── Goal inference ────────────────────────────────────────────────
-    _infer_goal(msg, scene, changes)
-
-    # ── Implicit goal inference ───────────────────────────────────────
-    _infer_implicit_goal(msg, scene, intent, changes, scene_notes)
-
-    # ── Visit plan extraction ─────────────────────────────────────────
-    _extract_visit_plan(msg, scene, changes)
-
-    # ── Visit constraint extraction ───────────────────────────────────
-    _extract_visit_constraints(msg, scene, changes, scene_notes)
-
-    # ── Domain exclusion extraction (runs on every turn — exclusions accumulate) ──
-    _extract_exclusions(msg, scene, changes, scene_notes)
-
-    # ── Shopping task extraction (runs in concierge flow for all kinds) ──
-    shopping_updates = _extract_shopping_task(msg, scene, intent, changes, scene_notes)
-
-    # ── Sequential query detection ────────────────────────────────────
-    _handle_sequential_query(msg, scene, intent, changes)
-
-    # ── Topic history ─────────────────────────────────────────────────
+    # ── Topic history ─────────────────────────────────────────────────────────
     if intent.domain and intent.domain not in ("general",):
         if not scene.topic_history or scene.topic_history[-1] != intent.domain:
             scene.topic_history = (scene.topic_history + [intent.domain])[-10:]
 
-    # ── Current need (preserve previous for follow-up context) ───────
+    # ── Current need ─────────────────────────────────────────────────────────
     if scene.current_need and scene.current_need != state.normalized_user_message:
         scene.previous_need = scene.current_need
     scene.current_need = state.normalized_user_message
 
     scenario_persisted = bool(scene.scenario and not topic_switch_detected)
-
-    # Emit scene_sufficient: True when enough context has accumulated that
-    # the LLM should infer rather than asking a clarifying question.
     scene_sufficient = _is_scene_sufficient(scene)
 
-    # ── Investigative layer: detect vague inputs that need one targeting question ─
-    # Only trigger when the scene lacks enough context to infer who the gift/
-    # shopping is for. Reset needs_clarification once target_person is known.
-    _detect_vague_clarification_need(msg, intent, scene, changes)
-
-    # ── Reset scene_acknowledged when companions change ───────────────
-    # If new companions were added this turn, the bot should acknowledge
-    # the updated context in the next response.
+    # ── Reset scene_acknowledged when companions changed this turn ────────────
     if any(c.startswith("+companion:") for c in changes):
         scene.scene_acknowledged = False
         changes.append("scene_acknowledged reset (companions changed)")
 
-    debug = DebugEnrichment(
-        inferred_scene_notes=scene_notes,
-        scene_update_reason=intent.message_kind,
-        continuity_preserved=continuity_preserved,
-        shopping_task_updates=shopping_updates,
-        scenario_persisted=scenario_persisted,
-        topic_switch_detected=topic_switch_detected,
-        scene_sufficient=scene_sufficient,
-    )
-
     return {
         "scene": scene,
-        "debug_enrichment": debug,
+        "debug_enrichment": DebugEnrichment(
+            inferred_scene_notes=scene_notes,
+            scene_update_reason=intent.message_kind,
+            continuity_preserved=continuity_preserved,
+            scenario_persisted=scenario_persisted,
+            topic_switch_detected=topic_switch_detected,
+            scene_sufficient=scene_sufficient,
+        ),
         "_trace_summary": f"Scene: {', '.join(changes) if changes else 'no changes'}",
     }
 
@@ -1524,491 +718,3 @@ _VAGUE_GIFT_SIGNALS: frozenset[str] = frozenset({
 _VAGUE_SHOPPING_SIGNALS: frozenset[str] = frozenset({
     "shopping_general", "general_shopping",
 })
-
-
-def _detect_vague_clarification_need(
-    msg: str,
-    intent: "InterpretedIntent",
-    scene: "SceneMemory",
-    changes: list[str],
-) -> None:
-    """
-    Detect when the visitor's shopping/gift query is too vague to give a
-    useful targeted recommendation.
-
-    Sets scene.needs_clarification = True and scene.clarification_topic
-    when the sub_intent is gift-related AND there is no target_person,
-    companion, or shopping_task target established yet.
-
-    Clears the flag once enough context has been gathered.
-    """
-    sub = getattr(intent, "sub_intent", "") or ""
-
-    # Clear the flag if target is now known
-    if scene.target_person or (
-        scene.shopping_task and scene.shopping_task.target_person
-    ):
-        if scene.needs_clarification:
-            scene.needs_clarification = False
-            scene.clarification_topic = ""
-            changes.append("clarification_resolved: target_person known")
-        return
-
-    # Set flag for vague gift queries without a target
-    if sub in _VAGUE_GIFT_SIGNALS and not scene.companions:
-        scene.needs_clarification = True
-        scene.clarification_topic = "gift_target"
-        changes.append("needs_clarification=True: vague gift, no target_person")
-    elif sub in _VAGUE_SHOPPING_SIGNALS and not scene.companions and not scene.occasion:
-        scene.needs_clarification = True
-        scene.clarification_topic = "shopping_target"
-        changes.append("needs_clarification=True: vague shopping, no context")
-    elif scene.needs_clarification and sub not in _VAGUE_GIFT_SIGNALS:
-        # Query moved on — clear the flag
-        scene.needs_clarification = False
-        scene.clarification_topic = ""
-        changes.append("clarification_cleared: topic changed")
-
-
-# ── Age extraction ──────────────────────────────────────────────────────────
-
-
-def _extract_child_age(
-    msg: str, scene: SceneMemory, changes: list[str], scene_notes: list[str],
-) -> None:
-    """Extract child age from phrases like '5 yr old', '3 year old daughter'."""
-    match = _AGE_PATTERN.search(msg)
-    if not match:
-        return
-
-    age = int(match.group(1))
-    detail: dict[str, Any] = {"type": "child", "age": age}
-
-    # Add to companion_details if not already recorded
-    existing_ages = {d.get("age") for d in scene.companion_details if d.get("type") == "child"}
-    if age not in existing_ages:
-        scene.companion_details.append(detail)
-        changes.append(f"companion_detail:child_age={age}")
-        scene_notes.append(
-            f"Detected parent_with_child from age reference '{match.group(0)}' (age {age})"
-        )
-
-    # Ensure "child" is in companions
-    if "child" not in scene.companions:
-        scene.companions.append("child")
-        changes.append("+companion:child(from_age)")
-
-    # Force family visit type
-    if not scene.visit_type:
-        scene.visit_type = "family_visit"
-        changes.append("visit_type=family_visit(from_child_age)")
-        scene_notes.append("Inferred family_visit from child age mention")
-
-
-# ── Enhanced hybrid companion extraction ─────────────────────────────────────
-# These patterns capture "with the kid", "with my child", "for the kids",
-# "any movies with the kid", etc. that the simple _COMPANION_SIGNALS dict misses.
-
-_HYBRID_CHILD_SIGNALS: tuple[str, ...] = (
-    "with the kid", "with my kid", "with my kids", "with kids",
-    "with child", "with my child", "with the children", "with children",
-    "with my daughter", "with my son",
-    "for the kid", "for my kid", "for the kids", "for kids",
-    "for my children", "for children", "for child",
-    "movies with", "movies for kids", "movies for children",
-    "any movies with", "kid friendly", "kid-friendly",
-    "child friendly", "child-friendly",
-    "little one", "little kid",
-    "my 5", "my 4", "my 6", "my 7", "my 8", "my 3",  # age-prefix companions
-)
-
-_HYBRID_COMPANION_SIGNALS: list[tuple[tuple[str, ...], str, str]] = [
-    # (keywords, companion_value, visit_type)
-    (("with my girlfriend", "my girlfriend", "with my gf", "my gf", "with gf"), "girlfriend", "couple"),
-    (("with my boyfriend", "my boyfriend", "with my bf", "my bf", "with bf"), "boyfriend", "couple"),
-    (("with my wife", "my wife", "with wife", "my wifey", "with wifey"), "wife", "couple"),
-    (("with my husband", "my husband", "with husband", "my hubby", "with hubby"), "husband", "couple"),
-    (("with friends", "with my friends", "with a friend"), "friends", "group"),
-    (("with family", "with my family"), "family", "family_visit"),
-]
-
-
-def _extract_hybrid_companions(
-    msg: str,
-    scene: SceneMemory,
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """
-    Strong companion extraction that picks up hybrid patterns missed by
-    the simple keyword dict approach.  Idempotent — safe to call multiple
-    times.
-    """
-    # ── Child/kid patterns ────────────────────────────────────────────
-    child_detected = any(sig in msg for sig in _HYBRID_CHILD_SIGNALS)
-    if child_detected:
-        if "child" not in scene.companions:
-            scene.companions.append("child")
-            changes.append("+companion:child(hybrid_pattern)")
-            scene_notes.append("Detected child companion via hybrid pattern matching")
-        if not scene.visit_type:
-            scene.visit_type = "family_visit"
-            changes.append("visit_type=family_visit(hybrid)")
-        elif scene.visit_type not in ("family_visit", "family"):
-            scene.visit_type = "family_visit"
-            changes.append("visit_type=family_visit(hybrid_override)")
-
-    # ── Couple/group/family patterns ──────────────────────────────────
-    for keywords, companion_val, visit_type_val in _HYBRID_COMPANION_SIGNALS:
-        if any(kw in msg for kw in keywords):
-            if companion_val not in scene.companions:
-                scene.companions.append(companion_val)
-                changes.append(f"+companion:{companion_val}(hybrid)")
-            if not scene.visit_type:
-                scene.visit_type = visit_type_val
-                changes.append(f"visit_type={visit_type_val}(hybrid)")
-
-
-# ── Audience inference ───────────────────────────────────────────────────────
-
-
-def _infer_audience(
-    msg: str, scene: SceneMemory, changes: list[str], scene_notes: list[str],
-) -> None:
-    romantic_cues = ("girlfriend", "boyfriend", "my gf", "my bf", " gf ", " bf ", "romantic", "date", "wife", "husband", "hubby", "wifey", "anniversary")
-    if any(cue in msg for cue in romantic_cues):
-        if "couple_friendly" not in scene.audience:
-            scene.audience.append("couple_friendly")
-            changes.append("+audience:couple_friendly")
-
-    family_cues = (
-        "kids", "children", "family", "son", "daughter", "child", "toddler", "baby",
-        "with the kid", "with my kid", "with kids", "with child", "with my child",
-        "for kids", "for children", "kid friendly", "child friendly",
-    )
-    child_detected = (
-        any(cue in msg for cue in family_cues)
-        or any(d.get("type") == "child" for d in scene.companion_details)
-        or "child" in scene.companions
-    )
-    if child_detected:
-        for tag in ("family_friendly", "kid_friendly"):
-            if tag not in scene.audience:
-                scene.audience.append(tag)
-                changes.append(f"+audience:{tag}")
-        if "parent_with_child" not in scene.audience:
-            scene.audience.append("parent_with_child")
-            changes.append("+audience:parent_with_child")
-        if "family" not in scene.audience:
-            scene.audience.append("family")
-            changes.append("+audience:family")
-        scene_notes.append("Inferred family / parent_with_child audience")
-
-    solo_cues = ("alone", "solo", "by myself")
-    if any(cue in msg for cue in solo_cues):
-        if "solo_friendly" not in scene.audience:
-            scene.audience.append("solo_friendly")
-            changes.append("+audience:solo_friendly")
-
-
-# ── Target person inference ─────────────────────────────────────────────────
-
-
-def _infer_target_person(msg: str, scene: SceneMemory, changes: list[str]) -> None:
-    """Resolve who the current query is about — persists for follow-ups."""
-    _child_set = {"son", "daughter", "kids", "child"}
-    _male_partner_set = {"boyfriend", "husband"}
-    _female_partner_set = {"girlfriend", "wife"}
-
-    # Only write if LLM extraction hasn't already set this field (LLM-first).
-    if not scene.target_person:
-        # ── Context-aware pronoun resolution ("for him" / "for her") ──────────
-        # These pronouns are gender-dependent and must be resolved against companions.
-        # "for him" with a male child present → child (not boyfriend/husband).
-        # "for her" with a female child (daughter) present → child (not girlfriend/wife).
-        _has_child = bool(_child_set & set(scene.companions)) or bool(
-            any(d.get("type") == "child" for d in scene.companion_details)
-        )
-        _has_male_child = (
-            "son" in scene.companions
-            or any(
-                d.get("type") == "child" and d.get("gender") in ("male", "boy", "m")
-                for d in scene.companion_details
-            )
-            or (
-                _has_child
-                and not any(c in {"daughter"} for c in scene.companions)
-                and not _female_partner_set & set(scene.companions)
-            )
-        )
-
-        if "for him" in msg or " him " in msg:
-            if _has_child:
-                # "him" most likely refers to the child when a child companion
-                # is present and no explicit male partner is mentioned.
-                scene.target_person = "child"
-                changes.append("target_person=child (pronoun 'him' → child companion)")
-                return
-            # No child → check for male partner
-            male_partner = next(
-                (c for c in scene.companions if c in _male_partner_set), ""
-            )
-            if male_partner:
-                scene.target_person = male_partner
-                changes.append(f"target_person={male_partner} (pronoun 'him' → partner)")
-                return
-
-        if "for her" in msg or " her " in msg:
-            # If daughter is an explicit companion, "her" = daughter/child
-            if "daughter" in scene.companions:
-                scene.target_person = "child"
-                changes.append("target_person=child (pronoun 'her' → daughter companion)")
-                return
-            # Otherwise resolve to female partner if present
-            female_partner = next(
-                (c for c in scene.companions if c in _female_partner_set), ""
-            )
-            if female_partner:
-                scene.target_person = female_partner
-                changes.append(f"target_person={female_partner} (pronoun 'her' → partner)")
-                return
-
-        # ── Static signal lookup (for explicit phrasing without pronouns) ──
-        for signal, person in _TARGET_PERSON_SIGNALS.items():
-            if signal in msg:
-                scene.target_person = person
-                changes.append(f"target_person={person}")
-                return
-
-    if not scene.target_person and scene.companions:
-        child_companions = {"son", "daughter", "kids", "child"}
-        partner_companions = {"girlfriend", "boyfriend", "wife", "husband"}
-        if child_companions & set(scene.companions):
-            scene.target_person = "child"
-            changes.append("target_person=child (inferred from companions)")
-        elif partner_companions & set(scene.companions):
-            last = next(
-                (c for c in reversed(scene.companions) if c in partner_companions),
-                "",
-            )
-            if last:
-                scene.target_person = last
-                changes.append(f"target_person={last} (inferred from companions)")
-
-
-# ── Visit type inference ────────────────────────────────────────────────────
-
-
-def _infer_visit_type(
-    msg: str, scene: SceneMemory, changes: list[str], scene_notes: list[str],
-) -> None:
-    if scene.visit_type:
-        return
-    # Check companion_details for child first
-    if any(d.get("type") == "child" for d in scene.companion_details):
-        scene.visit_type = "family_visit"
-        changes.append("visit_type=family_visit")
-        return
-    for signal, vtype in _VISIT_TYPE_SIGNALS.items():
-        if signal in msg:
-            scene.visit_type = vtype
-            changes.append(f"visit_type={vtype}")
-            return
-
-
-# ── Pace inference ──────────────────────────────────────────────────────────
-
-
-def _infer_pace(msg: str, scene: SceneMemory, changes: list[str]) -> None:
-    if scene.pace:
-        return
-    if any(sig in msg for sig in _PACE_FAST_SIGNALS):
-        scene.pace = "fast"
-        changes.append("pace=fast")
-    elif any(sig in msg for sig in _PACE_LEISURELY_SIGNALS):
-        scene.pace = "leisurely"
-        changes.append("pace=leisurely")
-    elif scene.companions or scene.visit_type:
-        # Default for family/couple visits
-        scene.pace = "moderate"
-        changes.append("pace=moderate (default)")
-
-
-# ── Budget inference ────────────────────────────────────────────────────────
-
-
-def _infer_budget(msg: str, scene: SceneMemory, changes: list[str]) -> None:
-    """Extract budget preference from message into scene.budget.
-    Only writes if LLM hasn't already set it this turn (LLM-first guard).
-    """
-    if scene.budget:
-        return
-    for signal, budget in _BUDGET_SIGNALS.items():
-        if signal in msg:
-            scene.budget = budget
-            changes.append(f"budget={budget}")
-            break
-
-
-# ── Goal inference ──────────────────────────────────────────────────────────
-
-
-def _infer_goal(msg: str, scene: SceneMemory, changes: list[str]) -> None:
-    import re as _re
-    for signal, goal in _GOAL_SIGNALS.items():
-        # Use word boundaries to prevent substring false positives:
-        # e.g. "eat" matching inside "weather", "fun" inside "function", etc.
-        if _re.search(r'\b' + _re.escape(signal) + r'\b', msg):
-            if scene.goal != goal:
-                scene.goal = goal
-                changes.append(f"goal={goal}")
-            return
-
-
-# ── Implicit goal inference ─────────────────────────────────────────────────
-
-
-def _infer_implicit_goal(
-    msg: str,
-    scene: SceneMemory,
-    intent,
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """Infer a rich implicit goal from the combination of scene signals."""
-    if scene.implicit_goal:
-        return
-
-    has_child = (
-        "child" in scene.companions
-        or any(d.get("type") == "child" for d in scene.companion_details)
-    )
-    has_partner = bool(
-        {"girlfriend", "boyfriend", "wife", "husband"} & set(scene.companions)
-    )
-
-    if has_child and scene.goal == "shopping":
-        scene.implicit_goal = "shopping while keeping child engaged"
-        scene_notes.append("Inferred implicit goal: shopping while keeping child engaged")
-        changes.append("implicit_goal=shopping_with_child")
-    elif has_child and scene.goal == "dining":
-        scene.implicit_goal = "family-friendly dining"
-        scene_notes.append("Inferred implicit goal: family-friendly dining")
-        changes.append("implicit_goal=family_dining")
-    elif has_child and intent.domain == "shopping":
-        scene.implicit_goal = "shopping while keeping child engaged"
-        scene_notes.append("Inferred implicit goal: shopping while keeping child engaged")
-        changes.append("implicit_goal=shopping_with_child")
-    elif has_child and intent.domain == "entertainment":
-        scene.implicit_goal = "entertainment suitable for the whole family"
-        changes.append("implicit_goal=family_entertainment")
-    elif has_partner and scene.goal == "gift_shopping":
-        scene.implicit_goal = "finding a gift for partner"
-        scene_notes.append("Inferred implicit goal: finding a gift for partner")
-        changes.append("implicit_goal=gift_for_partner")
-    elif scene.occasion == "before_movie":
-        scene.implicit_goal = "activity before the movie — time-sensitive"
-        scene_notes.append("Inferred implicit goal: activity before the movie")
-        changes.append("implicit_goal=before_movie_activity")
-    elif scene.occasion == "after_movie":
-        scene.implicit_goal = "activity after the movie — casual winding down"
-        changes.append("implicit_goal=after_movie_activity")
-    elif has_partner and intent.domain in ("dining", "shopping", "entertainment"):
-        scene.implicit_goal = "enjoyable outing with partner"
-        changes.append("implicit_goal=couple_outing")
-
-
-# ── Visit plan helpers ───────────────────────────────────────────────────────
-
-
-def _normalize_activity(word: str) -> str:
-    """Map a raw word to a normalized activity label."""
-    w = word.lower().strip()
-    return _ACTIVITY_LABELS.get(w, "")
-
-
-def _extract_visit_plan(msg: str, scene: SceneMemory, changes: list[str]) -> None:
-    """
-    Detect multi-activity sequences from the user message and populate
-    scene.visit_plan if a new sequence is found.
-    """
-    is_sequential = any(p.search(msg) for p in _SEQUENCE_PATTERNS)
-    if not is_sequential:
-        return
-
-    words = re.split(r"\band\s+then\b|\bthen\b|\bfollowed\s+by\b|\bafter\s+that\b|\+|,\s*", msg, flags=re.I)
-    activities: list[str] = []
-    for chunk in words:
-        chunk = chunk.strip()
-        for raw, label in _ACTIVITY_LABELS.items():
-            if raw in chunk.lower() and label not in activities:
-                activities.append(label)
-                break
-
-    if len(activities) >= 2:
-        scene.visit_plan = activities
-        scene.multi_activity_mode = True
-        if not scene.current_plan_step and activities:
-            scene.current_plan_step = activities[0]
-        changes.append(f"visit_plan={activities}")
-
-
-def _extract_visit_constraints(
-    msg: str,
-    scene: SceneMemory,
-    changes: list[str],
-    scene_notes: list[str],
-) -> None:
-    """Detect and store visit constraints like 'quick', 'budget_sensitive', 'near_cinema_preferred'."""
-    msg_lower = msg.lower()
-    for signal, constraint in _VISIT_CONSTRAINT_SIGNALS:
-        if signal in msg_lower:
-            if constraint not in scene.visit_constraints:
-                scene.visit_constraints.append(constraint)
-                changes.append(f"+constraint:{constraint}")
-                scene_notes.append(f"Inferred constraint '{constraint}' from phrase '{signal}'")
-
-
-def _handle_sequential_query(
-    msg: str, scene: SceneMemory, intent, changes: list[str],
-) -> None:
-    """
-    Detect 'after that?', 'what next?' type queries and advance the
-    current plan step so the LLM knows which activity we're moving to.
-    """
-    is_sequential = any(p.match(msg.strip()) for p in _SEQUENTIAL_QUERY_PATTERNS)
-
-    if is_sequential and scene.visit_plan:
-        current = scene.current_plan_step
-        if current and current not in scene.completed_steps:
-            scene.completed_steps.append(current)
-            changes.append(f"completed:{current}")
-        try:
-            idx = scene.visit_plan.index(current)
-            if idx + 1 < len(scene.visit_plan):
-                scene.current_plan_step = scene.visit_plan[idx + 1]
-                changes.append(f"plan_step→{scene.current_plan_step}")
-        except (ValueError, IndexError):
-            pass
-        return
-
-    # Non-sequential: mark current active_topic as completed when moving on
-    if (
-        scene.active_topic
-        and intent.domain
-        and intent.domain != scene.active_topic
-        and intent.domain not in ("general",)
-        and scene.active_topic not in scene.completed_steps
-    ):
-        scene.completed_steps = (scene.completed_steps + [scene.active_topic])[-8:]
-        changes.append(f"completed:{scene.active_topic}")
-
-    # Update current_plan_step from visit_plan if intent matches next step
-    if scene.visit_plan and intent.domain:
-        domain = intent.domain
-        for i, step in enumerate(scene.visit_plan):
-            step_domain = _ACTIVITY_LABELS.get(step, step)
-            if step_domain == domain and step not in scene.completed_steps:
-                scene.current_plan_step = step
-                changes.append(f"plan_step={step}")
-                break

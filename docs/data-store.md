@@ -48,8 +48,11 @@ Currently kept empty (`.gitkeep`) — raw API dumps are placed here before runni
 
 ```
 canonical/
-├── al_nakheel_plaza_13.json
-└── al_nakheel_plaza_28.json
+├── al_nakheel_plaza_1.json    ← Al Ahsa Mall (Al Ahsa)
+├── al_nakheel_plaza_10.json   ← The View Mall (Riyadh)
+├── al_nakheel_plaza_13.json   ← Mall of Arabia (Jeddah)
+├── al_nakheel_plaza_27.json   ← Al Nakheel Mall (Riyadh)
+└── al_nakheel_plaza_28.json   ← Al Nakheel Plaza (Buraidah)
 ```
 
 ### Top-level schema
@@ -123,7 +126,10 @@ Each entity across `stores`, `dining`, and `kiosks` shares a common shape:
 
 ```
 semantic/
+├── al_nakheel_plaza_1.json
+├── al_nakheel_plaza_10.json
 ├── al_nakheel_plaza_13.json
+├── al_nakheel_plaza_27.json
 └── al_nakheel_plaza_28.json
 ```
 
@@ -222,7 +228,10 @@ Each profile includes:
 
 ```
 playbooks/
+├── al_nakheel_plaza_1.json
+├── al_nakheel_plaza_10.json
 ├── al_nakheel_plaza_13.json
+├── al_nakheel_plaza_27.json
 └── al_nakheel_plaza_28.json
 ```
 
@@ -288,7 +297,10 @@ playbooks/
 
 ```
 context_packs/
+├── al_nakheel_plaza_1_context.json
+├── al_nakheel_plaza_10_context.json
 ├── al_nakheel_plaza_13_context.json
+├── al_nakheel_plaza_27_context.json
 └── al_nakheel_plaza_28_context.json
 ```
 
@@ -356,9 +368,12 @@ Topic blocks give the retriever a fast lookup path — instead of scanning all c
 
 ```
 tenant_config/
-├── tenant_defaults.json           Global defaults for all malls
-├── al_nakheel_plaza_13.json       Mall of Arabia (Jeddah) overrides
-└── al_nakheel_plaza_28.json       Al Nakheel Plaza (Buraidah) overrides
+├── tenant_defaults.json            Global defaults for all malls
+├── al_nakheel_plaza_1.json         Al Ahsa Mall (Al Ahsa) overrides
+├── al_nakheel_plaza_10.json        The View Mall (Riyadh) overrides
+├── al_nakheel_plaza_13.json        Mall of Arabia (Jeddah) overrides
+├── al_nakheel_plaza_27.json        Al Nakheel Mall (Riyadh) overrides
+└── al_nakheel_plaza_28.json        Al Nakheel Plaza (Buraidah) overrides
 ```
 
 ### Schema (v2)
@@ -539,10 +554,13 @@ chroma/
 
 One Chroma collection per mall, named `cenomi_mall_{mall_id}`:
 
-| Collection | Stores | Dining | Services | Cinemas | Total |
-|---|---|---|---|---|---|
-| `cenomi_mall_al_nakheel_plaza_28` | 83 | 10 | 10 | 1 | **104** |
-| `cenomi_mall_al_nakheel_plaza_13` | 48 | 5 | 0 | 1 | **54** |
+| Collection | Mall | City | Total |
+|---|---|---|---|
+| `cenomi_mall_al_nakheel_plaza_28` | Al Nakheel Plaza | Buraidah | **104** |
+| `cenomi_mall_al_nakheel_plaza_13` | Mall of Arabia | Jeddah | **54** |
+| `cenomi_mall_al_nakheel_plaza_1` | Al Ahsa Mall | Al Ahsa | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_10` | The View Mall | Riyadh | *(see canonical)* |
+| `cenomi_mall_al_nakheel_plaza_27` | Al Nakheel Mall | Riyadh | *(see canonical)* |
 
 Each vector was created by `scripts/ingest_vectors.py` which builds a semantically-dense text blob per entity (name + category + tags + description) and embeds it with `text-embedding-3-small`. The collection uses cosine distance (`hnsw:space: cosine`).
 
@@ -581,10 +599,7 @@ The recommended workflow uses the two-step data pipeline scripts:
 
 ### Step 1 — Generate the raw mall JSON (ETL)
 
-```bash
-# From the workspace root — produces output_mall_<N>.json
-python transform_mall_data.py --mall-id <N>
-```
+The Cenomi data platform produces `output_mall_<N>.json` files (one per property group ID). Place it in the workspace root.
 
 ### Step 2 — Convert to canonical (deterministic, no API key)
 
@@ -598,23 +613,32 @@ python scripts/convert_to_canonical.py ../output_mall_<N>.json
 
 ```bash
 cd backend
-python scripts/synthesize_mall_data.py data/canonical/<mall_id>.json
-# Creates:
-#   data/semantic/<mall_id>.json
-#   data/playbooks/<mall_id>.json
-#   data/tenant_config/<mall_id>.json
-#   data/context_packs/<mall_id>_context.json
+# Full pipeline — all 5 intelligence layers at once
+python scripts/generate_mall_data.py ../output_mall_<N>.json
+
+# Or selective steps only
+python scripts/generate_mall_data.py ../output_mall_<N>.json --steps semantic playbooks
+
+# Dry-run (preview, no files written, no API calls)
+python scripts/generate_mall_data.py ../output_mall_<N>.json --dry-run
 ```
 
-Or use the combined pipeline script for all steps at once:
+This creates:
+- `data/semantic/<mall_id>.json`
+- `data/playbooks/<mall_id>.json`
+- `data/tenant_config/<mall_id>.json`
+- `data/context_packs/<mall_id>_context.json`
+
+### Step 4 — Ingest vectors
 
 ```bash
 cd backend
-python scripts/generate_mall_data.py ../output_mall_<N>.json
+python scripts/ingest_vectors.py --mall-id <mall_id>
+# or --all to regenerate all malls
 ```
 
-### Step 4 — Register the mall
+### Step 5 — Register the mall
 
-Add the new `mall_id` to `BACKEND_MALL_IDS` in `backend/.env`, and add the mall display entry in `frontend/src/lib/constants.ts`. Restart the backend.
+Add the new `mall_id` to `BACKEND_MALL_IDS` in `backend/.env`, and add the mall display entry in `frontend/src/lib/constants.ts` (`MALLS` array). Restart the backend.
 
 See [`docs/data-pipeline.md`](data-pipeline.md) for full documentation on source formats, transform logic, and pipeline options.

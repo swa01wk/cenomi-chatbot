@@ -100,10 +100,13 @@ _ACTIVITY_SUB_INTENTS: frozenset[str] = frozenset({
     "general_entertainment", "general_dining", "romantic_dining",
 })
 
-# Explicit gift signals in the user message — only if these are present should
-# gift playbooks be allowed to win on non-shopping queries.
-_EXPLICIT_GIFT_SIGNALS: frozenset[str] = frozenset({
-    "gift", "present", "buy", "purchase", "shop for",
+# Gift intent signals — checked via LLM-classified secondary_intents and
+# sub_intent before falling back to a lightweight keyword scan.
+_GIFT_SUB_INTENTS: frozenset[str] = frozenset({
+    "gift_recommendation",
+})
+_GIFT_SECONDARY_INTENTS: frozenset[str] = frozenset({
+    "gift_for",
 })
 
 # Child companion signals
@@ -334,8 +337,11 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
 
     # ── Guard: prevent gift playbooks from hijacking activity/date queries ──
     if matched_pb and matched_pb.playbook_id in _GIFT_ONLY_PLAYBOOKS:
-        msg_lower = msg.lower()
-        has_explicit_gift = any(sig in msg_lower for sig in _EXPLICIT_GIFT_SIGNALS)
+        secondary = set(intent.secondary_intents or [])
+        has_explicit_gift = (
+            intent.sub_intent in _GIFT_SUB_INTENTS
+            or bool(secondary & _GIFT_SECONDARY_INTENTS)
+        )
         is_activity_query = (
             intent.domain in _ACTIVITY_DOMAINS
             or intent.sub_intent in _ACTIVITY_SUB_INTENTS

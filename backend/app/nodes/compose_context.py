@@ -133,6 +133,31 @@ _BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
     "gifts", "fashion", "", "all_stores",
 })
 
+# Semantic tags that unambiguously mark a store as women-only.
+# Used to hard-exclude these stores when the shopping task target is male.
+_FEMALE_ONLY_SEMANTIC_TAGS: frozenset[str] = frozenset({
+    "women_focused", "lingerie_intimate", "abaya", "womenswear_only",
+})
+
+# Semantic tags that unambiguously mark a store as men-only.
+# Used to hard-exclude these stores when the shopping task target is female.
+_MALE_ONLY_SEMANTIC_TAGS: frozenset[str] = frozenset({
+    "men_focused", "menswear_only",
+})
+
+# target_person values that imply a male target — used to derive gender when
+# shopping_task.target_gender is not explicitly set.
+_MALE_TARGET_PERSONS: frozenset[str] = frozenset({
+    "men", "man", "male", "husband", "boyfriend", "father", "dad", "brother",
+    "son", "boy", "grandfather", "uncle",
+})
+
+# target_person values that imply a female target.
+_FEMALE_TARGET_PERSONS: frozenset[str] = frozenset({
+    "women", "woman", "female", "wife", "girlfriend", "mother", "mom", "sister",
+    "daughter", "girl", "grandmother", "aunt", "bride",
+})
+
 # Mapping from user-expressed excluded_domain labels → entity_type sets that
 # must be hard-removed from the entity list before ranking.
 # This is the enforcement gate between SceneMemory.excluded_domains and the
@@ -342,6 +367,24 @@ def _suppress_dining_for_shopping(entities: list[dict]) -> tuple[list[dict], int
     return (kept if len(kept) >= 2 else entities), suppressed
 
 
+def _resolve_effective_gender(task) -> str:
+    """
+    Derive an effective gender string ("male" | "female" | "") from a ShoppingTask.
+
+    Checks task.target_gender first, then falls back to inferring from
+    task.target_person using the known-person lookup tables.
+    """
+    gender = (getattr(task, "target_gender", "") or "").lower()
+    if gender in ("male", "female"):
+        return gender
+    person = (getattr(task, "target_person", "") or "").lower()
+    if person in _MALE_TARGET_PERSONS:
+        return "male"
+    if person in _FEMALE_TARGET_PERSONS:
+        return "female"
+    return ""
+
+
 def _suppress_off_topic_for_task(
     entities: list[dict], task,
 ) -> tuple[list[dict], int, list[str]]:
@@ -351,6 +394,11 @@ def _suppress_off_topic_for_task(
     For apparel/clothing tasks, also removes perfume, jewelry, beauty, home,
     electronics entities — these are irrelevant to a jacket / shoe / kids-wear search.
 
+    Additionally applies gender-based tag filtering: when the task targets a
+    male shopper, stores tagged "women_focused" / "lingerie_intimate" / "abaya"
+    are excluded; when targeting a female shopper, stores tagged "men_focused"
+    / "menswear_only" are excluded.
+
     Returns (kept_entities, suppressed_count, suppressed_names).
     """
     cat = (task.product_category or "").lower()
@@ -359,15 +407,32 @@ def _suppress_off_topic_for_task(
         if cat in _APPAREL_PRODUCT_CATEGORIES
         else _SUPPRESS_ENTITY_TYPES_FOR_SHOPPING
     )
+
+    # Determine which opposite-gender tag set to exclude (if any)
+    effective_gender = _resolve_effective_gender(task)
+    gender_exclude_tags: frozenset[str] = frozenset()
+    if effective_gender == "male":
+        gender_exclude_tags = _FEMALE_ONLY_SEMANTIC_TAGS
+    elif effective_gender == "female":
+        gender_exclude_tags = _MALE_ONLY_SEMANTIC_TAGS
+
     kept: list[dict] = []
     suppressed = 0
     suppressed_names: list[str] = []
     for e in entities:
+        # Filter by entity type (dining, perfume, etc.)
         if e.get("entity_type", "").lower() in suppress_set:
             suppressed += 1
             suppressed_names.append(e.get("name", ""))
-        else:
-            kept.append(e)
+            continue
+        # Filter by gender-opposite semantic tags
+        if gender_exclude_tags:
+            entity_tags = set(e.get("semantic_tags", []))
+            if entity_tags & gender_exclude_tags:
+                suppressed += 1
+                suppressed_names.append(e.get("name", ""))
+                continue
+        kept.append(e)
     # Never leave fewer than 2 entities after suppression
     if len(kept) < 2:
         return entities, 0, []

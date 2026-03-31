@@ -16,96 +16,6 @@ from __future__ import annotations
 from app.models.state import SceneMemory
 
 
-# ── Phrase-to-tag mappings ───────────────────────────────────────────────────
-
-# Ordered longest-first so more specific phrases take precedence
-_PHRASE_TAG_MAP: list[tuple[str, list[str]]] = [
-    # Child/family signals
-    ("with my kid", ["kid_friendly", "family_friendly", "parent_friendly", "family_visit"]),
-    ("with my kids", ["kid_friendly", "family_friendly", "parent_friendly", "family_visit"]),
-    ("with my child", ["kid_friendly", "family_friendly", "parent_friendly", "family_visit"]),
-    ("with my son", ["kid_friendly", "family_friendly", "parent_friendly", "family_visit"]),
-    ("with my daughter", ["kid_friendly", "family_friendly", "parent_friendly", "family_visit"]),
-    ("yr old", ["kid_friendly", "family_friendly", "parent_friendly", "child_present"]),
-    ("year old", ["kid_friendly", "family_friendly", "parent_friendly", "child_present"]),
-    ("toddler", ["kid_friendly", "family_friendly", "stroller_friendly", "child_present"]),
-    ("baby", ["kid_friendly", "family_friendly", "stroller_friendly", "child_present"]),
-    ("infant", ["kid_friendly", "family_friendly", "stroller_friendly", "child_present"]),
-    # Romantic / couple signals
-    ("with my girlfriend", ["couple_friendly", "romantic", "gift_friendly"]),
-    ("with my boyfriend", ["couple_friendly", "romantic", "gift_friendly"]),
-    ("with my wife", ["couple_friendly", "romantic", "gift_friendly"]),
-    ("with my husband", ["couple_friendly", "romantic", "gift_friendly"]),
-    ("date night", ["romantic", "couple_friendly", "special_occasion"]),
-    ("anniversary", ["romantic", "couple_friendly", "special_occasion", "gift_friendly"]),
-    ("romantic", ["romantic", "couple_friendly"]),
-    # Gift signals
-    ("quick gift", ["gift_friendly", "quick_stop"]),
-    ("last minute gift", ["gift_friendly", "quick_stop"]),
-    ("looking for a gift", ["gift_friendly"]),
-    ("buy a gift", ["gift_friendly", "shopping_mission"]),
-    ("gift for", ["gift_friendly"]),
-    ("present for", ["gift_friendly"]),
-    # Movie / cinema signals
-    ("before the movie", ["before_movie", "time_sensitive", "near_cinema"]),
-    ("before movie", ["before_movie", "time_sensitive", "near_cinema"]),
-    ("after the movie", ["after_movie", "near_cinema", "casual"]),
-    ("after movie", ["after_movie", "near_cinema", "casual"]),
-    ("going to cinema", ["near_cinema", "before_movie"]),
-    ("watching a movie", ["near_cinema"]),
-    ("catching a movie", ["near_cinema"]),
-    # Quick / fast signals
-    ("something quick", ["quick_stop", "low_commitment"]),
-    ("something quicker", ["quick_stop", "low_commitment"]),
-    ("not much time", ["quick_stop", "time_sensitive"]),
-    ("in a hurry", ["quick_stop", "time_sensitive"]),
-    ("quick stop", ["quick_stop", "low_commitment"]),
-    ("quick snack", ["quick_stop", "quick_bite"]),
-    ("quick bite", ["quick_stop", "quick_bite"]),
-    # Budget / price signals
-    ("not expensive", ["budget_sensitive", "value_shopping"]),
-    ("not too expensive", ["budget_sensitive", "value_shopping"]),
-    ("not too pricey", ["budget_sensitive", "value_shopping"]),
-    ("more affordable", ["budget_sensitive", "value_shopping"]),
-    ("something affordable", ["budget_sensitive", "value_shopping"]),
-    ("budget friendly", ["budget_sensitive", "value_shopping"]),
-    ("cheap", ["budget_sensitive", "value_shopping"]),
-    ("affordable", ["budget_sensitive"]),
-    # Proximity signals
-    ("closer to cinema", ["near_cinema"]),
-    ("closer to the cinema", ["near_cinema"]),
-    ("near the cinema", ["near_cinema"]),
-    ("near cinema", ["near_cinema"]),
-    ("close to cinema", ["near_cinema"]),
-    # Shopping intent
-    ("want to do shopping", ["shopping_mission", "practical_shopping"]),
-    ("want to shop", ["shopping_mission", "practical_shopping"]),
-    ("do some shopping", ["shopping_mission", "practical_shopping"]),
-    ("go shopping", ["shopping_mission", "practical_shopping"]),
-    ("shopping", ["shopping_mission"]),
-    # Solo signals
-    ("by myself", ["solo_friendly"]),
-    ("alone", ["solo_friendly"]),
-    ("on my own", ["solo_friendly"]),
-    # Browsing / casual
-    ("just browsing", ["easy_browse", "low_commitment", "casual"]),
-    ("just looking", ["easy_browse", "low_commitment", "casual"]),
-    ("explore", ["easy_browse", "casual"]),
-    # Self-care
-    ("treat myself", ["self_care", "reward_stop"]),
-    ("pamper", ["self_care"]),
-    ("spa", ["self_care"]),
-    ("beauty", ["self_care"]),
-    # Food-specific
-    ("grab a bite", ["quick_bite", "quick_stop"]),
-    ("grab lunch", ["quick_bite"]),
-    ("grab food", ["quick_bite"]),
-    ("hungry", ["dining"]),
-    ("snack", ["quick_bite", "quick_stop"]),
-    ("dessert", ["dessert_spot"]),
-    ("coffee", ["coffee_spot"]),
-]
-
 # Scene-field to tag mappings (based on scene state rather than message text)
 _SCENE_COMPANION_TAG_MAP: dict[str, list[str]] = {
     "child": ["kid_friendly", "family_friendly", "parent_friendly", "child_relief_anchor"],
@@ -179,67 +89,58 @@ def extract_semantic_signals(
     intent_sub_intent: str = "",
 ) -> list[str]:
     """
-    Extract semantic tags from a user message + scene context.
+    Derive semantic tags from structured scene/intent state.
 
-    Returns a deduplicated, ordered list of semantic tags that describe:
-    - Who the visitor is (family, couple, solo)
-    - What they want (shopping, dining, entertainment)
-    - How they want it (quick, affordable, near cinema)
-    - Why they're here (gift, occasion, casual)
+    Raw-text phrase matching has been removed — companions, occasions,
+    constraints, and other context signals are now extracted by the LLM
+    scene extractor and stored in SceneMemory.  This function maps that
+    structured state to semantic tags used by the playbook resolver and
+    ranking pipeline.
 
-    These tags are used by the playbook resolver and ranking pipeline.
+    Returns a deduplicated, ordered list of semantic tags.
     """
     tags: list[str] = []
-    msg_lower = msg.lower()
 
-    # ── 1. Text phrase matching ──────────────────────────────────────
-    for phrase, phrase_tags in _PHRASE_TAG_MAP:
-        if phrase in msg_lower:
-            for tag in phrase_tags:
-                if tag not in tags:
-                    tags.append(tag)
-
-    # ── 2. Scene companion signals ───────────────────────────────────
+    # ── 1. Scene companion signals ───────────────────────────────────
     for companion in scene.companions:
         companion_tags = _SCENE_COMPANION_TAG_MAP.get(companion, [])
         for tag in companion_tags:
             if tag not in tags:
                 tags.append(tag)
 
-    # Also check companion_details for child type
     for detail in scene.companion_details:
         if detail.get("type") == "child":
             for tag in _SCENE_COMPANION_TAG_MAP.get("child", []):
                 if tag not in tags:
                     tags.append(tag)
 
-    # ── 3. Scene occasion signals ────────────────────────────────────
+    # ── 2. Scene occasion signals ────────────────────────────────────
     if scene.occasion:
         occasion_tags = _SCENE_OCCASION_TAG_MAP.get(scene.occasion, [])
         for tag in occasion_tags:
             if tag not in tags:
                 tags.append(tag)
 
-    # ── 4. Scene constraint signals ──────────────────────────────────
+    # ── 3. Scene constraint signals ──────────────────────────────────
     for constraint in scene.visit_constraints:
         constraint_tags = _SCENE_CONSTRAINT_TAG_MAP.get(constraint, [])
         for tag in constraint_tags:
             if tag not in tags:
                 tags.append(tag)
 
-    # ── 5. Budget signals ────────────────────────────────────────────
+    # ── 4. Budget signals ────────────────────────────────────────────
     if scene.budget:
         budget_tags = _SCENE_BUDGET_TAG_MAP.get(scene.budget, [])
         for tag in budget_tags:
             if tag not in tags:
                 tags.append(tag)
 
-    # ── 6. Audience signals ──────────────────────────────────────────
+    # ── 5. Audience signals ──────────────────────────────────────────
     for aud_tag in scene.audience:
         if aud_tag not in tags:
             tags.append(aud_tag)
 
-    # ── 7. Intent domain/sub-intent signals ─────────────────────────
+    # ── 6. Intent domain/sub-intent signals ─────────────────────────
     if intent_domain:
         for tag in _INTENT_DOMAIN_TAG_MAP.get(intent_domain, []):
             if tag not in tags:
@@ -262,7 +163,6 @@ def build_semantic_match_explanations(
     Used for debug output.
     """
     explanations: list[str] = []
-    msg_lower = msg.lower()
 
     if "kid_friendly" in signals:
         if any(d.get("type") == "child" for d in scene.companion_details):
@@ -272,16 +172,13 @@ def build_semantic_match_explanations(
             )
             explanations.append(f"kid_friendly: child companion detected (age {age_info})")
         elif "child" in scene.companions:
-            explanations.append("kid_friendly: child companion mentioned")
-        elif "yr old" in msg_lower or "year old" in msg_lower:
-            explanations.append(f"kid_friendly: age phrase detected in message")
+            explanations.append("kid_friendly: child companion in scene")
 
     if "before_movie" in signals:
         explanations.append("before_movie: visitor mentioned going to the cinema first")
 
     if "budget_sensitive" in signals:
-        if any(p in msg_lower for p in ("not expensive", "affordable", "budget", "cheap")):
-            explanations.append("budget_sensitive: price constraint phrase detected")
+        explanations.append("budget_sensitive: budget constraint from scene/intent")
 
     if "near_cinema" in signals:
         explanations.append("near_cinema: visitor wants options close to the cinema")
@@ -296,9 +193,6 @@ def build_semantic_match_explanations(
         explanations.append("romantic: couple companion or occasion detected")
 
     if "gift_friendly" in signals:
-        if "gift" in msg_lower or "present" in msg_lower:
-            explanations.append("gift_friendly: visitor explicitly mentioned a gift")
-        else:
-            explanations.append("gift_friendly: inferred from partner companion context")
+        explanations.append("gift_friendly: gift context from scene/intent")
 
     return explanations
