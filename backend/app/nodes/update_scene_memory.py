@@ -76,6 +76,11 @@ Available scene fields you may return:
   "visit_type": "couple"|"family_visit"|"solo"|"group" or null,
   "budget": "budget"|"mid_range"|"premium"|"luxury" or null,
   "visit_constraints": ["quick"|"kid_friendly_required"|"near_cinema_preferred"|"budget_sensitive"|"light"|"healthy"|"affordable"],
+  NOTE on kid_friendly_required: add this constraint ONLY when the user explicitly mentions
+  children, kids, a child, son, daughter, baby, toddler, or uses child-related language
+  ("something for the kids", "kid-friendly", "child-safe"). NEVER infer kid_friendly_required
+  from dietary requests such as "veg options", "vegetarian food", "healthy choices", or
+  "light meals" — dietary preferences have NO implication about children being present.
   "scenario": "wedding_related"|"family_outing"|"date"|"gift_shopping"|"before_movie"|"quick_visit"|"birthday"|"first_visit"|"group_outing"|"solo_visit" or null,
   "user_role": "bridesmaid"|"bride"|"groom"|"maid_of_honor"|"best_man"|"mother_of_bride"|"father_of_bride"|"tourist"|"first_time_visitor" or null,
   "style_intent": ["elegant"|"occasion_wear"|"romantic"|"casual"|"practical"|"quick"|"luxury"|"premium"|"budget"|"fun"],
@@ -83,6 +88,7 @@ Available scene fields you may return:
   "visit_plan": ["dining"|"coffee"|"shopping"|"movie"|"entertainment"|"dessert"|"kids_activity"],
   "shopping_task": {
     "product_type": string or null,
+    "product_category": string or null,
     "target_person": string or null,
     "budget_preference": "affordable"|"mid_range"|"premium"|"luxury" or null,
     "use_case": "gift"|"personal"|"household" or null,
@@ -95,7 +101,20 @@ Available scene fields you may return:
 RULES:
 - companions: ADD to existing list unless this is a fresh_start or correction.
 - visit_constraints: ADD to existing list (constraints accumulate across turns).
-- excluded_domains: ADD to list when user explicitly negates a domain ("no food", "no shopping", "no cinema", "skip dining", "avoid coffee", "without food", "strictly no food"). Never remove previously excluded domains.
+- excluded_domains: ADD to list ONLY when the user uses explicit negation words to reject an entire domain:
+  "no food", "no shopping", "no cinema", "skip dining", "avoid coffee", "without food", "strictly no food",
+  "don't want restaurants", "no dining", "avoid shopping", "no movies".
+  NEVER set excluded_domains for:
+  • Requests for a specific menu item or food dish ("Can I get tiramisu?", "do you have sushi?",
+    "is there pizza here?") — these are dining REQUESTS, not domain rejections.
+  • Dietary preference requests ("veg options", "vegetarian", "healthy food") — these are filters,
+    not domain exclusions.
+  • Any question that is seeking information WITHIN a domain rather than rejecting it.
+  Examples:
+  • "Can I get Tiramisu Cake here?" → excluded_domains: []  (asking ABOUT food, not rejecting food)
+  • "Can you give me some veg options?" → excluded_domains: []  (dietary preference, not exclusion)
+  • "no food, just shopping" → excluded_domains: ["dining"]  (explicit domain rejection)
+  Never remove previously excluded domains.
 - inferred_scene_notes: always include 1-2 brief notes about the visitor's intent.
 - If the message is about someone else ("she's into", "for my wife"), set target_person.
 - "a bit special", "something nice", "treat ourselves" → budget=premium (implicit premium signal).
@@ -105,6 +124,21 @@ RULES:
 - user_role: set explicitly declared roles (bridesmaid, tourist, etc.). Do not override once set.
 - style_intent: extract from style signals ("elegant", "luxury", "casual", "budget", etc.).
 - visit_plan: extract from explicit multi-step plans ("shopping then coffee then a movie" → ["shopping", "coffee", "movie"]).
+- shopping_task.product_category: when product_type is set, also set product_category to the closest
+  canonical category from this list:
+  "outerwear" — jacket, coat, hoodie, warm clothes, winter wear, something warmer, puffer, blazer
+  "menswear"  — men's shirt, men's trousers, men's suit, something for a man
+  "womenswear" — women's dress, women's top, ladies clothes
+  "footwear"  — shoes, sneakers, boots, sandals, heels, trainers
+  "sportswear" — gym wear, activewear, workout clothes, running gear, sports clothes
+  "accessories" — bag, handbag, belt, wallet, sunglasses, watch (non-luxury), scarf
+  "jewelry"   — necklace, ring, bracelet, earrings, luxury watch
+  "fragrance" — perfume, cologne, oud, scent
+  "beauty"    — makeup, skincare, lipstick, foundation, moisturiser
+  "kids_fashion" — kids clothes, children's wear, toddler clothes
+  "toys"      — toy, game, puzzle, lego, kids game
+  "gifts"     — gift, present (when no specific product type is clear)
+  Leave product_category null when product_type is null or too vague to categorise.
 - PRONOUN DISAMBIGUATION (CRITICAL — read before setting target_person):
   "for him" / "for his" / "him" — resolve based on who is present:
     If companions include a child (son, child, kids) AND a female partner (girlfriend, wife):

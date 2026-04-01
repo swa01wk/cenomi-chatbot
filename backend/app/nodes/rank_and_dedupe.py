@@ -37,6 +37,7 @@ from app.models.state import (
     DebugEnrichment,
 )
 from app.nodes._tracing import traced_node
+from app.nodes.compose_context import _infer_product_category
 
 logger = logging.getLogger(__name__)
 
@@ -320,8 +321,8 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
             )
             # Apply shopping task boost / suppression if a specific product task is active
             if shopping_task and shopping_task.product_type and (
-                shopping_task.product_category or ""
-            ).lower() not in ("", "fashion", "gifts", "all_stores"):
+                _infer_product_category(shopping_task)
+            ) not in ("fashion", "gifts", "all_stores", ""):
                 score, was_suppressed = _apply_shopping_task_score_adjustment(
                     score, entity, shopping_task
                 )
@@ -378,7 +379,7 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         _skip_child_relief = (
             shopping_task is not None
             and bool(shopping_task.product_type)
-            and (shopping_task.product_category or "").lower() not in _BROAD_TASK_CATEGORIES
+            and _infer_product_category(shopping_task) not in _BROAD_TASK_CATEGORIES
         )
         if (has_child or "kid_friendly" in audience_set or "kid_friendly_required" in constraint_set) and not _skip_child_relief:
             capped = _ensure_child_relief_anchor(
@@ -497,8 +498,11 @@ _APPAREL_RANK_CATEGORIES: frozenset[str] = frozenset({
 })
 
 # Product categories that are too broad for strict task-scoped ranking
+# NOTE: empty string ("") intentionally excluded — when product_category is
+# empty, _infer_product_category infers it from product_type instead of
+# treating the task as too broad to scope.
 _BROAD_TASK_CATEGORIES: frozenset[str] = frozenset({
-    "gifts", "fashion", "", "all_stores",
+    "gifts", "fashion", "all_stores",
 })
 
 _KIDS_BOOST_TAGS: frozenset[str] = frozenset({
@@ -524,7 +528,7 @@ def _apply_shopping_task_score_adjustment(
     """
     entity_type = entity.get("entity_type", "").lower()
     entity_tags = set(entity.get("semantic_tags", []))
-    cat = (task.product_category or "").lower()
+    cat = _infer_product_category(task)
 
     # Determine which suppression set to use based on task category
     suppress_set = (

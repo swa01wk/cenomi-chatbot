@@ -130,8 +130,41 @@ _APPAREL_PRODUCT_CATEGORIES: frozenset[str] = frozenset({
 # Product categories broad enough that we DON'T apply entity suppression
 # (they could include gifting contexts where anything might be relevant)
 _BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
-    "gifts", "fashion", "", "all_stores",
+    "gifts", "fashion", "all_stores",
+    # NOTE: empty string ("") intentionally removed — an unset product_category
+    # no longer bypasses suppression; we infer from product_type instead.
 })
+
+# Fallback inference: maps common product_type strings (lowercased) to product_category.
+# Used when shopping_task.product_category is empty but product_type is set.
+# The LLM in update_scene_memory is the primary source; this is the safety net.
+_PRODUCT_TYPE_TO_CATEGORY: dict[str, str] = {
+    # Outerwear
+    "jacket": "outerwear", "coat": "outerwear", "hoodie": "outerwear",
+    "puffer": "outerwear", "puffer jacket": "outerwear", "blazer": "outerwear",
+    "overcoat": "outerwear", "warm clothes": "outerwear", "warmer": "outerwear",
+    "something warmer": "outerwear", "winter wear": "outerwear",
+    # Menswear / womenswear
+    "shirt": "menswear", "trousers": "menswear", "suit": "menswear",
+    "dress": "womenswear", "skirt": "womenswear", "abaya": "womenswear",
+    # Footwear
+    "shoes": "footwear", "sneakers": "footwear", "boots": "footwear",
+    "sandals": "footwear", "heels": "footwear", "trainers": "footwear",
+    # Sportswear
+    "sportswear": "sportswear", "gym wear": "sportswear", "activewear": "sportswear",
+    "workout clothes": "sportswear", "running gear": "sportswear",
+    # Accessories
+    "bag": "accessories", "handbag": "accessories", "wallet": "accessories",
+    "sunglasses": "accessories", "scarf": "accessories", "belt": "accessories",
+    # Jewelry
+    "necklace": "jewelry", "ring": "jewelry", "bracelet": "jewelry",
+    "earrings": "jewelry", "watch": "jewelry",
+    # Fragrance / beauty
+    "perfume": "fragrance", "cologne": "fragrance", "oud": "fragrance",
+    "makeup": "beauty", "skincare": "beauty", "lipstick": "beauty",
+    # Kids
+    "toy": "toys", "toys": "toys", "kids clothes": "kids_fashion",
+}
 
 # Semantic tags that unambiguously mark a store as women-only.
 # Used to hard-exclude these stores when the shopping task target is male.
@@ -258,6 +291,21 @@ _TOPIC_BLOCKS_ALWAYS_SUPPRESSED_FOR_SHOPPING: frozenset[str] = frozenset({
 })
 
 
+def _infer_product_category(task) -> str:
+    """
+    Return the effective product_category for a shopping task.
+
+    Uses task.product_category if set; otherwise falls back to inferring from
+    task.product_type using _PRODUCT_TYPE_TO_CATEGORY.  Returns "" when neither
+    yields a match, which still allows basic dining/entertainment suppression.
+    """
+    explicit = (task.product_category or "").lower().strip()
+    if explicit:
+        return explicit
+    pt = (task.product_type or "").lower().strip()
+    return _PRODUCT_TYPE_TO_CATEGORY.get(pt, "")
+
+
 def _resolve_shopping_task_category(scene) -> str | None:
     """
     If an active shopping_task has a specific product category, return the
@@ -267,7 +315,7 @@ def _resolve_shopping_task_category(scene) -> str | None:
     task = getattr(scene, "shopping_task", None)
     if not task or not task.product_type:
         return None
-    cat = (task.product_category or "").lower()
+    cat = _infer_product_category(task)
     if cat in _BROAD_SHOPPING_CATEGORIES:
         return None
     return _PRODUCT_CATEGORY_TO_ENTITY_CATEGORY.get(cat)
@@ -401,7 +449,7 @@ def _suppress_off_topic_for_task(
 
     Returns (kept_entities, suppressed_count, suppressed_names).
     """
-    cat = (task.product_category or "").lower()
+    cat = _infer_product_category(task)
     suppress_set = (
         _SUPPRESS_ENTITY_TYPES_FOR_APPAREL
         if cat in _APPAREL_PRODUCT_CATEGORIES
@@ -695,7 +743,7 @@ async def compose_context(state: ConciergeState) -> dict:
     _has_specific_task_for_topics = bool(
         _task_for_topics
         and _task_for_topics.product_type
-        and (_task_for_topics.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+        and _infer_product_category(_task_for_topics) not in _BROAD_SHOPPING_CATEGORIES
     )
 
     if intent.domain == "exploration":
@@ -923,20 +971,18 @@ async def compose_context(state: ConciergeState) -> dict:
     # not gated on the retrieval path, so semantic enrichment cannot reintroduce
     # off-topic entities after category retrieval scoped the primary list.
     task = getattr(scene, "shopping_task", None)
-    if (
-        task
-        and task.product_type
-        and (task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
-    ):
-        entities, _off_topic_suppressed, _off_topic_names_suppressed = (
-            _suppress_off_topic_for_task(entities, task)
-        )
-        if _off_topic_suppressed:
-            warnings.append(
-                f"Shopping task '{task.product_type}': suppressed "
-                f"{_off_topic_suppressed} off-topic entities"
-                + (f": {_off_topic_names_suppressed[:5]}" if _off_topic_names_suppressed else "")
+    if task and task.product_type:
+        _effective_cat = _infer_product_category(task)
+        if _effective_cat not in _BROAD_SHOPPING_CATEGORIES:
+            entities, _off_topic_suppressed, _off_topic_names_suppressed = (
+                _suppress_off_topic_for_task(entities, task)
             )
+            if _off_topic_suppressed:
+                warnings.append(
+                    f"Shopping task '{task.product_type}' (category='{_effective_cat}'): suppressed "
+                    f"{_off_topic_suppressed} off-topic entities"
+                    + (f": {_off_topic_names_suppressed[:5]}" if _off_topic_names_suppressed else "")
+                )
 
     # ── Domain exclusion hard filter ──────────────────────────────────
     # Applies user-expressed domain exclusions (e.g. "no food", "no dining")
@@ -1114,7 +1160,7 @@ async def compose_context(state: ConciergeState) -> dict:
             continuity_resolved_topic=_continuity_resolved_topic,
             shopping_task_active=bool(
                 task and task.product_type
-                and (task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+                and _infer_product_category(task) not in _BROAD_SHOPPING_CATEGORIES
             ),
         ),
         "dominant_task_scope": _dominant_task_scope,

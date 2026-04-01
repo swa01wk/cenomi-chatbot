@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-1f1cce2c5662",
+  "session_id": "cpx3-c22058a7",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-b11e4b7c5ff5",
+  "user_message": "i need to pray \u2014 where are the prayer rooms and when are the prayer times?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-03-31 20:08:20.604109"
+}

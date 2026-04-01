@@ -230,10 +230,38 @@ async def update_memory(state: ConciergeState) -> dict:
         )
         return result
 
-    # ── Domain exclusions — merge and persist across all turns ──────────
-    # excluded_domains are durable: they accumulate and are NEVER cleared,
-    # not even on topic_switch. Only an explicit reversal ("actually food is
-    # fine") should remove them, which is not yet implemented.
+    # ── Domain exclusions — merge and persist, with re-engagement clearance ─
+    # excluded_domains accumulate when a user explicitly rejects a domain.
+    # However, if the user subsequently issues a genuine request IN that same
+    # domain (e.g. "where can I eat?" after dining was excluded), the exclusion
+    # is a false-positive or the user has changed their mind — clear it so the
+    # pipeline can serve recommendations normally.
+    _DOMAIN_TO_EXCLUDED = {
+        "dining": "dining",
+        "shopping": "shopping",
+        "entertainment": "entertainment",
+        "cafe": "cafe",
+    }
+    _REENGAGEMENT_KINDS = frozenset({
+        "fresh_request", "refinement", "followup",
+        "topic_switch", "constraint_refinement",
+    })
+    current_intent_domain = state.intent.domain or ""
+    mapped_excluded = _DOMAIN_TO_EXCLUDED.get(current_intent_domain)
+    if (
+        mapped_excluded
+        and scene.excluded_domains
+        and mapped_excluded in scene.excluded_domains
+        and state.intent.message_kind in _REENGAGEMENT_KINDS
+    ):
+        scene.excluded_domains = [
+            d for d in scene.excluded_domains if d != mapped_excluded
+        ]
+        changes.append(
+            f"excluded_domains: removed '{mapped_excluded}' "
+            f"(user re-engaged with {current_intent_domain} domain)"
+        )
+
     if state.scene.excluded_domains:
         existing_excluded = set(scene.excluded_domains or [])
         existing_excluded.update(state.scene.excluded_domains)

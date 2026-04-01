@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from app.models.state import ConciergeState, DebugEnrichment, PlaybookResolution
 from app.nodes._tracing import traced_node
+from app.nodes.compose_context import _infer_product_category
 from app.runtime import get_mall_context
 from app.services.semantic_signals import (
     build_semantic_match_explanations,
@@ -62,8 +63,11 @@ _CONFIDENCE_THRESHOLD = 0.25
 
 # Product categories that are broad/generic enough that family override is still
 # appropriate (no specific product task has been created).
+# NOTE: empty string ("") intentionally excluded — _infer_product_category
+# infers category from product_type, so an empty product_category no longer
+# signals "too broad to scope".
 _BROAD_SHOPPING_CATEGORIES: frozenset[str] = frozenset({
-    "gifts", "fashion", "", "all_stores",
+    "gifts", "fashion", "all_stores",
 })
 
 # Playbooks that are appropriate for a specific product shopping task.
@@ -270,7 +274,7 @@ async def resolve_playbooks(state: ConciergeState) -> dict:
     has_specific_shopping_task = bool(
         _shopping_task
         and _shopping_task.product_type
-        and (_shopping_task.product_category or "").lower() not in _BROAD_SHOPPING_CATEGORIES
+        and _infer_product_category(_shopping_task) not in _BROAD_SHOPPING_CATEGORIES
     )
 
     is_shopping_domain = intent.domain == "shopping"

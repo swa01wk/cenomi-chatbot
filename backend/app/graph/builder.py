@@ -212,15 +212,15 @@ def build_concierge_graph(checkpointer=None):
             "generate_response": "generate_response",
         },
     )
-    graph.add_edge("fetch_exact_facts", "generate_response")
+    # NOTE: No static edge here — the conditional edge below handles both
+    # concierge (→ generate_response) and factual (→ compose_fact_response_context).
 
     # ── Factual pipeline ──────────────────────────────────────────────
     graph.add_edge("resolve_fact_scope", "fetch_exact_facts")
 
-    # Note: fetch_exact_facts is shared between both paths.
+    # fetch_exact_facts is shared between both paths.
     # In factual flow, it goes to compose_fact_response_context.
     # In concierge flow, it goes directly to generate_response.
-    # We use a conditional edge from fetch_exact_facts to handle this.
     graph.add_conditional_edges(
         "fetch_exact_facts",
         _route_after_fetch,

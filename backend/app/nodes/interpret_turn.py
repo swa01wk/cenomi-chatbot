@@ -298,6 +298,19 @@ DOMAINS AND SUB-INTENTS:
 - navigation: location_query
 - general: general_inquiry (greetings, off-topic, unclear)
 
+IMPORTANT — navigation/location_query vs services/service_info:
+"Where is X?" should be classified as navigation/location_query when X is a RESTAURANT, STORE,
+or known BRAND NAME — even if the name is misspelled.
+services/service_info is ONLY for mall-provided services (information desk, customer service,
+valet, prayer room, ATM, Wi-Fi, stroller rental, lost & found — NOT restaurants or shops).
+Examples:
+- "where is Herfy" → navigation/location_query (it's a restaurant)
+- "where is herfa" → navigation/location_query (misspelling of "Herfy" — still a restaurant)
+- "where is McDonald's" → navigation/location_query
+- "where is the food court" → navigation/location_query
+- "where is the information desk" → services/service_info
+- "where is customer service" → services/service_info
+
 IMPORTANT — offer_details:
 - ANY question about offers, deals, discounts, sales, or promotions → shopping/offer_details
 - "What offers are there?" → shopping/offer_details
@@ -407,6 +420,17 @@ MESSAGE KIND RULES:
   or any positive word (great, amazing, perfect, awesome, brilliant, wonderful, fantastic).
   NEVER classify as disengagement if the message is a genuine topic request (food, movies, shopping, etc.).
   Disengagement is ONLY for messages that actively dismiss, resign, express anger, or express frustration.
+  ABSOLUTE ACTION-REQUEST OVERRIDE: If the message contains an explicit desire, craving, or action
+  for food/dining, shopping, or entertainment — "I wanna eat", "I want to buy", "show me", "I'm hungry",
+  "give me food", "I need a jacket", "I want to watch" — it is ALWAYS dining/shopping/entertainment
+  with message_kind="fresh_request" (or "refinement" if it refines an active topic).
+  Even if the prior context involved frustration or disengagement, an explicit craving or mall-related
+  action request is NEVER disengagement. The user has re-engaged.
+  Examples of NEVER disengagement:
+  • "I wanna eat junk food, a lot of unhealthy junk food" → dining/general_dining, fresh_request
+  • "just give me food" (even after frustration) → dining/general_dining, fresh_request
+  • "I want to buy a jacket" (even after complaint turns) → shopping/general_shopping, fresh_request
+  • "something to eat" → dining/general_dining, fresh_request or refinement
 - topic_switch: user changes topic ("instead", "forget that", "something else").
   IMPORTANT: Also use topic_switch when the user's message clearly refers to a DIFFERENT
   domain from the active topic — even without explicit transition words.
@@ -414,6 +438,10 @@ MESSAGE KIND RULES:
   • Active topic = dining, user says "men's wear" → shopping/fashion_shopping, topic_switch
   • Active topic = shopping, user says "what's showing at the cinema?" → entertainment, topic_switch
   • Active topic = entertainment, user says "food?" → dining, topic_switch
+  • Active topic = dining, user says "I wanna buy a jacket" → shopping/general_shopping, topic_switch
+  • Active topic = dining, user says "I also wanna buy a jacket" → shopping/general_shopping, topic_switch
+  • Active topic = dining, user says "I want to watch horror movies" → entertainment/general_entertainment, topic_switch
+  • Active topic = dining, user says "I want to watch horror movies?" → entertainment/general_entertainment, topic_switch
   Key test: if the user's message domain is unambiguously different from the active_topic
   field, classify as topic_switch, not followup or refinement.
   SHORT-QUERY RULE: This domain-switch test applies to ALL query lengths, including 1-2 words.
@@ -464,33 +492,50 @@ MESSAGE KIND RULES:
   after a bot offer or question is ALWAYS followup, NOT acknowledgement — even if it has extra words.
   Key test: if the message gives no actionable information about what the visitor wants AND the
   bot did not just ask a yes/no question or make an offer, it is acknowledgement.
+  SUB-INTENT RULE: When message_kind="acknowledgement", ALWAYS set sub_intent="general_inquiry".
+  NEVER carry the sub_intent from the previous bot turn (e.g. "ok" after a dessert suggestion
+  must NOT become sub_intent="dessert_recommendation"). The user has not requested anything specific.
+  Examples:
+  • "ok" (after bot suggested desserts) → acknowledgement, sub_intent=general_inquiry
+  • "oki" → acknowledgement, sub_intent=general_inquiry
+  • "alright" → acknowledgement, sub_intent=general_inquiry
   CRITICAL DISTINCTION from disengagement: acknowledgement is for NEUTRAL vague fillers
   ("ok", "hmm", "alright") — messages with NO frustration or complaint.
   If the message contains ANY hint of complaint, frustration, or dismissal (e.g. "not working",
   "chatbot is not working", "useless", "pissed", "[X] is pissed"), classify as disengagement NOT acknowledgement.
   If the message mentions a person being angry or frustrated (e.g. "Binoo is pissed",
   "I'm pissed"), classify as disengagement, NOT acknowledgement or emotional.
-- emotional: visitor expresses a SAD, STRESSED, BORED, or OVERWHELMED state,
-  OR makes a request motivated by low mood rather than a specific need.
-  Examples:
+- emotional: visitor expresses any AFFECTIVE or MOOD state — sad, stressed, bored, overwhelmed,
+  OR happy, excited, content — that is NOT a specific mall request.
+  The key test is whether the message is primarily about how the visitor FEELS rather than what
+  they want to find or do.
+  Negative-mood examples:
   • "I'm sad", "I feel down", "I'm bored", "I'm stressed", "I'm tired"
   • "I'm sad, give me a plan that will make me happy" — emotional, even though it asks for a plan
   • "give me something fun", "I need cheering up", "cheer me up", "make me happy"
   • "I'm overwhelmed", "I don't know what to do", "nothing sounds good"
   • "my wife seems down", "my friend is stressed", "they're having a rough day"
+  Positive-mood examples (respond with warmth + open offer to help):
+  • "i am happy" → emotional (respond warmly: "That's great to hear! What can I help you with?")
+  • "I'm excited", "feeling great", "i'm in a good mood", "i am just happy about my life"
+  • "this is great", "i'm really happy today"
   NOTE: Anger/frustration expressions ("[name] is pissed", "I'm pissed", "I'm angry",
-  "I'm furious") → disengagement, NOT emotional. Emotional is ONLY for sadness/stress/boredom.
+  "I'm furious") → disengagement, NOT emotional. Emotional is for ANY mood expression that is
+  NOT anger/frustration — it covers the full range from sadness to joy.
   CRITICAL MOOD OVERRIDE (absolute — overrides all other rules):
     • Any message starting with "I'm sad", "I feel down", "I'm stressed", "I'm bored",
       "I'm tired", "I'm depressed", "I'm overwhelmed" → ALWAYS message_kind="emotional",
       even if the rest of the message contains "give me a plan", "suggest something", "what to do".
     • "cheer me up", "make me happy", "I need cheering up", "lift my spirits",
       "I'm having a bad day" → ALWAYS message_kind="emotional".
-  For all of the above, set domain=exploration, sub_intent=activity_suggestion.
+    • Pure mood declarations with no shopping/dining/entertainment request ("i am happy",
+      "I'm excited") → ALWAYS message_kind="emotional", NOT fresh_request or acknowledgement.
+  For all of the above, set domain=general, sub_intent=general_inquiry.
   "I'm sad, give me a plan that will make me happy" → emotional (NOT fresh_request or refinement).
   "cheer me up" → emotional (NOT fresh_request or exploration with fresh_request kind).
+  "i am happy" → emotional (NOT acknowledgement or fresh_request).
   Do NOT inherit a shopping/dining/entertainment domain from active_topic for emotional turns.
-  The bot responds with empathy + an open activity suggestion, not recycled recommendations.
+  The bot responds with warmth + an open offer to help, not recycled recommendations.
 - companion_correction: the user is explicitly correcting a FALSE assumption about their companions
   or personal situation that the bot has been making.
   Examples: "I don't have kids", "I'm alone", "I am by myself", "no kids", "I came alone",
@@ -582,6 +627,20 @@ These bypass the full pipeline and receive compassionate, context-appropriate re
 - "What offers are going on in Zara?" → shopping/offer_details
 - "Any deals or discounts?" → shopping/offer_details
 - "What perfume stores do you have?" → shopping/perfume_shopping
+- "I wanna eat junk food, a lot of unhealthy junk food" → dining/general_dining, message_kind="fresh_request" (explicit craving — NEVER disengagement)
+- "just give me food" → dining/general_dining, message_kind="fresh_request"
+- "i am happy" → general/general_inquiry, message_kind="emotional" (positive mood — NOT acknowledgement)
+- "i am just happy about my life" → general/general_inquiry, message_kind="emotional"
+- "I want to watch horror movies?" → entertainment/general_entertainment, message_kind="topic_switch" (domain switch from dining)
+- "i also wanna buy a jacket" → shopping/general_shopping, message_kind="topic_switch" (domain switch from dining)
+- "something warmer" (after jacket suggestions) → shopping/general_shopping, message_kind="constraint_refinement"
+- "ok" (after bot suggested desserts, no offer/question from bot) → general/general_inquiry, message_kind="acknowledgement", sub_intent="general_inquiry"
+- "oki" → general/general_inquiry, message_kind="acknowledgement", sub_intent="general_inquiry"
+- "What movie genre do I have?" → entertainment/movie_showtime, message_kind="clarification_request", response_mode="clarification_request" (bot cannot see the visitor's booking; should ask what genre they want)
+- "what genre is my movie" → entertainment/movie_showtime, message_kind="clarification_request", response_mode="clarification_request"
+- "where is herfy" → navigation/location_query, flow_type="factual" (restaurant location — NOT service_info)
+- "where is herfa" → navigation/location_query, flow_type="factual" (misspelling of Herfy — still a restaurant)
+- "where is McDonald's" → navigation/location_query, flow_type="factual"
 """
 
 
