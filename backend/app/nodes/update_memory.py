@@ -84,6 +84,21 @@ async def update_memory(state: ConciergeState) -> dict:
         scene.recent_mood = ""
         scene.mood_turn_index = 0
 
+    # ── Companion context from LLM classifier — always-on extraction ─────
+    # The LLM classifier populates intent.companion_context for any turn,
+    # including factual-flow turns where update_scene_memory is not called.
+    # Merging here ensures companions are captured regardless of flow path.
+    if state.intent.companion_context:
+        existing_companions = set(scene.companions)
+        for companion in state.intent.companion_context:
+            if companion and companion not in existing_companions:
+                scene.companions.append(companion)
+                existing_companions.add(companion)
+                changes.append(f"+companion:{companion}(llm_intent)")
+        if any(c.startswith("+companion:") for c in changes):
+            scene.scene_acknowledged = False
+            changes.append("scene_acknowledged reset (companions updated via llm_intent)")
+
     # ── Hybrid intent memory — persist across turns for follow-up ─────
     # primary_intent and secondary_filters are stored so the NEXT turn
     # can inherit them (e.g. "anything with the kid?" follow-up to movies).
@@ -149,6 +164,7 @@ async def update_memory(state: ConciergeState) -> dict:
     # ── Topic lock — maintain active topic coherence across turns ─────
     # The topic_lock is derived from the active_primary_intent and active_topic.
     # Rules:
+    #   - LLM releases_topic_lock signal → clear/update lock (highest priority)
     #   - New factual intent → lock to that intent (high confidence)
     #   - Follow-up / refinement → strengthen existing lock
     #   - Topic switch → clear the lock or reset to new topic
@@ -163,6 +179,56 @@ async def update_memory(state: ConciergeState) -> dict:
     message_kind = state.intent.message_kind
     new_primary = state.primary_intent or ""
 
+    # Domain-mismatch auto-release: for fresh_request turns, if the new primary intent
+    # belongs to a different domain than the active topic lock, the lock is stale and
+    # should be overridden — even when the LLM classifier did not explicitly fire
+    # releases_topic_lock. This is domain-coherence logic, not keyword matching.
+    _LOCK_TO_DOMAIN = {
+        "movie_lookup": "entertainment",
+        "dining_recommendation": "dining",
+        "shopping_recommendation": "shopping",
+        "gift_shopping": "shopping",
+        "discovery": "exploration",
+        "mall_overview": "mall_info",
+        "location_lookup": "navigation",
+        "service_lookup": "services",
+    }
+    # For fresh_request turns, use the raw LLM classifier intent (state.intent.primary_intent)
+    # as the tiebreaker for the auto-release check.  When route_flow applies a domain lock
+    # it overwrites state.primary_intent back to the locked value (e.g. movie_lookup), so
+    # the standard new_primary would see no domain change and never fire the release.
+    # The LLM's own intent output is not overridden by route_flow and correctly reflects
+    # the user's actual new domain.
+    _auto_release_primary = (
+        state.intent.primary_intent or new_primary
+        if message_kind == "fresh_request"
+        else new_primary
+    )
+    _auto_release = (
+        message_kind == "fresh_request"
+        and scene.topic_lock
+        and _auto_release_primary in _LOCKABLE_INTENTS
+        and _LOCK_TO_DOMAIN.get(scene.topic_lock) != _LOCK_TO_DOMAIN.get(_auto_release_primary)
+    )
+    if _auto_release:
+        old_lock = scene.topic_lock
+        scene.topic_lock = _auto_release_primary
+        scene.topic_lock_confidence = 0.8
+        changes.append(
+            f"topic_lock auto-shifted (fresh_request domain change): {old_lock} → {_auto_release_primary}"
+        )
+
+    # LLM signal: the classifier explicitly flagged that this turn releases the topic lock.
+    # This fires when the user genuinely moves to a different domain even without using
+    # explicit "topic_switch" phrasing (e.g. "something quick for lunch" after movie_lookup).
+    if state.intent.releases_topic_lock and scene.topic_lock and not _auto_release:
+        old_lock = scene.topic_lock
+        scene.topic_lock = new_primary if new_primary in _LOCKABLE_INTENTS else ""
+        scene.topic_lock_confidence = 0.7 if scene.topic_lock else 0.0
+        changes.append(
+            f"topic_lock released (LLM signal): {old_lock} → {scene.topic_lock or 'none'}"
+        )
+
     if message_kind == "topic_switch":
         # Clear topic lock on explicit topic switch
         old_lock = scene.topic_lock
@@ -170,11 +236,25 @@ async def update_memory(state: ConciergeState) -> dict:
         scene.topic_lock_confidence = 0.7 if scene.topic_lock else 0.0
         changes.append(f"topic_lock reset: {old_lock} → {scene.topic_lock}")
     elif message_kind == "context_setting":
-        # Context setting doesn't change the topic lock — it enriches the scene
-        pass
+        # Usually context-setting enriches the scene without changing the lock.
+        # Exception: when the domain has clearly shifted (e.g. movie_lookup →
+        # dining_recommendation via "let's grab dinner"), update the lock so
+        # subsequent turns are not incorrectly routed to the stale topic.
+        if (new_primary and new_primary in _LOCKABLE_INTENTS
+                and scene.topic_lock and scene.topic_lock != new_primary):
+            scene.topic_lock = new_primary
+            scene.topic_lock_confidence = 0.7
+            changes.append(f"topic_lock updated (context_setting domain shift): {new_primary}")
     elif message_kind in ("followup", "refinement", "constraint_refinement"):
-        # Follow-up strengthens existing lock
-        if scene.topic_lock:
+        # Follow-up strengthens existing lock, but only if the domain hasn't changed.
+        # When the user shifts to a different lockable topic (e.g. "I also wanna buy a
+        # jacket" classified as followup after dining), update the lock rather than
+        # reinforcing the stale one.
+        if new_primary and new_primary in _LOCKABLE_INTENTS and scene.topic_lock != new_primary:
+            scene.topic_lock = new_primary
+            scene.topic_lock_confidence = 0.75
+            changes.append(f"topic_lock updated (domain shift in followup): {new_primary} conf=0.75")
+        elif scene.topic_lock and scene.topic_lock == new_primary:
             scene.topic_lock_confidence = min(1.0, scene.topic_lock_confidence + 0.1)
             changes.append(f"topic_lock reinforced: {scene.topic_lock} conf={scene.topic_lock_confidence:.2f}")
     elif new_primary and new_primary in _LOCKABLE_INTENTS:
@@ -262,11 +342,59 @@ async def update_memory(state: ConciergeState) -> dict:
             f"(user re-engaged with {current_intent_domain} domain)"
         )
 
-    if state.scene.excluded_domains:
-        existing_excluded = set(scene.excluded_domains or [])
-        existing_excluded.update(state.scene.excluded_domains)
-        scene.excluded_domains = list(existing_excluded)
-        changes.append(f"excluded_domains={scene.excluded_domains}")
+    # Extra clearance for hybrid_plan turns: when the response mode is hybrid_plan
+    # the user is explicitly requesting cross-domain content (e.g. "food AND movies").
+    # Any stale domain exclusions that overlap the hybrid request are false-positives
+    # — clear them all so both domains are served.
+    if state.response_plan.response_mode == "hybrid_plan" and scene.excluded_domains:
+        # hybrid_plan always spans dining + entertainment; clear both
+        _hybrid_cleared = [
+            d for d in scene.excluded_domains
+            if d in ("dining", "entertainment", "cafe")
+        ]
+        if _hybrid_cleared:
+            scene.excluded_domains = [
+                d for d in scene.excluded_domains if d not in _hybrid_cleared
+            ]
+            changes.append(
+                f"excluded_domains: cleared {_hybrid_cleared} for hybrid_plan "
+                "(cross-domain request overrides prior domain exclusion)"
+            )
+
+    # Extra clearance for explicit topic_switch turns: when the user switches to a
+    # domain that was previously excluded AND the intent domain mapping didn't fire
+    # above (e.g. intent.domain="exploration" for an activity query in a dining session),
+    # use the response_mode secondary signal to detect and clear the stale exclusion.
+    if (
+        state.intent.message_kind == "topic_switch"
+        and scene.excluded_domains
+        and current_intent_domain
+    ):
+        # Also check sub-intent and secondary intents for domain signals the main
+        # domain field doesn't capture
+        _SECONDARY_DOMAIN_MAP: dict[str, str] = {
+            "activity_suggestion": "entertainment",
+            "open_exploration": "entertainment",
+            "general_entertainment": "entertainment",
+            "movie_showtime": "entertainment",
+            "general_dining": "dining",
+            "family_dining": "dining",
+            "quick_bite": "dining",
+            "cafe_recommendation": "cafe",
+        }
+        sub_excluded = _SECONDARY_DOMAIN_MAP.get(state.intent.sub_intent or "")
+        if (
+            sub_excluded
+            and sub_excluded in scene.excluded_domains
+            and sub_excluded != mapped_excluded  # not already cleared above
+        ):
+            scene.excluded_domains = [
+                d for d in scene.excluded_domains if d != sub_excluded
+            ]
+            changes.append(
+                f"excluded_domains: removed '{sub_excluded}' "
+                f"(topic_switch via sub_intent={state.intent.sub_intent!r})"
+            )
 
     # ── Concierge-flow memory updates (existing logic) ────────────────
     if state.intent.domain and state.intent.domain != "general":

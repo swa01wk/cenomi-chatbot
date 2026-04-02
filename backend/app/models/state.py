@@ -153,6 +153,24 @@ class InterpretedIntent(BaseModel):
     #       "where is Starbucks" → "Starbucks").
     # Avoids regex-based post-processing for entity extraction.
     entity_query: str = ""
+    # ── LLM-driven pipeline signals ──────────────────────────────────────────
+    # retrieval_needed: LLM determines whether this turn requires a live data
+    #   lookup. Consumed by decide_retrieval as the primary signal, replacing
+    #   the static _SKIP_INTENTS / _EXACT_INTENTS binary.
+    retrieval_needed: bool = False
+    # companion_context: companions the LLM detected in THIS turn's message.
+    #   Populated on any flow type (including factual), so companions aren't
+    #   lost when a domain lock routes away from update_scene_memory.
+    #   e.g. ["child"] for "with kid", ["wife"] for "buying for my wife"
+    companion_context: list[str] = Field(default_factory=list)
+    # releases_topic_lock: LLM signals that this turn genuinely moves to a
+    #   different domain from the active topic_lock, even when message_kind is
+    #   not "topic_switch". Consumed by update_memory to clear scene.topic_lock.
+    releases_topic_lock: bool = False
+    # is_gibberish: promoted from raw_signals to a typed field so choose_strategy
+    #   can differentiate unintelligible input from intelligible off-topic requests
+    #   when both resolve to graceful_recovery response mode.
+    is_gibberish: bool = False
 
 
 # ═══════════════════════════════════════════════════════════════════════════

@@ -57,6 +57,27 @@ async def fetch_exact_facts(state: ConciergeState) -> dict:
             results.append({"target": target, "status": "error", "data": None})
             trace_warnings.append(f"Retrieval for '{target}' failed: {exc}")
 
+    # Brand-absence sentinel: when a brand_availability query returns no entity location,
+    # inject a brand_absent result with the mall store catalog so the response LLM can
+    # proactively suggest similar stores that ARE present in the mall.
+    fact_scope = getattr(state, "fact_scope", "") or ""
+    if fact_scope == "brand_availability" and fact_query_entity:
+        for r in results:
+            if r.get("target") == "entity_location" and r.get("status") == "not_found":
+                mall_catalog = _lookup_mall_store_catalog(mall_ctx)
+                r["data"] = {
+                    "type": "brand_absent",
+                    "queried_brand": fact_query_entity,
+                    "confirmed_absent": True,
+                    "mall_stores": mall_catalog,
+                }
+                r["status"] = "found"
+                trace_warnings.append(
+                    f"Brand '{fact_query_entity}' not found; injecting brand_absent sentinel "
+                    f"with {len(mall_catalog)} alternative stores"
+                )
+                break
+
     retrieval.retrieval_results = results
 
     # In factual flow: only inject facts, NOT semantic entities, into context.
@@ -65,7 +86,15 @@ async def fetch_exact_facts(state: ConciergeState) -> dict:
     if not is_factual:
         for r in results:
             if r.get("data"):
-                context.selected_entities.append(r["data"])
+                data = r["data"]
+                # Enforce entity_cap from choose_strategy to avoid bloating LLM context.
+                # The * 3 multiplier gives the response LLM headroom to select the most
+                # relevant subset from a pre-filtered pool rather than the entire catalog.
+                if "entities" in data:
+                    cap = getattr(state.response_plan, "entity_cap", None)
+                    if cap:
+                        data = {**data, "entities": data["entities"][: cap * 3]}
+                context.selected_entities.append(data)
 
     found_count = sum(1 for r in results if r.get("data"))
     flow_tag = "factual" if is_factual else "concierge"
@@ -92,6 +121,10 @@ def _fetch_target(target: str, msg: str, mall_ctx) -> dict[str, Any] | None:
         "facility_location": _lookup_facility_location,
         "parking_details": _lookup_parking,
         "service_details": _lookup_service_details,
+        # Concierge recommendation targets — entity lists for downstream LLM composition
+        "dining_list": _lookup_dining_list,
+        "store_list": _lookup_store_list,
+        "entertainment_list": _lookup_entertainment_list,
     }
     handler = handlers.get(target)
     if handler:
@@ -321,3 +354,124 @@ def _lookup_service_details(msg: str, mall_ctx) -> dict | None:
                 "pricing_notes": svc.pricing_notes,
             }
     return None
+
+
+def _lookup_dining_list(msg: str, mall_ctx) -> dict | None:
+    """Return the full canonical dining entity list for concierge recommendation turns."""
+    canonical = mall_ctx._builder._canonical
+    dining = canonical.get("dining", [])
+    if not dining:
+        return None
+    return {
+        "type": "dining_list",
+        "entities": [
+            {
+                "entity_id": e.entity_id,
+                "name": e.name,
+                "cuisine_type": getattr(e, "cuisine_type", None),
+                "dining_type": getattr(e, "dining_type", None),
+                "description": getattr(e, "description", None),
+                "price_range": getattr(e, "price_range", None),
+                "tags": getattr(e, "tags", []),
+                "location": e.location.model_dump() if e.location else {},
+                "operating_hours": e.operating_hours.model_dump() if e.operating_hours else {},
+            }
+            for e in dining
+        ],
+    }
+
+
+def _lookup_store_list(msg: str, mall_ctx) -> dict | None:
+    """Return the full canonical store entity list for concierge recommendation turns."""
+    canonical = mall_ctx._builder._canonical
+    stores = canonical.get("stores", [])
+    if not stores:
+        return None
+    return {
+        "type": "store_list",
+        "entities": [
+            {
+                "entity_id": e.entity_id,
+                "name": e.name,
+                "store_category": getattr(e, "store_category", None),
+                "brand": getattr(e, "brand", None),
+                "description": getattr(e, "description", None),
+                "price_range": getattr(e, "price_range", None),
+                "tags": getattr(e, "tags", []),
+                "location": e.location.model_dump() if e.location else {},
+                "operating_hours": e.operating_hours.model_dump() if e.operating_hours else {},
+            }
+            for e in stores
+        ],
+    }
+
+
+def _lookup_mall_store_catalog(mall_ctx, cap: int = 25) -> list[dict]:
+    """
+    Return a capped store catalog for brand-absence alternative suggestions.
+
+    When a queried brand is absent from the mall, passing the full store list
+    (stripped to name, category, price_range, floor) lets the response LLM use
+    its own knowledge to suggest the most relevant alternatives — no separate
+    categorisation call needed.
+    """
+    stores: list[dict] = []
+    for etype in ("stores", "dining"):
+        canonical = mall_ctx._builder._canonical.get(etype, [])
+        for entity in canonical:
+            stores.append({
+                "name": entity.name,
+                "category": (
+                    getattr(entity, "category", "")
+                    or getattr(entity, "cuisine_type", "")
+                    or ""
+                ),
+                "price_range": getattr(entity, "price_range", "") or "",
+                "floor": entity.location.floor if entity.location else "",
+            })
+            if len(stores) >= cap:
+                break
+        if len(stores) >= cap:
+            break
+    return stores[:cap]
+
+
+def _lookup_entertainment_list(msg: str, mall_ctx) -> dict | None:
+    """Return canonical entertainment/activity entities for concierge recommendation turns."""
+    canonical = mall_ctx._builder._canonical
+    cinemas = canonical.get("cinemas", [])
+    services = canonical.get("services", [])
+    _ENTERTAINMENT_CATEGORIES = {
+        "cinema", "entertainment", "bowling", "arcade", "gaming",
+        "activity", "kids_play", "trampoline", "ice_skating",
+    }
+    activity_services = [
+        s for s in services
+        if any(cat in getattr(s, "service_category", "").lower()
+               for cat in _ENTERTAINMENT_CATEGORIES)
+    ]
+    entities = []
+    for e in cinemas:
+        entities.append({
+            "entity_id": e.entity_id,
+            "name": e.name,
+            "entity_type": "cinema",
+            "description": getattr(e, "description", None),
+            "tags": getattr(e, "tags", []),
+            "location": e.location.model_dump() if e.location else {},
+            "operating_hours": e.operating_hours.model_dump() if e.operating_hours else {},
+        })
+    for e in activity_services:
+        entities.append({
+            "entity_id": e.entity_id,
+            "name": e.name,
+            "entity_type": "activity",
+            "service_category": getattr(e, "service_category", None),
+            "description": getattr(e, "description", None),
+            "tags": getattr(e, "tags", []),
+            "location": e.location.model_dump() if e.location else {},
+            "operating_hours": e.operating_hours.model_dump() if e.operating_hours else {},
+        })
+    if not entities:
+        return None
+    return {"type": "entertainment_list", "entities": entities}

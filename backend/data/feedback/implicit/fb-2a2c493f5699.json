@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-2a2c493f5699",
+  "session_id": "sc3-9c772881",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-acb096f97511",
+  "user_message": "i want to buy a gift",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-04-02 18:18:22.187022"
+}

@@ -1,0 +1,1620 @@
+{
+  "generated_at": "2026-04-01 11:16:38 UTC",
+  "judge_model": "gpt-4o-mini",
+  "session_meta": {
+    "session_id": "session-598af00703f04421",
+    "tenant_id": "al_nakheel_plaza_28",
+    "mall_id": "al_nakheel_plaza_28",
+    "exported_at": "2026-04-01T08:44:56.100Z",
+    "total_messages": 34
+  },
+  "summary": {
+    "turns": 17,
+    "passing": 0,
+    "failing": 17,
+    "errors": 25,
+    "warnings": 64,
+    "infos": 0
+  },
+  "turns": [
+    {
+      "turn_index": 1,
+      "user_message": "Anything quick before movie?",
+      "assistant_snippet": "For a quick bite before the film, the Food Court is your simplest route.\n\n- McDonald’s — Ground Floor, Food Court. Fast,",
+      "intent": "dining/quick_bite",
+      "intent_confidence": 0.9,
+      "message_kind": "fresh_request",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 5,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 16975.61,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 2,
+      "user_message": "Can you give me some veg options?",
+      "assistant_snippet": "For a quick vegetarian-leaning stop before the film, these are the most relevant choices in the mall:\n\n- **McDonald’s** ",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 10,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 13802.97,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 3,
+      "user_message": "Dessert please",
+      "assistant_snippet": "For a quick dessert stop before the movie, Baskin Robbins is the cleanest match — easy, fast, and child-friendly.\n\n- **B",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 5,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 9689.01,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 4,
+      "user_message": "Can I get Tiramisu Cake here",
+      "assistant_snippet": "For something quick before the movie, your best bet for tiramisu-style dessert is **CINNABON** on the **Ground Floor, Fo",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 8196.86,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The user asked about tiramisu, which is a food request, but dining is excluded."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval needed is false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval needed is true and there are no sources despite retrieval results."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge but the user made a factual request."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking for a specific food item."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency exceeds 8000ms."
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The user asked about tiramisu, which is a food request, but dining is excluded."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval needed is false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval needed is true and there are no sources despite retrieval results."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge but the user made a factual request."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking for a specific food item."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency exceeds 8000ms."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 5,
+      "user_message": "What movie genre do I have?",
+      "assistant_snippet": "For something quicker before the film, the most straightforward answer is **Muvi Cinema on the Cinema Level** for your m",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.8,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6756.91,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The intent_domain is set to dining, but the user is asking about movie genre."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval needed is false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval fired but no sources were surfaced."
+        },
+        "response_mode": {
+          "result": "warning",
+          "reason": "Response mode is guided_recommendation but the user query is about movie genre."
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge, but the query is factual."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking about a dining-related context."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The intent_domain is set to dining, but the user is asking about movie genre."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval needed is false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval fired but no sources were surfaced."
+        },
+        {
+          "check": "response_mode",
+          "severity": "warning",
+          "message": "Response mode is guided_recommendation but the user query is about movie genre."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge, but the query is factual."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking about a dining-related context."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 6,
+      "user_message": "I want to watch horror movies?",
+      "assistant_snippet": "For a horror screening, **Muvi Cinema on the Cinema Level** is the right place to head first — it is the mall’s cinema a",
+      "intent": "entertainment/general_entertainment",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 13263.63,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "stale exclusion: entertainment requested but dining is excluded."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "stale topic_lock still showing dining after a topic switch."
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "stale exclusion: entertainment requested but dining is excluded."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "stale topic_lock still showing dining after a topic switch."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 7,
+      "user_message": "i am happy",
+      "assistant_snippet": "Still on entertainment? Tell me what you need and I'll narrow it right down.",
+      "intent": "general/general_inquiry",
+      "intent_confidence": 0.9,
+      "message_kind": "acknowledgement",
+      "response_mode": "context_acknowledgement",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 5333.46,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "pass"
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge but the user message is an acknowledgement, which may not require concierge routing."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded, but the user may still have an interest in it."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "Topic lock is set to dining_recommendation, which is inconsistent with the general inquiry."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge but the user message is an acknowledgement, which may not require concierge routing."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded, but the user may still have an interest in it."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "Topic lock is set to dining_recommendation, which is inconsistent with the general inquiry."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 8,
+      "user_message": "No, i am just happy about my life",
+      "assistant_snippet": "Sorry about that — I should have moved on from dining sooner. What would you like to do instead?",
+      "intent": "general/general_inquiry",
+      "intent_confidence": 0.9,
+      "message_kind": "disengagement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 3200.84,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "warning",
+          "reason": "response_mode seems inconsistent with the intent type."
+        },
+        "flow_routing": {
+          "result": "error",
+          "reason": "disengagement is a MISFIRE due to user expressing happiness."
+        },
+        "disengagement_misfire": {
+          "result": "error",
+          "reason": "disengagement is only correct when the user is expressing frustration."
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "stale exclusion: dining is excluded but the user just explicitly re-requested it."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "stale topic_lock still showing the old domain after a topic switch."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "response_mode",
+          "severity": "warning",
+          "message": "response_mode seems inconsistent with the intent type."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "error",
+          "message": "disengagement is a MISFIRE due to user expressing happiness."
+        },
+        {
+          "check": "disengagement_misfire",
+          "severity": "error",
+          "message": "disengagement is only correct when the user is expressing frustration."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "stale exclusion: dining is excluded but the user just explicitly re-requested it."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "stale topic_lock still showing the old domain after a topic switch."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 9,
+      "user_message": "I wanna eat junnk food, a lot of unhealthy junk food'",
+      "assistant_snippet": "Sorry about that — I should have moved on from dining sooner. What would you like to do instead?",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.8,
+      "message_kind": "disengagement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 3287.59,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "error",
+          "reason": "target_person is empty while the user expressed a desire to eat."
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "error",
+          "reason": "disengagement is a misfire as the user expressed a clear food craving."
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "flow_type contradicts the clear query nature."
+        },
+        "disengagement_misfire": {
+          "result": "error",
+          "reason": "disengagement is inappropriate as the user made a specific food request."
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded after the user asked about food."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "target_person",
+          "severity": "error",
+          "message": "target_person is empty while the user expressed a desire to eat."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "response_mode",
+          "severity": "error",
+          "message": "disengagement is a misfire as the user expressed a clear food craving."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "flow_type contradicts the clear query nature."
+        },
+        {
+          "check": "disengagement_misfire",
+          "severity": "error",
+          "message": "disengagement is inappropriate as the user made a specific food request."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded after the user asked about food."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 10,
+      "user_message": "where can i eat?",
+      "assistant_snippet": "For something quick and budget-conscious, the **Food Court on the Ground Floor** is the most practical place to start — ",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 7287.59,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for recommendation responses."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "flow_type contradicts the clear query nature."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "stale exclusion: a domain is excluded but the user just explicitly re-requested it."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for recommendation responses."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "flow_type contradicts the clear query nature."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "stale exclusion: a domain is excluded but the user just explicitly re-requested it."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 11,
+      "user_message": "where is herfa'",
+      "assistant_snippet": "For family-friendly dining, I don’t have a precise location for Herfy in the facts available to me right now.\n\nWhat I ca",
+      "intent": "services/service_info",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "direct_factual",
+      "confidence_level": "high",
+      "flow_type": "factual",
+      "chosen_strategy": "route_hint",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6020.66,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The intent domain is 'services' but the user is asking for a location related to dining."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval was needed but no results were returned."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval was needed but no sources were surfaced."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking about a dining location."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "Topic lock is set to dining_recommendation but the flow type is factual."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The intent domain is 'services' but the user is asking for a location related to dining."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval was needed but no results were returned."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval was needed but no sources were surfaced."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking about a dining location."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "Topic lock is set to dining_recommendation but the flow type is factual."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 12,
+      "user_message": "ok",
+      "assistant_snippet": "Which other place in the Food Court would you like assistance with?",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 5985.37,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The intent domain is dining, but the excluded_domains list includes dining."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval needed is false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval fired with results, but no sources were surfaced."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge, but the user message is unclear."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking for dining assistance."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The intent domain is dining, but the excluded_domains list includes dining."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval needed is false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval fired with results, but no sources were surfaced."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge, but the user message is unclear."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking for dining assistance."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 13,
+      "user_message": "give me options",
+      "assistant_snippet": "For something quicker and still suitable before the movie, **McDonald’s** in the **Ground Floor Food Court** is the simp",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6478.73,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for recommendation responses."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "error",
+          "reason": "flow_type contradicts the clear query nature."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "spurious exclusion: dining excluded after the user asked for options."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms > 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for recommendation responses."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "error",
+          "message": "flow_type contradicts the clear query nature."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "spurious exclusion: dining excluded after the user asked for options."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms > 8000."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 14,
+      "user_message": "oki",
+      "assistant_snippet": "For something quick before the movie, the **Food Court on the Ground Floor** remains the easiest starting point.\n\n- **Mc",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6000.31,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The intent domain is dining, but the user message is too vague to confirm a specific request."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval needed is false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval fired but no sources were surfaced."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge, but the user message lacks a clear request."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking for food options."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The intent domain is dining, but the user message is too vague to confirm a specific request."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval needed is false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval fired but no sources were surfaced."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge, but the user message lacks a clear request."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking for food options."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 15,
+      "user_message": "ok",
+      "assistant_snippet": "Which would you prefer — McDonald’s, Herfy, Kudu, or Popeyes?",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6701.68,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The intent domain is dining, but it is excluded."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Retrieval needed is false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "Retrieval fired but no sources surfaced."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "Flow type is concierge but the domain is excluded."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded despite the user asking for a dining recommendation."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency is over 8000ms."
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The intent domain is dining, but it is excluded."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Retrieval needed is false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "Retrieval fired but no sources surfaced."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "Flow type is concierge but the domain is excluded."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded despite the user asking for a dining recommendation."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency is over 8000ms."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 16,
+      "user_message": "i also wanna buy a jacket",
+      "assistant_snippet": "For a quick, budget-sensitive jacket search, start with **Max** and **Red Tag** on the **Ground Floor, Main Gallery** — ",
+      "intent": "shopping/general_shopping",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 67,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6072.62,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "error",
+          "reason": "target_person is empty while the user expressed a desire to buy a jacket."
+        },
+        "target_gender": {
+          "result": "error",
+          "reason": "target_gender is empty while the user expressed a desire to buy a jacket."
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for a recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "error",
+          "reason": "disengagement is not appropriate as the user expressed a desire to buy."
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded while the user is making a shopping request."
+        },
+        "entity_pipeline": {
+          "result": "warning",
+          "reason": "entity count of 67 is excessive for a specific product task."
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "topic_lock is still set to dining_recommendation after a shopping request."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "target_person",
+          "severity": "error",
+          "message": "target_person is empty while the user expressed a desire to buy a jacket."
+        },
+        {
+          "check": "target_gender",
+          "severity": "error",
+          "message": "target_gender is empty while the user expressed a desire to buy a jacket."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for a recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "disengagement_misfire",
+          "severity": "error",
+          "message": "disengagement is not appropriate as the user expressed a desire to buy."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded while the user is making a shopping request."
+        },
+        {
+          "check": "entity_pipeline",
+          "severity": "warning",
+          "message": "entity count of 67 is excessive for a specific product task."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "topic_lock is still set to dining_recommendation after a shopping request."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 17,
+      "user_message": "something warmer",
+      "assistant_snippet": "For something warmer, start with **Max** and **Centrepoint** — both are strong value stops for a jacket and easy to cove",
+      "intent": "shopping/general_shopping",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 67,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 8709.76,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "retrieval_needed=false for recommendation response."
+        },
+        "source_attribution": {
+          "result": "error",
+          "reason": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "flow_type contradicts the clear query nature."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "stale exclusion: a domain is excluded but the user just explicitly re-requested it."
+        },
+        "entity_pipeline": {
+          "result": "warning",
+          "reason": "entity count is high for a specific product task."
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "stale topic_lock still showing the old domain after a topic switch."
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "total_latency_ms exceeds 8000."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "retrieval_needed=false for recommendation response."
+        },
+        {
+          "check": "source_attribution",
+          "severity": "error",
+          "message": "retrieval_needed=true AND retrieval_results>0 AND sources_count=0."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "flow_type contradicts the clear query nature."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "stale exclusion: a domain is excluded but the user just explicitly re-requested it."
+        },
+        {
+          "check": "entity_pipeline",
+          "severity": "warning",
+          "message": "entity count is high for a specific product task."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "stale topic_lock still showing the old domain after a topic switch."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "total_latency_ms exceeds 8000."
+        }
+      ],
+      "pass": false
+    }
+  ]
+}

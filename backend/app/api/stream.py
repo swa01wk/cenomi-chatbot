@@ -257,11 +257,20 @@ async def _generate_stream(
         cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
         suggestions = get_cta_suggestions(cta_type)
 
+    sources: list[dict] = []
+    if result is not None:
+        sources = [
+            {"target": r["target"], "data": r["data"]}
+            for r in result.retrieval.retrieval_results
+            if r.get("status") == "found" and r.get("data")
+        ]
+
     done_data = {
         "session_id": session_id,
         "session_state": session_summary.model_dump() if session_summary else {},
         "debug": debug_payload.model_dump() if debug_payload else None,
         "suggestions": suggestions,
+        "sources": sources,
     }
     yield _sse("done", json.dumps(done_data, default=str))
 

@@ -1,0 +1,1349 @@
+{
+  "generated_at": "2026-04-01 11:15:23 UTC",
+  "judge_model": "gpt-5.4-mini",
+  "session_meta": {
+    "session_id": "session-598af00703f04421",
+    "tenant_id": "al_nakheel_plaza_28",
+    "mall_id": "al_nakheel_plaza_28",
+    "exported_at": "2026-04-01T08:44:56.100Z",
+    "total_messages": 34
+  },
+  "summary": {
+    "turns": 17,
+    "passing": 1,
+    "failing": 16,
+    "errors": 2,
+    "warnings": 42,
+    "infos": 0
+  },
+  "turns": [
+    {
+      "turn_index": 1,
+      "user_message": "Anything quick before movie?",
+      "assistant_snippet": "For a quick bite before the film, the Food Court is your simplest route.\n\n- McDonald’s — Ground Floor, Food Court. Fast,",
+      "intent": "dining/quick_bite",
+      "intent_confidence": 0.9,
+      "message_kind": "fresh_request",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 5,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 16975.61,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining usually should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Node trace is complete and has no duplicates, but total latency is very high at 16975.61ms (>8000ms)."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining usually should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Node trace is complete and has no duplicates, but total latency is very high at 16975.61ms (>8000ms)."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 2,
+      "user_message": "Can you give me some veg options?",
+      "assistant_snippet": "For a quick vegetarian-leaning stop before the film, these are the most relevant choices in the mall:\n\n- **McDonald’s** ",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 10,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 13802.97,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency exceeds 8000ms (13802.97ms), indicating a slow turn."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency exceeds 8000ms (13802.97ms), indicating a slow turn."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 3,
+      "user_message": "Dessert please",
+      "assistant_snippet": "For a quick dessert stop before the movie, Baskin Robbins is the cleanest match — easy, fast, and child-friendly.\n\n- **B",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 5,
+      "excluded_domains": [],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 9689.01,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency exceeds 8000ms (9689.01ms), indicating a slow turn."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency exceeds 8000ms (9689.01ms), indicating a slow turn."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 4,
+      "user_message": "Can I get Tiramisu Cake here",
+      "assistant_snippet": "For something quick before the movie, your best bet for tiramisu-style dessert is **CINNABON** on the **Ground Floor, Fo",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 8196.86,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining was excluded even though the user explicitly asked about a dessert item within dining; this is a stale/spurious exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency exceeds 8000 ms, indicating a slow turn."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining was excluded even though the user explicitly asked about a dessert item within dining; this is a stale/spurious exclusion."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency exceeds 8000 ms, indicating a slow turn."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 5,
+      "user_message": "What movie genre do I have?",
+      "assistant_snippet": "For something quicker before the film, the most straightforward answer is **Muvi Cinema on the Cinema Level** for your m",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.8,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6756.91,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "User asked about a movie genre, which is entertainment-related, but intent_domain was classified as dining."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Response mode is guided_recommendation in an entertainment-like query, so retrieval would generally be expected, but retrieval_needed was false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "warning",
+          "reason": "guided_recommendation is not consistent with the apparent factual entertainment query 'What movie genre do I have?'."
+        },
+        "flow_routing": {
+          "result": "warning",
+          "reason": "This looks like a factual/clarification query about a movie genre, but flow_type was routed as concierge recommendation."
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining was excluded even though the user did not ask a dining question; the exclusion appears stale or irrelevant to the current turn."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "User asked about a movie genre, which is entertainment-related, but intent_domain was classified as dining."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Response mode is guided_recommendation in an entertainment-like query, so retrieval would generally be expected, but retrieval_needed was false."
+        },
+        {
+          "check": "response_mode",
+          "severity": "warning",
+          "message": "guided_recommendation is not consistent with the apparent factual entertainment query 'What movie genre do I have?'."
+        },
+        {
+          "check": "flow_routing",
+          "severity": "warning",
+          "message": "This looks like a factual/clarification query about a movie genre, but flow_type was routed as concierge recommendation."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining was excluded even though the user did not ask a dining question; the exclusion appears stale or irrelevant to the current turn."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 6,
+      "user_message": "I want to watch horror movies?",
+      "assistant_snippet": "For a horror screening, **Muvi Cinema on the Cinema Level** is the right place to head first — it is the mall’s cinema a",
+      "intent": "entertainment/general_entertainment",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 13263.63,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "For an entertainment recommendation request with guided_recommendation, retrieval would generally be expected; retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded, but the user is asking about entertainment; the exclusion may be stale or unnecessary for this turn."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "topic_lock remains dining_recommendation despite the current entertainment intent, indicating stale topic state after a topic shift/refinement."
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Node trace is complete and has no duplicates, but total_latency_ms is 13263.63, which exceeds the 8000ms slow-turn threshold."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "For an entertainment recommendation request with guided_recommendation, retrieval would generally be expected; retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded, but the user is asking about entertainment; the exclusion may be stale or unnecessary for this turn."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "topic_lock remains dining_recommendation despite the current entertainment intent, indicating stale topic state after a topic shift/refinement."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Node trace is complete and has no duplicates, but total_latency_ms is 13263.63, which exceeds the 8000ms slow-turn threshold."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 7,
+      "user_message": "i am happy",
+      "assistant_snippet": "Still on entertainment? Tell me what you need and I'll narrow it right down.",
+      "intent": "general/general_inquiry",
+      "intent_confidence": 0.9,
+      "message_kind": "acknowledgement",
+      "response_mode": "context_acknowledgement",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 5333.46,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "pass"
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded even though the current user message is a generic acknowledgement, but the assistant response references entertainment and the topic_lock remains on dining_recommendation, suggesting stale context/exclusion handling rather than a clear user-driven exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "message_kind is acknowledgement, so topic_lock is not strictly required to update; however it remains on dining_recommendation while the assistant asks about entertainment, indicating stale topic context."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded even though the current user message is a generic acknowledgement, but the assistant response references entertainment and the topic_lock remains on dining_recommendation, suggesting stale context/exclusion handling rather than a clear user-driven exclusion."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "message_kind is acknowledgement, so topic_lock is not strictly required to update; however it remains on dining_recommendation while the assistant asks about entertainment, indicating stale topic context."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 8,
+      "user_message": "No, i am just happy about my life",
+      "assistant_snippet": "Sorry about that — I should have moved on from dining sooner. What would you like to do instead?",
+      "intent": "general/general_inquiry",
+      "intent_confidence": 0.9,
+      "message_kind": "disengagement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 3200.84,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "pass"
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [],
+      "pass": true
+    },
+    {
+      "turn_index": 9,
+      "user_message": "I wanna eat junnk food, a lot of unhealthy junk food'",
+      "assistant_snippet": "Sorry about that — I should have moved on from dining sooner. What would you like to do instead?",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.8,
+      "message_kind": "disengagement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 3287.59,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "pass"
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "error",
+          "reason": "The user explicitly expressed a food craving/purchase-like dining intent ('I wanna eat... junk food'), so labeling the turn as disengagement is incorrect."
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining was excluded even though the user explicitly requested a dining-related item in this turn; this is a stale/spurious exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "disengagement_misfire",
+          "severity": "error",
+          "message": "The user explicitly expressed a food craving/purchase-like dining intent ('I wanna eat... junk food'), so labeling the turn as disengagement is incorrect."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining was excluded even though the user explicitly requested a dining-related item in this turn; this is a stale/spurious exclusion."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 10,
+      "user_message": "where can i eat?",
+      "assistant_snippet": "For something quick and budget-conscious, the **Food Court on the Ground Floor** is the most practical place to start — ",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 7287.59,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "This is a dining recommendation response, so retrieval would generally be expected, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded even though the user explicitly asked where they can eat in this turn; this is a stale/spurious exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "This is a dining recommendation response, so retrieval would generally be expected, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded even though the user explicitly asked where they can eat in this turn; this is a stale/spurious exclusion."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 11,
+      "user_message": "where is herfa'",
+      "assistant_snippet": "For family-friendly dining, I don’t have a precise location for Herfy in the facts available to me right now.\n\nWhat I ca",
+      "intent": "services/service_info",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "direct_factual",
+      "confidence_level": "high",
+      "flow_type": "factual",
+      "chosen_strategy": "route_hint",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6020.66,
+      "check_results": {
+        "intent_routing": {
+          "result": "warning",
+          "reason": "The user is asking a location question ('where is Herfy'), which should typically route to navigation/factual location handling, but the pipeline classified it as services."
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "This is a factual location query and retrieval was needed, but retrieval_results is 0, indicating a likely retrieval miss."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded even though the user is asking about Herfy, which is a food-related venue/location query and not a rejection of dining."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "The node trace contains duplicate node names: generate_response appears twice, update_memory appears twice, and emit_debug_payload appears twice."
+        }
+      },
+      "issues": [
+        {
+          "check": "intent_routing",
+          "severity": "warning",
+          "message": "The user is asking a location question ('where is Herfy'), which should typically route to navigation/factual location handling, but the pipeline classified it as services."
+        },
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "This is a factual location query and retrieval was needed, but retrieval_results is 0, indicating a likely retrieval miss."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded even though the user is asking about Herfy, which is a food-related venue/location query and not a rejection of dining."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "The node trace contains duplicate node names: generate_response appears twice, update_memory appears twice, and emit_debug_payload appears twice."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 12,
+      "user_message": "ok",
+      "assistant_snippet": "Which other place in the Food Court would you like assistance with?",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 5985.37,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded even though the current turn is still a dining follow-up; pipeline warning also shows dining entities were removed."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded even though the current turn is still a dining follow-up; pipeline warning also shows dining entities were removed."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 13,
+      "user_message": "give me options",
+      "assistant_snippet": "For something quicker and still suitable before the movie, **McDonald’s** in the **Ground Floor Food Court** is the simp",
+      "intent": "dining/general_dining",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6478.73,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining was excluded even though the user is asking for dining options; this looks like a stale/spurious exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in dining typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining was excluded even though the user is asking for dining options; this looks like a stale/spurious exclusion."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 14,
+      "user_message": "oki",
+      "assistant_snippet": "For something quick before the movie, the **Food Court on the Ground Floor** remains the easiest starting point.\n\n- **Mc",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6000.31,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "guided_recommendation in dining generally should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded even though the current turn is a dining follow-up request, so the exclusion appears stale/spurious."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "guided_recommendation in dining generally should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded even though the current turn is a dining follow-up request, so the exclusion appears stale/spurious."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 15,
+      "user_message": "ok",
+      "assistant_snippet": "Which would you prefer — McDonald’s, Herfy, Kudu, or Popeyes?",
+      "intent": "dining/dessert_recommendation",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "concise_shortlist",
+      "entity_count": 0,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6701.68,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "pass"
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "error",
+          "reason": "The user message 'ok' is a minimal follow-up, not an explicit food craving, purchase intent, or entertainment request. Disengagement is not applicable here, so this check does not indicate a misfire."
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "Dining is excluded even though the current turn is in a dining recommendation flow and the assistant is offering dining options. This looks like a stale or spurious exclusion."
+        },
+        "entity_pipeline": {
+          "result": "pass"
+        },
+        "topic_lock": {
+          "result": "pass"
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "disengagement_misfire",
+          "severity": "error",
+          "message": "The user message 'ok' is a minimal follow-up, not an explicit food craving, purchase intent, or entertainment request. Disengagement is not applicable here, so this check does not indicate a misfire."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "Dining is excluded even though the current turn is in a dining recommendation flow and the assistant is offering dining options. This looks like a stale or spurious exclusion."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 16,
+      "user_message": "i also wanna buy a jacket",
+      "assistant_snippet": "For a quick, budget-sensitive jacket search, start with **Max** and **Red Tag** on the **Ground Floor, Main Gallery** — ",
+      "intent": "shopping/general_shopping",
+      "intent_confidence": 0.9,
+      "message_kind": "followup",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 67,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 6072.62,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Shopping recommendation response with guided_recommendation should generally trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "warning",
+          "reason": "dining is excluded even though the user is making a shopping request; this looks like a stale or irrelevant exclusion for the current turn."
+        },
+        "entity_pipeline": {
+          "result": "warning",
+          "reason": "entity_count is very high (67) for a specific shopping task, indicating likely entity bloat."
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "topic_lock remains dining_recommendation despite a shopping intent, suggesting stale topic locking after a topic change."
+        },
+        "node_trace": {
+          "result": "pass"
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Shopping recommendation response with guided_recommendation should generally trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "excluded_domains",
+          "severity": "warning",
+          "message": "dining is excluded even though the user is making a shopping request; this looks like a stale or irrelevant exclusion for the current turn."
+        },
+        {
+          "check": "entity_pipeline",
+          "severity": "warning",
+          "message": "entity_count is very high (67) for a specific shopping task, indicating likely entity bloat."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "topic_lock remains dining_recommendation despite a shopping intent, suggesting stale topic locking after a topic change."
+        }
+      ],
+      "pass": false
+    },
+    {
+      "turn_index": 17,
+      "user_message": "something warmer",
+      "assistant_snippet": "For something warmer, start with **Max** and **Centrepoint** — both are strong value stops for a jacket and easy to cove",
+      "intent": "shopping/general_shopping",
+      "intent_confidence": 0.9,
+      "message_kind": "refinement",
+      "response_mode": "guided_recommendation",
+      "confidence_level": "high",
+      "flow_type": "concierge",
+      "chosen_strategy": "guided_plan",
+      "entity_count": 67,
+      "excluded_domains": [
+        "dining"
+      ],
+      "topic_lock": "dining_recommendation",
+      "node_count": 12,
+      "total_latency_ms": 8709.76,
+      "check_results": {
+        "intent_routing": {
+          "result": "pass"
+        },
+        "companion_extract": {
+          "result": "pass"
+        },
+        "target_person": {
+          "result": "pass"
+        },
+        "target_gender": {
+          "result": "pass"
+        },
+        "retrieval_gap": {
+          "result": "warning",
+          "reason": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+        },
+        "source_attribution": {
+          "result": "pass"
+        },
+        "response_mode": {
+          "result": "pass"
+        },
+        "flow_routing": {
+          "result": "pass"
+        },
+        "disengagement_misfire": {
+          "result": "pass"
+        },
+        "excluded_domains": {
+          "result": "pass"
+        },
+        "entity_pipeline": {
+          "result": "warning",
+          "reason": "Entity count is very high (67), which is bloat for a shopping refinement turn."
+        },
+        "topic_lock": {
+          "result": "warning",
+          "reason": "message_kind is refinement but topic_lock remains dining_recommendation, which is stale for the new shopping intent."
+        },
+        "node_trace": {
+          "result": "warning",
+          "reason": "Total latency exceeds 8000ms (8709.76ms), indicating a slow turn."
+        }
+      },
+      "issues": [
+        {
+          "check": "retrieval_gap",
+          "severity": "warning",
+          "message": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+        },
+        {
+          "check": "entity_pipeline",
+          "severity": "warning",
+          "message": "Entity count is very high (67), which is bloat for a shopping refinement turn."
+        },
+        {
+          "check": "topic_lock",
+          "severity": "warning",
+          "message": "message_kind is refinement but topic_lock remains dining_recommendation, which is stale for the new shopping intent."
+        },
+        {
+          "check": "node_trace",
+          "severity": "warning",
+          "message": "Total latency exceeds 8000ms (8709.76ms), indicating a slow turn."
+        }
+      ],
+      "pass": false
+    }
+  ]
+}

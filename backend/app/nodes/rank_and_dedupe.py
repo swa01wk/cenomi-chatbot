@@ -266,9 +266,10 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
         is_context_setting = state.intent.message_kind == "context_setting"
 
         # For category-level retrieval, preserve the full list (don't cap) —
-        # UNLESS a specific target person is set (e.g. "men", "son", "girlfriend").
-        # When the guest has specified who they are shopping for, the result
-        # should be a focused shortlist, not a full category dump.
+        # UNLESS a specific target person OR a specific product type is set.
+        # When the guest has specified who they are shopping for, or a specific
+        # product type was extracted (e.g. "jackets"), the result should be a
+        # focused shortlist, not a full category dump that bloats LLM context.
         is_category_retrieval = any(
             e.get("source", "").startswith("category/") for e in deduped
         )
@@ -276,7 +277,10 @@ async def rank_and_dedupe(state: ConciergeState) -> dict:
             shopping_task
             and getattr(shopping_task, "target_person", "") not in ("", "self")
         )
-        if is_category_retrieval and not has_specific_target:
+        has_specific_product = bool(
+            shopping_task and getattr(shopping_task, "product_type", "")
+        )
+        if is_category_retrieval and not has_specific_target and not has_specific_product:
             entity_cap = len(deduped)
 
         # Determine whether an active audience requirement is in force.

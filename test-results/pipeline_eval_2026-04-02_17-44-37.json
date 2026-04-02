@@ -1,0 +1,798 @@
+{
+  "generated_at": "2026-04-02 17:44:37 UTC",
+  "run_id": "1cd8f807",
+  "judge_model": "gpt-5.4-mini",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 10,
+    "http_pass": 10,
+    "http_fail": 0,
+    "http_errors": 0,
+    "pipeline_pass": 7,
+    "pipeline_fail": 3,
+    "pipeline_skip": 0,
+    "total_errors": 0,
+    "total_warnings": 4,
+    "avg_latency_ms": 6258
+  },
+  "smoke_results": [
+    {
+      "id": "S-01",
+      "session_key": "smoke-1",
+      "query": "what movies are showing?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6577,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 1,
+        "user_message": "what movies are showing?",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 1.0,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 6285.28,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-02",
+      "session_key": "smoke-2",
+      "query": "i am here with my kids",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6781,
+      "reply_snippet": "For a family outing with your kids, the smoothest plan is to begin with Fun Time in the Entertainment Wing for play, the",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 2,
+        "user_message": "i am here with my kids",
+        "assistant_snippet": "For a family outing with your kids, the smoothest plan is to begin with Fun Time in the Entertainment Wing for play, the",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 4,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6765.89,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-03",
+      "session_key": "smoke-2",
+      "query": "where can we eat?",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6673,
+      "reply_snippet": "For a family meal with your kids, the best dining options are all on the Ground Floor and easy to reach.\n\n- **McDonald's",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 3,
+        "user_message": "where can we eat?",
+        "assistant_snippet": "For a family meal with your kids, the best dining options are all on the Ground Floor and easy to reach.\n\n- **McDonald's",
+        "intent": "dining/family_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6653.96,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-04",
+      "session_key": "smoke-4",
+      "query": "food and movies",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "medium",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 10025,
+      "reply_snippet": "Muvi Cinema on the Cinema Level is the best place to anchor a food-and-movies outing: it gives you the entertainment fir",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 4,
+        "user_message": "food and movies",
+        "assistant_snippet": "Muvi Cinema on the Cinema Level is the best place to anchor a food-and-movies outing: it gives you the entertainment fir",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "shortlist_recommendation",
+        "entity_count": 3,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 9999.31,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (9999.31ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (9999.31ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-05",
+      "session_key": "smoke-5",
+      "query": "anything interesting here?",
+      "expected_mode": "best_effort_shortlist",
+      "expected_conf": "medium",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 8045,
+      "reply_snippet": "For a relaxed outing with a bit of variety, I would start with **Fun Time** on the **Ground Floor, Entertainment Wing** ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 5,
+        "user_message": "anything interesting here?",
+        "assistant_snippet": "For a relaxed outing with a bit of variety, I would start with **Fun Time** on the **Ground Floor, Entertainment Wing** ",
+        "intent": "exploration/open_exploration",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 8019.02,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Response mode is recommendation-like (best_effort_shortlist/guided_plan) in an exploration/concierge turn, so retrieval would generally be expected; retrieval_needed=false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000 ms (8019.02 ms), which is slow and worth reviewing."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Response mode is recommendation-like (best_effort_shortlist/guided_plan) in an exploration/concierge turn, so retrieval would generally be expected; retrieval_needed=false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000 ms (8019.02 ms), which is slow and worth reviewing."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-06",
+      "session_key": "smoke-6",
+      "query": "where is the prayer room?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 3194,
+      "reply_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 6,
+        "user_message": "where is the prayer room?",
+        "assistant_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+        "intent": "services/prayer_room",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "route_hint",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "service_lookup",
+        "node_count": 9,
+        "total_latency_ms": 3176.35,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-07",
+      "session_key": "smoke-7",
+      "query": "i am a bridesmaid",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 7491,
+      "reply_snippet": "For a bridesmaid, a polished route through the Ground Floor Main Gallery is the most fitting starting point for elegant ",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 7,
+        "user_message": "i am a bridesmaid",
+        "assistant_snippet": "For a bridesmaid, a polished route through the Ground Floor Main Gallery is the most fitting starting point for elegant ",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 7458.99,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-08",
+      "session_key": "smoke-8",
+      "query": "something nice for my son",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6750,
+      "reply_snippet": "For your son, the strongest starting points are in the Main Gallery and Kiosk Row — each offers an easy gift stop with s",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 8,
+        "user_message": "something nice for my son",
+        "assistant_snippet": "For your son, the strongest starting points are in the Main Gallery and Kiosk Row — each offers an easy gift stop with s",
+        "intent": "shopping/gift_recommendation",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6730.73,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-09",
+      "session_key": "smoke-9",
+      "query": "asdf",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 2946,
+      "reply_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 9,
+        "user_message": "asdf",
+        "assistant_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 2927.42,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-10a",
+      "session_key": "smoke-1",
+      "query": "with kid",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4095,
+      "reply_snippet": "For a child, the most relevant family-oriented stop in this mall is **Fun Time** in the **Entertainment Wing on the Grou",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 10,
+        "user_message": "with kid",
+        "assistant_snippet": "For a child, the most relevant family-oriented stop in this mall is **Fun Time** in the **Entertainment Wing on the Grou",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "direct_lookup",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4078.52,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "warning",
+            "reason": "User said \"with kid\" but companions list is empty; the child companion should be captured."
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "companion_extract",
+            "severity": "warning",
+            "message": "User said \"with kid\" but companions list is empty; the child companion should be captured."
+          }
+        ],
+        "pass": false
+      }
+    }
+  ],
+  "scenario_results": []
+}

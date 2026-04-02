@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-197993459913",
+  "session_id": "smoke-8-9c772881",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-55f232651321",
+  "user_message": "something nice for my son",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+my\\s+(?:son|daughter|kid|child|baby|toddler)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-04-02 18:16:01.455003"
+}

@@ -25,6 +25,7 @@ from app.models.state import (
     PlaybookResolution,
     ResponsePlan,
     SceneMemory,
+    ShoppingTask,
 )
 from app.services.semantic_signals import extract_semantic_signals
 
@@ -874,3 +875,348 @@ class TestPlaybookData:
         assert pb is not None
         assert "kid_friendly" in pb.get("ranking_biases", {}), \
             f"kid_friendly missing from ranking_biases: {pb.get('ranking_biases')}"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 8. Disengagement Classification Tests
+#    Aligned with: disengagement_misfire audit check
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestDisengagementClassification:
+    """
+    Tests that interpret_turn does NOT classify explicit requests as disengagement.
+
+    The disengagement_misfire audit check flags turns where message_kind=disengagement
+    but the user was clearly making a food, shopping, or entertainment request.
+    These tests exercise the LLM classifier directly to verify the prompt fix holds.
+    """
+
+    @pytest.mark.asyncio
+    async def test_explicit_food_craving_not_disengagement(self):
+        """
+        'I wanna eat junk food' must not be classified as disengagement.
+        This was the Turn 9 failure in the original test_scenario.json analysis.
+        """
+        from app.nodes.interpret_turn import interpret_turn
+
+        state = _make_state(
+            msg="I wanna eat junk food, a lot of unhealthy junk food",
+            domain="dining",
+        )
+        result = await interpret_turn(state)
+        intent = result["intent"]
+
+        assert intent.message_kind != "disengagement", (
+            f"'I wanna eat junk food' must not be disengagement. "
+            f"Got message_kind={intent.message_kind!r}, domain={intent.domain!r}"
+        )
+        assert intent.domain in ("dining", "general"), (
+            f"Expected dining domain, got {intent.domain!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_explicit_shopping_intent_not_disengagement(self):
+        """
+        'I want to buy a jacket' must not be classified as disengagement
+        and must route to the shopping domain.
+        """
+        from app.nodes.interpret_turn import interpret_turn
+
+        state = _make_state(
+            msg="I want to buy a jacket",
+            domain="shopping",
+        )
+        result = await interpret_turn(state)
+        intent = result["intent"]
+
+        assert intent.message_kind != "disengagement", (
+            f"'I want to buy a jacket' must not be disengagement. "
+            f"Got message_kind={intent.message_kind!r}"
+        )
+        assert intent.domain == "shopping", (
+            f"Expected shopping domain, got {intent.domain!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_re_engagement_after_frustration_not_disengagement(self):
+        """
+        Even after a frustrated turn, 'just give me food' is a request, not disengagement.
+        """
+        from app.nodes.interpret_turn import interpret_turn
+
+        state = _make_state(
+            msg="just give me food",
+            domain="dining",
+        )
+        result = await interpret_turn(state)
+        intent = result["intent"]
+
+        assert intent.message_kind != "disengagement", (
+            f"'just give me food' must not be disengagement. "
+            f"Got message_kind={intent.message_kind!r}"
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 9. Scene Excluded Domains Tests
+#    Aligned with: excluded_domains audit check
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestSceneExcludedDomains:
+    """
+    Tests that update_scene_memory does NOT spuriously set excluded_domains
+    for food item queries or dietary preferences — only for explicit rejections.
+
+    The excluded_domains audit check flags spurious or stale exclusions.
+    These tests verify the LLM extraction prompt rules hold.
+    """
+
+    @pytest.mark.asyncio
+    async def test_specific_food_item_query_no_exclusion(self):
+        """
+        Asking about a specific dish must NOT add dining to excluded_domains.
+        This was the Turn 4 failure: 'Can I get Tiramisu Cake here?' set excluded_domains=["dining"].
+        """
+        from app.nodes.update_scene_memory import update_scene_memory
+
+        state = _make_state(
+            msg="Can I get Tiramisu Cake here?",
+            domain="dining",
+        )
+        result = await update_scene_memory(state)
+        scene = result["scene"]
+
+        excluded = scene.excluded_domains or []
+        assert "dining" not in excluded, (
+            f"Asking about a food item must not exclude 'dining'. "
+            f"Got excluded_domains={excluded!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_dietary_preference_no_exclusion(self):
+        """
+        Requesting dietary options must NOT add dining to excluded_domains.
+        'veg options' is a request within dining, not a rejection of dining.
+        """
+        from app.nodes.update_scene_memory import update_scene_memory
+
+        state = _make_state(
+            msg="can you give me some veg options?",
+            domain="dining",
+        )
+        result = await update_scene_memory(state)
+        scene = result["scene"]
+
+        excluded = scene.excluded_domains or []
+        assert "dining" not in excluded, (
+            f"Dietary preference query must not exclude 'dining'. "
+            f"Got excluded_domains={excluded!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_explicit_rejection_sets_exclusion(self):
+        """
+        An explicit domain rejection must add that domain to excluded_domains.
+        'no food, just shopping' → excluded_domains should contain 'dining'.
+        """
+        from app.nodes.update_scene_memory import update_scene_memory
+
+        state = _make_state(
+            msg="no food, just shopping",
+            domain="shopping",
+        )
+        result = await update_scene_memory(state)
+        scene = result["scene"]
+
+        excluded = scene.excluded_domains or []
+        assert "dining" in excluded, (
+            f"Explicit 'no food' should add 'dining' to excluded_domains. "
+            f"Got excluded_domains={excluded!r}"
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 10. Entity Category Inference Tests
+#     Aligned with: entity_pipeline audit check
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestEntityCategoryInference:
+    """
+    Unit tests for _infer_product_category in compose_context.py.
+
+    This pure-Python fallback function is what prevents entity bloat when the
+    LLM does not explicitly populate shopping_task.product_category.
+    The entity_pipeline audit check flags bloated entity counts for specific tasks.
+
+    Note: These are pure Python tests — no LLM calls. The function exists to
+    provide reliable inference when the LLM misses product_category; testing it
+    with an LLM call would be circular.
+    """
+
+    def test_infer_category_jacket_returns_fashion(self):
+        """product_type='jacket' → inferred category 'fashion'."""
+        from app.nodes.compose_context import _infer_product_category
+
+        task = ShoppingTask(product_type="jacket", product_category="")
+        result = _infer_product_category(task)
+        assert result == "fashion", (
+            f"product_type='jacket' should infer 'fashion', got {result!r}"
+        )
+
+    def test_infer_category_sneakers_returns_fashion(self):
+        """product_type='sneakers' → inferred category 'fashion'."""
+        from app.nodes.compose_context import _infer_product_category
+
+        task = ShoppingTask(product_type="sneakers", product_category="")
+        result = _infer_product_category(task)
+        assert result == "fashion", (
+            f"product_type='sneakers' should infer 'fashion', got {result!r}"
+        )
+
+    def test_infer_category_explicit_wins_over_type(self):
+        """Explicit product_category='gifts' is returned as-is, ignoring product_type."""
+        from app.nodes.compose_context import _infer_product_category
+
+        task = ShoppingTask(product_type="jacket", product_category="gifts")
+        result = _infer_product_category(task)
+        assert result == "gifts", (
+            f"Explicit product_category should win. Got {result!r}"
+        )
+
+    def test_infer_category_unknown_type_returns_empty(self):
+        """An unrecognised product_type with no explicit category returns ''."""
+        from app.nodes.compose_context import _infer_product_category
+
+        task = ShoppingTask(product_type="ufo", product_category="")
+        result = _infer_product_category(task)
+        assert result == "", (
+            f"Unknown product_type should return '', got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_rank_and_dedupe_suppresses_off_domain_entities_with_product_type(self):
+        """
+        When shopping_task.product_type='jacket' is set, rank_and_dedupe must
+        suppress dining and entertainment entities, returning ≤ 20 from a pool of 30.
+
+        This directly validates the entity bloat fix: with _infer_product_category
+        returning 'fashion', off-domain entities are filtered out.
+        """
+        from app.nodes.rank_and_dedupe import rank_and_dedupe
+
+        dining_entities = [
+            {
+                "entity_id": f"d{i}", "name": f"Restaurant {i}",
+                "entity_type": "dining", "score": 0.5,
+                "semantic_tags": ["casual_dining"],
+                "audience_fit": ["general"],
+            }
+            for i in range(10)
+        ]
+        entertainment_entities = [
+            {
+                "entity_id": f"e{i}", "name": f"Cinema {i}",
+                "entity_type": "entertainment", "score": 0.5,
+                "semantic_tags": ["movies"],
+                "audience_fit": ["general"],
+            }
+            for i in range(10)
+        ]
+        store_entities = [
+            {
+                "entity_id": f"s{i}", "name": f"Fashion Store {i}",
+                "entity_type": "store", "score": 0.5,
+                "semantic_tags": ["fashion", "clothing"],
+                "audience_fit": ["general"],
+            }
+            for i in range(10)
+        ]
+        all_entities = dining_entities + entertainment_entities + store_entities
+
+        state = _make_state(
+            domain="shopping",
+            sub_intent="general_shopping",
+            entities=all_entities,
+            strategy="guided_plan",
+            entity_cap=25,  # cap alone would not reduce below 20
+        )
+        state.scene.shopping_task = ShoppingTask(
+            product_type="jacket",
+            product_category="",
+        )
+
+        result = await rank_and_dedupe(state)
+        final = result["context"].selected_entities
+
+        assert len(final) <= 20, (
+            f"With product_type='jacket', off-domain entities should be suppressed. "
+            f"Expected ≤ 20, got {len(final)}"
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 11. Topic Lock Transition Tests
+#     Aligned with: topic_lock audit check
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestTopicLockTransition:
+    """
+    Tests that topic_lock is updated when the user switches topics.
+
+    The topic_lock audit check flags turns where message_kind=topic_switch
+    but topic_lock still reflects the old domain.
+    """
+
+    @pytest.mark.asyncio
+    async def test_topic_switch_from_dining_to_shopping_clears_dining_lock(self):
+        """
+        When the user switches from dining to shopping, the resulting scene
+        must NOT have topic_lock still anchored to 'dining'.
+
+        Pre-condition: topic_lock = 'dining_recommendation'
+        Turn: message_kind=topic_switch, domain=shopping, message='I want to buy a jacket'
+        Expected: topic_lock should not still reference 'dining'
+        """
+        from app.nodes.update_scene_memory import update_scene_memory
+
+        state = _make_state(
+            msg="I want to buy a jacket",
+            domain="shopping",
+            sub_intent="general_shopping",
+            message_kind="topic_switch",
+        )
+        state.scene.topic_lock = "dining_recommendation"
+
+        result = await update_scene_memory(state)
+        scene = result["scene"]
+
+        topic_lock = scene.topic_lock or ""
+        assert "dining" not in topic_lock.lower(), (
+            f"After topic_switch to shopping, topic_lock should not still reference 'dining'. "
+            f"Got topic_lock={topic_lock!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_topic_switch_from_shopping_to_entertainment_updates_lock(self):
+        """
+        When the user switches from shopping to entertainment, topic_lock
+        must not still reference 'shopping' after the transition.
+        """
+        from app.nodes.update_scene_memory import update_scene_memory
+
+        state = _make_state(
+            msg="I want to watch a movie",
+            domain="entertainment",
+            sub_intent="movie",
+            message_kind="topic_switch",
+        )
+        state.scene.topic_lock = "shopping_recommendation"
+
+        result = await update_scene_memory(state)
+        scene = result["scene"]
+
+        topic_lock = scene.topic_lock or ""
+        assert "shopping" not in topic_lock.lower(), (
+            f"After topic_switch to entertainment, topic_lock should not still reference 'shopping'. "
+            f"Got topic_lock={topic_lock!r}"
+        )

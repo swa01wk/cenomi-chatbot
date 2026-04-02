@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-dfc185dc0bb7",
+  "session_id": "sc10-78cfe517",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-12fb8ef06c0e",
+  "user_message": "something cheaper",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\bcheaper\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-04-02 16:29:23.110333"
+}

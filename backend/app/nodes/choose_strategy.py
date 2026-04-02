@@ -245,6 +245,14 @@ async def choose_strategy(state: ConciergeState) -> dict:
     constraints = _build_constraints(intent, scene)
     entity_cap = _STRATEGY_ENTITY_CAPS.get(chosen, 8)
 
+    # ── Product-type entity cap tightening ────────────────────────────
+    # When the LLM classifier extracted a specific product_type (e.g. "jackets",
+    # "outerwear"), the shopping task is focused enough that the full category
+    # list is unhelpful — a tighter shortlist (≤ 10) is both more accurate and
+    # more readable. Driven by the LLM classifier's shopping_task output, not keywords.
+    if scene.shopping_task.product_type:
+        entity_cap = min(entity_cap, 10)
+
     # ── Family + dining cap override ──────────────────────────────────
     # When a child is present and the query is dining, cap at 3 entities
     # to avoid noisy kiosk/snack-stand results cluttering the response.
@@ -305,6 +313,16 @@ async def choose_strategy(state: ConciergeState) -> dict:
         response_mode = "hybrid_plan"
         rm_reason = f"multi-domain strategy '{chosen}' → hybrid_plan inferred"
         fallback_applied = False
+
+    # ── graceful_recovery shape: distinguish unintelligible vs off-topic ──
+    # is_gibberish=True  → visitor's message was random/nonsensical → ask them to rephrase
+    # is_gibberish=False → message was intelligible but off-topic (jokes, weather, etc.)
+    #                      → acknowledge it can't help + pivot to what it can offer
+    if response_mode == "graceful_recovery":
+        if state.intent.is_gibberish:
+            shape = "graceful_recovery_unintelligible"
+        else:
+            shape = "graceful_recovery_offtopic"
 
     plan = ResponsePlan(
         chosen_strategy=chosen,

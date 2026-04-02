@@ -214,10 +214,17 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
     cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
     suggestions = get_cta_suggestions(cta_type)
 
+    sources = [
+        {"target": r["target"], "data": r["data"]}
+        for r in result.retrieval.retrieval_results
+        if r.get("status") == "found" and r.get("data")
+    ]
+
     return ChatResponse(
         session_id=session_id,
         message=result.final_response_text,
         session_state=session_summary,
+        sources=sources,
         suggestions=suggestions,
         debug=debug_payload,
     )

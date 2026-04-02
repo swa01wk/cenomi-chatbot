@@ -73,8 +73,9 @@ def _get_model(override: str | None) -> str:
 # ── Judge prompts ─────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """You are an objective evaluator for a shopping mall concierge AI.
-You will receive a single conversation turn with full context and the assistant's response.
-Score the response on FIVE dimensions, each 1–5 (1=very poor, 5=excellent).
+You will receive a single conversation turn with full context, the assistant's response,
+and internal pipeline debug signals.
+Score the response on SIX dimensions, each 1–5 (1=very poor, 5=excellent).
 
 Return ONLY valid JSON in this exact format (no markdown fences):
 {
@@ -83,7 +84,8 @@ Return ONLY valid JSON in this exact format (no markdown fences):
   "honesty": <1-5>,
   "conciseness": <1-5>,
   "context_retention": <1-5>,
-  "overall_score": <float average of the five>,
+  "pipeline_correctness": <1-5>,
+  "overall_score": <float average of the six>,
   "strengths": "<one sentence>",
   "weaknesses": "<one sentence, or 'None' if none>",
   "verdict": "pass" | "needs_improvement" | "fail"
@@ -95,6 +97,16 @@ Scoring guide:
   honesty              — Are all stores/facts grounded in context? No invented prices or availability?
   conciseness          — Is the response appropriately sized? Not bloated or too terse?
   context_retention    — Does the response correctly use context from earlier in the conversation?
+  pipeline_correctness — Did the internal pipeline behave correctly?
+    5: Right flow path; correct intent and message_kind; entity list relevant and not bloated;
+       no spurious domain exclusions; node_trace shows expected sequence; no warnings.
+    4: Minor pipeline signal is off but did not affect the response.
+    3: Noticeable pipeline issue (e.g. stale topic_lock, slightly wrong strategy) but response
+       quality was partially rescued.
+    2: Pipeline made a wrong routing or classification decision that clearly impacted quality
+       (e.g. wrong flow type, entity domain mismatch).
+    1: Severe failure: disengagement misfire on explicit request, spurious domain exclusion
+       blocking all relevant content, duplicate node execution, or 60+ irrelevant entities.
 
 Verdict rules:
   overall >= 4.0  → "pass"
@@ -123,9 +135,28 @@ User: {user_message}
   sources_count:    {sources_count}
   warnings:         {warnings}
 
+=== PIPELINE SIGNALS (for pipeline_correctness scoring) ===
+  flow_type:        {flow_type}
+  chosen_strategy:  {chosen_strategy}
+  entity_count:     {entity_count} entities (types: {entity_types_summary})
+  excluded_domains: {excluded_domains}
+  topic_lock:       {topic_lock}
+  node_warnings:    {node_warnings}
+
 === ASSISTANT RESPONSE ===
 {assistant_response}
 """
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _summarise_entity_types(entities: list[dict]) -> str:
+    """Return a compact summary like 'dining×3, store×5'."""
+    from collections import Counter
+    if not entities:
+        return "none"
+    counts = Counter(e.get("entity_type", "unknown") for e in entities)
+    return ", ".join(f"{t}×{n}" for t, n in sorted(counts.items()))
 
 
 # ── OpenAI call ───────────────────────────────────────────────────────────────
@@ -161,13 +192,14 @@ def call_judge(
 
     scores: dict[str, Any] = json.loads(raw)
 
-    # Recompute overall from the 5 dimensions
+    # Recompute overall from the 6 dimensions
     dims = [
         scores["intent_alignment"],
         scores["constraint_adherence"],
         scores["honesty"],
         scores["conciseness"],
         scores["context_retention"],
+        scores["pipeline_correctness"],
     ]
     scores["overall_score"] = round(sum(dims) / len(dims), 2)
 
@@ -206,30 +238,43 @@ def evaluate_turn(
     api_key: str,
     model: str,
 ) -> dict[str, Any]:
-    debug   = assistant_msg.get("debug", {})
-    scene   = debug.get("scene_summary", {})
-    shop    = scene.get("shopping_task", {})
-    sources = assistant_msg.get("sources", [])
+    debug      = assistant_msg.get("debug", {})
+    scene      = debug.get("scene_summary", {})
+    shop       = scene.get("shopping_task", {})
+    sources    = assistant_msg.get("sources", [])
+    node_trace = debug.get("node_trace", [])
+    entities   = debug.get("selected_entities", [])
+
+    node_warnings = [
+        w for entry in node_trace for w in (entry.get("warnings") or [])
+    ]
 
     history = build_history_text(messages, user_msg_index)
 
     user_content = USER_TEMPLATE.format(
-        history          = history,
-        user_message     = user_msg,
-        intent_domain    = debug.get("intent_domain", ""),
-        intent_sub       = debug.get("intent_sub", ""),
-        message_kind     = debug.get("message_kind", ""),
-        response_mode    = debug.get("response_mode", "") or "(smalltalk)",
-        confidence_level = debug.get("confidence_level", ""),
-        companions       = scene.get("companions", []),
-        budget           = scene.get("budget", ""),
-        target_person    = shop.get("target_person", ""),
-        target_gender    = shop.get("target_gender", ""),
-        retrieval_needed = debug.get("retrieval_needed", False),
-        retrieval_results= debug.get("retrieval_results_count", 0),
-        sources_count    = len(sources),
-        warnings         = debug.get("warnings", []),
-        assistant_response = assistant_msg.get("content", "")[:800],
+        history              = history,
+        user_message         = user_msg,
+        intent_domain        = debug.get("intent_domain", ""),
+        intent_sub           = debug.get("intent_sub", ""),
+        message_kind         = debug.get("message_kind", ""),
+        response_mode        = debug.get("response_mode", "") or "(smalltalk)",
+        confidence_level     = debug.get("confidence_level", ""),
+        companions           = scene.get("companions", []),
+        budget               = scene.get("budget", ""),
+        target_person        = shop.get("target_person", ""),
+        target_gender        = shop.get("target_gender", ""),
+        retrieval_needed     = debug.get("retrieval_needed", False),
+        retrieval_results    = debug.get("retrieval_results_count", 0),
+        sources_count        = len(sources),
+        warnings             = debug.get("warnings", []),
+        flow_type            = debug.get("flow_type", ""),
+        chosen_strategy      = debug.get("chosen_strategy", ""),
+        entity_count         = len(entities),
+        entity_types_summary = _summarise_entity_types(entities),
+        excluded_domains     = scene.get("excluded_domains", []),
+        topic_lock           = scene.get("topic_lock", ""),
+        node_warnings        = node_warnings or "none",
+        assistant_response   = assistant_msg.get("content", "")[:800],
     )
 
     t0 = time.perf_counter()
@@ -273,7 +318,7 @@ def write_report(
 
     # Aggregate scores
     all_scores = [r["scores"] for r in results if "scores" in r]
-    dims = ["intent_alignment", "constraint_adherence", "honesty", "conciseness", "context_retention"]
+    dims = ["intent_alignment", "constraint_adherence", "honesty", "conciseness", "context_retention", "pipeline_correctness"]
     avg_by_dim: dict[str, float] = {}
     for d in dims:
         vals = [s[d] for s in all_scores if d in s]
@@ -316,14 +361,14 @@ def write_report(
         "",
         "## Turn-by-Turn Scores",
         "",
-        "| Turn | User message | Overall | Intent | Constrt | Honesty | Concise | Context | Verdict |",
-        "|------|-------------|---------|--------|---------|---------|---------|---------|---------|",
+        "| Turn | User message | Overall | Intent | Constrt | Honesty | Concise | Context | Pipeline | Verdict |",
+        "|------|-------------|---------|--------|---------|---------|---------|---------|----------|---------|",
     ]
 
     for r in results:
         sc = r.get("scores", {})
         if "error" in r:
-            lines.append(f"| {r['turn']} | `{r['user_message'][:40]}` | 💥 ERROR | — | — | — | — | — | — |")
+            lines.append(f"| {r['turn']} | `{r['user_message'][:40]}` | 💥 ERROR | — | — | — | — | — | — | — |")
             continue
         umsg = r["user_message"][:40].replace("|", "\\|")
         lines.append(
@@ -334,6 +379,7 @@ def write_report(
             f"| {sc.get('honesty', '—')} "
             f"| {sc.get('conciseness', '—')} "
             f"| {sc.get('context_retention', '—')} "
+            f"| {sc.get('pipeline_correctness', '—')} "
             f"| {_verdict_icon(sc.get('verdict', ''))} {sc.get('verdict', '')} |"
         )
 

@@ -1,0 +1,5180 @@
+{
+  "generated_at": "2026-04-02 16:57:07 UTC",
+  "run_id": "d9dd7ccf",
+  "judge_model": "gpt-5.4-mini",
+  "target": "http://127.0.0.1:8000/api/chat",
+  "summary": {
+    "total": 61,
+    "http_pass": 51,
+    "http_fail": 10,
+    "http_errors": 0,
+    "pipeline_pass": 11,
+    "pipeline_fail": 50,
+    "pipeline_skip": 0,
+    "total_errors": 3,
+    "total_warnings": 105,
+    "avg_latency_ms": 8389
+  },
+  "smoke_results": [
+    {
+      "id": "S-01",
+      "session_key": "smoke-1",
+      "query": "what movies are showing?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 11694,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 1,
+        "user_message": "what movies are showing?",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 11446.42,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (11446.42ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (11446.42ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-02",
+      "session_key": "smoke-2",
+      "query": "i am here with my kids",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 12657,
+      "reply_snippet": "For a family outing with your children, the simplest plan is to begin with Fun Time in the Entertainment Wing, then move",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 2,
+        "user_message": "i am here with my kids",
+        "assistant_snippet": "For a family outing with your children, the simplest plan is to begin with Fun Time in the Entertainment Wing, then move",
+        "intent": "",
+        "intent_confidence": null,
+        "message_kind": null,
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 4,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 12636.09,
+        "check_results": {},
+        "issues": [
+          {
+            "check": "inspector_error",
+            "severity": "error",
+            "message": "Expecting ',' delimiter: line 1 column 313 (char 312)"
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-03",
+      "session_key": "smoke-2",
+      "query": "where can we eat?",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 15990,
+      "reply_snippet": "The most practical places to eat are all in the **Ground Floor Food Court**, with one easy extra option in **Kiosk Row**",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 3,
+        "user_message": "where can we eat?",
+        "assistant_snippet": "The most practical places to eat are all in the **Ground Floor Food Court**, with one easy extra option in **Kiosk Row**",
+        "intent": "dining/family_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 15967.98,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "guided_recommendation in dining generally should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (15967.98ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "guided_recommendation in dining generally should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (15967.98ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-04",
+      "session_key": "smoke-4",
+      "query": "food and movies",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "medium",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 12092,
+      "reply_snippet": "For a film-and-food outing, Muvi Cinema on the Cinema Level is the strongest anchor — it gives you the entertainment fir",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 4,
+        "user_message": "food and movies",
+        "assistant_snippet": "For a film-and-food outing, Muvi Cinema on the Cinema Level is the strongest anchor — it gives you the entertainment fir",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "shortlist_recommendation",
+        "entity_count": 3,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 12074.75,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Response mode is hybrid_plan/shortlist_recommendation in an entertainment request, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000ms (12074.75ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Response mode is hybrid_plan/shortlist_recommendation in an entertainment request, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000ms (12074.75ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-05",
+      "session_key": "smoke-5",
+      "query": "anything interesting here?",
+      "expected_mode": "best_effort_shortlist",
+      "expected_conf": "medium",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 9495,
+      "reply_snippet": "If you’re looking for something interesting, the strongest starting point is Muvi Cinema on the Cinema Level for the mai",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 5,
+        "user_message": "anything interesting here?",
+        "assistant_snippet": "If you’re looking for something interesting, the strongest starting point is Muvi Cinema on the Cinema Level for the mai",
+        "intent": "exploration/open_exploration",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 9472.45,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "best_effort_shortlist/guided_plan in an exploration/concierge-style request would generally benefit from retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (9472.45ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "best_effort_shortlist/guided_plan in an exploration/concierge-style request would generally benefit from retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (9472.45ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-06",
+      "session_key": "smoke-6",
+      "query": "where is the prayer room?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 11851,
+      "reply_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 6,
+        "user_message": "where is the prayer room?",
+        "assistant_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+        "intent": "services/prayer_room",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "route_hint",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "service_lookup",
+        "node_count": 9,
+        "total_latency_ms": 11825.89,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (11825.89ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (11825.89ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-07",
+      "session_key": "smoke-7",
+      "query": "i am a bridesmaid",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 13608,
+      "reply_snippet": "For a bridesmaid, the Ground Floor Main Gallery is the best starting point for elegant, occasion-ready pieces.\n\nBegin at",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 7,
+        "user_message": "i am a bridesmaid",
+        "assistant_snippet": "For a bridesmaid, the Ground Floor Main Gallery is the best starting point for elegant, occasion-ready pieces.\n\nBegin at",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 13583.71,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User is asking for bridesmaid outfit guidance, which is a shopping/fashion recommendation, but intent_domain is labeled general."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a recommendation-style concierge response in a shopping-related context, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode=context_acknowledgement is not well aligned with a fresh recommendation request; guided recommendation would be more appropriate."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Node trace is complete with no duplicates, but total_latency_ms is 13583.71, which exceeds the slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User is asking for bridesmaid outfit guidance, which is a shopping/fashion recommendation, but intent_domain is labeled general."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a recommendation-style concierge response in a shopping-related context, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode=context_acknowledgement is not well aligned with a fresh recommendation request; guided recommendation would be more appropriate."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Node trace is complete with no duplicates, but total_latency_ms is 13583.71, which exceeds the slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-08",
+      "session_key": "smoke-8",
+      "query": "something nice for my son",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 11013,
+      "reply_snippet": "For something nice for your son within budget, start with **Zohoor Al Reef** in the **Main Gallery** and **Ajmal Perfume",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 8,
+        "user_message": "something nice for my son",
+        "assistant_snippet": "For something nice for your son within budget, start with **Zohoor Al Reef** in the **Main Gallery** and **Ajmal Perfume",
+        "intent": "shopping/gift_recommendation",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "gift_shopping",
+        "node_count": 12,
+        "total_latency_ms": 10994.1,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000ms (10994.1ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000ms (10994.1ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "S-09",
+      "session_key": "smoke-9",
+      "query": "asdf",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4353,
+      "reply_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 9,
+        "user_message": "asdf",
+        "assistant_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 4346.25,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "S-10a",
+      "session_key": "smoke-1",
+      "query": "with kid",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": false,
+      "conf_ok": true,
+      "http_status": "fail",
+      "elapsed_ms": 6187,
+      "reply_snippet": "For a family outing with kids, the best next step is a simple two-stop plan: **Fun Time** for entertainment, then a quic",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 10,
+        "user_message": "with kid",
+        "assistant_snippet": "For a family outing with kids, the best next step is a simple two-stop plan: **Fun Time** for entertainment, then a quic",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 3,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 12,
+        "total_latency_ms": 6168.71,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode=context_acknowledgement is a bit mismatched for a context-setting turn that is also producing a guided plan; a planning-oriented mode would be more consistent."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "entity_count is small, but the entity types are skewed toward dining/store entities for an entertainment intent; this is mildly inconsistent with the turn."
+          },
+          "topic_lock": {
+            "result": "warning",
+            "reason": "message_kind=context_setting but topic_lock is movie_lookup, which appears stale or overly specific relative to the current entertainment context."
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode=context_acknowledgement is a bit mismatched for a context-setting turn that is also producing a guided plan; a planning-oriented mode would be more consistent."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "entity_count is small, but the entity types are skewed toward dining/store entities for an entertainment intent; this is mildly inconsistent with the turn."
+          },
+          {
+            "check": "topic_lock",
+            "severity": "warning",
+            "message": "message_kind=context_setting but topic_lock is movie_lookup, which appears stale or overly specific relative to the current entertainment context."
+          }
+        ],
+        "pass": false
+      }
+    }
+  ],
+  "scenario_results": [
+    {
+      "id": "1.1",
+      "session_key": "sc1",
+      "query": "what movies are showing?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6601,
+      "reply_snippet": "Here are the movies showing now:\n\n- SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI) — Sport — 180 min  \n- SAUDI PRO LEAGUE (AL ",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 1,
+        "user_message": "what movies are showing?",
+        "assistant_snippet": "Here are the movies showing now:\n\n- SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI) — Sport — 180 min  \n- SAUDI PRO LEAGUE (AL ",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 6578.21,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "1.2",
+      "session_key": "sc1",
+      "query": "show me movies",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": false,
+      "conf_ok": true,
+      "http_status": "fail",
+      "elapsed_ms": 4977,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 2,
+        "user_message": "show me movies",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4957.08,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "1.4",
+      "session_key": "sc1",
+      "query": "now showing",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4961,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n  - Sports sc",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 3,
+        "user_message": "now showing",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n  - Sports sc",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4940.53,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "1.5",
+      "session_key": "sc1",
+      "query": "what's playing at the cinema?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 5186,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 4,
+        "user_message": "what's playing at the cinema?",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 5167.42,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "1.6",
+      "session_key": "sc1",
+      "query": "any kids movies today?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4552,
+      "reply_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 5,
+        "user_message": "any kids movies today?",
+        "assistant_snippet": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO",
+        "intent": "entertainment/movie_showtime",
+        "intent_confidence": 0.9,
+        "message_kind": "followup",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "structured_fact_list",
+        "entity_count": 6,
+        "excluded_domains": [],
+        "topic_lock": "movie_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4533.33,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "2.1",
+      "session_key": "sc2",
+      "query": "i am here with my family",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6111,
+      "reply_snippet": "For a family outing, a simple and comfortable route is to begin at **Fun Time** in the **Entertainment Wing on the Groun",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 6,
+        "user_message": "i am here with my family",
+        "assistant_snippet": "For a family outing, a simple and comfortable route is to begin at **Fun Time** in the **Entertainment Wing on the Groun",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6093.44,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "The user only set context ('i am here with my family') and did not ask a specific shopping/dining/navigation question, so a concierge guided plan is somewhat speculative rather than clearly matched to an explicit intent."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode is context_acknowledgement, which is plausible for a context-setting turn, but the assistant response is already producing a guided plan; the mode and generated behavior are slightly misaligned."
+          },
+          "flow_routing": {
+            "result": "warning",
+            "reason": "The turn is context-setting rather than a factual query or a clear recommendation request, so routing to concierge is debatable and may be premature."
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "The user only set context ('i am here with my family') and did not ask a specific shopping/dining/navigation question, so a concierge guided plan is somewhat speculative rather than clearly matched to an explicit intent."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode is context_acknowledgement, which is plausible for a context-setting turn, but the assistant response is already producing a guided plan; the mode and generated behavior are slightly misaligned."
+          },
+          {
+            "check": "flow_routing",
+            "severity": "warning",
+            "message": "The turn is context-setting rather than a factual query or a clear recommendation request, so routing to concierge is debatable and may be premature."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "2.2",
+      "session_key": "sc2b",
+      "query": "i am here with my kids",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6462,
+      "reply_snippet": "For a family outing with your children, the smoothest start is to combine playtime with an easy meal and keep everything",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 7,
+        "user_message": "i am here with my kids",
+        "assistant_snippet": "For a family outing with your children, the smoothest start is to combine playtime with an easy meal and keep everything",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 4,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6440.77,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User is only setting context with companions, not asking a general inquiry; intent_domain=general is acceptable but not strongly aligned to a concierge action."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode=context_acknowledgement is plausible for context-setting, but the assistant produced a guided plan, which is not fully consistent with the mode."
+          },
+          "flow_routing": {
+            "result": "warning",
+            "reason": "The turn is context-setting rather than a recommendation or factual query, so concierge flow is somewhat overactive for this message."
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User is only setting context with companions, not asking a general inquiry; intent_domain=general is acceptable but not strongly aligned to a concierge action."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode=context_acknowledgement is plausible for context-setting, but the assistant produced a guided plan, which is not fully consistent with the mode."
+          },
+          {
+            "check": "flow_routing",
+            "severity": "warning",
+            "message": "The turn is context-setting rather than a recommendation or factual query, so concierge flow is somewhat overactive for this message."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "2.3",
+      "session_key": "sc2",
+      "query": "where can we eat?",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6384,
+      "reply_snippet": "For dining in the mall, the full list is right here — I have kept it focused on the restaurants and cafés that match you",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 8,
+        "user_message": "where can we eat?",
+        "assistant_snippet": "For dining in the mall, the full list is right here — I have kept it focused on the restaurants and cafés that match you",
+        "intent": "dining/family_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 6368.96,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a dining recommendation request with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a dining recommendation request with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "2.4",
+      "session_key": "sc2",
+      "query": "any activities for the kids?",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": false,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 6558,
+      "reply_snippet": "For something easy to combine with your dining plan, start at **Fun Time** in the **Entertainment Wing on the Ground Flo",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 9,
+        "user_message": "any activities for the kids?",
+        "assistant_snippet": "For something easy to combine with your dining plan, start at **Fun Time** in the **Entertainment Wing on the Ground Flo",
+        "intent": "exploration/activity_suggestion",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 6539.21,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User asks for kids' activities, which is closer to entertainment/exploration than the classified intent_domain \"exploration\" only if the system treats activities as a distinct entertainment request; routing is not clearly wrong but somewhat underspecified."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a recommendation-style concierge response in an activity/entertainment context, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity mix is somewhat off for a kids-activities request: 3 dining entities and 1 store entity dominate a non-shopping, non-dining query, suggesting irrelevant entity bloat."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User asks for kids' activities, which is closer to entertainment/exploration than the classified intent_domain \"exploration\" only if the system treats activities as a distinct entertainment request; routing is not clearly wrong but somewhat underspecified."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a recommendation-style concierge response in an activity/entertainment context, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity mix is somewhat off for a kids-activities request: 3 dining entities and 1 store entity dominate a non-shopping, non-dining query, suggesting irrelevant entity bloat."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "2.5",
+      "session_key": "sc2",
+      "query": "what movies are there?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": false,
+      "conf_ok": true,
+      "http_status": "fail",
+      "elapsed_ms": 12482,
+      "reply_snippet": "Muvi Cinema on the **Cinema Level, Cinema Zone** is the right place to start for a family movie outing — it is the mall’",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 10,
+        "user_message": "what movies are there?",
+        "assistant_snippet": "Muvi Cinema on the **Cinema Level, Cinema Zone** is the right place to start for a family movie outing — it is the mall’",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 2,
+        "excluded_domains": [
+          "dining"
+        ],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 12459.75,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Entertainment recommendation response_mode is guided_recommendation, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "warning",
+            "reason": "dining is excluded, but the user asked a general entertainment question and the pipeline warning shows entities were removed due to that exclusion; this may be acceptable but should be reviewed for over-filtering."
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000ms, indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Entertainment recommendation response_mode is guided_recommendation, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          {
+            "check": "excluded_domains",
+            "severity": "warning",
+            "message": "dining is excluded, but the user asked a general entertainment question and the pipeline warning shows entities were removed due to that exclusion; this may be acceptable but should be reviewed for over-filtering."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000ms, indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "2.7",
+      "session_key": "sc2",
+      "query": "something quick for lunch",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 9557,
+      "reply_snippet": "For the quickest lunch stop, head to **Kudu Restaurant** in the **Food Court on the Ground Floor** — it is the strongest",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 11,
+        "user_message": "something quick for lunch",
+        "assistant_snippet": "For the quickest lunch stop, head to **Kudu Restaurant** in the **Food Court on the Ground Floor** — it is the strongest",
+        "intent": "dining/quick_bite",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 9532.37,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided dining recommendation normally should trigger retrieval, but retrieval_needed is false despite a recommendation response."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "warning",
+            "reason": "Pipeline warning indicates dining entities were removed due to excluded_domains=['dining'], which is stale/spurious for a fresh dining request."
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000ms (9532.37ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided dining recommendation normally should trigger retrieval, but retrieval_needed is false despite a recommendation response."
+          },
+          {
+            "check": "excluded_domains",
+            "severity": "warning",
+            "message": "Pipeline warning indicates dining entities were removed due to excluded_domains=['dining'], which is stale/spurious for a fresh dining request."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000ms (9532.37ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "3.1",
+      "session_key": "sc3",
+      "query": "i want to buy a gift",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 9647,
+      "reply_snippet": "For a gift, the strongest starting points are in the Ground Floor Main Gallery and Kiosk Row — especially fragrances, wa",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 12,
+        "user_message": "i want to buy a gift",
+        "assistant_snippet": "For a gift, the strongest starting points are in the Ground Floor Main Gallery and Kiosk Row — especially fragrances, wa",
+        "intent": "shopping/gift_recommendation",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 29,
+        "excluded_domains": [],
+        "topic_lock": "gift_shopping",
+        "node_count": 12,
+        "total_latency_ms": 9632.35,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided recommendation in shopping typically should trigger retrieval; retrieval_needed is false despite a recommendation-style response."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is 29 store entities, which is somewhat bloated for a single gift-shopping request."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000ms (9632.35ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided recommendation in shopping typically should trigger retrieval; retrieval_needed is false despite a recommendation-style response."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is 29 store entities, which is somewhat bloated for a single gift-shopping request."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000ms (9632.35ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "3.2",
+      "session_key": "sc3b",
+      "query": "i want to buy jackets",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "medium",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 17464,
+      "reply_snippet": "For jackets, start in **fashion** first — the strongest places are **Zara**, **Bershka**, and **Centrepoint** on the Gro",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 13,
+        "user_message": "i want to buy jackets",
+        "assistant_snippet": "For jackets, start in **fashion** first — the strongest places are **Zara**, **Bershka**, and **Centrepoint** on the Gro",
+        "intent": "shopping/general_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 67,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 17438.21,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Recommendation-style shopping request in a concierge flow would generally be expected to trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is very high (67), which is likely bloat for a general shopping request."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency is 17438.21ms, which exceeds the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Recommendation-style shopping request in a concierge flow would generally be expected to trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is very high (67), which is likely bloat for a general shopping request."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency is 17438.21ms, which exceeds the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "3.3",
+      "session_key": "sc3b",
+      "query": "for my 5 year old son",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 16609,
+      "reply_snippet": "For your 5-year-old son, the most practical starting points are **Centrepoint** and **Brands For Less** — both are famil",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 14,
+        "user_message": "for my 5 year old son",
+        "assistant_snippet": "For your 5-year-old son, the most practical starting points are **Centrepoint** and **Brands For Less** — both are famil",
+        "intent": "shopping/fashion_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "refinement",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 27,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 16582.93,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "warning",
+            "reason": "target_person is 'self' but the user explicitly said 'for my 5 year old son', so the recipient should not be self."
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a shopping recommendation response in a concierge flow, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is 27 store entities, which is somewhat bloated for a focused shopping refinement and may reduce relevance."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "The node trace is complete, but total_latency_ms is 16582.93, which is above the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "target_person",
+            "severity": "warning",
+            "message": "target_person is 'self' but the user explicitly said 'for my 5 year old son', so the recipient should not be self."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a shopping recommendation response in a concierge flow, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is 27 store entities, which is somewhat bloated for a focused shopping refinement and may reduce relevance."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "The node trace is complete, but total_latency_ms is 16582.93, which is above the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "3.5",
+      "session_key": "sc3b",
+      "query": "something affordable",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 13369,
+      "reply_snippet": "For something affordable, **Centrepoint** is the strongest starting point, with **Red Tag** and **Max** close behind. Al",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 15,
+        "user_message": "something affordable",
+        "assistant_snippet": "For something affordable, **Centrepoint** is the strongest starting point, with **Red Tag** and **Max** close behind. Al",
+        "intent": "shopping/general_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "constraint_refinement",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 62,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 13344.06,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "warning",
+            "reason": "companions includes 'child' but the user message only says 'something affordable' and does not mention any companion in this turn."
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "response_mode is guided_recommendation in shopping, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "entity_count is 62, which is high for a specific shopping task and suggests entity bloat."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "node_trace is complete and has no duplicates, but total_latency_ms is 13344.06, which is slow."
+          }
+        },
+        "issues": [
+          {
+            "check": "companion_extract",
+            "severity": "warning",
+            "message": "companions includes 'child' but the user message only says 'something affordable' and does not mention any companion in this turn."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "response_mode is guided_recommendation in shopping, so retrieval would generally be expected, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "entity_count is 62, which is high for a specific shopping task and suggests entity bloat."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "node_trace is complete and has no duplicates, but total_latency_ms is 13344.06, which is slow."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "3.6",
+      "session_key": "sc3c",
+      "query": "gift for my girlfriend",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 19314,
+      "reply_snippet": "For a gift for your girlfriend, start with L'Occitane in the Main Gallery — it is a refined choice for skincare, body ca",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 16,
+        "user_message": "gift for my girlfriend",
+        "assistant_snippet": "For a gift for your girlfriend, start with L'Occitane in the Main Gallery — it is a refined choice for skincare, body ca",
+        "intent": "shopping/gift_recommendation",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "gift_shopping",
+        "node_count": 12,
+        "total_latency_ms": 19290.6,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Node trace is complete and has no duplicates, but total_latency_ms is 19290.6, which is well above the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Node trace is complete and has no duplicates, but total_latency_ms is 19290.6, which is well above the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "4.1",
+      "session_key": "sc4",
+      "query": "i am here with my girlfriend",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6024,
+      "reply_snippet": "For your visit with your girlfriend, a simple romantic flow is to begin at **L'Occitane** in the **Ground Floor, Main Ga",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 17,
+        "user_message": "i am here with my girlfriend",
+        "assistant_snippet": "For your visit with your girlfriend, a simple romantic flow is to begin at **L'Occitane** in the **Ground Floor, Main Ga",
+        "intent": "",
+        "intent_confidence": null,
+        "message_kind": null,
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6007.08,
+        "check_results": {},
+        "issues": [
+          {
+            "check": "inspector_error",
+            "severity": "error",
+            "message": "Expecting ',' delimiter: line 1 column 83 (char 82)"
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "4.2",
+      "session_key": "sc4",
+      "query": "suggest a nice dinner",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6486,
+      "reply_snippet": "For a nice dinner, the best fit in this mall is **Kudu Restaurant** on the **Ground Floor, Food Court** — it offers meal",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 18,
+        "user_message": "suggest a nice dinner",
+        "assistant_snippet": "For a nice dinner, the best fit in this mall is **Kudu Restaurant** on the **Ground Floor, Food Court** — it offers meal",
+        "intent": "dining/romantic_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 6461.35,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "warning",
+            "reason": "The user asked only for a nice dinner in this turn; companions includes 'girlfriend' without an explicit mention in the message, so companion extraction may be stale or over-inferred."
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a dining recommendation with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "companion_extract",
+            "severity": "warning",
+            "message": "The user asked only for a nice dinner in this turn; companions includes 'girlfriend' without an explicit mention in the message, so companion extraction may be stale or over-inferred."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a dining recommendation with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "4.3",
+      "session_key": "sc4b",
+      "query": "we want to catch a movie and then eat",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "high",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 6383,
+      "reply_snippet": "Muvi Cinema on the Cinema Level is the right starting point for your outing, then you can move straight to dining withou",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 19,
+        "user_message": "we want to catch a movie and then eat",
+        "assistant_snippet": "Muvi Cinema on the Cinema Level is the right starting point for your outing, then you can move straight to dining withou",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6340.42,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Response mode is a recommendation/planning style for an entertainment outing, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "User asked for a combined outing plan (movie then eat), but response_mode is hybrid_plan rather than the more typical guided_recommendation for a fresh concierge request."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Response mode is a recommendation/planning style for an entertainment outing, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "User asked for a combined outing plan (movie then eat), but response_mode is hybrid_plan rather than the more typical guided_recommendation for a fresh concierge request."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "4.6",
+      "session_key": "sc4c",
+      "query": "any romantic options here?",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6521,
+      "reply_snippet": "For a date, the most romantic choice here is **Muvi Cinema on the Cinema Level** — it gives you an easy, polished evenin",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 20,
+        "user_message": "any romantic options here?",
+        "assistant_snippet": "For a date, the most romantic choice here is **Muvi Cinema on the Cinema Level** — it gives you an easy, polished evenin",
+        "intent": "dining/romantic_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 6497.91,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User asked for romantic options, which is a dining/concierge-style recommendation request, but the response includes cinema as the primary romantic option, making the domain classification somewhat mismatched to the actual ask."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a guided_recommendation in a recommendation-oriented domain, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User asked for romantic options, which is a dining/concierge-style recommendation request, but the response includes cinema as the primary romantic option, making the domain classification somewhat mismatched to the actual ask."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a guided_recommendation in a recommendation-oriented domain, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "5.1",
+      "session_key": "sc5",
+      "query": "something quick to eat",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 7704,
+      "reply_snippet": "For something quick to eat, the best choices are all on the Ground Floor, mainly in the Food Court and nearby Kiosk Row.",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 21,
+        "user_message": "something quick to eat",
+        "assistant_snippet": "For something quick to eat, the best choices are all on the Ground Floor, mainly in the Food Court and nearby Kiosk Row.",
+        "intent": "dining/quick_bite",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "concise_shortlist",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 7684.59,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a dining recommendation request with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a dining recommendation request with guided_recommendation mode, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "5.2",
+      "session_key": "sc5b",
+      "query": "we are in a hurry",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6595,
+      "reply_snippet": "If you are in a hurry, I would keep this to the quickest stops on the Ground Floor and avoid anything that slows you dow",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 22,
+        "user_message": "we are in a hurry",
+        "assistant_snippet": "If you are in a hurry, I would keep this to the quickest stops on the Ground Floor and avoid anything that slows you dow",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "concise_shortlist",
+        "entity_count": 4,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6587.8,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "5.4",
+      "session_key": "sc5c",
+      "query": "something quick before the movie",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "high",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 7164,
+      "reply_snippet": "For something quick before the movie, the Food Court is your simplest route — all four fast options are on the Ground Fl",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 23,
+        "user_message": "something quick before the movie",
+        "assistant_snippet": "For something quick before the movie, the Food Court is your simplest route — all four fast options are on the Ground Fl",
+        "intent": "dining/quick_bite",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "concise_shortlist",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 7146.26,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Response mode is a recommendation-style dining request, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Response mode is a recommendation-style dining request, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "6.1",
+      "session_key": "sc6",
+      "query": "food and movies",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "medium",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6611,
+      "reply_snippet": "Start with Muvi Cinema on the Cinema Level for the film, then finish with food in the Ground Floor Food Court — it keeps",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 24,
+        "user_message": "food and movies",
+        "assistant_snippet": "Start with Muvi Cinema on the Cinema Level for the film, then finish with food in the Ground Floor Food Court — it keeps",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "shortlist_recommendation",
+        "entity_count": 2,
+        "excluded_domains": [
+          "dining"
+        ],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6596.98,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Recommendation-style concierge response in entertainment/dining context typically should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "warning",
+            "reason": "Dining was excluded even though the user explicitly asked for food and movies; this looks like a stale/spurious exclusion for the current request."
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Recommendation-style concierge response in entertainment/dining context typically should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "excluded_domains",
+            "severity": "warning",
+            "message": "Dining was excluded even though the user explicitly asked for food and movies; this looks like a stale/spurious exclusion for the current request."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "6.3",
+      "session_key": "sc6b",
+      "query": "where can we eat after the movie?",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "high",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 7682,
+      "reply_snippet": "For your after-movie meal, the Ground Floor gives you the simplest path: quick bites in the Food Court, or a relaxed cof",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 25,
+        "user_message": "where can we eat after the movie?",
+        "assistant_snippet": "For your after-movie meal, the Ground Floor gives you the simplest path: quick bites in the Food Court, or a relaxed cof",
+        "intent": "dining/general_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "concise_shortlist",
+        "entity_count": 10,
+        "excluded_domains": [],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 7662.95,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "For a dining recommendation request with response_mode=hybrid_plan, retrieval would generally be expected, but retrieval_needed is False."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "For a dining recommendation request with response_mode=hybrid_plan, retrieval would generally be expected, but retrieval_needed is False."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "6.5",
+      "session_key": "sc6c",
+      "query": "we want to watch a movie and grab dinner",
+      "expected_mode": "hybrid_plan",
+      "expected_conf": "high",
+      "actual_mode": "hybrid_plan",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": false,
+      "http_status": "fail",
+      "elapsed_ms": 6261,
+      "reply_snippet": "Muvi Cinema on the Cinema Level is the natural starting point for your group — it anchors the entertainment part of the ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 26,
+        "user_message": "we want to watch a movie and grab dinner",
+        "assistant_snippet": "Muvi Cinema on the Cinema Level is the natural starting point for your group — it anchors the entertainment part of the ",
+        "intent": "entertainment/general_entertainment",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "hybrid_plan",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6234.69,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User explicitly wants both entertainment and dining, but intent_domain is set only to entertainment, so the dining part is under-routed."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a recommendation/planning response in entertainment, where retrieval would generally be expected, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User explicitly wants both entertainment and dining, but intent_domain is set only to entertainment, so the dining part is under-routed."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a recommendation/planning response in entertainment, where retrieval would generally be expected, but retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "7.1",
+      "session_key": "sc7",
+      "query": "anything interesting here?",
+      "expected_mode": "best_effort_shortlist",
+      "expected_conf": "medium",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 9462,
+      "reply_snippet": "For a pleasant visit, the strongest starting points are Muvi Cinema, Fun Time, and a sweet stop at CINNABON or Baskin Ro",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 27,
+        "user_message": "anything interesting here?",
+        "assistant_snippet": "For a pleasant visit, the strongest starting points are Muvi Cinema, Fun Time, and a sweet stop at CINNABON or Baskin Ro",
+        "intent": "exploration/open_exploration",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 9429.02,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "The user asked a vague exploration question ('anything interesting here?'), but the pipeline classified it as exploration rather than a concrete dining/shopping/navigation request. This is not a clear contradiction, but it is broad and could be routed more specifically based on mall context."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Response mode is best_effort_shortlist/guided_plan in a concierge-style exploration, which generally should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms, indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "The user asked a vague exploration question ('anything interesting here?'), but the pipeline classified it as exploration rather than a concrete dining/shopping/navigation request. This is not a clear contradiction, but it is broad and could be routed more specifically based on mall context."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Response mode is best_effort_shortlist/guided_plan in a concierge-style exploration, which generally should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms, indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "7.3",
+      "session_key": "sc7",
+      "query": "i'm bored",
+      "expected_mode": "best_effort_shortlist",
+      "expected_conf": "medium",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6406,
+      "reply_snippet": "For a bored visit, start with **Fun Time** — it is the strongest way to turn the mood around. If you want to keep the ou",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 28,
+        "user_message": "i'm bored",
+        "assistant_snippet": "For a bored visit, start with **Fun Time** — it is the strongest way to turn the mood around. If you want to keep the ou",
+        "intent": "",
+        "intent_confidence": null,
+        "message_kind": null,
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "exploration_overview",
+        "entity_count": 12,
+        "excluded_domains": [],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 6386.16,
+        "check_results": {},
+        "issues": [
+          {
+            "check": "inspector_error",
+            "severity": "error",
+            "message": "Expecting ',' delimiter: line 1 column 70 (char 69)"
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "7.4",
+      "session_key": "sc7b",
+      "query": "it's my first time here",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6518,
+      "reply_snippet": "A first visit is best enjoyed with a simple starting route, so I would guide you through a short discovery loop on the G",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 29,
+        "user_message": "it's my first time here",
+        "assistant_snippet": "A first visit is best enjoyed with a simple starting route, so I would guide you through a short discovery loop on the G",
+        "intent": "exploration/first_visit_guide",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6495.35,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "The turn is a fresh exploratory request, but response_mode is context_acknowledgement rather than a recommendation-oriented mode like guided_recommendation or hybrid_plan."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "The turn is a fresh exploratory request, but response_mode is context_acknowledgement rather than a recommendation-oriented mode like guided_recommendation or hybrid_plan."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "7.7",
+      "session_key": "sc7c",
+      "query": "surprise me",
+      "expected_mode": "best_effort_shortlist",
+      "expected_conf": "medium",
+      "actual_mode": "best_effort_shortlist",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6869,
+      "reply_snippet": "For a spontaneous visit, I would shape it into a simple Ground-to-Cinema outing: start with a little browsing, add a swe",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 30,
+        "user_message": "surprise me",
+        "assistant_snippet": "For a spontaneous visit, I would shape it into a simple Ground-to-Cinema outing: start with a little browsing, add a swe",
+        "intent": "exploration/open_exploration",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "best_effort_shortlist",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "discovery",
+        "node_count": 12,
+        "total_latency_ms": 6849.92,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "User asked for open-ended exploration ('surprise me'), but response_mode is best_effort_shortlist/guided_plan rather than a more clearly exploratory or recommendation-oriented mode; not necessarily wrong, but slightly mismatched."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "User asked for open-ended exploration ('surprise me'), but response_mode is best_effort_shortlist/guided_plan rather than a more clearly exploratory or recommendation-oriented mode; not necessarily wrong, but slightly mismatched."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "8.1",
+      "session_key": "sc8",
+      "query": "asdf",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 7464,
+      "reply_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 31,
+        "user_message": "asdf",
+        "assistant_snippet": "I'm not sure I understood \"asdf\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining** — restaur",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 7438.39,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "8.3",
+      "session_key": "sc8b",
+      "query": "what's the weather like?",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4875,
+      "reply_snippet": "I'm not sure I understood \"what's the weather like?\" — but I'm here to help you navigate the mall. I can assist with:\n• ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 32,
+        "user_message": "what's the weather like?",
+        "assistant_snippet": "I'm not sure I understood \"what's the weather like?\" — but I'm here to help you navigate the mall. I can assist with:\n• ",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 4855.81,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User asked about weather, which is not a mall concierge domain; intent_domain was classified as general instead of a factual navigation/service query or an out-of-scope handling path."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "warning",
+            "reason": "The query is a factual/out-of-scope question rather than a concierge recommendation request, yet flow_type was routed to concierge."
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is low, but all entities are store-type and unrelated to the weather query, indicating irrelevant entity selection for the intent."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User asked about weather, which is not a mall concierge domain; intent_domain was classified as general instead of a factual navigation/service query or an out-of-scope handling path."
+          },
+          {
+            "check": "flow_routing",
+            "severity": "warning",
+            "message": "The query is a factual/out-of-scope question rather than a concierge recommendation request, yet flow_type was routed to concierge."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is low, but all entities are store-type and unrelated to the weather query, indicating irrelevant entity selection for the intent."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "8.4",
+      "session_key": "sc8c",
+      "query": "tell me a joke",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6230,
+      "reply_snippet": "I'm not sure I understood \"tell me a joke\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining**",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 33,
+        "user_message": "tell me a joke",
+        "assistant_snippet": "I'm not sure I understood \"tell me a joke\" — but I'm here to help you navigate the mall. I can assist with:\n• **Dining**",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 3,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6205.84,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User asked for a joke, which is not a mall concierge intent; routing to general/concierge is a mismatch."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "A fresh_request with a non-concierge general query would typically fit a direct or fallback response more than guided_plan/graceful_recovery."
+          },
+          "flow_routing": {
+            "result": "warning",
+            "reason": "This is a general chit-chat request, not a factual or concierge mall query; concierge flow is not the best fit."
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is low, but all entities are stores for a non-mall general joke request, so the extracted entities are irrelevant to the intent."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User asked for a joke, which is not a mall concierge intent; routing to general/concierge is a mismatch."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "A fresh_request with a non-concierge general query would typically fit a direct or fallback response more than guided_plan/graceful_recovery."
+          },
+          {
+            "check": "flow_routing",
+            "severity": "warning",
+            "message": "This is a general chit-chat request, not a factual or concierge mall query; concierge flow is not the best fit."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is low, but all entities are stores for a non-mall general joke request, so the extracted entities are irrelevant to the intent."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "8.6",
+      "session_key": "sc8d",
+      "query": "a",
+      "expected_mode": "graceful_recovery",
+      "expected_conf": "low",
+      "actual_mode": "graceful_recovery",
+      "actual_conf": "low",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6372,
+      "reply_snippet": "I didn't quite catch that — I'm here to help with the mall. You can ask me about dining, shopping, movies, directions, o",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 34,
+        "user_message": "a",
+        "assistant_snippet": "I didn't quite catch that — I'm here to help with the mall. You can ask me about dining, shopping, movies, directions, o",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.1,
+        "message_kind": "fresh_request",
+        "response_mode": "graceful_recovery",
+        "confidence_level": "low",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 6353.96,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "9.1",
+      "session_key": "sc9",
+      "query": "where is Zara?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4072,
+      "reply_snippet": "Zara is on the Ground Floor, in the Main Gallery, unit GF020. If you need directions to anything else nearby, just ask.",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 35,
+        "user_message": "where is Zara?",
+        "assistant_snippet": "Zara is on the Ground Floor, in the Main Gallery, unit GF020. If you need directions to anything else nearby, just ask.",
+        "intent": "navigation/location_query",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "route_hint",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "location_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4041.76,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "9.2",
+      "session_key": "sc9b",
+      "query": "where is the prayer room?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 3811,
+      "reply_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 36,
+        "user_message": "where is the prayer room?",
+        "assistant_snippet": "The Men’s Prayer Room is on the Ground Floor, in the Main Gallery. If you need directions to anything else nearby, just ",
+        "intent": "services/prayer_room",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "route_hint",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "service_lookup",
+        "node_count": 9,
+        "total_latency_ms": 3795.4,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "intent_domain is services, but the user is asking a location query ('where is the prayer room?'), which is closer to navigation/factual lookup than a generic services intent."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "intent_domain is services, but the user is asking a location query ('where is the prayer room?'), which is closer to navigation/factual lookup than a generic services intent."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "9.4",
+      "session_key": "sc9c",
+      "query": "what are the mall opening hours?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4710,
+      "reply_snippet": "Al Nakheel Plaza is open **09:00 AM–11:00 PM on weekdays and Saturday**, and **01:00 PM–11:00 PM on Friday**.",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 37,
+        "user_message": "what are the mall opening hours?",
+        "assistant_snippet": "Al Nakheel Plaza is open **09:00 AM–11:00 PM on weekdays and Saturday**, and **01:00 PM–11:00 PM on Friday**.",
+        "intent": "mall_info/opening_hours",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "mall_fact_lookup",
+        "node_count": 9,
+        "total_latency_ms": 4692.8,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "intent_domain is mall_info, but the user is asking for opening hours; this is a factual mall-info query rather than a shopping/dining/entertainment/navigation request."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "intent_domain is mall_info, but the user is asking for opening hours; this is a factual mall-info query rather than a shopping/dining/entertainment/navigation request."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "9.7",
+      "session_key": "sc9d",
+      "query": "is Starbucks here?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4053,
+      "reply_snippet": "Yes, Starbucks is here — Ground Floor, Main Gallery, Unit GF134.",
+      "pipeline_status": "pass",
+      "audit": {
+        "turn_index": 38,
+        "user_message": "is Starbucks here?",
+        "assistant_snippet": "Yes, Starbucks is here — Ground Floor, Main Gallery, Unit GF134.",
+        "intent": "shopping/brand_availability",
+        "intent_confidence": 0.9,
+        "message_kind": "correction",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "direct_lookup",
+        "entity_count": 1,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 9,
+        "total_latency_ms": 4032.07,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [],
+        "pass": true
+      }
+    },
+    {
+      "id": "10.1",
+      "session_key": "sc10",
+      "query": "suggest some restaurants",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 6057,
+      "reply_snippet": "For restaurants in Al Nakheel Plaza, these are the full dining options to start with:\n\n- McDonald's — Ground Floor, Food",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 39,
+        "user_message": "suggest some restaurants",
+        "assistant_snippet": "For restaurants in Al Nakheel Plaza, these are the full dining options to start with:\n\n- McDonald's — Ground Floor, Food",
+        "intent": "dining/general_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [
+          "shopping"
+        ],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 6022.85,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a guided dining recommendation request, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a guided dining recommendation request, so retrieval would generally be expected; retrieval_needed is false."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "10.2",
+      "session_key": "sc10",
+      "query": "something cheaper",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "medium",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 7243,
+      "reply_snippet": "For something cheaper, the best place to start is the **Food Court on the Ground Floor** — you will find the most budget",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 40,
+        "user_message": "something cheaper",
+        "assistant_snippet": "For something cheaper, the best place to start is the **Food Court on the Ground Floor** — you will find the most budget",
+        "intent": "dining/general_dining",
+        "intent_confidence": 0.9,
+        "message_kind": "constraint_refinement",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 2,
+        "excluded_domains": [
+          "shopping"
+        ],
+        "topic_lock": "dining_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 7231.39,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided recommendation in dining usually should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "warning",
+            "reason": "Pipeline warning shows dining was also removed from context despite the user asking for a dining refinement; excluded_domains only lists shopping, suggesting stale or inconsistent exclusion handling."
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided recommendation in dining usually should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "excluded_domains",
+            "severity": "warning",
+            "message": "Pipeline warning shows dining was also removed from context despite the user asking for a dining refinement; excluded_domains only lists shopping, suggesting stale or inconsistent exclusion handling."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "10.6",
+      "session_key": "sc10b",
+      "query": "suggest some stores for fashion",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 9227,
+      "reply_snippet": "For fashion shopping, start in the Main Gallery and sweep through the strongest style names there; the Ground Floor also",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 41,
+        "user_message": "suggest some stores for fashion",
+        "assistant_snippet": "For fashion shopping, start in the Main Gallery and sweep through the strongest style names there; the Ground Floor also",
+        "intent": "shopping/fashion_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 32,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 9213.95,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "Entity count is high at 32, which is potential bloat for a shopping recommendation turn."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Total latency exceeds 8000 ms (9213.95 ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Guided recommendation in shopping typically should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "Entity count is high at 32, which is potential bloat for a shopping recommendation turn."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Total latency exceeds 8000 ms (9213.95 ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "10.7",
+      "session_key": "sc10b",
+      "query": "something more affordable",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "medium",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "medium",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 7152,
+      "reply_snippet": "For something more affordable, I would steer you toward the best value spots in the Main Gallery and Entertainment Wing ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 42,
+        "user_message": "something more affordable",
+        "assistant_snippet": "For something more affordable, I would steer you toward the best value spots in the Main Gallery and Entertainment Wing ",
+        "intent": "shopping/general_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "constraint_refinement",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "medium",
+        "flow_type": "concierge",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 67,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 7124.79,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "guided_recommendation in shopping generally should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "entity_count is very high (67) for a general shopping refinement, which suggests bloat even though entity types are relevant."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "guided_recommendation in shopping generally should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "entity_count is very high (67) for a general shopping refinement, which suggests bloat even though entity types are relevant."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "11.1",
+      "session_key": "sc11",
+      "query": "i am a bridesmaid",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 10589,
+      "reply_snippet": "For a bridesmaid role, the cleanest starting point is the Ground Floor Main Gallery, where you can focus on elegant, occ",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 43,
+        "user_message": "i am a bridesmaid",
+        "assistant_snippet": "For a bridesmaid role, the cleanest starting point is the Ground Floor Main Gallery, where you can focus on elegant, occ",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 10575.42,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User is not asking a general inquiry; they are setting context for a shopping/occasion-related concierge flow, so intent_domain=general is a weak match."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Chosen strategy is guided_plan in a concierge flow, but retrieval_needed=false; for recommendation-style guidance this generally should have fired."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode=context_acknowledgement is somewhat inconsistent with a concierge guided_plan response for this context-setting turn."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Node trace is complete and non-duplicated, but total_latency_ms=10575.42 exceeds the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User is not asking a general inquiry; they are setting context for a shopping/occasion-related concierge flow, so intent_domain=general is a weak match."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Chosen strategy is guided_plan in a concierge flow, but retrieval_needed=false; for recommendation-style guidance this generally should have fired."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode=context_acknowledgement is somewhat inconsistent with a concierge guided_plan response for this context-setting turn."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Node trace is complete and non-duplicated, but total_latency_ms=10575.42 exceeds the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "11.2",
+      "session_key": "sc11b",
+      "query": "i am a bridesmaid shopping for the wedding",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 14717,
+      "reply_snippet": "For a bridesmaid shopping for a wedding, I would begin with polished fashion and finish with a beauty stop for the final",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 44,
+        "user_message": "i am a bridesmaid shopping for the wedding",
+        "assistant_snippet": "For a bridesmaid shopping for a wedding, I would begin with polished fashion and finish with a beauty stop for the final",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "exploration_overview",
+        "entity_count": 8,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 14690.83,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User is clearly setting up a shopping/recommendation context for wedding-related attire, but intent_domain is labeled general instead of shopping."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "This is a concierge-style recommendation response in a shopping context, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "For a fresh shopping/recommendation context, response_mode=context_acknowledgement is less appropriate than a recommendation-oriented mode such as guided_recommendation or hybrid_plan."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Node trace is complete, but total latency is 14690.83ms, which exceeds the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User is clearly setting up a shopping/recommendation context for wedding-related attire, but intent_domain is labeled general instead of shopping."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "This is a concierge-style recommendation response in a shopping context, so retrieval would generally be expected; retrieval_needed is false."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "For a fresh shopping/recommendation context, response_mode=context_acknowledgement is less appropriate than a recommendation-oriented mode such as guided_recommendation or hybrid_plan."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Node trace is complete, but total latency is 14690.83ms, which exceeds the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "11.3",
+      "session_key": "sc11",
+      "query": "i need something elegant",
+      "expected_mode": "guided_recommendation",
+      "expected_conf": "high",
+      "actual_mode": "guided_recommendation",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 10510,
+      "reply_snippet": "For an elegant finish to your bridesmaid look, stay in the **Ground Floor Main Gallery** and focus on pieces that feel r",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 45,
+        "user_message": "i need something elegant",
+        "assistant_snippet": "For an elegant finish to your bridesmaid look, stay in the **Ground Floor Main Gallery** and focus on pieces that feel r",
+        "intent": "shopping/fashion_shopping",
+        "intent_confidence": 0.9,
+        "message_kind": "refinement",
+        "response_mode": "guided_recommendation",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 32,
+        "excluded_domains": [],
+        "topic_lock": "shopping_recommendation",
+        "node_count": 12,
+        "total_latency_ms": 10494.26,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "guided_recommendation in shopping generally should trigger retrieval, but retrieval_needed is false."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "warning",
+            "reason": "entity_count is 32 for a shopping fashion request, which is bloat beyond the recommended threshold."
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms is 10494.26, exceeding the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "guided_recommendation in shopping generally should trigger retrieval, but retrieval_needed is false."
+          },
+          {
+            "check": "entity_pipeline",
+            "severity": "warning",
+            "message": "entity_count is 32 for a shopping fashion request, which is bloat beyond the recommended threshold."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms is 10494.26, exceeding the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "11.6",
+      "session_key": "sc11c",
+      "query": "i am here for a wedding — i am the groom",
+      "expected_mode": "context_acknowledgement",
+      "expected_conf": "high",
+      "actual_mode": "context_acknowledgement",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 11121,
+      "reply_snippet": "For your wedding visit as the groom, a polished route would begin with **It's Mine** in the **Ground Floor, Main Gallery",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 46,
+        "user_message": "i am here for a wedding — i am the groom",
+        "assistant_snippet": "For your wedding visit as the groom, a polished route would begin with **It's Mine** in the **Ground Floor, Main Gallery",
+        "intent": "general/general_inquiry",
+        "intent_confidence": 0.9,
+        "message_kind": "context_setting",
+        "response_mode": "context_acknowledgement",
+        "confidence_level": "high",
+        "flow_type": "concierge",
+        "chosen_strategy": "guided_plan",
+        "entity_count": 5,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 12,
+        "total_latency_ms": 11104.16,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User is not asking a general inquiry; they are setting context for a wedding visit, which should likely be treated as a concierge/contextual shopping or styling intent rather than general."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "warning",
+            "reason": "Chosen strategy is guided_plan in a concierge flow, but retrieval_needed is false; recommendation-style planning would generally be expected to retrieve options."
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "warning",
+            "reason": "response_mode=context_acknowledgement is not well aligned with the apparent concierge planning intent implied by the assistant response and chosen_strategy."
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "Node trace is complete and has no duplicates, but total_latency_ms is 11104.16, which exceeds the 8000ms slow-turn threshold."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User is not asking a general inquiry; they are setting context for a wedding visit, which should likely be treated as a concierge/contextual shopping or styling intent rather than general."
+          },
+          {
+            "check": "retrieval_gap",
+            "severity": "warning",
+            "message": "Chosen strategy is guided_plan in a concierge flow, but retrieval_needed is false; recommendation-style planning would generally be expected to retrieve options."
+          },
+          {
+            "check": "response_mode",
+            "severity": "warning",
+            "message": "response_mode=context_acknowledgement is not well aligned with the apparent concierge planning intent implied by the assistant response and chosen_strategy."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "Node trace is complete and has no duplicates, but total_latency_ms is 11104.16, which exceeds the 8000ms slow-turn threshold."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "12.1",
+      "session_key": "sc12",
+      "query": "do you have H&M?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 11835,
+      "reply_snippet": "I don’t see H&M in the current listing. For the most accurate check, you can confirm with the Information Desk on the Gr",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 47,
+        "user_message": "do you have H&M?",
+        "assistant_snippet": "I don’t see H&M in the current listing. For the most accurate check, you can confirm with the Information Desk on the Gr",
+        "intent": "shopping/brand_availability",
+        "intent_confidence": 0.9,
+        "message_kind": "correction",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "direct_lookup",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 9,
+        "total_latency_ms": 11817.14,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms (11817.14ms), indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms (11817.14ms), indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "12.2",
+      "session_key": "sc12b",
+      "query": "is Nike here?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 8654,
+      "reply_snippet": "I don’t see Nike in the current listing. You may wish to check with the Information Desk on the Ground Floor.",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 48,
+        "user_message": "is Nike here?",
+        "assistant_snippet": "I don’t see Nike in the current listing. You may wish to check with the Information Desk on the Ground Floor.",
+        "intent": "shopping/brand_availability",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "direct_lookup",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "",
+        "node_count": 9,
+        "total_latency_ms": 8636.0,
+        "check_results": {
+          "intent_routing": {
+            "result": "pass"
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms exceeds 8000ms, indicating a slow turn."
+          }
+        },
+        "issues": [
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms exceeds 8000ms, indicating a slow turn."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "13.1",
+      "session_key": "sc13",
+      "query": "tell me about the mall",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4118,
+      "reply_snippet": "Al Nakheel Plaza is in Buraidah on King Abdullah Road Al Muntazah, Buraydah 52381, Saudi Arabia. It has Ground and Cinem",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 49,
+        "user_message": "tell me about the mall",
+        "assistant_snippet": "Al Nakheel Plaza is in Buraidah on King Abdullah Road Al Muntazah, Buraydah 52381, Saudi Arabia. It has Ground and Cinem",
+        "intent": "mall_info/overview",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "mall_overview",
+        "node_count": 9,
+        "total_latency_ms": 4100.27,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "The user asked for a mall overview, but intent_domain is mall_info rather than one of the standard routing domains listed in the guidance. The factual routing itself still matches the request."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "The user asked for a mall overview, but intent_domain is mall_info rather than one of the standard routing domains listed in the guidance. The factual routing itself still matches the request."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "13.2",
+      "session_key": "sc13b",
+      "query": "what does this mall have?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 8590,
+      "reply_snippet": "Al Nakheel Plaza in Buraidah has shopping across fashion, beauty, jewelry, accessories, home, electronics, groceries, di",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 50,
+        "user_message": "what does this mall have?",
+        "assistant_snippet": "Al Nakheel Plaza in Buraidah has shopping across fashion, beauty, jewelry, accessories, home, electronics, groceries, di",
+        "intent": "mall_info/what_is_available",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "mall_overview",
+        "node_count": 9,
+        "total_latency_ms": 8570.45,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "intent_domain is mall_info, but the user is asking a broad mall-availability question; this is close to factual mall info, though not one of the listed canonical domains."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "warning",
+            "reason": "total_latency_ms is 8570.45, which exceeds the 8000ms threshold; node trace itself is complete and non-duplicated."
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "intent_domain is mall_info, but the user is asking a broad mall-availability question; this is close to factual mall info, though not one of the listed canonical domains."
+          },
+          {
+            "check": "node_trace",
+            "severity": "warning",
+            "message": "total_latency_ms is 8570.45, which exceeds the 8000ms threshold; node trace itself is complete and non-duplicated."
+          }
+        ],
+        "pass": false
+      }
+    },
+    {
+      "id": "13.3",
+      "session_key": "sc13c",
+      "query": "is this mall family friendly?",
+      "expected_mode": "direct_factual",
+      "expected_conf": "high",
+      "actual_mode": "direct_factual",
+      "actual_conf": "high",
+      "mode_ok": true,
+      "conf_ok": true,
+      "http_status": "pass",
+      "elapsed_ms": 4495,
+      "reply_snippet": "Yes — Al Nakheel Plaza includes family-oriented facilities and services such as Baby Stroller Service, wheelchair servic",
+      "pipeline_status": "fail",
+      "audit": {
+        "turn_index": 51,
+        "user_message": "is this mall family friendly?",
+        "assistant_snippet": "Yes — Al Nakheel Plaza includes family-oriented facilities and services such as Baby Stroller Service, wheelchair servic",
+        "intent": "mall_info/family_friendliness",
+        "intent_confidence": 0.9,
+        "message_kind": "fresh_request",
+        "response_mode": "direct_factual",
+        "confidence_level": "high",
+        "flow_type": "factual",
+        "chosen_strategy": "quick_answer",
+        "entity_count": 0,
+        "excluded_domains": [],
+        "topic_lock": "mall_overview",
+        "node_count": 9,
+        "total_latency_ms": 4466.96,
+        "check_results": {
+          "intent_routing": {
+            "result": "warning",
+            "reason": "User asks a mall amenity/family-friendliness question, which is closer to mall_info/navigation than the provided intent_domain=mall_info is acceptable but not one of the canonical domains listed."
+          },
+          "companion_extract": {
+            "result": "pass"
+          },
+          "target_person": {
+            "result": "pass"
+          },
+          "target_gender": {
+            "result": "pass"
+          },
+          "retrieval_gap": {
+            "result": "pass"
+          },
+          "source_attribution": {
+            "result": "pass"
+          },
+          "response_mode": {
+            "result": "pass"
+          },
+          "flow_routing": {
+            "result": "pass"
+          },
+          "disengagement_misfire": {
+            "result": "pass"
+          },
+          "excluded_domains": {
+            "result": "pass"
+          },
+          "entity_pipeline": {
+            "result": "pass"
+          },
+          "topic_lock": {
+            "result": "pass"
+          },
+          "node_trace": {
+            "result": "pass"
+          }
+        },
+        "issues": [
+          {
+            "check": "intent_routing",
+            "severity": "warning",
+            "message": "User asks a mall amenity/family-friendliness question, which is closer to mall_info/navigation than the provided intent_domain=mall_info is acceptable but not one of the canonical domains listed."
+          }
+        ],
+        "pass": false
+      }
+    }
+  ]
+}

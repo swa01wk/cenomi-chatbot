@@ -1767,7 +1767,18 @@ async def _build_mall_info_response(
     )
 
     # ── CTA for mall overview ─────────────────────────────────────────
-    cta_instruction = get_cta_instruction("overview_continue")
+    # When response_mode=direct_factual, the guest asked for information — answer and stop.
+    # Suppress exploration prompts, CTAs, and "would you like to..." follow-ups.
+    is_direct_factual = state.response_mode == "direct_factual"
+    if is_direct_factual:
+        cta_instruction = (
+            "IMPORTANT: The guest asked for factual information. "
+            "Answer the question directly and completely. "
+            "Do NOT append exploration prompts, CTAs, or 'would you like to...' follow-ups. "
+            "Give the information and stop.\n\n"
+        )
+    else:
+        cta_instruction = get_cta_instruction("overview_continue")
 
     user_prompt = (
         f"Guest question:\n{query}\n\n"

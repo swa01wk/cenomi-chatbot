@@ -201,6 +201,20 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
             fact_payload["loyalty"] = data
             fact_payload["summary_notes"].append("Loyalty program details retrieved")
 
+        elif data_type == "brand_absent":
+            queried_brand = data.get("queried_brand", query_entity or "the brand")
+            mall_stores = data.get("mall_stores", [])
+            fact_payload["absent_brand"] = queried_brand
+            fact_payload["alternative_stores"] = mall_stores
+            fact_payload["summary_notes"].append(
+                f"Brand '{queried_brand}' is not in this mall — "
+                f"{len(mall_stores)} stores available as alternatives"
+            )
+            # Mark retrieval_succeeded=True: we got a definitive confirmed-absent answer.
+            # This allows the response LLM to suggest alternatives rather than saying
+            # data is unavailable.
+            retrieval_succeeded = True
+
         elif data_type == "active_offers":
             fact_payload["offers"] = data.get("offers", [])
             fact_payload["summary_notes"].append(

@@ -84,7 +84,7 @@ Available scene fields you may return:
   "scenario": "wedding_related"|"family_outing"|"date"|"gift_shopping"|"before_movie"|"quick_visit"|"birthday"|"first_visit"|"group_outing"|"solo_visit" or null,
   "user_role": "bridesmaid"|"bride"|"groom"|"maid_of_honor"|"best_man"|"mother_of_bride"|"father_of_bride"|"tourist"|"first_time_visitor" or null,
   "style_intent": ["elegant"|"occasion_wear"|"romantic"|"casual"|"practical"|"quick"|"luxury"|"premium"|"budget"|"fun"],
-  "excluded_domains": ["dining"|"cafe"|"shopping"|"entertainment"],
+  "excluded_domains": ["dining"|"cafe"|"shopping"|"entertainment"],  (see EXCLUDED DOMAINS RULES below)
   "visit_plan": ["dining"|"coffee"|"shopping"|"movie"|"entertainment"|"dessert"|"kids_activity"],
   "shopping_task": {
     "product_type": string or null,
@@ -101,20 +101,35 @@ Available scene fields you may return:
 RULES:
 - companions: ADD to existing list unless this is a fresh_start or correction.
 - visit_constraints: ADD to existing list (constraints accumulate across turns).
-- excluded_domains: ADD to list ONLY when the user uses explicit negation words to reject an entire domain:
+EXCLUDED DOMAINS RULES (excluded_domains field):
+- ADD a domain to excluded_domains ONLY when the user uses explicit negation words to reject an entire domain:
   "no food", "no shopping", "no cinema", "skip dining", "avoid coffee", "without food", "strictly no food",
   "don't want restaurants", "no dining", "avoid shopping", "no movies".
-  NEVER set excluded_domains for:
+  NEVER add for:
   • Requests for a specific menu item or food dish ("Can I get tiramisu?", "do you have sushi?",
     "is there pizza here?") — these are dining REQUESTS, not domain rejections.
   • Dietary preference requests ("veg options", "vegetarian", "healthy food") — these are filters,
     not domain exclusions.
   • Any question that is seeking information WITHIN a domain rather than rejecting it.
+- REMOVE a domain from excluded_domains when the user explicitly re-engages with that domain
+  (i.e. makes a genuine request IN that domain after previously excluding it).
+  Re-engagement signals:
+  • User previously excluded "dining" → now says "where can I eat?", "suggest a restaurant",
+    "something to eat", "I'm hungry", "any food options?", "something cheaper to eat" → remove "dining"
+  • User previously excluded "shopping" → now says "I want to buy", "show me stores",
+    "where can I shop?" → remove "shopping"
+  • User previously excluded "entertainment" → now asks about movies or activities → remove "entertainment"
+  • A constraint refinement on an excluded domain ("something cheaper" when dining was excluded) →
+    remove the exclusion — the user is refining within the domain, not maintaining the rejection.
+  If unsure whether the user is re-engaging, default to REMOVING the exclusion to avoid blocking legitimate requests.
   Examples:
   • "Can I get Tiramisu Cake here?" → excluded_domains: []  (asking ABOUT food, not rejecting food)
   • "Can you give me some veg options?" → excluded_domains: []  (dietary preference, not exclusion)
   • "no food, just shopping" → excluded_domains: ["dining"]  (explicit domain rejection)
-  Never remove previously excluded domains.
+  • (after "no dining" was set) "any restaurants?" → excluded_domains: []  (re-engagement, remove dining)
+  • "food and movies" → excluded_domains: []  (HYBRID affirmative request — user wants BOTH, not excluding either)
+  • "dinner and entertainment" → excluded_domains: []  (hybrid plan, not a domain rejection)
+  • "what can we eat and what movies are on?" → excluded_domains: []  (hybrid query — asking about both domains positively)
 - inferred_scene_notes: always include 1-2 brief notes about the visitor's intent.
 - If the message is about someone else ("she's into", "for my wife"), set target_person.
 - "a bit special", "something nice", "treat ourselves" → budget=premium (implicit premium signal).
@@ -195,6 +210,8 @@ async def _llm_extract_scene_delta(
             scene_summary["budget"] = scene.budget
         if scene.visit_constraints:
             scene_summary["visit_constraints"] = scene.visit_constraints
+        if scene.excluded_domains:
+            scene_summary["excluded_domains"] = scene.excluded_domains
         if scene.shopping_task and scene.shopping_task.product_type:
             scene_summary["shopping_task"] = {
                 "product_type": scene.shopping_task.product_type,
@@ -242,6 +259,8 @@ def _apply_llm_scene_delta(
     scene: SceneMemory,
     changes: list[str],
     scene_notes: list[str],
+    intent_domain: str = "",
+    intent_sub_intent: str = "",
 ) -> None:
     """
     Merge a validated LLM scene delta into the scene object.
@@ -262,7 +281,11 @@ def _apply_llm_scene_delta(
             if scene.target_person:
                 changes.append(f"-target_person:{scene.target_person}(llm)")
                 scene.target_person = ""
-        elif val and not scene.target_person:
+        elif val and (not scene.target_person or scene.target_person == "self"):
+            # Allow an explicit LLM-provided target to overwrite the "self" fallback.
+            # Without this, first-person shopping ("I want to buy a jacket") sets
+            # target_person="self", then a subsequent "for my 5 year old son" would
+            # be silently blocked because scene.target_person is already set.
             scene.target_person = val
             changes.append(f"target_person={val}(llm)")
 
@@ -325,10 +348,50 @@ def _apply_llm_scene_delta(
                 changes.append(f"+style_intent:{si}(llm)")
 
     if "excluded_domains" in delta and isinstance(delta["excluded_domains"], list):
-        for domain in delta["excluded_domains"]:
-            if domain and domain not in scene.excluded_domains:
-                scene.excluded_domains.append(domain)
-                changes.append(f"+excluded_domain:{domain}(llm)")
+        # Replace the full list so the LLM can clear stale exclusions within the same turn.
+        # Domains present in old list but absent from delta are treated as cleared.
+        new_excluded = [d for d in delta["excluded_domains"] if d]
+
+        # Intent-domain guard: prevent the scene extractor from adding a domain to
+        # excluded_domains when the LLM classifier's own output signals an affirmative
+        # request IN that same domain this turn (e.g. "food and movies" should not
+        # exclude "dining" even if the scene extractor hallucinated that exclusion).
+        # This guard is driven entirely by the LLM classifier's domain/sub_intent
+        # signals — not by keyword matching.
+        _DOMAIN_TO_INTENT = {
+            "dining": frozenset({"dining", "cafe"}),
+            "cafe": frozenset({"dining", "cafe"}),
+            "entertainment": frozenset({"entertainment"}),
+            "shopping": frozenset({"shopping"}),
+        }
+        if intent_domain or intent_sub_intent:
+            guarded_excluded: list[str] = []
+            for d in new_excluded:
+                affirmative_domains = _DOMAIN_TO_INTENT.get(d, frozenset())
+                is_affirmative = (
+                    intent_domain in affirmative_domains
+                    or any(intent_sub_intent.startswith(dom) for dom in affirmative_domains)
+                )
+                # Only block NEW additions when the current intent is affirmative for that domain.
+                # If the domain was already excluded before this turn, preserve it (user may
+                # have genuinely excluded it earlier and the LLM is just keeping it).
+                if is_affirmative and d not in scene.excluded_domains:
+                    scene_notes.append(
+                        f"[guard] excluded_domain '{d}' addition blocked: "
+                        f"current intent ({intent_domain}/{intent_sub_intent}) "
+                        f"is an affirmative request in that domain"
+                    )
+                else:
+                    guarded_excluded.append(d)
+            new_excluded = guarded_excluded
+
+        removed = [d for d in scene.excluded_domains if d not in new_excluded]
+        added = [d for d in new_excluded if d not in scene.excluded_domains]
+        scene.excluded_domains = new_excluded
+        for d in removed:
+            changes.append(f"-excluded_domain:{d}(llm)")
+        for d in added:
+            changes.append(f"+excluded_domain:{d}(llm)")
 
     if "visit_plan" in delta and isinstance(delta["visit_plan"], list):
         if delta["visit_plan"] and not scene.visit_plan:
@@ -344,7 +407,8 @@ def _apply_llm_scene_delta(
         if st.get("product_type") and not scene.shopping_task.product_type:
             scene.shopping_task.product_type = st["product_type"]
             changes.append(f"shopping_task.product_type={st['product_type']}(llm)")
-        if st.get("target_person") and not scene.shopping_task.target_person:
+        if st.get("target_person") and (not scene.shopping_task.target_person
+                                         or scene.shopping_task.target_person == "self"):
             scene.shopping_task.target_person = st["target_person"]
             changes.append(f"shopping_task.target_person={st['target_person']}(llm)")
         if st.get("budget_preference") and not scene.shopping_task.budget_preference:
@@ -518,7 +582,11 @@ async def update_scene_memory(state: ConciergeState) -> dict:
             recent_messages=list(state.messages),
             message_kind=intent.message_kind,
         )
-        _apply_llm_scene_delta(llm_delta, scene, changes, scene_notes)
+        _apply_llm_scene_delta(
+            llm_delta, scene, changes, scene_notes,
+            intent_domain=intent.domain,
+            intent_sub_intent=intent.sub_intent,
+        )
 
     # ── Acknowledgement: preserve scene exactly, no extraction ───────────────
     if intent.message_kind == "acknowledgement":
@@ -701,10 +769,67 @@ async def update_scene_memory(state: ConciergeState) -> dict:
     scenario_persisted = bool(scene.scenario and not topic_switch_detected)
     scene_sufficient = _is_scene_sufficient(scene)
 
+    # ── Keyword supplement: companion extraction ──────────────────────────────
+    # The LLM scene extractor sometimes misses explicit companion signals from
+    # short phrases like "with kid" or "for my 5 year old son". Run a
+    # lightweight keyword scan as a supplement after the LLM delta is applied.
+    _msg_lower = state.normalized_user_message.lower()
+    _KID_SIGNALS = (
+        "with kid", "with my kid", "with kids", "with child", "with my child",
+        "my son", "my daughter", "my child", "year old", "yr old",
+        "toddler", "baby", "infant",
+    )
+    _KID_COMPANION_LABELS = frozenset({"child", "kids", "son", "daughter"})
+    if (
+        any(s in _msg_lower for s in _KID_SIGNALS)
+        and not _KID_COMPANION_LABELS.intersection(scene.companions)
+    ):
+        scene.companions.append("child")
+        changes.append("+companion:child(keyword)")
+
     # ── Reset scene_acknowledged when companions changed this turn ────────────
     if any(c.startswith("+companion:") for c in changes):
         scene.scene_acknowledged = False
         changes.append("scene_acknowledged reset (companions changed)")
+
+    # ── Keyword supplement: shopping_task.target_gender ───────────────────────
+    # When the user explicitly mentions a gendered person ("my son", "my
+    # girlfriend", etc.) the LLM may populate scene.target_person but leave
+    # shopping_task.target_gender blank.  Fill it deterministically here.
+    if intent.domain == "shopping" and not scene.shopping_task.target_gender:
+        _MALE_GENDER_SIGNALS = (
+            " son", "my son", " boy", "my boy", " him", " his",
+            "boyfriend", "husband", "groom", "grandfather", "brother",
+        )
+        _FEMALE_GENDER_SIGNALS = (
+            " daughter", "my daughter", " girl", "my girl", " her",
+            "girlfriend", "wife", "bride", "bridesmaid", "grandmother", "sister",
+        )
+        if any(s in _msg_lower for s in _MALE_GENDER_SIGNALS):
+            scene.shopping_task.target_gender = "male"
+            changes.append("shopping_task.target_gender=male(keyword)")
+        elif any(s in _msg_lower for s in _FEMALE_GENDER_SIGNALS):
+            scene.shopping_task.target_gender = "female"
+            changes.append("shopping_task.target_gender=female(keyword)")
+
+    # ── Deterministic target_person=self fallback for first-person shopping ───
+    # When the user makes a first-person shopping request ("I want to buy a
+    # jacket", "I also wanna buy ...") the LLM scene extractor often leaves
+    # target_person empty because no explicit third-party was named.  Without a
+    # target_person the entity ranker preserves the full category list (e.g. 67
+    # stores) rather than focusing it, producing bloated responses.
+    #
+    # IMPORTANT: prefer an already-set scene.target_person (e.g. "for my son"
+    # → child, "gift for my girlfriend" → girlfriend) over the generic "self"
+    # default.  Only fall back to "self" when the scene has no named target.
+    if (
+        intent.domain == "shopping"
+        and intent.message_kind not in ("acknowledgement", "disengagement")
+        and not scene.shopping_task.target_person
+    ):
+        fallback = scene.target_person if scene.target_person else "self"
+        scene.shopping_task.target_person = fallback
+        changes.append(f"shopping_task.target_person={fallback}(fallback:first_person)")
 
     return {
         "scene": scene,

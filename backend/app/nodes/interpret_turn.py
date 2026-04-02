@@ -144,6 +144,9 @@ Return ONLY valid JSON with these fields:
   "secondary_intents": []  (list — contextual filters active for this turn, chosen from the list below)
   "modifiers": []          (list — semantic modifier tags active for this turn, chosen from the list below)
   "entity_query": ""       (the specific entity/brand/item being searched — REQUIRED for factual flow and cross_mall; empty string otherwise)
+  "retrieval_needed": true/false  (see RETRIEVAL DECISION RULES below)
+  "companion_context": []  (companions detected in THIS turn's message — see COMPANION CONTEXT RULES below)
+  "releases_topic_lock": true/false  (see TOPIC LOCK RELEASE RULES below)
 }
 
 ENTITY_QUERY EXTRACTION RULES:
@@ -190,10 +193,24 @@ SCENARIO VALUES (scenario field — extract the real-world context/occasion):
 - "solo_visit"      — alone, by myself, solo, just me
 - ""                — no clear real-world scenario
 
+ROMANTIC OCCASION DETECTION (CRITICAL):
+When the query contains romantic language ("romantic", "date", "date night", "for a couple",
+"anniversary", "special evening", "for two", "intimate") — even WITHOUT explicit companion
+context in scene memory — ALWAYS set scenario="date".
+For dining queries with romantic language: set sub_intent="romantic_dining" and
+response_mode="guided_recommendation" (NOT "best_effort_shortlist"). The romantic occasion
+itself is specific context that warrants a curated shortlist.
+Examples:
+• "any romantic options here?"       → scenario="date", sub_intent="romantic_dining", response_mode="guided_recommendation"
+• "any romantic restaurants?"        → scenario="date", sub_intent="romantic_dining", response_mode="guided_recommendation"
+• "something romantic for dinner"    → scenario="date", sub_intent="romantic_dining", response_mode="guided_recommendation"
+• "a nice romantic place to eat"     → scenario="date", sub_intent="romantic_dining", response_mode="guided_recommendation"
+• "somewhere romantic"               → scenario="date", response_mode="guided_recommendation"
+
 RESPONSE MODE RULES (response_mode field — how the bot should respond this turn):
 - "direct_factual"          — user wants EXACT DATA: movie times, store hours, location, brand presence check, parking info. Only when flow_type=factual and intent is a precise data lookup.
 - "guided_recommendation"   — user wants SUGGESTIONS or a SHORTLIST: recommend restaurants, suggest stores, curate options. The default for concierge flow with clear intent.
-- "hybrid_plan"             — user requests a PLAN, ITINERARY, or SCHEDULE spanning MULTIPLE domains. Signals: explicit "AND" joining two domains ("food AND movies", "dinner AND a show"), "plan for", "itinerary", "full day", "what order should we", "can we fit", "X-hour schedule". CRITICAL: any message with TWO or more distinct activities (dining + entertainment, shopping + food, movie + meal) → ALWAYS "hybrid_plan".
+- "hybrid_plan"             — user requests a PLAN, ITINERARY, or SCHEDULE spanning MULTIPLE domains. Signals: explicit "AND" joining two domains ("food AND movies", "dinner AND a show"), "plan for", "itinerary", "full day", "what order should we", "can we fit", "X-hour schedule". CRITICAL: any message with TWO or more distinct activities (dining + entertainment, shopping + food, movie + meal) → ALWAYS "hybrid_plan". ALSO: any dining request that explicitly references a movie time or movie context ("something before the movie", "eat after the movie", "quick bite before the film", "dinner after the show") → ALWAYS "hybrid_plan" because the response must coordinate both the dining suggestion AND the movie timing.
 - "best_effort_shortlist"   — user's intent is VAGUE or EXPLORATORY: "what can I do", "anything good", "surprise me", "i'm bored", first visit without clear intent. Present diverse safe options.
 - "context_acknowledgement" — user is DECLARING CONTEXT (message_kind=context_setting) without a specific request: "I'm here with my family", "it's my girlfriend's birthday". Acknowledge and offer next-step options.
 - "graceful_recovery"       — user's message is UNINTELLIGIBLE, completely off-topic, or intent cannot be determined (is_gibberish=true, domain=general with no intent).
@@ -523,9 +540,14 @@ MESSAGE KIND RULES:
   "I'm furious") → disengagement, NOT emotional. Emotional is for ANY mood expression that is
   NOT anger/frustration — it covers the full range from sadness to joy.
   CRITICAL MOOD OVERRIDE (absolute — overrides all other rules):
-    • Any message starting with "I'm sad", "I feel down", "I'm stressed", "I'm bored",
+    • Any message starting with "I'm sad", "I feel down", "I'm stressed",
       "I'm tired", "I'm depressed", "I'm overwhelmed" → ALWAYS message_kind="emotional",
       even if the rest of the message contains "give me a plan", "suggest something", "what to do".
+    • EXCEPTION — "I'm bored" in a MALL context: treat as an exploration discovery request
+      (exploration/activity_suggestion, message_kind="fresh_request", response_mode="best_effort_shortlist").
+      A visitor who says "I'm bored" at a mall wants activity suggestions, NOT emotional counselling.
+      Do NOT classify "I'm bored" as emotional unless accompanied by clear distress ("I'm really bored
+      and sad", "I'm bored and don't feel well"). Plain "I'm bored" or "bored" → exploration.
     • "cheer me up", "make me happy", "I need cheering up", "lift my spirits",
       "I'm having a bad day" → ALWAYS message_kind="emotional".
     • Pure mood declarations with no shopping/dining/entertainment request ("i am happy",
@@ -576,7 +598,7 @@ Examples:
 - "What time does the mall open?" → mall_info/opening_hours
 - "What are the opening hours?" → mall_info/opening_hours
 - "What can I do here?" → exploration/open_exploration
-- "I'm bored" → exploration/activity_suggestion
+- "I'm bored" → exploration/activity_suggestion, message_kind="fresh_request", response_mode="best_effort_shortlist" (mall discovery, NOT emotional)
 - "First time at this mall" → exploration/first_visit_guide
 SMALLTALK AND SAFETY MESSAGE KINDS (new — use these when the message is purely conversational or requires special handling):
 - "greeting"  — pure greeting with no information request: "hi", "hello", "hey", "good morning", "marhaba", "ahlan"
@@ -615,13 +637,94 @@ These bypass the full pipeline and receive compassionate, context-appropriate re
 - "say something funny" → general/general_inquiry, message_kind="fresh_request", response_mode="graceful_recovery"
 - "tell me a riddle" → general/general_inquiry, message_kind="fresh_request", response_mode="graceful_recovery"
 - "i am a bridesmaid" → general/general_inquiry, message_kind="context_setting", response_mode="context_acknowledgement", scenario="wedding_related"
+- "i am a bridesmaid shopping for the wedding" → shopping/fashion_shopping, message_kind="context_setting", response_mode="guided_recommendation", scenario="wedding_related"
+  RULE: when a context declaration is COMBINED with an explicit action intent ("shopping for", "looking for", "want to buy"),
+  the domain is the ACTION's domain (shopping), not general. message_kind stays "context_setting".
+  Compare: "i am a bridesmaid" (no action) → general/context_setting; "i am a bridesmaid shopping for the wedding" (has action) → shopping/context_setting.
+
+WEDDING ROLE DECLARATIONS (context_setting turns that anchor domain to shopping):
+- "i am the groom", "i'm the groom", "i am the best man", "i'm the best man",
+  "i am a groomsman", "i'm a groomsman"
+  → domain=shopping, sub_intent=general_shopping, message_kind=context_setting,
+    response_mode=context_acknowledgement, scenario=wedding_related
+- "i am the bride", "i'm the bride", "i am a bridesmaid" (without additional action request)
+  → domain=shopping, sub_intent=fashion_shopping, message_kind=context_setting,
+    response_mode=context_acknowledgement, scenario=wedding_related
+These are context-setting turns that anchor the domain to shopping even without an explicit request.
+Do NOT route wedding role declarations to domain=general — the occasion implies a shopping need.
+The follow-up turns will inherit the shopping domain and wedding_related scenario correctly.
 - "it's my anniversary" → general/general_inquiry, message_kind="context_setting", response_mode="context_acknowledgement", scenario="date"
+- "we are in a hurry" → general/general_inquiry, message_kind="context_setting", scenario="quick_visit", response_mode="context_acknowledgement"
+- "i'm in a hurry" → general/general_inquiry, message_kind="context_setting", scenario="quick_visit", response_mode="context_acknowledgement"
+- "short on time" → general/general_inquiry, message_kind="context_setting", scenario="quick_visit", response_mode="context_acknowledgement"
+- "we don't have much time" → general/general_inquiry, message_kind="context_setting", scenario="quick_visit", response_mode="context_acknowledgement"
 - "food and movies" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
 - "dinner and entertainment" → entertainment/general_entertainment, response_mode="hybrid_plan"
 - "catch a movie and eat" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
 - "movie then dinner" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
 - "food and maybe movie also" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
-- "we want to watch a movie and grab dinner" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan"
+- "we want to watch a movie and grab dinner" → entertainment/general_entertainment, message_kind="fresh_request", response_mode="hybrid_plan", secondary_intents=["add_dining_step"]
+  RULE: for hybrid_plan queries combining movies + dining, always include "add_dining_step" in secondary_intents
+  so the dining dimension is visible to downstream routing checks.
+- "something quick before the movie" → dining/quick_bite, flow_type="concierge", response_mode="hybrid_plan" (before-movie dining = movie + food = hybrid)
+- "something to eat before the film" → dining/quick_bite, flow_type="concierge", response_mode="hybrid_plan"
+- "where can we eat after the movie?" → dining/general_dining, flow_type="concierge", response_mode="hybrid_plan" (post-movie dining = movie + food = hybrid)
+- "dinner after the movie" → dining/general_dining, flow_type="concierge", response_mode="hybrid_plan"
+- "show me movies" → entertainment/general_entertainment, flow_type="concierge", response_mode="guided_recommendation" (browse/discover — no schedule qualifier)
+  CRITICAL DISTINCTION — movie intent routing:
+  • flow_type="factual" + sub_intent="movie_showtime" ONLY when the query is an explicit SCHEDULE LOOKUP:
+    "what movies are showing", "what's showing", "now showing", "what's playing",
+    "what time does X start", "is X showing today", "what are the showtimes",
+    "any kids movies today", "what movies are there?" — ALL of these want the CURRENT SCHEDULE → factual/movie_showtime
+  • flow_type="concierge" + sub_intent="general_entertainment" when the query BROWSES or DISCOVERS films
+    without asking for a schedule: "show me movies", "browse movies", "recommend a movie",
+    "what good movies are on", "suggest a film" → concierge/guided_recommendation
+  KEY TEST: if the user wants to SEE THE CURRENT LISTINGS (even phrased as "what movies are there?"),
+  it is factual/movie_showtime — NOT concierge.  Only "show me movies" / "recommend a movie" without
+  a schedule-lookup intent → concierge/general_entertainment.
+
+MOVIE QUERIES — CRITICAL DISAMBIGUATION:
+There are two distinct movie query types. Session context (family, companions, dining history) does NOT change this routing:
+
+1. Schedule/showtimes lookup → entertainment/movie_showtime, flow_type="factual", response_mode="direct_factual"
+   The user wants a LIST OF CURRENTLY PLAYING FILMS or SHOWTIME DATA.
+   Examples: "what movies are showing?", "what's playing at the cinema?", "what films are on?",
+   "now showing", "what's on?", "what movies are there?", "any kids movies today?",
+   "what time does X play?", "what's showing?".
+   Key test: the user is asking WHAT IS ON — current listings, schedule, or showtime data.
+
+2. Browse/discover → entertainment/general_entertainment, flow_type="concierge", response_mode="guided_recommendation"
+   The user wants to BROWSE or EXPLORE movie options — no schedule/listing intent.
+   Examples: "show me movies", "browse movies", "suggest a movie", "recommend a film",
+   "any good movies?", "what genre do you have?".
+   Key test: the user wants SUGGESTIONS or to explore — NOT to look up what's currently screening.
+
+ABSOLUTE RULE: "what movies are there?" → ALWAYS entertainment/movie_showtime, flow_type="factual",
+response_mode="direct_factual" REGARDLESS of session context (family companions, prior dining queries,
+or any other scene memory). Movie schedule queries are factual data lookups — session context cannot
+convert a factual listing query into a guided_recommendation.
+
+ABSOLUTE RULE: "show me movies" → ALWAYS entertainment/general_entertainment, flow_type="concierge",
+response_mode="guided_recommendation" (browsing intent, not a schedule lookup).
+
+IN-SESSION MOVIE DISAMBIGUATION (applies even when topic_lock=movie_lookup is active):
+The lookup vs. browse distinction is based on query intent, NOT session state.
+- "show me movies", "browse movies", "suggest a movie", "any good movies?" within an active movie session
+  → STILL entertainment/general_entertainment, flow_type="concierge", response_mode="guided_recommendation"
+  The session lock does NOT convert a browsing query into a factual schedule lookup.
+- "what's showing?", "what movies are on?", "what's playing?" within an active movie session
+  → entertainment/movie_showtime, flow_type="factual", response_mode="direct_factual" (schedule lookup intent)
+
+"WITH KID" CONSTRAINT IN MOVIE SESSION:
+When the active topic is movie_lookup (topic_lock=movie_lookup or active_topic=entertainment) and the user
+adds "with kid", "for my kid", "kid-friendly movies", "for children" — this is a CONSTRAINT REFINEMENT
+on the existing movie query, NOT a companion scene declaration:
+- "with kid" (active_topic=entertainment/movie session) → entertainment/movie_showtime,
+  message_kind="constraint_refinement", flow_type="factual", response_mode="direct_factual"
+  The user wants to filter the movie list to kid-appropriate films.
+- Do NOT classify "with kid" in a movie session as context_setting or guided_recommendation.
+  The kid context is a filter on the existing factual query, not a new companion addition.
+
 - "Where can I eat?" → dining/general_dining
 - "Show me all the shopping offers" → shopping/offer_details
 - "What offers are going on in Zara?" → shopping/offer_details
@@ -641,6 +744,105 @@ These bypass the full pipeline and receive compassionate, context-appropriate re
 - "where is herfy" → navigation/location_query, flow_type="factual" (restaurant location — NOT service_info)
 - "where is herfa" → navigation/location_query, flow_type="factual" (misspelling of Herfy — still a restaurant)
 - "where is McDonald's" → navigation/location_query, flow_type="factual"
+
+CONFIDENCE CALIBRATION:
+The "confidence" field reflects HOW CLEARLY YOU UNDERSTAND THE INTENT, not how specific the request is.
+A vague but categorisable request is still high confidence when the domain and intent are unambiguous.
+Use these guidelines:
+- confidence=0.85–0.95 (high): Domain and intent are clear, even if the request is open-ended.
+  Examples:
+  • "i want to buy a gift"       → 0.85  (intent clear: gift shopping; openness ≠ ambiguity)
+  • "what does this mall have?"  → 0.90  (intent clear: mall overview)
+  • "with kid" (context add-on)  → 0.85  (context unambiguous given active conversation)
+  • "where is Starbucks?"        → 0.95  (clear factual lookup)
+  • "I want sushi for my wife's birthday" → 0.95  (clear intent + rich context)
+- confidence=0.65–0.84 (medium): Intent is clear but genuinely incomplete — e.g. a fresh shopping
+  request for a broad product category with no companions, no occasion, no target person stated.
+  A single clarifying question would materially improve the result.
+  Examples:
+  • "I want to buy jackets" (no context at all) → 0.65
+  • "show me shoes" (no context) → 0.65
+  • "where can I eat?" (no constraint) → 0.70
+  • "what can I do here?" (first turn, no context) → 0.65
+- confidence<0.5 (low): Domain or primary intent cannot be reliably determined.
+  Examples:
+  • "anything good?"             → 0.40  (domain unknown → genuinely low)
+  • "asdf"                       → 0.10  (gibberish → low)
+CRITICAL RULE: Only score below 0.75 when you cannot reliably determine the domain or primary intent.
+Openness of a request (broad category, no specific item) does NOT justify a low score when the
+domain and intent are already clear.
+
+RETRIEVAL DECISION RULES (retrieval_needed field):
+Set retrieval_needed=true when the turn genuinely requires a live data lookup to answer well:
+- flow_type="factual": ALWAYS set retrieval_needed=true (exact data lookups — showtimes, hours, locations, brand presence)
+- flow_type="concierge" with a SPECIFIC constraint that requires live data (e.g. "restaurants near the cinema",
+  "something open right now", "stores on level 2", "what's closest to entrance") → true
+- flow_type="concierge" where the answer requires knowing CURRENT availability or SPECIFIC entity details
+  (e.g. "do any restaurants here have outdoor seating?", "which shops have sale right now?") → true
+- flow_type="concierge" AND secondary_intents include any audience/context filter
+  (kid_friendly, family_filter, gift_for, budget_filter, romantic_filter, quick_filter,
+  proximity_filter, group_filter) → true
+  Rationale: when a filter is active the shortlist quality depends on live entity data.
+  The initial response_mode hint may be upgraded downstream — do not gate retrieval on it.
+  Examples: "any activities for the kids?" (kid_friendly) → true;
+  "something nice for my son" (kid_friendly/gift_for) → true;
+  "something affordable for dinner" (budget_filter) → true;
+  "a romantic restaurant for tonight" (romantic_filter) → true;
+  "something quick near the cinema" (quick_filter + proximity_filter) → true
+- flow_type="concierge" with sub_intent in (gift_recommendation, romantic_dining, general_shopping)
+  AND a specific target person, companion, or occasion is detectable (from current query OR scene context):
+  → true. Rationale: personalised gift/romantic/shopping queries need live entity data to produce
+  a confident guided_recommendation; pre-loaded context alone is insufficient.
+  Examples:
+  • "something for my son" (kid target) → true
+  • "gift ideas for my girlfriend" (companion/target) → true
+  • "any romantic options here?" (romantic occasion in query itself) → true
+  • "romantic restaurants for tonight" → true
+  • "I want to buy a gift for someone special" → true
+Set retrieval_needed=false when general category suggestions from the mall's canonical context are sufficient:
+- General recommendation requests with no specific constraint AND no audience filter: "suggest a restaurant",
+  "what can I eat", "recommend some stores", "anything good to do", "where can we shop" → false
+- Context-setting, companion declarations, acknowledgement, and off-topic turns → always false
+- Vague exploratory requests with no audience filter ("something interesting", "I'm bored") → false
+DEFAULT: false (most concierge recommendation turns do not need live retrieval)
+
+COMPANION CONTEXT RULES (companion_context field):
+Extract companions mentioned in THIS turn's message. Populate on ANY flow type (including factual).
+Use these companion labels (matching scene memory vocabulary):
+  child, kids, son, daughter, wife, husband, girlfriend, boyfriend, family, friends, solo
+Examples:
+  "with kid" → ["child"]
+  "with my kids" → ["kids"]
+  "for my 5 year old son" → ["child"]
+  "with my wife and daughter" → ["wife", "daughter"]
+  "with my girlfriend" → ["girlfriend"]
+  "me and my husband" → ["husband"]
+  "with friends" → ["friends"]
+  "I'm alone" / "just me" / "solo" → ["solo"]
+Leave companion_context=[] when no companion is mentioned in THIS specific turn (even if companions exist in scene memory).
+Do NOT carry forward companions from scene memory — only extract what is explicitly stated THIS turn.
+
+TOPIC LOCK RELEASE RULES (releases_topic_lock field):
+The "Active topic lock" value (if provided in context) represents the domain the conversation has been locked to.
+Set releases_topic_lock=true when the current message is clearly in a DIFFERENT domain from the active topic lock:
+- topic_lock="movie_lookup" + user asks "something quick for lunch" → true (dining ≠ movies)
+- topic_lock="movie_lookup" + user asks "any restaurants?" → true
+- topic_lock="movie_lookup" + user asks "I want to buy a jacket" → true
+- topic_lock="dining_recommendation" + user asks "show me movies" → true
+- topic_lock="shopping_recommendation" + user asks "where can I eat?" → true
+IMPORTANT: releases_topic_lock fires for ANY genuine domain shift on a fresh_request,
+even without explicit transition words. Key test: if you are classifying this turn as
+dining/shopping/entertainment AND the active_topic_lock is for a DIFFERENT domain,
+set releases_topic_lock=true. Do not require "instead" or "forget that" phrasing.
+Example: topic_lock=movie_lookup + user says "something quick for lunch" → releases_topic_lock=true
+(dining intent ≠ entertainment domain — domain shift is enough, no keyword needed).
+
+Set releases_topic_lock=false when the turn stays in or alongside the locked domain:
+- Follow-up, refinement, or constraint on the same domain → false
+- Context-setting that adds scene info without switching domain → false
+- A companion declaration while in movie/factual flow → false (companion is additive, not a domain switch)
+- No active topic lock → false (nothing to release)
+DEFAULT: false
 """
 
 
@@ -654,7 +856,7 @@ def _get_classifier_llm() -> ChatOpenAI:
             model=settings.classifier_model,
             temperature=0.0,
             api_key=settings.openai_api_key,
-            max_tokens=350,
+            max_tokens=450,
         )
     return _classifier_llm
 
@@ -731,7 +933,7 @@ async def interpret_turn(state: ConciergeState) -> dict:
         intent.raw_signals["classifier_source"] = "error_fallback"
 
     # ── LLM-driven gibberish detection ────────────────────────────────
-    if intent.raw_signals.get("is_gibberish"):
+    if intent.is_gibberish:
         intent.primary_intent = "unsupported"
         intent.confidence = 0.1
         intent.raw_signals["unsupported"] = True
@@ -962,6 +1164,30 @@ async def _llm_classify(
     if flow_type not in ("factual", "concierge"):
         flow_type = "concierge"
 
+    # Guard: prevent positive-mood messages being misfired as disengagement.
+    # Despite explicit prompt guidance, the LLM occasionally classifies "I'm just
+    # happy about my life" or similar as disengagement when recent_mood is set.
+    # Detect the misfire deterministically: if the LLM returned disengagement but
+    # the message contains positive sentiment with no frustration signals, reclassify
+    # to emotional so the response path handles it with warmth, not an apology.
+    _POSITIVE_SIGNALS = frozenset({
+        "happy", "great", "good", "excited", "glad", "love", "enjoy",
+        "wonderful", "fantastic", "fine", "pleased", "content", "joy",
+    })
+    _FRUSTRATION_SIGNALS = frozenset({
+        "pissed", "angry", "furious", "frustrated", "useless", "stop",
+        "forget it", "nevermind", "not working", "doesn't matter",
+        "give up", "done with", "i give up",
+    })
+    if message_kind == "disengagement":
+        _msg_lower = msg.lower()
+        _has_positive = any(w in _msg_lower for w in _POSITIVE_SIGNALS)
+        _has_frustration = any(w in _msg_lower for w in _FRUSTRATION_SIGNALS)
+        if _has_positive and not _has_frustration:
+            message_kind = "emotional"
+            domain = "general"
+            sub_intent = "general_inquiry"
+
     # Guard: continuation kinds require an established topic.
     _CONTINUATION_KINDS = {"followup", "refinement", "constraint_refinement"}
     if (
@@ -1005,6 +1231,18 @@ async def _llm_classify(
     # LLM-extracted entity — strip whitespace and punctuation only
     entity_query = str(parsed.get("entity_query", "") or "").strip(" ?.,!")
 
+    # New LLM-driven pipeline signals
+    retrieval_needed = bool(parsed.get("retrieval_needed", False))
+
+    raw_companion_context = parsed.get("companion_context", [])
+    companion_context: list[str] = (
+        [str(c) for c in raw_companion_context if isinstance(c, str)]
+        if isinstance(raw_companion_context, list)
+        else []
+    )
+
+    releases_topic_lock = bool(parsed.get("releases_topic_lock", False))
+
     intent = InterpretedIntent(
         domain=domain,
         sub_intent=sub_intent,
@@ -1016,8 +1254,10 @@ async def _llm_classify(
         entity_query=entity_query,
         flow_type_candidate=flow_type,
         response_mode_hint=response_mode_hint,
+        is_gibberish=is_gibberish,
+        retrieval_needed=retrieval_needed,
+        companion_context=companion_context,
+        releases_topic_lock=releases_topic_lock,
     )
-    if is_gibberish:
-        intent.raw_signals["is_gibberish"] = True
     intent.raw_signals["scenario"] = scenario
     return intent
