@@ -988,7 +988,13 @@ async def compose_context(state: ConciergeState) -> dict:
     # Applies user-expressed domain exclusions (e.g. "no food", "no dining")
     # as a hard filter AFTER all retrieval paths. This ensures excluded
     # categories are never surfaced regardless of how they were retrieved.
-    if scene.excluded_domains:
+    #
+    # Exception: skip when response_mode is hybrid_plan — the user is
+    # explicitly requesting cross-domain content (e.g. "food AND movies"),
+    # so any stale exclusion must not block the hybrid response.
+    notes: list[str] = []
+    _is_hybrid_plan = state.response_plan.response_mode == "hybrid_plan"
+    if scene.excluded_domains and not _is_hybrid_plan:
         entities_before_exclusion = len(entities)
         entities = _apply_domain_exclusions(entities, scene.excluded_domains)
 
@@ -1045,7 +1051,6 @@ async def compose_context(state: ConciergeState) -> dict:
         _inject_offer_context(entities, mall_ctx, state)
 
     # ── Ranking notes ─────────────────────────────────────────────────
-    notes: list[str] = []
     if category_key and category_entities:
         if category_key == "all_stores":
             notes.append(
@@ -1076,7 +1081,7 @@ async def compose_context(state: ConciergeState) -> dict:
             f"Playbook '{playbook_obj.playbook_id}' active — "
             f"{playbook_obj.concierge_reasoning_notes}"
         )
-    if scene.excluded_domains:
+    if scene.excluded_domains and not _is_hybrid_plan:
         notes.append(
             f"HARD EXCLUSION: User has explicitly refused these domains: {scene.excluded_domains}. "
             f"DO NOT recommend ANY entities from these categories. "
