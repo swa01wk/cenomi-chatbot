@@ -96,7 +96,7 @@ def _infer_location(pms_codes: list[str], tags: list[str]) -> dict:
 
     # Floor + zone from code prefix
     if code.startswith("CNL"):
-        floor, zone = "Cinema Level", "Cinema Zone"
+        floor, zone = "Upper Level", "Cinema Zone"
     elif code.startswith("GFHYPM"):
         floor, zone = "Ground", "Hypermarket Area"
     elif code.startswith("GFENT"):
@@ -599,7 +599,7 @@ def build_mall_profile(data: dict) -> dict:
         {
             "zone_id": "z-cinema",
             "name": "Cinema Zone",
-            "floor": "Cinema Level",
+            "floor": "Upper Level",
             "description": "Muvi Cinemas — the entertainment anchor with multiple screens.",
             "category_focus": ["Cinema", "Entertainment"],
         },
@@ -672,7 +672,7 @@ def build_mall_profile(data: dict) -> dict:
         "country": country,
         "address": f"{contact_raw.get('Address1En', '')} {contact_raw.get('Address2En', '')}".strip(),
         "coordinates": coords,
-        "floors": ["Ground", "Cinema Level"],
+        "floors": ["Ground", "Upper Level"],
         "zones": zones,
         "landmarks": landmarks,
         "facilities": facilities,
@@ -764,7 +764,7 @@ def convert(source_path: Path) -> dict:
                 "name": "Muvi Cinemas",
                 "brand": "Muvi Cinemas",
                 "description": "Muvi Cinemas at Al Nakheel Plaza — multiple screens with current releases.",
-                "location": {"floor": "Cinema Level", "zone": "Cinema Zone"},
+                "location": {"floor": "Upper Level", "zone": "Cinema Zone"},
                 "operating_hours": _build_operating_hours(timing),
                 "formats_available": ["Standard"],
                 "price_range": "mid_range",

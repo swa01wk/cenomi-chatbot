@@ -56,88 +56,18 @@ _SCOPE_DEFAULT_RESPONSE_MODE: dict[str, str] = {
     "store_lookup":            "direct_lookup",
 }
 
-# ── Keyword → fact_scope mapping (fallback only) ───────────────────────────
-# Only consulted when the LLM classifier left fact_scope_candidate empty.
-_SCOPE_RULES: list[tuple[tuple[str, ...], str, str, str]] = [
-    # (keywords, fact_scope, fact_entity_type, response_mode)
-    (
-        ("movie", "movies", "film", "films", "showtime", "showtimes",
-         "now showing", "what's playing", "playing", "cinema schedule",
-         "cinema programme", "what can i watch", "what movies"),
-        "movie_schedule", "movie", "structured_fact_list",
-    ),
-    (
-        ("opening hours", "closing hours", "what time do you close",
-         "what time do you open", "when do you open", "when do you close",
-         "mall hours", "mall timing", "what time does", "what are your hours"),
-        "mall_fact", "mall", "quick_answer",
-    ),
-    (
-        ("atm", "cash machine", "cash point"),
-        "service_lookup", "facility", "route_hint",
-    ),
-    (
-        ("prayer room", "prayer rooms", "praying room", "mosque",
-         "musallah", "namaz room", "where to pray"),
-        "service_lookup", "facility", "route_hint",
-    ),
-    (
-        ("stroller", "pram", "wheelchair", "baby chair",
-         "baby trolley", "baby cart"),
-        "service_lookup", "facility", "direct_lookup",
-    ),
-    (
-        ("parking", "car park", "valet"),
-        "service_lookup", "parking", "quick_answer",
-    ),
-    (
-        ("information desk", "customer service", "help desk",
-         "concierge desk"),
-        "service_lookup", "facility", "route_hint",
-    ),
-    (
-        ("where is muvi", "where is vox", "where is the cinema",
-         "cinema location", "cinema floor", "how to get to the cinema"),
-        "cinema_lookup", "cinema", "route_hint",
-    ),
-    (
-        ("where is",),
-        "route_hint", "entity", "route_hint",
-    ),
-    (
-        ("does mall of arabia", "is it at mall", "which malls have",
-         "any of your malls", "across malls", "other mall", "other malls",
-         "also have", "mall of arabia", "cenomi malls"),
-        "cross_mall_availability", "brand", "cross_mall_availability",
-    ),
-    (
-        ("do you have", "is there a", "is there an", "do you carry",
-         "can i find", "available here", "is it here",
-         "is starbucks", "is zara", "is nike", "is h&m", "is mango",
-         "is there starbucks", "is there zara",
-         # Generic "is X here / available" pattern handled via rule below
-         ),
-        "brand_availability", "store", "direct_lookup",
-    ),
-    (
-        ("loyalty", "rewards program", "cenomi rewards", "points program"),
-        "mall_fact", "loyalty", "quick_answer",
-    ),
-    (
-        ("facilities", "services list", "what services", "what facilities",
-         "amenities"),
-        "service_lookup", "facility", "structured_fact_list",
-    ),
-    (
-        ("events", "what events", "upcoming events", "any events"),
-        "mall_fact", "event", "structured_fact_list",
-    ),
-    (
-        ("offers", "deals", "discounts", "promotions", "sales",
-         "what offers"),
-        "mall_fact", "offer", "structured_fact_list",
-    ),
-]
+# ── Domain-based fallback: LLM-driven, no keyword matching ────────────────
+# Applied only when the LLM produced a domain but did not populate
+# fact_scope_candidate (i.e. the sub_intent was not in _SUB_INTENT_TO_FACT_SCOPE).
+# This uses the LLM's own domain classification — not text matching.
+_DOMAIN_SCOPE_FALLBACK: dict[str, tuple[str, str, str]] = {
+    # domain: (fact_scope, entity_type, response_mode)
+    "services":      ("service_lookup",         "service", "route_hint"),
+    "navigation":    ("route_hint",             "entity",  "route_hint"),
+    "entertainment": ("cinema_lookup",          "cinema",  "route_hint"),
+    "mall_info":     ("mall_fact",              "mall",    "quick_answer"),
+    "cross_mall":    ("cross_mall_availability","brand",   "cross_mall_availability"),
+}
 
 # Scope → retrieval targets mapping
 _SCOPE_RETRIEVAL_TARGETS: dict[str, list[str]] = {
@@ -174,16 +104,19 @@ async def resolve_fact_scope(state: ConciergeState) -> dict:
     response_mode = _SCOPE_DEFAULT_RESPONSE_MODE.get(scope, "") if scope else ""
     query_entity = ""
 
-    # ── Keyword rules: fallback only when classifier left scope empty ─────────
+    # ── Domain-based fallback: LLM-driven, no keyword matching ───────────────
+    # When the LLM produced a domain but the sub_intent was not in
+    # _SUB_INTENT_TO_FACT_SCOPE, derive the scope from the LLM's domain.
     if not scope:
-        for keywords, rule_scope, rule_entity_type, rule_mode in _SCOPE_RULES:
-            if any(kw in msg for kw in keywords):
-                scope = rule_scope
-                entity_type = rule_entity_type
-                response_mode = rule_mode
-                break
+        domain = (intent.domain or "").lower()
+        if domain in _DOMAIN_SCOPE_FALLBACK:
+            scope, entity_type, response_mode = _DOMAIN_SCOPE_FALLBACK[domain]
+            logger.debug(
+                "resolve_fact_scope: domain fallback %r → scope=%s", domain, scope
+            )
 
-        # Catch-all: "is X here / available" → brand_availability
+        # Structural fallback: "is X here / available" → brand_availability
+        # This matches sentence structure, not keywords.
         if not scope:
             _brand_here_pat = re.compile(
                 r"\bis\s+\w[\w &'-]{1,20}\s+(?:here|available|in (?:this|the) mall)",

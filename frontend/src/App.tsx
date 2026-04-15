@@ -28,9 +28,11 @@ export default function App() {
             messages={chat.messages}
             isLoading={chat.isLoading}
             selectedTurnId={chat.selectedTurnId}
+            mallConfirmed={chat.mallConfirmed}
             onSend={chat.send}
             onSelectTurn={chat.setSelectedTurnId}
             onFeedback={chat.handleFeedback}
+            onConfirmMall={chat.confirmMall}
           />
         </div>
 

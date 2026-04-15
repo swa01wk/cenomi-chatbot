@@ -7,15 +7,15 @@
     "tagline": "Transforming Your Shopping Experience, One Mall At A Time",
     "floors": [
       "Ground",
-      "Cinema Level"
+      "Upper Level"
     ],
     "key_zones": {
-      "Main Gallery": "Ground floor — fashion, cosmetics, jewelry, accessories, watches. Includes Zara, Swarovski, L'Occitane, Stradivarius, The Body Shop.",
+      "Ground Floor": "Ground floor — fashion, cosmetics, jewelry, accessories, watches. Includes Zara, Swarovski, L'Occitane, Stradivarius, The Body Shop.",
       "Kiosk Row": "Ground floor — inline kiosks for perfumes, cafes, accessories. Includes Baskin Robbins, Doknah, Lord, Bloom.",
       "Food Court": "Ground floor — fast food and dessert. McDonald's, Herfy, Kudu, Popeyes, Cinnabon.",
       "Entertainment Wing": "Ground floor — large-format retail and kids' entertainment. Adidas SP, Brands For Less, Home Box, Centrepoint, Fun Time.",
       "Hypermarket Area": "Ground floor — Danube HyperMarket for groceries and essentials.",
-      "Cinema Zone": "Cinema Level — Muvi Cinemas, the entertainment anchor."
+      "Cinema Zone": "Upper Level — Muvi Cinemas, the entertainment anchor."
     },
     "highlights": [
       "100+ stores and kiosks across 2 levels",
@@ -46,13 +46,13 @@
     "accessibility": [
       "Wheelchair ramps at all entrances",
       "Accessible washrooms",
-      "Complimentary wheelchair loans from Information Desk (Gate 2, Main Gallery)",
+      "Complimentary wheelchair loans from Information Desk (Gate 2, Ground Floor)",
       "Baby stroller loans available at Gate 2 and near Doknah Kiosk"
     ],
     "essential_services": {
-      "information_desk": "Ground floor, Main Gallery, near Gate 2 — directions, lost & found, wheelchair/stroller loans",
-      "prayer_rooms": "Men's and Women's Prayer Rooms on Ground floor, Main Gallery (near Gate 1 and near Max Store)",
-      "atms": "Multiple locations, Main Gallery (near Polo store, Gates 1 & 2, Food Court)",
+      "information_desk": "Ground floor, Ground Floor, near Gate 2 — directions, lost & found, wheelchair/stroller loans",
+      "prayer_rooms": "Men's and Women's Prayer Rooms on Ground floor, Ground Floor (near Gate 1 and near Max Store)",
+      "atms": "Multiple locations, Ground Floor (near Polo store, Gates 1 & 2, Food Court)",
       "washrooms": "Ground floor, near Gates 1, 2, and 3",
       "lost_and_found": "Customer Service Desk, Gate 2"
     },
@@ -65,7 +65,7 @@
   "topic_blocks": {
     "dining": {
       "topic": "dining",
-      "summary": "Al Nakheel Plaza's Food Court on the Ground floor features popular fast food and dessert brands. Cafes and dessert kiosks are found in Kiosk Row and Main Gallery. All dining is halal.",
+      "summary": "Al Nakheel Plaza's Food Court on the Ground floor features popular fast food and dessert brands. Cafes and dessert kiosks are found in Kiosk Row and Ground Floor. All dining is halal.",
       "entities": [
         {
           "name": "McDonald's",
@@ -127,7 +127,7 @@
           "type": "cafe",
           "cuisine": "Coffee & Light Dining",
           "price": "mid_range",
-          "location": "Ground floor, Main Gallery (GF058)",
+          "location": "Ground floor, Ground Floor (GF058)",
           "best_for": "coffee breaks, pastries, meetings",
           "meal_time": "30 min",
           "kids_menu": false,
@@ -138,7 +138,7 @@
           "type": "cafe",
           "cuisine": "Coffee & Light Dining",
           "price": "mid_range",
-          "location": "Ground floor, Main Gallery (GF134/GF135)",
+          "location": "Ground floor, Ground Floor (GF134/GF135)",
           "best_for": "coffee, snacks, relaxing",
           "meal_time": "30 min",
           "kids_menu": false,
@@ -180,7 +180,7 @@
       ],
       "semantic_highlights": [
         "Quick lunch: McDonald's, Herfy, Kudu, Popeyes (all in Food Court, ~20 min)",
-        "Coffee break: Starbucks (Main Gallery), FanJan Caffé (Main Gallery), Cinnabon (Food Court)",
+        "Coffee break: Starbucks (Ground Floor), FanJan Caffé (Ground Floor), Cinnabon (Food Court)",
         "Dessert treat: Baskin Robbins (Kiosk Row), Cinnabon (Food Court), MammaBunz (Kiosk Row)",
         "All dining options are halal"
       ],
@@ -199,7 +199,7 @@
           "type": "beauty",
           "category": "Cosmetics & Skincare",
           "price": "premium",
-          "location": "Ground floor, Main Gallery (GF044)",
+          "location": "Ground floor, Ground Floor (GF044)",
           "gift_type": "premium skincare, fragrances",
           "key_note": "Elegant, upscale, perfect for anniversaries"
         },
@@ -208,7 +208,7 @@
           "type": "jewelry",
           "category": "Fine Jewelry",
           "price": "premium",
-          "location": "Ground floor, Main Gallery (GF040)",
+          "location": "Ground floor, Ground Floor (GF040)",
           "gift_type": "crystal jewelry, accessories",
           "key_note": "Luxury crystal gifts for special occasions"
         },
@@ -217,7 +217,7 @@
           "type": "beauty",
           "category": "Perfume",
           "price": "mid_range",
-          "location": "Ground floor, Main Gallery (GF126)",
+          "location": "Ground floor, Ground Floor (GF126)",
           "gift_type": "Arabic fragrances",
           "key_note": "Classic perfumes, suitable for all ages"
         },
@@ -235,7 +235,7 @@
           "type": "accessories",
           "category": "Watches & Timepieces",
           "price": "premium",
-          "location": "Ground floor, Main Gallery (GF033/GF034) and Kiosk Row (GFK40, GFK59)",
+          "location": "Ground floor, Ground Floor (GF033/GF034) and Kiosk Row (GFK40, GFK59)",
           "gift_type": "stylish watches, accessories",
           "key_note": "Quick, elegant gifts"
         },
@@ -244,7 +244,7 @@
           "type": "jewelry",
           "category": "Fine Jewelry",
           "price": "premium",
-          "location": "Ground floor, Main Gallery (GF038)",
+          "location": "Ground floor, Ground Floor (GF038)",
           "gift_type": "jewelry, watches, elegant gifts",
           "key_note": "Unique collections for special moments"
         },
@@ -253,14 +253,14 @@
           "type": "beauty",
           "category": "Cosmetics & Skincare",
           "price": "mid_range",
-          "location": "Ground floor, Main Gallery (GF010/GF011)",
+          "location": "Ground floor, Ground Floor (GF010/GF011)",
           "gift_type": "body care sets",
           "key_note": "Popular for self-care and gifting"
         }
       ],
       "semantic_highlights": [
-        "Premium gifts: Swarovski, Tous (Main Gallery)",
-        "Quick gifts: Season Accessorize (Kiosk Row/Main Gallery), Ajmal Perfumes, Osma (Kiosk Row, with offer)",
+        "Premium gifts: Swarovski, Tous (Ground Floor)",
+        "Quick gifts: Season Accessorize (Kiosk Row/Ground Floor), Ajmal Perfumes, Osma (Kiosk Row, with offer)",
         "Beauty and self-care: L'Occitane, The Body Shop"
       ],
       "concierge_tips": [
@@ -309,7 +309,7 @@
           "name": "Men's & Women's Prayer Rooms",
           "type": "service",
           "category": "prayer_room",
-          "location": "Ground floor, Main Gallery (near Gate 1 and near Max Store)",
+          "location": "Ground floor, Ground Floor (near Gate 1 and near Max Store)",
           "best_for": "family prayer needs",
           "key_note": "Separate facilities for men and women"
         }
@@ -328,12 +328,12 @@
     },
     "movie": {
       "topic": "movie",
-      "summary": "Muvi Cinema on the Cinema Level offers the latest movies, including Arabic and international releases. Family and action genres are available.",
+      "summary": "Muvi Cinema on the Upper Level offers the latest movies, including Arabic and international releases. Family and action genres are available.",
       "entities": [
         {
           "name": "Muvi Cinema",
           "type": "cinema",
-          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "location": "Upper Level, Cinema Zone (CNL001)",
           "formats": [
             "Standard"
           ],
@@ -344,7 +344,7 @@
       ],
       "semantic_highlights": [
         "Current movies include action, thriller, and sports (Saudi Pro League screenings)",
-        "Cinema is accessible via dedicated Cinema Level",
+        "Cinema is accessible via dedicated Upper Level",
         "Online booking recommended for popular showtimes"
       ],
       "concierge_tips": [
@@ -366,7 +366,7 @@
         {
           "name": "Season Accessorize",
           "type": "accessories",
-          "location": "Kiosk Row (GFK40, GFK59) and Main Gallery (GF033/GF034)",
+          "location": "Kiosk Row (GFK40, GFK59) and Ground Floor (GF033/GF034)",
           "avg_time": "10 min"
         },
         {
@@ -378,7 +378,7 @@
         {
           "name": "ATM",
           "type": "service",
-          "location": "Main Gallery, near Polo store, Gates 1 & 2, Food Court",
+          "location": "Ground Floor, near Polo store, Gates 1 & 2, Food Court",
           "avg_time": "5 min"
         }
       ],
@@ -395,12 +395,12 @@
     },
     "mall_overview": {
       "topic": "mall_overview",
-      "summary": "Al Nakheel Plaza is a modern shopping and entertainment destination in Buraidah (Qassim region), Saudi Arabia. Located on King Abdullah Road, Al Muntazah. 2 floors: Ground Level and Cinema Level. 100+ stores and kiosks across 6 zones. Key anchors: Muvi Cinema, Danube HyperMarket, Fun Time (Sparky's), and a diverse Food Court.",
+      "summary": "Al Nakheel Plaza is a modern shopping and entertainment destination in Buraidah (Qassim region), Saudi Arabia. Located on King Abdullah Road, Al Muntazah. 2 floors: Ground Level and Upper Level. 100+ stores and kiosks across 6 zones. Key anchors: Muvi Cinema, Danube HyperMarket, Fun Time (Sparky's), and a diverse Food Court.",
       "key_facts": {
         "name": "Al Nakheel Plaza",
         "city": "Buraidah, Qassim, Saudi Arabia",
         "address": "King Abdullah Road, Al Muntazah, Buraydah 52381",
-        "floors": ["Ground Level", "Cinema Level"],
+        "floors": ["Ground Level", "Upper Level"],
         "total_stores": "100+",
         "opening_hours": {
           "sun_thu_sat": "09:00 AM – 11:00 PM",
@@ -411,25 +411,25 @@
         "map": "https://maps.app.goo.gl/83uUvGeEcBC28Qdm6"
       },
       "zones": [
-        "Main Gallery (Ground) — Fashion, Jewelry, Beauty, Accessories",
+        "Ground Floor (Ground) — Fashion, Jewelry, Beauty, Accessories",
         "Kiosk Row (Ground) — Perfumes, Cafes, Quick Gifts",
         "Food Court (Ground) — Fast Food, Cafes, Dessert",
         "Entertainment Wing (Ground) — Sports, Value Fashion, Kids Entertainment",
         "Hypermarket Area (Ground) — Danube HyperMarket",
-        "Cinema Zone (Cinema Level) — Muvi Cinema"
+        "Cinema Zone (Upper Level) — Muvi Cinema"
       ],
       "key_services": ["Prayer Rooms", "Baby Stroller Loans", "Wheelchair Loans", "ATM", "Information Desk", "Lost & Found", "Free WiFi (Mobily)"],
       "concierge_tips": [
         "Friday opening is later (01:00 PM) — inform guests planning early visits.",
-        "Cinema Level is accessed from Ground floor via escalator/lift.",
+        "Upper Level is accessed from Ground floor via escalator/lift.",
         "Stroller loans available 4:00 PM – 11:00 PM at Gate 2."
       ]
     },
     "shopping_overview": {
       "topic": "shopping_overview",
-      "summary": "Al Nakheel Plaza's Main Gallery is the primary shopping corridor with premium fashion, jewelry, beauty, and accessories. The Entertainment Wing offers sportswear and value fashion. Kiosk Row features quick-access perfumes and accessories.",
+      "summary": "Al Nakheel Plaza's Ground Floor is the primary shopping corridor with premium fashion, jewelry, beauty, and accessories. The Entertainment Wing offers sportswear and value fashion. Kiosk Row features quick-access perfumes and accessories.",
       "zones": {
-        "Main Gallery": "Fashion anchors: Zara, NINE WEST, Stradivarius, Charles & Keith. Premium: Swarovski, Tous, L'Occitane, The Body Shop. Watches: Al Daham Watches, Season Accessorize.",
+        "Ground Floor": "Fashion anchors: Zara, NINE WEST, Stradivarius, Charles & Keith. Premium: Swarovski, Tous, L'Occitane, The Body Shop. Watches: Al Daham Watches, Season Accessorize.",
         "Kiosk Row": "Quick stops: Ajmal Perfumes, Osma, Doknah, Season Accessorize (watches/accessories).",
         "Entertainment Wing": "Value fashion: Centrepoint, Brands For Less, Red Tag. Sportswear: Adidas SP. Home: Home Box.",
         "Hypermarket Area": "Danube HyperMarket — groceries, essentials, household items."
@@ -450,12 +450,12 @@
     },
     "entertainment": {
       "topic": "entertainment",
-      "summary": "Al Nakheel Plaza has two main entertainment anchors: Muvi Cinema on the Cinema Level (latest movies, online booking) and Fun Time (Sparky's) in the Entertainment Wing (large indoor play center for kids). Saudi Pro League matches are also screened at Muvi Cinema.",
+      "summary": "Al Nakheel Plaza has two main entertainment anchors: Muvi Cinema on the Upper Level (latest movies, online booking) and Fun Time (Sparky's) in the Entertainment Wing (large indoor play center for kids). Saudi Pro League matches are also screened at Muvi Cinema.",
       "entities": [
         {
           "name": "Muvi Cinema",
           "type": "cinema",
-          "location": "Cinema Level, Cinema Zone (CNL001)",
+          "location": "Upper Level, Cinema Zone (CNL001)",
           "contact": "+966535491018",
           "booking": "https://www.muvicinemas.com/ar",
           "key_note": "Latest movies + Saudi Pro League screenings. Multiple screens. Online booking recommended."
@@ -482,11 +482,11 @@
     },
     "cinema_and_movies": {
       "topic": "cinema_and_movies",
-      "summary": "Muvi Cinema on the Cinema Level is Al Nakheel Plaza's entertainment anchor. Currently showing action and thriller films. Saudi Pro League matches coming soon. Online booking available.",
+      "summary": "Muvi Cinema on the Upper Level is Al Nakheel Plaza's entertainment anchor. Currently showing action and thriller films. Saudi Pro League matches coming soon. Online booking available.",
       "cinema": {
         "name": "Muvi Cinema",
         "entity_id": "t-cinema-001",
-        "location": "Cinema Level, Cinema Zone, Unit CNL001",
+        "location": "Upper Level, Cinema Zone, Unit CNL001",
         "phone": "+966535491018",
         "booking_url": "https://www.muvicinemas.com/ar",
         "formats": ["Standard"],
@@ -549,7 +549,7 @@
         "No kids/animation films currently — redirect families to Fun Time"
       ],
       "concierge_tips": [
-        "For a quick pre-movie snack: Food Court (Kudu, Herfy, McDonald's) is directly below Cinema Level.",
+        "For a quick pre-movie snack: Food Court (Kudu, Herfy, McDonald's) is directly below Upper Level.",
         "For post-movie dessert: Baskin Robbins (Kiosk Row) or Cinnabon (Food Court).",
         "If user asks 'what movies' — list now-showing films with genre/audience flags.",
         "If family with kids asks about movies — redirect to Fun Time and explain current adult lineup."
@@ -590,16 +590,16 @@
     },
     "date_night": {
       "topic": "date_night",
-      "summary": "Al Nakheel Plaza offers a pleasant date night experience combining cinema, dining, and optional gift shopping. Muvi Cinema shows current thrillers and action films. Cozy café options available. Premium gift stores in Main Gallery.",
+      "summary": "Al Nakheel Plaza offers a pleasant date night experience combining cinema, dining, and optional gift shopping. Muvi Cinema shows current thrillers and action films. Cozy café options available. Premium gift stores in Ground Floor.",
       "itinerary": [
-        {"step": 1, "activity": "Movie at Muvi Cinema", "options": ["SHELTER (Action/Thriller)", "CRIME 101 (Crime/Action)", "THE HOUSEMAID (Thriller)"], "location": "Cinema Level, Cinema Zone", "note": "Book online at muvicinemas.com"},
-        {"step": 2, "activity": "Dinner or coffee", "options": ["Kudu Restaurant (Food Court, quick & tasty)", "FanJan Caffé (Main Gallery, cozy)", "Starbucks (Main Gallery, casual)"], "location": "Ground floor"},
+        {"step": 1, "activity": "Movie at Muvi Cinema", "options": ["SHELTER (Action/Thriller)", "CRIME 101 (Crime/Action)", "THE HOUSEMAID (Thriller)"], "location": "Upper Level, Cinema Zone", "note": "Book online at muvicinemas.com"},
+        {"step": 2, "activity": "Dinner or coffee", "options": ["Kudu Restaurant (Food Court, quick & tasty)", "FanJan Caffé (Ground Floor, cozy)", "Starbucks (Ground Floor, casual)"], "location": "Ground floor"},
         {"step": 3, "activity": "Dessert treat", "options": ["Baskin Robbins (Kiosk Row)", "Cinnabon (Food Court)", "CoolNup (sweet treats)"], "location": "Ground floor"},
-        {"step": 4, "activity": "Optional gift shopping", "options": ["Swarovski (GF040)", "Tous (GF038)", "Ajmal Perfumes (GF126)", "Osma (GFK49, 99 SAR offer)"], "location": "Main Gallery / Kiosk Row"}
+        {"step": 4, "activity": "Optional gift shopping", "options": ["Swarovski (GF040)", "Tous (GF038)", "Ajmal Perfumes (GF126)", "Osma (GFK49, 99 SAR offer)"], "location": "Ground Floor / Kiosk Row"}
       ],
       "semantic_highlights": [
-        "Cinema: Muvi Cinema (Cinema Level) — thriller/action current lineup",
-        "Cozy dining: FanJan Caffé, Starbucks (both Main Gallery)",
+        "Cinema: Muvi Cinema (Upper Level) — thriller/action current lineup",
+        "Cozy dining: FanJan Caffé, Starbucks (both Ground Floor)",
         "Dessert: Baskin Robbins, Cinnabon, CoolNup",
         "Romantic gifts: Swarovski, Tous, L'Occitane, Ajmal"
       ],
@@ -612,8 +612,8 @@
     },
     "before_movie": {
       "topic": "before_movie",
-      "summary": "Quick options near Muvi Cinema before the movie starts. Food Court is directly below the Cinema Level. Kiosk Row offers fast snacks. Time-sensitive — keep it brief.",
-      "proximity_note": "Food Court (Ground floor) is the most convenient dining option before heading to Cinema Level. Kiosk Row snacks are also fast and accessible.",
+      "summary": "Quick options near Muvi Cinema before the movie starts. Food Court is directly below the Upper Level. Kiosk Row offers fast snacks. Time-sensitive — keep it brief.",
+      "proximity_note": "Food Court (Ground floor) is the most convenient dining option before heading to Upper Level. Kiosk Row snacks are also fast and accessible.",
       "quick_options": [
         {"name": "McDonald's", "type": "fast_food", "location": "Food Court (FC005)", "time": "~15 min", "note": "Fastest option, halal"},
         {"name": "Herfy", "type": "fast_food", "location": "Food Court (FC003)", "time": "~15 min", "note": "Saudi fast food, quick"},
@@ -624,7 +624,7 @@
       "semantic_highlights": [
         "All Food Court options are near_cinema and quick_stop",
         "Kiosk Row snacks (Corn World, Baskin Robbins) are fastest",
-        "Starbucks (Main Gallery) for a coffee to take in"
+        "Starbucks (Ground Floor) for a coffee to take in"
       ],
       "concierge_tips": [
         "If they have 15+ min: any Food Court option (McDonald's, Herfy, Kudu).",
@@ -634,18 +634,18 @@
     },
     "after_movie": {
       "topic": "after_movie",
-      "summary": "Winding down after the movie at Al Nakheel Plaza. Dessert spots, cafes, and casual dining all accessible from Cinema Level. Keep it relaxed — no intensive shopping needed.",
+      "summary": "Winding down after the movie at Al Nakheel Plaza. Dessert spots, cafes, and casual dining all accessible from Upper Level. Keep it relaxed — no intensive shopping needed.",
       "post_movie_flow": "Exit cinema → take escalator/lift to Ground floor → Kiosk Row or Food Court for dessert/coffee",
       "casual_options": [
         {"name": "Baskin Robbins", "type": "dessert", "location": "Kiosk Row (GFK17)", "note": "Classic post-movie ice cream treat"},
         {"name": "Cinnabon", "type": "cafe", "location": "Food Court (FCW04)", "note": "Warm cinnamon rolls, sweet ending"},
         {"name": "MammaBunz", "type": "cafe", "location": "Kiosk Row (GFK58)", "note": "Sweet buns and drinks"},
-        {"name": "Starbucks", "type": "cafe", "location": "Main Gallery (GF134/135)", "note": "Relaxed coffee and chat"},
-        {"name": "FanJan Caffé", "type": "cafe", "location": "Main Gallery (GF058)", "note": "Cozy specialty coffee, great for couples"}
+        {"name": "Starbucks", "type": "cafe", "location": "Ground Floor (GF134/135)", "note": "Relaxed coffee and chat"},
+        {"name": "FanJan Caffé", "type": "cafe", "location": "Ground Floor (GF058)", "note": "Cozy specialty coffee, great for couples"}
       ],
       "semantic_highlights": [
         "Dessert: Baskin Robbins (quick), Cinnabon (warm, cozy), MammaBunz",
-        "Coffee: Starbucks, FanJan Caffé (both Main Gallery)",
+        "Coffee: Starbucks, FanJan Caffé (both Ground Floor)",
         "All options are near_cinema and reward_stop"
       ],
       "concierge_tips": [
@@ -662,28 +662,28 @@
         {
           "name": "Information Desk",
           "type": "information",
-          "location": "Ground floor, Main Gallery, near Gate 2",
+          "location": "Ground floor, Ground Floor, near Gate 2",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Directions, lost & found, service loans"
         },
         {
           "name": "Lost & Found",
           "type": "lost_found",
-          "location": "Ground floor, Main Gallery, near Gate 2",
+          "location": "Ground floor, Ground Floor, near Gate 2",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Report or retrieve lost items"
         },
         {
           "name": "ATM",
           "type": "atm",
-          "location": "Main Gallery, near Polo store, Gates 1 & 2, Food Court",
+          "location": "Ground Floor, near Polo store, Gates 1 & 2, Food Court",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Multiple machines, all major banks"
         },
         {
           "name": "Wheelchair Service",
           "type": "accessibility",
-          "location": "Ground floor, Main Gallery, near Gate 2",
+          "location": "Ground floor, Ground Floor, near Gate 2",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Complimentary loans"
         },
@@ -697,14 +697,14 @@
         {
           "name": "Men's Prayer Room",
           "type": "prayer_room",
-          "location": "Ground floor, Main Gallery, near Gate 1 (Lavalle Store)",
+          "location": "Ground floor, Ground Floor, near Gate 1 (Lavalle Store)",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Ablution facilities available"
         },
         {
           "name": "Women's Prayer Room",
           "type": "prayer_room",
-          "location": "Ground floor, Main Gallery, near Max Store and Food Court",
+          "location": "Ground floor, Ground Floor, near Max Store and Food Court",
           "hours": "09:00 AM–11:00 PM",
           "key_note": "Ablution facilities available"
         },
@@ -754,7 +754,7 @@
         "User mentions family, kids, or children",
         "User asks for things to do as a family"
       ],
-      "approach": "Start at Centrepoint for family shopping → Kids play at Fun Time → Family meal at Food Court (McDonald's, Herfy, Kudu, Popeyes) → Dessert at Baskin Robbins → Prayer break in Main Gallery prayer rooms"
+      "approach": "Start at Centrepoint for family shopping → Kids play at Fun Time → Family meal at Food Court (McDonald's, Herfy, Kudu, Popeyes) → Dessert at Baskin Robbins → Prayer break in Ground Floor prayer rooms"
     },
     {
       "id": "pb-solo-visit",
@@ -772,7 +772,7 @@
         "User mentions anniversary, wedding anniversary",
         "User planning a special couples outing"
       ],
-      "approach": "Gift shopping at Swarovski or Tous → Coffee break at FanJan Caffé → Movie at Muvi Cinema → Relaxing stroll through Main Gallery"
+      "approach": "Gift shopping at Swarovski or Tous → Coffee break at FanJan Caffé → Movie at Muvi Cinema → Relaxing stroll through Ground Floor"
     },
     {
       "id": "pb-gift-girlfriend",
@@ -862,7 +862,7 @@
         "User mentions last-minute, urgent, or quick gift",
         "Detected intent: last_minute_gift, urgent_gift"
       ],
-      "approach": "Head to Osma (Kiosk Row, with offer), Season Accessorize (Kiosk Row/Main Gallery), or Ajmal Perfumes for fast checkout"
+      "approach": "Head to Osma (Kiosk Row, with offer), Season Accessorize (Kiosk Row/Ground Floor), or Ajmal Perfumes for fast checkout"
     },
     {
       "id": "pb-child-activity-parents-shop",

@@ -12,12 +12,12 @@
     },
     "floors": [
       "Ground",
-      "Cinema Level"
+      "Upper Level"
     ],
     "zones": [
       {
         "zone_id": "z-main",
-        "name": "Main Gallery",
+        "name": "Ground Floor",
         "floor": "Ground",
         "description": "Primary shopping corridor with fashion, cosmetics, jewelry, accessories, and watches.",
         "category_focus": [
@@ -75,7 +75,7 @@
       {
         "zone_id": "z-cinema",
         "name": "Cinema Zone",
-        "floor": "Cinema Level",
+        "floor": "Upper Level",
         "description": "Muvi Cinemas — the entertainment anchor with multiple screens.",
         "category_focus": [
           "Cinema",
@@ -90,7 +90,7 @@
         "landmark_type": "entrance",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery"
+          "zone": "Ground Floor"
         },
         "description": "Primary mall entrance."
       },
@@ -100,7 +100,7 @@
         "landmark_type": "entrance",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery",
+          "zone": "Ground Floor",
           "directions_hint": "Near Information Desk"
         },
         "description": "Secondary entrance — Information Desk and Customer Service nearby."
@@ -111,7 +111,7 @@
         "landmark_type": "information_desk",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery",
+          "zone": "Ground Floor",
           "directions_hint": "Gate 2, Customer Service area"
         },
         "description": "Guest services, lost & found, wheelchair and stroller loans."
@@ -124,7 +124,7 @@
         "facility_type": "prayer_room",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery",
+          "zone": "Ground Floor",
           "directions_hint": "Near Gate 1, Lavalle Store"
         },
         "description": "Men's prayer room with ablution facilities.",
@@ -139,7 +139,7 @@
         "facility_type": "prayer_room",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery"
+          "zone": "Ground Floor"
         },
         "description": "Women's prayer room with ablution facilities.",
         "tags": [
@@ -153,7 +153,7 @@
         "facility_type": "accessibility",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery"
+          "zone": "Ground Floor"
         },
         "description": "Complimentary wheelchair loans available.",
         "tags": [
@@ -167,7 +167,7 @@
         "facility_type": "family",
         "location": {
           "floor": "Ground",
-          "zone": "Main Gallery",
+          "zone": "Ground Floor",
           "directions_hint": "Gate 2, near Doknah Kiosk"
         },
         "description": "Baby stroller loans available 4:00 PM – 11:00 PM.",
@@ -245,7 +245,7 @@
       "description": "L'Occitane brand is distinguished by its skin care, body care and perfume products.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF044",
         "directions_hint": "First floor- near Gate 6 , next to L'Occitane"
       },
@@ -374,7 +374,7 @@
       "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers' needs for every occasion.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF033",
         "additional_units": [
           "GF034"
@@ -421,7 +421,7 @@
       "description": "Ajmal is a prestigious brand renowned for its exquisite perfumes, offering a diverse selection of luxurious fragrances. The website features their extensive collection of Arabic and oriental scents, designed for both men and women. With a legacy of craftsmanship and a commitment to unparalleled quality, Ajmal focuses on creating timeless fragrances with innovative compositions. Crafting unforgettable memories since 1951.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF126"
       },
       "operating_hours": {
@@ -506,7 +506,7 @@
       "description": "Zohoor Alreef is a renowned beauty and fragrance brand inspired by the essence of nature. Specializing in premium perfumes, skincare, and body care products, Zohoor Alreef combines elegance and quality to create captivating scents and luxurious self-care experiences.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF060"
       },
       "operating_hours": {
@@ -547,7 +547,7 @@
       "description": "A Saudi brand proud of its roots, that celebrates women and supporting them in every moment, including and accessories that combine comfort with style",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF014",
         "additional_units": [
           "GF015"
@@ -596,7 +596,7 @@
       "description": "Dkhoon Emirates is a luxury fragrance brand known for its exquisite perfumes, oud, and bukhoor. Embodying elegance and heritage, the brand offers rich, long-lasting scents that make a statement of sophistication and luxury.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF081"
       },
       "operating_hours": {
@@ -640,7 +640,7 @@
       "description": "Season is a company specializing in offering a wide range of stylish accessories known for their elegance and high quality, catering to customers&#x27; needs for every occasion",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF070"
       },
       "operating_hours": {
@@ -684,7 +684,7 @@
       "description": "l Dhaham Company was established in 1959 by its founder Mr. Abdul Rahman Al Dhaham, where the first branch was opened in Riyadh and soon more branches were opened in different cities and then joined the entire Kingdom. Al Dhaham Company witnessed rapid and remarkable growth millions of years to become one of the largest experts in luxury watches in the Arabian Gulf region",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF001A"
       },
       "operating_hours": {
@@ -720,7 +720,7 @@
       "description": "Nine West is a fashion retailer specializing in women&#x27;s shoes, handbags, and accessories.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF002",
         "additional_units": [
           "GF003"
@@ -764,7 +764,7 @@
       "description": "Al Rukun Al Swissari Watches is a company with strong principles in the watch retail sector in Saudi Arabia and the Gulf countries. We are authorized dealers of the world&#x27;s finest watches, aligning with our customers&#x27; aspirations. A prestigious brand with nearly 150 branches.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF012"
       },
       "operating_hours": {
@@ -847,7 +847,7 @@
       "description": "Our story started in Brighton, England in 1976. It began with our founder, Dame Anita Roddick, and her belief in something revolutionary: that business could be a force for good. Following her vision, we’ve been rule breaking, never faking and change making for over 40 years.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF010",
         "additional_units": [
           "GF011"
@@ -893,7 +893,7 @@
       "description": "The Optical Club is an optical store that provide a wide options of eyeglasses, sunglasses and contact lenses in a reasonable prices and good quality. also providing a free eye test for all",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF129",
         "additional_units": [
           "GF130"
@@ -932,7 +932,7 @@
       "description": "Al Homaidhi Group, renowned for luxury watches in Saudi Arabia, features 98 top-notch outlets and over 700 specialists committed to unmatched ethical standards.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF137"
       },
       "operating_hours": {
@@ -975,7 +975,7 @@
       "description": "Ali Algabas Trading EST",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF101",
         "additional_units": [
           "GF102",
@@ -1024,7 +1024,7 @@
       "description": "ORANGE BED & BATH specializes in premium bedroom essentials and stylish home accessories. From luxurious bed linens, mattress toppers, and sheets to cozy sleeping pillows and more, we provide everything your home needs, crafted from the finest, high-quality materials. Explore our extensive collection of bathroom necessities and elegant accessories designed to elevate your living space.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GFA4"
       },
       "operating_hours": {
@@ -1107,7 +1107,7 @@
       "description": "Modern designs reflecting the latest fashion trends, blending elegance with simplicity to inspire your unique style.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF064",
         "additional_units": [
           "GF065",
@@ -1155,7 +1155,7 @@
       "description": "A contemporary brand offering innovative fashion that blends boldness and comfort, targeting young individuals seeking a lifestyle aligned with the latest trends. With its daring and fresh designs, Bershka is the ideal choice for those who love uniqueness and creativity in their everyday looks.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF035"
       },
       "operating_hours": {
@@ -1203,7 +1203,7 @@
       "description": "The ultimate destination for vegan shoes, handbags and accessories, Call It Spring is your go-to for coveted trends with accessible price-tags.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF004"
       },
       "operating_hours": {
@@ -1290,7 +1290,7 @@
       "description": "Harayer Factory is a Saudi factory and one of the largest factories in the Kingdom of Saudi Arabia and the first in Madinah. It is also one of the top ten brands in the field of manufacturing and weaving fabrics and silk. We specialize in manufacturing and tailoring abayas in addition to dresses for occasions and weddings. Our team has more than 35 years of experience in the field, as we started with a single tailor and reached 300 tailors. It was established in 1991 and is headquartered in Madinah. Harayer provides high-quality tailoring and detailing services and designs according to every taste and desire, in addition to choosing the finest and finest fabrics from around the world.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF075"
       },
       "operating_hours": {
@@ -1334,7 +1334,7 @@
       "description": "It&#x27;s Mine, established in 2000, is a fashion brand known for offering the best dresses and skirts. With a focus on style, quality, and elegance, the brand caters to fashion-forward individuals seeking trendy and timeless pieces.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF036"
       },
       "operating_hours": {
@@ -1370,7 +1370,7 @@
       "description": "Swarovski is a brand specialized in selling luxury crystal, jewelry, and elegant accessories , including necklaces, earrings, watches, and unique gift items.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF040"
       },
       "operating_hours": {
@@ -1409,7 +1409,7 @@
       "description": "A refreshing concept launched in 2006, REDTAG currently has 225+ fashion & lifestyle stores across the Middle East and Asia and has been growing at a rate of 20 percent annually. As a chain of value fashion and home stores, REDTAG offers a pleasant shopping experience with great variety at unbeatable prices. With 365 days of value, REDTAG is a big hit with families that look forward to the latest in fashion and home trends. The product prices, stringent quality, and availability of a wide range of sizes, shapes and colors make REDTAG the first choice for value-conscious customers. REDTAG is a part of BMA International Group, which has achieved important milestones in retail, fashion, and lifestyle over the last three decades. REDTAG has ambitious plans to open a lot of new stores in the MENA region across malls as well as high streets, with intentions to be a leader in the value fashion and lifestyle market.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF084",
         "additional_units": [
           "GF085",
@@ -1459,7 +1459,7 @@
       "description": "By bottles bearing the Abdul Samad Al-Qurashi brand is that the use of perfumes alters the mood and increases the vital energies in the body for those who seek it. Its effect also goes beyond spreading to those around him as well. Therefore, the goal of the first martyr of the Mihrab was to give life a special flavor and increase its beauty and vitality, so it sought His studies aimed to satisfy people's desires, meet their needs, and spread joy and satisfaction in people Their souls, through many products that respond to different tastes.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF078"
       },
       "operating_hours": {
@@ -1500,7 +1500,7 @@
       "description": "Your destination for health and beauty.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF137A"
       },
       "operating_hours": {
@@ -1540,7 +1540,7 @@
       "description": "Charles & Keith is a fashion and accessories brand that offers contemporary designs blending style and comfort. The brand focuses on catering to the needs of the modern woman at affordable prices.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF131"
       },
       "operating_hours": {
@@ -1582,7 +1582,7 @@
       "description": "Zara is a global fashion brand known for its trendy, high-quality, and affordable clothing. It offers a wide range of stylish apparel, footwear, and accessories, combining fast fashion with elegant designs to cater to diverse fashion tastes.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF020",
         "additional_units": [
           "GF021",
@@ -1678,7 +1678,7 @@
       "description": "\"Prando,\" we are a leading global brand in women's fashion, established in 2005 in Saudi Arabia. With a clear strategic vision and a dedicated team, we have achieved continuous success. Today, we operate over 27 branches across the Kingdom. We are committed to offering the latest fashion trends with high quality, meeting the needs of the modern woman who seeks both elegance and comfort. At \"Prando,\" every detail reflects our dedication to providing an exceptional shopping experience and strengthening our relationship with customers.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF062"
       },
       "operating_hours": {
@@ -1721,7 +1721,7 @@
       "description": "Miyhar is your top choice for high-quality Saudi clothing, offering stylish and authentic designs that reflect the rich cultural heritage of Saudi Arabia",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF112"
       },
       "operating_hours": {
@@ -1764,7 +1764,7 @@
       "description": "Aldo designs trendy, sophisticated, and beautiful accessories that make people look and feel great. Inspired by the latest runway trends from London, Paris, Milan, and New York, Aldo makes high fashion affordable for the style-conscious.Established in 1972 in Montréal, one of Canada’s most vibrant and diverse cities, Aldo expanded into the US market in 1993. Today, it is a truly global brand, offering a wide range of stunning handbags, jewelry, sunglasses, and other accessories.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF013"
       },
       "operating_hours": {
@@ -1809,7 +1809,7 @@
       "description": "Since 1959 Yves Rocher has created a special relationship between plants and female beauty, formulating a cutting-edge cosmetics: the Cosmétique Végétale®. Today the Rocher Group has 10 brands, over 18,000 employees worldwide and over 50 million customers. True to its roots, theRocher Group maintains its beating heart in Brittany, where the entire production is located.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF128"
       },
       "operating_hours": {
@@ -1851,7 +1851,7 @@
       "description": "Tous is a luxury brand offering a wide range of jewelry, watches, gifts, and elegant accessories. Known for its unique collections, Tous combines craftsmanship with contemporary design, creating timeless pieces that exude style, sophistication, and charm for any occasion.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF038",
         "directions_hint": "Main Floor, between Gate 1 and 6"
       },
@@ -1888,7 +1888,7 @@
       "description": "FACES stores are the leading partner of the most prestigious international brands in the field of beauty.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF071",
         "additional_units": [
           "GF072",
@@ -1937,7 +1937,7 @@
       "description": "La Vie en Rose is a leading speciality lingerie retailer based in Montreal, Canada. With the aim of producing underwear that is feminine, sophisticated and sensual, the brand’s designs are extensively researched and painstakingly put together.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF017",
         "additional_units": [
           "GF018"
@@ -1980,7 +1980,7 @@
       "description": "For over 40 years, we have been creating a new concept for every moment, using a local touch that offers you luxury and indulgence.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF001"
       },
       "operating_hours": {
@@ -2022,7 +2022,7 @@
       "description": "Natural Touch We see beauty in the simplest things in life, so we have developed a deep relationship with nature because we believe that nature has the ability to change the way we live. Today we sell our products in more than 100 stores, and all our products contain natural ingredients.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF123"
       },
       "operating_hours": {
@@ -2065,7 +2065,7 @@
       "description": "Actan strives to be the top destination for women&#x27;s elegance, offering designs inspired by Gulf culture, blending tradition with modern sophistication.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF005",
         "additional_units": [
           "GF006"
@@ -2112,7 +2112,7 @@
       "description": "One of the prolific and Largest Malaysian Fashion Retail Brand Targeting Ladies 25+ age with 29 Stores Around KSA.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GFA2C",
         "directions_hint": "Main Floor, between Gate 1 and 6"
       },
@@ -2149,7 +2149,7 @@
       "description": "Cole Haan is a renowned brand offering stylish, high-quality footwear, apparel, and accessories for both men and women. Known for combining craftsmanship with innovation, the brand&#x27;s collections emphasize comfort and design, including notable lines like ZERØGRAND and ØriginalGrand. They offer a variety of products such as shoes, bags, and outerwear, with a focus on modern and functional style.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF096"
       },
       "operating_hours": {
@@ -2192,7 +2192,7 @@
       "description": "At Zyrus, we believe that uniqueness is the starting point that shapes a world of individuality and beauty. Every product we design reflects our vision of empowering individuals to express their unique identities in their own way.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF121",
         "additional_units": [
           "GF122"
@@ -2231,7 +2231,7 @@
       "description": "Max Fashion is an Indian fashion brand under the banner of the Landmark Group in Dubai. The brand was first launched in May 2004 in the Middle East in Abu Dhabi.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GFA6"
       },
       "operating_hours": {
@@ -2271,7 +2271,7 @@
       "description": "For 80 years, Coach has inspired the dreamer in all of us. As we write our next chapter, we’re building on our heritage of craftsmanship and confident New York style to deliver a complete lifestyle brand for modern lives.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF036"
       },
       "operating_hours": {
@@ -2313,7 +2313,7 @@
       "description": "Bareeq Silver offers exquisite jewelry designed to bring you joy, featuring timeless pieces crafted with precision and elegance, perfect for any occasion.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF059B"
       },
       "operating_hours": {
@@ -2475,7 +2475,7 @@
       "description": "La Beaute de La mour is a French brand specializing in body care products and perfumes, offering a variety of high-quality products for both men and women.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF097"
       },
       "operating_hours": {
@@ -2515,7 +2515,7 @@
       "description": "Deraah shares with you beauty in more than 850 branches spread across 162 cities around the Kingdom, for the best products of French perfume, perfume, Oriental Oud, cosmetics, care, men's and women's accessories and hair care devices.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF019"
       },
       "operating_hours": {
@@ -2555,7 +2555,7 @@
       "description": "SEERA company was established in 2006 to meet the needs of modern women and reflect their passion for elegance. It offers unique designs that combine beauty and high quality. We believe that every women deserves to look her best ,so we work hard to provide products that reflect her good taste.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF048"
       },
       "operating_hours": {
@@ -2598,7 +2598,7 @@
       "description": "La Vallee is an online store offering a wide selection of fashion products, including dresses, evening wear, and accessories. The brand features elegant and trendy collections, often focusing on high-quality fabrics like chiffon and crepe. La Vallee provides stylish options for various occasions, from casual wear to special evening events, with a focus on comfort and elegance. The store also offers discounts and promotions for added value.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF037"
       },
       "operating_hours": {
@@ -2640,7 +2640,7 @@
       "description": "Medical eyeglasses and sunglasses shop for eye health.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF061"
       },
       "operating_hours": {
@@ -2680,7 +2680,7 @@
       "description": "Midi is a fashion brand known for its elegant and contemporary clothing, offering a wide range of stylish apparel for both casual and formal occasions. With a focus on high-quality materials and timeless designs, Midi provides fashionable pieces that cater to modern tastes.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF113",
         "additional_units": [
           "GF114",
@@ -2727,7 +2727,7 @@
       "description": "Al Rayes Lingerie is a Saudi brand established in 1967, offering premium global lingerie brands with exceptional quality and elegance through physical stores and online shopping across Riyadh, Eastern Province, and Qassim.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF054",
         "additional_units": [
           "GF055A",
@@ -2767,7 +2767,7 @@
       "description": "Eyewa was founded in 2017, with a purposeful intent to offer an advanced and easy-to-use platform to purchase high-quality eyewear at affordable prices, creating a unique, efficient, and memorable shopping experience to all. Ever since, we became the largest and most trusted online eyewear store in the Middle East to provide the finest brands of prescription glasses, sunglasses, blue light glasses, color contact lenses, and corrective contact lenses.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF051",
         "additional_units": [
           "GF053"
@@ -2854,7 +2854,7 @@
       "description": "Parfois is a Portuguese women's accessories brand with fashion accessories such as handbags, jewelry, wallets, sunglasses, belts, scarves, watches, hair accessories, etc.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF007",
         "additional_units": [
           "GF008"
@@ -2940,7 +2940,7 @@
       "description": "bath & Body Works is one of the world’s leading specialty retailers of fragrant products for the body, hands & home. Customers look to Bath & Body Works for quality, on-trend products and the newest, freshest fragrances",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF132",
         "additional_units": [
           "GF133"
@@ -2983,7 +2983,7 @@
       "description": "Ain Zain Women&#x27;s Abayas offer a stunning collection of modest yet fashionable designs, crafted with high-quality fabrics, blending elegance and comfort for contemporary women. Perfect for every occasion.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF110"
       },
       "operating_hours": {
@@ -3177,7 +3177,7 @@
       "description": "Brand Mene Roz offers a unique collection of fashion, accessories, and lifestyle essentials, blending style and affordability. Designed for trend-conscious shoppers, Mene Roz brings the latest trends with quality and elegance.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF125"
       },
       "operating_hours": {
@@ -3334,7 +3334,7 @@
       "description": "One of the most beautiful perfumes you'll ever experience, the scent of elegance that lasts and refreshes you all day long. A luxurious oriental fragrance for women, blending coffee beans and vanilla with soft flower petals.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF041"
       },
       "operating_hours": {
@@ -3411,7 +3411,7 @@
       "description": "Ibraq (originally Ibrahim Al-Qurashi) is a heritage Saudi Arabian perfume house rooted in the traditional art of perfumery since 1929. Starting from a modest shop near the Holy Mosque in Makkah, the brand expanded to Jeddah and across the Gulf, blending Arabic fragrance heritage with contemporary craftsmanship to create oud, amber, musk, and bespoke perfume blends that celebrate luxury and authenticity. Today, Ibraq is considered one of the leading perfume brands in Saudi Arabia and the Gulf region.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GFA2A"
       },
       "operating_hours": {
@@ -3447,7 +3447,7 @@
       "description": "SHADER is a premium fashion brand specializing in elegant, high-quality abayas and modest wear, known for its refined designs and craftsmanship that reflect timeless style and attention to detail.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF076"
       },
       "operating_hours": {
@@ -3483,7 +3483,7 @@
       "description": "Arasha offers trendy women’s fashion featuring modern cuts, elegant styles, and versatile outfits for every occasion. The brand blends contemporary design with effortless sophistication.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF100"
       },
       "operating_hours": {
@@ -3555,7 +3555,7 @@
       "description": "Fayendra is a jewelry brand offering a wide range of elegant and refined silver and gemstone jewelry for men and women, blending classic artistry with modern design. The brand’s collections include rings, bracelets, necklaces, earrings, and luxury accessories, designed to celebrate life’s special moments with timeless elegance and craftsmanship. Their products are showcased through numerous showrooms across Saudi Arabia and the UAE",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF016"
       },
       "operating_hours": {
@@ -3666,7 +3666,7 @@
       "description": "Rina is a Saudi contemporary fashion brand offering women’s clothing with a modern feminine aesthetic, blending elegance, quality, and contemporary details to elevate everyday style.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF099"
       },
       "operating_hours": {
@@ -3742,7 +3742,7 @@
       "description": "Providing a cup of coffee from the best types of specialty coffee in the world, is our goal in FANJAN , which is the motive to present one of the finest cups of coffee, and to participate In promoting luxury by creating an environment prominent as a meeting place for communities to be more than just a cafe. We seek the highest quality standards in preparing our beverages by searching the coffee farms in the world for the best types of specialty coffee beans , then roasting the beans with care and passion, and preparing the beverages by our professional baristas to enjoy you with the best cup of coffee, We do not stop at this point, but we prepare in our factories the most delicious pastries and sweets to complete the beauty of your day with us. And the factor of training and experience is what distinguishes us, as we have established a training center to train all our employees on quality standards and methods of preparing and presenting all products.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF058"
       },
       "operating_hours": {
@@ -3970,7 +3970,7 @@
       "description": "Starbucks offers a delightful experience with rich, flavorful coffee and a variety of delicious snacks, perfect for fueling your day or relaxing with friends.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "unit_number": "GF134",
         "additional_units": [
           "GF135"
@@ -4085,7 +4085,7 @@
       "brand": "Kids",
       "description": "Muvi Cinema offers a unique experience with a blend of the latest movies and delicious meals, creating a perfect setting for relaxation and enjoyment.",
       "location": {
-        "floor": "Cinema Level",
+        "floor": "Upper Level",
         "zone": "Cinema Zone",
         "unit_number": "CNL001"
       },
@@ -4273,7 +4273,7 @@
       "description": "Directions Gate 1&2 front of Polo store Gate 2 Gate 1&2 food court",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "ATM"
       },
       "operating_hours": {
@@ -4297,7 +4297,7 @@
       "description": "Directions Ground Floor: Customer Service Desk, Gate 2 Contact Information",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Wheelchair"
       },
       "operating_hours": {
@@ -4322,7 +4322,7 @@
       "description": "Description Lost something during your visit? Our Lost & Found service helps reunite you with your belongings Directions Ground Floor: Customer Service Desk, Gate 2 Contact Information",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Lost & Found"
       },
       "operating_hours": {
@@ -4346,7 +4346,7 @@
       "description": "Directions Ground Floor: Customer Service Desk, Gate 2",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Information Desk"
       },
       "operating_hours": {
@@ -4370,7 +4370,7 @@
       "description": "Directions Ground Floor: Gate 2, near Doknah Kiosk Ground Floor: Gates 2 & 3, beside Rina Store",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Information Desk"
       },
       "operating_hours": {
@@ -4395,7 +4395,7 @@
       "description": "Directions Located on the ground floor, in front of each gate.",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Adidas"
       },
       "operating_hours": {
@@ -4419,7 +4419,7 @@
       "description": "Directions Ground Floor: Near Lavalle Store, Gate 1",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Men's Prayer Room"
       },
       "operating_hours": {
@@ -4444,7 +4444,7 @@
       "description": "Directions Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Women's Prayer Room"
       },
       "operating_hours": {
@@ -4469,7 +4469,7 @@
       "description": "Directions Ground Floor: Gate 1, near Lavalle Store Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Men's Washroom"
       },
       "operating_hours": {
@@ -4493,7 +4493,7 @@
       "description": "Directions Ground Floor: Gates 1 & 2 (Food Court) Ground Floor: Gates 2 & 3, near Max Store",
       "location": {
         "floor": "Ground",
-        "zone": "Main Gallery",
+        "zone": "Ground Floor",
         "mappedin_location": "Women's Washroom"
       },
       "operating_hours": {

@@ -103,10 +103,10 @@ _SUB_INTENT_TO_FACT_SCOPE: dict[str, tuple[str, str]] = {
     "service_info": ("service_lookup", "service"),
     "prayer_room": ("service_lookup", "facility"),
     "parking_info": ("service_lookup", "parking"),
+    "facilities_summary": ("service_lookup", "service"),  # general facilities → service lookup
     "cross_mall_search": ("cross_mall_availability", "brand"),
     "brand_availability": ("brand_availability", "store"),
     "overview": ("mall_fact", "mall"),
-    "facilities_summary": ("mall_fact", "mall"),
     "family_friendliness": ("mall_fact", "mall"),
     "what_is_available": ("mall_fact", "mall"),
 }
@@ -119,7 +119,7 @@ VALID_SUB_INTENTS = {
     "brand_availability",
     "general_entertainment", "movie_showtime",
     "store_hours", "parking_info", "location_query", "service_info",
-    "prayer_room", "event_schedule", "offer_details", "loyalty_info",
+    "prayer_room", "facilities_summary", "event_schedule", "offer_details", "loyalty_info",
     "open_exploration", "activity_suggestion", "first_visit_guide",
     "overview", "facilities_summary", "opening_hours",
     "family_friendliness", "what_is_available",
@@ -311,7 +311,8 @@ DOMAINS AND SUB-INTENTS:
 - dining: general_dining, romantic_dining, quick_bite, family_dining, cafe_recommendation, dessert_recommendation
 - shopping: general_shopping, gift_recommendation, fashion_shopping, perfume_shopping, jewelry_shopping, accessories_shopping, offer_details, brand_availability ("do you have H&M?", "is Nike here?", "do you carry Zara?", "is there a Starbucks?") — brand_availability is ONLY for named brands/stores; food items, facilities, and activities use the domain-dispatch rules above.
 - entertainment: general_entertainment, movie_showtime
-- services: store_hours, parking_info, service_info, prayer_room, event_schedule, loyalty_info
+- services: store_hours, parking_info, service_info, prayer_room, facilities_summary, event_schedule, loyalty_info
+  (use facilities_summary when visitor asks about the full set of facilities/amenities/services the mall offers)
 - navigation: location_query
 - general: general_inquiry (greetings, off-topic, unclear)
 
@@ -327,6 +328,61 @@ Examples:
 - "where is the food court" → navigation/location_query
 - "where is the information desk" → services/service_info
 - "where is customer service" → services/service_info
+
+IMPORTANT — SERVICES CLASSIFICATION (CRITICAL — apply to ALL of the following):
+Every query about a mall-provided facility or amenity MUST be classified as:
+  domain=services, sub_intent=service_info, flow_type=factual, response_mode=direct_factual
+
+Exhaustive examples — ALL of these are services/service_info:
+ATM / cash:
+- "where is the ATM?" → services/service_info, entity_query="ATM"
+- "is there an ATM?" → services/service_info, entity_query="ATM"
+- "where can I get cash?" → services/service_info, entity_query="ATM"
+- "I need to withdraw money" → services/service_info, entity_query="ATM"
+- "cash machine" → services/service_info, entity_query="ATM"
+
+WiFi / internet:
+- "is there WiFi here?" → services/service_info, entity_query="WiFi"
+- "free wifi?" → services/service_info, entity_query="WiFi"
+- "do you have internet?" → services/service_info, entity_query="WiFi"
+- "can I connect to the internet?" → services/service_info, entity_query="WiFi"
+
+Lost & Found:
+- "is there a lost and found?" → services/service_info, entity_query="lost and found"
+- "I lost my bag" → services/service_info, entity_query="lost and found"
+- "where do I report a lost item?" → services/service_info, entity_query="lost and found"
+
+Prayer rooms / musallah:
+- "is there a prayer room?" → services/service_info, entity_query="prayer room"
+- "where can I pray?" → services/service_info, entity_query="prayer room"
+- "musallah" → services/service_info, entity_query="prayer room"
+
+Nursing / baby facilities:
+- "is there a nursing room?" → services/service_info, entity_query="nursing room"
+- "baby room?" → services/service_info, entity_query="nursing room"
+- "where can I breastfeed?" → services/service_info, entity_query="nursing room"
+
+Restrooms / toilets:
+- "where are the restrooms?" → services/service_info, entity_query="restroom"
+- "where is the toilet?" → services/service_info, entity_query="restroom"
+- "bathroom?" → services/service_info, entity_query="restroom"
+
+Wheelchairs / strollers:
+- "can I get a wheelchair?" → services/service_info, entity_query="wheelchair"
+- "do you have strollers?" → services/service_info, entity_query="stroller"
+- "pram rental?" → services/service_info, entity_query="stroller"
+
+Lockers / storage:
+- "are there lockers?" → services/service_info, entity_query="lockers"
+- "luggage storage?" → services/service_info, entity_query="lockers"
+- "where can I leave my bags?" → services/service_info, entity_query="lockers"
+
+General facilities:
+- "what facilities does the mall have?" → services/facilities_summary, flow_type=factual
+- "what amenities are available?" → services/facilities_summary, flow_type=factual
+- "what services does the mall offer?" → services/facilities_summary, flow_type=factual
+
+NEVER classify any of the above as domain=general or domain=mall_info.
 
 IMPORTANT — offer_details:
 - ANY question about offers, deals, discounts, sales, or promotions → shopping/offer_details

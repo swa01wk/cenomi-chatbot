@@ -5,6 +5,7 @@ import { DEFAULT_MALL_ID } from "../lib/constants";
 import type { ChatMessage, DebugPayload, MessageFeedback } from "../types/chat";
 
 const STORAGE_KEY = "cenomi_active_mall";
+const STORAGE_KEY_CONFIRMED = "cenomi_mall_confirmed";
 
 function getStoredMallId(): string {
   try {
@@ -14,9 +15,21 @@ function getStoredMallId(): string {
   }
 }
 
-function storeActiveMall(mallId: string): void {
+/** Returns true only when the user has explicitly chosen a mall (not just the default). */
+function getStoredMallConfirmed(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY_CONFIRMED) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function storeActiveMall(mallId: string, confirmed = false): void {
   try {
     localStorage.setItem(STORAGE_KEY, mallId);
+    if (confirmed) {
+      localStorage.setItem(STORAGE_KEY_CONFIRMED, "1");
+    }
   } catch {
     /* storage unavailable */
   }
@@ -35,6 +48,7 @@ export function useChat() {
   const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
   const [mallId, setMallId] = useState<string>(getStoredMallId);
+  const [mallConfirmed, setMallConfirmed] = useState<boolean>(getStoredMallConfirmed);
   // tenantId always mirrors mallId in this system
   const tenantId = mallId;
   const turnCountRef = useRef(0);
@@ -256,6 +270,23 @@ export function useChat() {
     [mallId, reset],
   );
 
+  /**
+   * Explicitly confirm which mall the user is visiting.
+   * This sets the active mall, marks it as user-confirmed, and clears any
+   * prior session so history starts fresh for the chosen mall.
+   */
+  const confirmMall = useCallback(
+    async (chosenMallId: string) => {
+      if (chosenMallId !== mallId) {
+        await reset();
+      }
+      storeActiveMall(chosenMallId, true);
+      setMallId(chosenMallId);
+      setMallConfirmed(true);
+    },
+    [mallId, reset],
+  );
+
   const exportConversation = useCallback(() => {
     const data = {
       session_id: sessionId,
@@ -293,6 +324,7 @@ export function useChat() {
     debugMode,
     tenantId,
     mallId,
+    mallConfirmed,
     selectedTurnId,
     selectedTurn,
     send,
@@ -301,6 +333,7 @@ export function useChat() {
     exportConversation,
     setDebugMode,
     changeMallId,
+    confirmMall,
     setSelectedTurnId,
   };
 }

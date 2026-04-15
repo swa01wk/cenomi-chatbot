@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import SuggestedChips from "../components/SuggestedChips";
-import { SUGGESTED_QUERIES } from "../lib/constants";
+import { SUGGESTED_QUERIES, MALLS } from "../lib/constants";
 import type {
   ChatMessage as ChatMessageType,
   MessageFeedback,
@@ -12,18 +12,22 @@ interface ChatPageProps {
   messages: ChatMessageType[];
   isLoading: boolean;
   selectedTurnId: string | null;
+  mallConfirmed: boolean;
   onSend: (text: string) => void;
   onSelectTurn: (id: string) => void;
   onFeedback: (id: string, update: Partial<MessageFeedback>) => void;
+  onConfirmMall: (mallId: string) => void;
 }
 
 export default function ChatPage({
   messages,
   isLoading,
   selectedTurnId,
+  mallConfirmed,
   onSend,
   onSelectTurn,
   onFeedback,
+  onConfirmMall,
 }: ChatPageProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +48,9 @@ export default function ChatPage({
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-4 py-6">
-          {isEmpty ? (
+          {isEmpty && !mallConfirmed ? (
+            <MallPickerScreen onConfirm={onConfirmMall} />
+          ) : isEmpty ? (
             <WelcomeScreen onChipSelect={onSend} />
           ) : (
             <div className="space-y-4">
@@ -79,6 +85,34 @@ export default function ChatPage({
 
       {/* Input */}
       <ChatInput onSend={onSend} disabled={isLoading} />
+    </div>
+  );
+}
+
+function MallPickerScreen({ onConfirm }: { onConfirm: (mallId: string) => void }) {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center">
+      <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-bold text-white shadow-lg shadow-blue-200">
+        C
+      </div>
+      <h1 className="mt-4 text-xl font-semibold text-gray-800">
+        Cenomi Mall Concierge
+      </h1>
+      <p className="mt-1.5 max-w-sm text-center text-sm text-gray-500">
+        Which Cenomi mall are you visiting today?
+      </p>
+      <div className="mt-8 flex flex-col gap-2.5 w-full max-w-xs">
+        {MALLS.map((mall) => (
+          <button
+            key={mall.id}
+            onClick={() => onConfirm(mall.id)}
+            className="flex flex-col items-start rounded-xl border border-gray-200 bg-white px-5 py-3.5 text-left shadow-sm transition-all hover:border-blue-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <span className="text-sm font-semibold text-gray-800">{mall.label}</span>
+            <span className="text-xs text-gray-400 mt-0.5">{mall.city}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

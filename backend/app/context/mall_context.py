@@ -321,7 +321,7 @@ class MallContextLoader:
         profile_dict = mp.model_dump() if mp else {}
 
         tenants: list[dict[str, Any]] = []
-        for section in ("stores", "dining", "services"):
+        for section in ("stores", "dining"):
             for entity in canonical.get(section, []):
                 d = entity.model_dump()
                 d.setdefault("entity_type", section.rstrip("s"))
@@ -334,9 +334,16 @@ class MallContextLoader:
 
         pack = self.get_context_pack()
 
+        # Build a flat services list for the dedicated services prompt block.
+        services: list[dict[str, Any]] = [
+            entity.model_dump()
+            for entity in canonical.get("services", [])
+        ]
+
         return {
             "mall_profile": profile_dict,
             "tenants": tenants,
+            "services": services,
             "operational_context": pack.get("operational_context", {}),
             "events_and_offers": pack.get("events_and_offers", []),
         }

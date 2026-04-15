@@ -855,6 +855,78 @@ See [CHANGELOG.md](CHANGELOG.md) for full release history.
 
 ---
 
+## Client Feedback — Test Results
+
+Tests run against `backend/tests/test_client_feedback.py` on **2026-04-15** with model `gpt-4o-mini`.
+
+```
+Scenarios : 5/5 passed
+Turns     : 18/18 passed
+```
+
+### CF-01 — Service queries are answered with actual data `5/5`
+
+| Turn | Query | Result | Response snippet |
+|------|-------|--------|-----------------|
+| 1 | Where is the ATM? | ✅ PASS | "The ATM is on the Ground Floor… by Gate 1 and Gate 2, in front of the Polo store…" |
+| 2 | Is there a lost and found? | ✅ PASS | "Lost & Found is on the Ground Floor, near the Information Desk at the Customer Service Desk, Gate 2." |
+| 3 | Do you have a prayer room? | ✅ PASS | "Men's Prayer Room is on Ground, Ground Floor. It is near Lavalle Store, Gate 1." |
+| 4 | What facilities does the mall have? | ✅ PASS | "The mall has these facilities: men's prayer room…wheelchair service…baby stroller service…" |
+| 5 | Is there WiFi here? | ✅ PASS | "I don't have WiFi information…best place to confirm is the Information Desk on the Ground Floor…" |
+
+**Fix applied:** Added a dedicated `MALL SERVICES & FACILITIES` block to the LLM prompt context, expanded service-keyword routing in `resolve_fact_scope.py`, and improved `_lookup_service_details` to return all matched services for list queries.
+
+---
+
+### CF-02 — Mall context is isolated per mall_id `3/3`
+
+| Turn | Mall ID | Query | Result | Response snippet |
+|------|---------|-------|--------|-----------------|
+| 1 | al_nakheel_plaza_28 | What is this mall? | ✅ PASS | "Al Nakheel Plaza in **Buraidah**, Saudi Arabia…" |
+| 2 | al_nakheel_plaza_13 | What is this mall? | ✅ PASS | "Mall of Arabia…in **Jeddah**, Saudi Arabia…" |
+| 3 | al_nakheel_plaza_27 | What is this mall? | ✅ PASS | "Al Nakheel Mall in **Riyadh**…" |
+
+**Fix applied:** Mall picker UI added to the frontend welcome screen (`ChatPage.tsx`) so every session is explicitly tied to a chosen mall. `useChat.ts` persists the confirmed `mall_id` and resets the session on mall switch.
+
+---
+
+### CF-03 — Recovery suggestions exclude the failed domain `3/3`
+
+| Turn | Query | Result | Response snippet |
+|------|-------|--------|-----------------|
+| 1 | Tell me a joke | ✅ PASS | "I'm not sure I can help with 'Tell me a joke' — but I'm here to make your mall visit excellent. I can assist with: Dining… Shopping… Cinema…" |
+| 2 | Tell me another joke | ✅ PASS | Same graceful recovery, no joke suggestions offered |
+| 3 | What can I do here? | ✅ PASS | "…begin at **Zara** on the **Ground Floor** for current fashion, then move to **Stradivarius**…" |
+
+**Fix applied:** `generate_response.py` now dynamically excludes the current failed domain from graceful-recovery suggestion lists, preventing the bot from looping back to a topic it just could not handle.
+
+---
+
+### CF-04 — "Cinema Level" replaced by "Upper Level" in all responses `3/3`
+
+| Turn | Query | Result | Response snippet |
+|------|-------|--------|-----------------|
+| 1 | Where is Muvi Cinema? | ✅ PASS | "Muvi Cinema is on the **Upper Level**, in the Cinema Zone, unit CNL001." |
+| 2 | What floor is the cinema on? | ✅ PASS | "Muvi Cinema is on the **Upper Level**, Cinema Zone." |
+| 3 | Tell me about the mall | ✅ PASS | "…Ground and **Upper Level** areas…" — "Cinema Level" never appears |
+
+**Fix applied:** All occurrences of `"Cinema Level"` replaced with `"Upper Level"` across `al_nakheel_plaza_28.json`, the context pack, semantic data, playbooks, and conversion scripts via bulk `sed` replacement.
+
+---
+
+### CF-05 — "Main Gallery" / "Gallery" replaced by "Ground Floor" in all responses `4/4`
+
+| Turn | Query | Result | Response snippet |
+|------|-------|--------|-----------------|
+| 1 | Where is Zara? | ✅ PASS | "Zara is on the **Ground Floor**, Ground Floor, at unit GF020." |
+| 2 | Where is the prayer room? | ✅ PASS | "The Men's Prayer Room is on the **Ground Floor**, Ground Floor." |
+| 3 | Tell me about the mall | ✅ PASS | "…Ground and Upper Level areas…" — "Gallery" never appears |
+| 4 | Where can I find perfumes? | ✅ PASS | "…Ajmal Perfumes on the **Ground Floor**…Zohoor Al Reef…on the **Ground Floor**…" |
+
+**Fix applied:** Zone name `"Main Gallery"` replaced with `"Ground Floor"` across canonical data, context packs, semantic enrichment rules, and playbooks for `al_nakheel_plaza_28`.
+
+---
+
 ## License
 
 This project is proprietary. All rights reserved.

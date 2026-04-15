@@ -608,10 +608,10 @@ def _build_scene_acknowledgment(state: ConciergeState) -> str:
         "but NEVER use 'Since you're...', 'Given you're...', 'As you're...', or 'Because you're...'.\n"
         "Instead rotate through these polished opener styles:\n"
         "  • Lead with the destination:   'Head to Centrepoint — an excellent selection of kids' jackets on the Ground Floor.'\n"
-        "  • Lead with the person/group:  'For your daughter, the finest picks are in the Main Gallery.'\n"
+        "  • Lead with the person/group:  'For your daughter, the finest picks are on the Ground Floor.'\n"
         "  • Lead with the need:          'For something within budget, here are your three strongest options:'\n"
         "  • Lead with an action:         'Start at Red Tag for strong value picks, then step into Max right next door.'\n"
-        "  • Lead with a direct answer:   'Muvi Cinema on the Cinema Level is the ideal choice for a family screening.'\n"
+        "  • Lead with a direct answer:   'Muvi Cinema on the Upper Level is the ideal choice for a family screening.'\n"
         "Do NOT start with 'Great!', 'Sure!', 'Of course!', 'Absolutely!', 'Hey', 'Hi there', or any casual phrase.\n\n"
     )
 
@@ -1911,23 +1911,38 @@ def _build_unsupported_recovery_response(state: ConciergeState) -> str:
             f"just confirm and I'll look it up for you."
         )
 
+    # Build a domain-aware alternative list (exclude the domain that just failed).
+    current_domain = (state.intent.domain or "").lower()
+    _ALL_ALTERNATIVES: list[tuple[str, str, str]] = [
+        ("dining",        "dining",        "Dining — restaurants, cafes, quick bites"),
+        ("shopping",      "shopping",      "Shopping — stores, brands, offers"),
+        ("entertainment", "entertainment", "Movies & Entertainment — now showing, showtimes"),
+        ("services",      "services",      "Directions & Services — floors, parking, prayer rooms"),
+        ("navigation",    "navigation",    "Navigation — finding specific stores or facilities"),
+    ]
+    alternatives = [
+        label
+        for domain, _, label in _ALL_ALTERNATIVES
+        if domain != current_domain
+    ][:4]  # cap at 4
+
+    bullet_list = "\n".join(f"• **{alt}**" for alt in alternatives)
+
     # Very short / random input
     if len(raw) <= 3:
+        alt_str = ", ".join(a.split(" —")[0] for a in alternatives)
         return (
             "I didn't quite catch that — I'm here to help with the mall. "
-            "You can ask me about dining, shopping, movies, directions, or services. "
+            f"You can ask me about {alt_str}. "
             "What would you like to know?"
         )
 
     # Longer gibberish / off-topic
     return (
-        f"I'm not sure I understood \"{raw[:40]}{'...' if len(raw) > 40 else ''}\" — "
-        "but I'm here to help you navigate the mall. "
+        f"I'm not sure I can help with \"{raw[:40]}{'...' if len(raw) > 40 else ''}\" — "
+        "but I'm here to make your mall visit excellent. "
         "I can assist with:\n"
-        "• **Dining** — restaurants, cafes, quick bites\n"
-        "• **Shopping** — stores, brands, offers\n"
-        "• **Movies & Entertainment** — now showing, showtimes\n"
-        "• **Directions & Services** — floors, parking, prayer rooms\n\n"
+        f"{bullet_list}\n\n"
         "What would you like help with?"
     )
 
@@ -3036,13 +3051,26 @@ def _build_response_mode_instruction(state: ConciergeState) -> str:
     # intent.primary_intent == "unsupported".  This branch handles low-
     # confidence queries that still reached the concierge path.
     if mode == "graceful_recovery":
+        # Exclude the domain that just failed so we never re-suggest it.
+        current_domain = (state.intent.domain or "").lower() if state else ""
+        _RECOVERY_OPTIONS: list[tuple[str, str]] = [
+            ("dining",        "dining (restaurants, cafes, quick bites)"),
+            ("shopping",      "shopping (stores, brands, offers)"),
+            ("entertainment", "cinema and entertainment (movies, showtimes)"),
+            ("services",      "services and directions (parking, prayer rooms, ATM)"),
+            ("navigation",    "navigation (finding a specific store or facility)"),
+        ]
+        alternatives = ", ".join(
+            label
+            for domain, label in _RECOVERY_OPTIONS
+            if domain != current_domain
+        )
         return (
             "RESPONSE MODE — GRACEFUL RECOVERY:\n"
             "The guest's query is unclear or outside supported topics. "
             "Rules:\n"
             "  1. Do NOT hallucinate stores, services, or details.\n"
-            "  2. Offer 3–4 supported directions graciously "
-            "(e.g. dining, shopping, cinema, services).\n"
+            f"  2. Offer 3–4 supported directions graciously from: {alternatives}.\n"
             "  3. Ask ONE short, focused clarifying question if it would genuinely help.\n"
             "  4. Never claim information you do not have.\n\n"
         )

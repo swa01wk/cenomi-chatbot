@@ -86,12 +86,12 @@
     "entity_cap": 5,
     "must_include_entity_types": ["store", "dining"],
     "fallback_entity_types": [],
-    "itinerary_template": "1) Coffee at Starbucks/FanJan → 2) Browse Main Gallery (Zara, L'Occitane) → 3) Optional treat or meal",
+    "itinerary_template": "1) Coffee at Starbucks/FanJan → 2) Browse Ground Floor (Zara, L'Occitane) → 3) Optional treat or meal",
     "retrieval_triggers": [],
     "next_step_hint": "Ask about specific interests (fashion, electronics, beauty) to narrow recommendations",
     "do_not_include": ["Kids-only stores", "Group-only activities"],
     "priority": 5,
-    "concierge_reasoning_notes": "Solo visitors appreciate efficiency and discovery. Start with Starbucks in Main Gallery for coffee. Suggest browsing Zara, NINE WEST, and L'Occitane for personal shopping. Mention WiFi and quiet seating at FanJan Caffé."
+    "concierge_reasoning_notes": "Solo visitors appreciate efficiency and discovery. Start with Starbucks in Ground Floor for coffee. Suggest browsing Zara, NINE WEST, and L'Occitane for personal shopping. Mention WiFi and quiet seating at FanJan Caffé."
   },
   {
     "playbook_id": "pb-anniversary",
@@ -142,7 +142,7 @@
       "Practical/utilitarian stores"
     ],
     "priority": 7,
-    "concierge_reasoning_notes": "Anniversary plans should feel special. Recommend Swarovski or Tous in Main Gallery for jewelry, L'Occitane for luxury beauty gifts, and FanJan Caffé for a cozy dinner. Suggest Muvi Cinema for a movie if desired."
+    "concierge_reasoning_notes": "Anniversary plans should feel special. Recommend Swarovski or Tous in Ground Floor for jewelry, L'Occitane for luxury beauty gifts, and FanJan Caffé for a cozy dinner. Suggest Muvi Cinema for a movie if desired."
   },
   {
     "playbook_id": "pb-gift-girlfriend",
@@ -259,7 +259,7 @@
       "If no movie is showing, suggest upcoming releases",
       "If no table service, suggest best available fast food"
     ],
-    "response_shape_hint": "Suggest a movie at Muvi Cinema, then 2-3 dining options nearby (Food Court or Main Gallery)",
+    "response_shape_hint": "Suggest a movie at Muvi Cinema, then 2-3 dining options nearby (Food Court or Ground Floor)",
     "preferred_response_shape": "guided_plan",
     "preferred_strategy": "mini_itinerary",
     "shortlist_size_hint": 7,
@@ -395,7 +395,7 @@
     "next_step_hint": "Ask about shopping interests (fashion, beauty, accessories)",
     "do_not_include": ["Full meal restaurants", "Kids-only stores"],
     "priority": 6,
-    "concierge_reasoning_notes": "Suggest shopping at Zara, Stradivarius, or NINE WEST in Main Gallery, then dessert at CINNABON in Food Court or Baskin Robbins in Kiosk Row."
+    "concierge_reasoning_notes": "Suggest shopping at Zara, Stradivarius, or NINE WEST in Ground Floor, then dessert at CINNABON in Food Court or Baskin Robbins in Kiosk Row."
   },
   {
     "playbook_id": "pb-date-plan",
@@ -532,7 +532,7 @@
     "next_step_hint": "Ask about preferred product type (jewelry, fashion, accessories)",
     "do_not_include": ["Budget stores", "Kids or family-only stores"],
     "priority": 6,
-    "concierge_reasoning_notes": "Highlight Swarovski, Tous, COACH, and Al Daham Watches in Main Gallery for luxury shopping. L'Occitane offers premium beauty, and NINE WEST or Charles & Keith for high-end footwear."
+    "concierge_reasoning_notes": "Highlight Swarovski, Tous, COACH, and Al Daham Watches in Ground Floor for luxury shopping. L'Occitane offers premium beauty, and NINE WEST or Charles & Keith for high-end footwear."
   },
   {
     "playbook_id": "pb-last-minute-gift",
@@ -574,7 +574,7 @@
     "next_step_hint": "Ask about recipient (age/gender) to refine suggestions",
     "do_not_include": ["Stores with long wait times", "Custom order-only stores"],
     "priority": 8,
-    "concierge_reasoning_notes": "MINISO and The Body Shop in Main Gallery are ideal for quick, popular gifts. Ajmal Perfumes offers ready-to-go fragrance gifts. Suggest CINNABON for a sweet add-on."
+    "concierge_reasoning_notes": "MINISO and The Body Shop in Ground Floor are ideal for quick, popular gifts. Ajmal Perfumes offers ready-to-go fragrance gifts. Suggest CINNABON for a sweet add-on."
   },
   {
     "playbook_id": "pb-child-activity-parents-shop",
@@ -774,7 +774,7 @@
       "Stores requiring intensive shopping energy"
     ],
     "priority": 9,
-    "concierge_reasoning_notes": "Natural post-movie flow: dessert → coffee → light snack. Baskin Robbins (Kiosk Row), Cinnabon (Food Court), or FanJan Caffé / Starbucks (Main Gallery) are ideal. Keep it relaxed and casual."
+    "concierge_reasoning_notes": "Natural post-movie flow: dessert → coffee → light snack. Baskin Robbins (Kiosk Row), Cinnabon (Food Court), or FanJan Caffé / Starbucks (Ground Floor) are ideal. Keep it relaxed and casual."
   },
   {
     "playbook_id": "pb-quick-errand",
@@ -864,7 +864,7 @@
     "next_step_hint": "Ask if they need directions to a specific area or want recommendations",
     "do_not_include": [],
     "priority": 10,
-    "concierge_reasoning_notes": "Mall overview must be concise and answer-first. Lead with: Al Nakheel Plaza, Buraidah (King Abdullah Road, Al Muntazah). 2 floors: Ground + Cinema Level. 6 zones: Main Gallery, Kiosk Row, Food Court, Entertainment Wing, Hypermarket Area, Cinema Zone. Highlights: Muvi Cinema, Danube HyperMarket, Fun Time, 100+ stores, free parking. Hours: Sun-Thu & Sat 09:00 AM-11:00 PM, Fri 01:00 PM-11:00 PM. Do NOT list every store."
+    "concierge_reasoning_notes": "Mall overview must be concise and answer-first. Lead with: Al Nakheel Plaza, Buraidah (King Abdullah Road, Al Muntazah). 2 floors: Ground + Cinema Level. 6 zones: Ground Floor, Kiosk Row, Food Court, Entertainment Wing, Hypermarket Area, Cinema Zone. Highlights: Muvi Cinema, Danube HyperMarket, Fun Time, 100+ stores, free parking. Hours: Sun-Thu & Sat 09:00 AM-11:00 PM, Fri 01:00 PM-11:00 PM. Do NOT list every store."
   },
   {
     "playbook_id": "pb-brand-lookup",
@@ -942,7 +942,7 @@
     "next_step_hint": "Ask if they want to narrow by budget, brand, or specific style",
     "do_not_include": ["Unrelated categories"],
     "priority": 7,
-    "concierge_reasoning_notes": "Match product category to the right zone. Fashion → Main Gallery (Zara, NINE WEST, Stradivarius). Perfumes → Kiosk Row (Ajmal, Osma, Doknah). Shoes → Main Gallery (NINE WEST, Charles & Keith). Beauty → Main Gallery (L'Occitane, The Body Shop). Value → Entertainment Wing (Centrepoint, Brands For Less). Keep to 3-4 strong options."
+    "concierge_reasoning_notes": "Match product category to the right zone. Fashion → Ground Floor (Zara, NINE WEST, Stradivarius). Perfumes → Kiosk Row (Ajmal, Osma, Doknah). Shoes → Ground Floor (NINE WEST, Charles & Keith). Beauty → Ground Floor (L'Occitane, The Body Shop). Value → Entertainment Wing (Centrepoint, Brands For Less). Keep to 3-4 strong options."
   },
   {
     "playbook_id": "pb-movie-showtime-lookup",
@@ -1142,7 +1142,7 @@
     "next_step_hint": "Ask if they need anything else",
     "do_not_include": ["Non-service entities"],
     "priority": 10,
-    "concierge_reasoning_notes": "Services need direct answers, not shortlists. ATM: Main Gallery near Polo store, Gates 1 & 2, Food Court. Prayer rooms: Men's near Gate 1/Lavalle Store; Women's near Max Store/Food Court. Stroller: Gate 2, near Doknah Kiosk (4PM-11PM). Wheelchair: Gate 2, Customer Service. Information Desk: Gate 2. Lost & Found: Gate 2, Customer Service."
+    "concierge_reasoning_notes": "Services need direct answers, not shortlists. ATM: Ground Floor near Polo store, Gates 1 & 2, Food Court. Prayer rooms: Men's near Gate 1/Lavalle Store; Women's near Max Store/Food Court. Stroller: Gate 2, near Doknah Kiosk (4PM-11PM). Wheelchair: Gate 2, Customer Service. Information Desk: Gate 2. Lost & Found: Gate 2, Customer Service."
   },
   {
     "playbook_id": "pb-route-refinement",
@@ -1183,7 +1183,7 @@
     "next_step_hint": "Ask what they need (dining, shopping, service) to give a more precise suggestion",
     "do_not_include": ["Destinations requiring extensive navigation", "Unrelated zones"],
     "priority": 9,
-    "concierge_reasoning_notes": "For 'near cinema': Food Court is the closest dining zone (Ground floor, directly below Cinema Level). Kiosk Row is also highly accessible. For 'closer to cinema' — give Food Court + Kiosk Row as top picks. For 'near entrance': Main Gallery stores near Gate 1 and Gate 2 are fastest to access from the parking area."
+    "concierge_reasoning_notes": "For 'near cinema': Food Court is the closest dining zone (Ground floor, directly below Cinema Level). Kiosk Row is also highly accessible. For 'closer to cinema' — give Food Court + Kiosk Row as top picks. For 'near entrance': Ground Floor stores near Gate 1 and Gate 2 are fastest to access from the parking area."
   },
   {
     "playbook_id": "pb-quick-snack",
@@ -1223,6 +1223,6 @@
     "next_step_hint": "Ask if they want sweet or savory",
     "do_not_include": ["Full-service restaurants", "Long-wait dining"],
     "priority": 7,
-    "concierge_reasoning_notes": "Quick snack options: Corn World (Kiosk Row, savory), Baskin Robbins (Kiosk Row, ice cream), MammaBunz (Kiosk Row, sweet buns), Cinnabon (Food Court, cinnamon rolls). For quick coffee: Starbucks or FanJan Caffé (Main Gallery). All fast and suitable before a movie or as a shopping break."
+    "concierge_reasoning_notes": "Quick snack options: Corn World (Kiosk Row, savory), Baskin Robbins (Kiosk Row, ice cream), MammaBunz (Kiosk Row, sweet buns), Cinnabon (Food Court, cinnamon rolls). For quick coffee: Starbucks or FanJan Caffé (Ground Floor). All fast and suitable before a movie or as a shopping break."
   }
 ]

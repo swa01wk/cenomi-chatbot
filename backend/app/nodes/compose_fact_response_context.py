@@ -182,6 +182,26 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
                 "source": "factual/service",
             })
 
+        elif data_type == "service_list":
+            svcs = data.get("services", [])
+            fact_payload["services"] = svcs
+            fact_payload["summary_notes"].append(
+                f"Service list retrieved: {len(svcs)} services"
+            )
+            for svc in svcs:
+                extracted_entities.append({
+                    "entity_type": "service",
+                    "entity_id": svc.get("entity_id", ""),
+                    "name": svc.get("name", ""),
+                    "service_category": svc.get("service_category", ""),
+                    "description": svc.get("description", ""),
+                    "floor": svc.get("location", {}).get("floor", ""),
+                    "zone": svc.get("location", {}).get("zone", ""),
+                    "is_free": svc.get("is_free"),
+                    "pricing_notes": svc.get("pricing_notes", ""),
+                    "source": "factual/service",
+                })
+
         elif data_type == "entity_hours":
             if data.get("type") == "mall_hours":
                 fact_payload["mall_hours"] = data.get("operating_hours", {})

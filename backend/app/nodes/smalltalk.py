@@ -147,8 +147,8 @@ _GREETING_RETURNING: list[str] = [
     "upper level, and I am here to guide you effortlessly. What are you looking for?",
 
     "Still here whenever you are ready. A brief orientation: fashion and accessories "
-    "are centred in the Main Gallery, dining is near the central atrium, and entertainment "
-    "is on the upper level. Is there something specific I can help you with?",
+    "are on the Ground Floor, dining is near the central atrium, and entertainment "
+    "is on the Upper Level. Is there something specific I can help you with?",
 
     "At your service. If you are not quite sure where to begin, simply tell me one thing "
     "you have in mind — shopping, a meal, a film, something for the family — "

@@ -284,7 +284,7 @@ GUIDELINES — follow these strictly:
     - Lead with the DESTINATION:
         "Head to Centrepoint on the Ground Floor — they carry an excellent kids' range."
     - Lead with the PERSON/GROUP:
-        "For your little one, the best selections are right in the Main Gallery."
+        "For your little one, the best selections are right on the Ground Floor."
     - Lead with the NEED/OCCASION:
         "For something within budget, here are the three strongest options:"
         "For a family outing — here is a plan worth following:"
@@ -292,7 +292,7 @@ GUIDELINES — follow these strictly:
         "Start at Red Tag for strong value picks, then step into Max right next door."
         "A quick stop at the Food Court covers everything — fast, varied, and family-friendly."
     - Lead with a SHORT DIRECT ANSWER:
-        "Muvi Cinema on the Cinema Level is the ideal choice for a family screening."
+        "Muvi Cinema on the Upper Level is the ideal choice for a family screening."
         "The Food Court on the Ground Floor has all you need — efficient, affordable, welcoming."
     - Lead with a CONSTRAINT ACKNOWLEDGMENT:
         "Keeping it within budget: Red Tag and Max are both excellent nearby options."
@@ -530,6 +530,34 @@ def _format_mall_context(mall_context: dict[str, Any]) -> str:
                 f"Parking: {cap_str}, "
                 f"rate {parking.get('rate', 'N/A')}, "
                 f"valet {'available' if parking.get('valet') else 'not available'}"
+            )
+
+    # --- mall services (ATM, Lost & Found, Info Desk, etc.) ---
+    service_entities = mall_context.get("services") or []
+    if service_entities:
+        svc_lines = []
+        for s in service_entities:
+            s_name = s.get("name", "")
+            if not s_name:
+                continue
+            s_cat = s.get("service_category", s.get("category", ""))
+            s_desc = (s.get("description") or "")[:80]
+            loc_data = s.get("location", {})
+            if isinstance(loc_data, dict):
+                s_floor = loc_data.get("floor", "")
+                s_zone = loc_data.get("zone", "")
+            else:
+                s_floor = ""
+                s_zone = ""
+            loc_parts = [p for p in [s_floor, s_zone] if p]
+            loc_str = f" [{', '.join(loc_parts)}]" if loc_parts else ""
+            is_free = s.get("is_free")
+            free_str = " (free)" if is_free else ""
+            svc_lines.append(f"  - {s_name}{loc_str} — {s_cat}{free_str}: {s_desc}")
+        if svc_lines:
+            sections.append(
+                "MALL SERVICES & FACILITIES — answer service-related questions using these:\n"
+                + "\n".join(svc_lines)
             )
 
     # --- events / offers (active only) ---

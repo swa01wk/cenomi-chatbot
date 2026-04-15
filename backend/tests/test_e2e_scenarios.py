@@ -387,7 +387,7 @@ SCENARIOS: list[Scenario] = [
             Turn(
                 query="where is the ATM",
                 note="Factual — must give ATM floor/location. Must NOT redirect to shopping/offers.",
-                must=["atm", "ground", "main gallery"],
+                must=["atm", "ground"],
                 must_not=["restaurant", "offer"],
             ),
             Turn(
@@ -448,8 +448,8 @@ SCENARIOS: list[Scenario] = [
             ),
             Turn(
                 query="im attending, need an outfit, wedding but not too fancy",
-                note="Smart-casual — must suggest outfit options in main gallery. No ball gowns.",
-                must=["outfit", "main gallery"],
+                note="Smart-casual — must suggest outfit options on the ground floor. No ball gowns.",
+                must=["outfit", "ground floor"],
                 must_not=["ball gown", "tuxedo", "error"],
             ),
             Turn(

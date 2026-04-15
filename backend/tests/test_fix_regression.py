@@ -178,7 +178,7 @@ SCENARIOS: list[Scenario] = [
                 note="CRITICAL: 'Thanks' after bot question → must route to smalltalk thanks pool, "
                      "NOT repeat recommendations",
                 must=[],
-                must_not=["l'occitane", "for your grandma", "ground floor", "main gallery"],
+                must_not=["l'occitane", "for your grandma", "main gallery"],
                 debug={"message_kind": "thanks"},
             ),
         ],

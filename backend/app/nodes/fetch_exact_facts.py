@@ -336,24 +336,52 @@ def _lookup_parking(msg: str, mall_ctx) -> dict | None:
 
 
 def _lookup_service_details(msg: str, mall_ctx) -> dict | None:
+    """Return matching service(s) for a query.
+
+    For general list/facilities queries returns ALL services so the LLM can
+    present a complete picture.  For specific queries (e.g. "where is the ATM")
+    returns the first matching service.
+    """
     canonical = mall_ctx._builder._canonical
     services = canonical.get("services", [])
+
+    def _to_dict(svc) -> dict:
+        return {
+            "type": "service_details",
+            "entity_id": svc.entity_id,
+            "name": svc.name,
+            "service_category": getattr(svc, "service_category", ""),
+            "description": getattr(svc, "description", ""),
+            "location": svc.location.model_dump() if svc.location else {},
+            "operating_hours": svc.operating_hours.model_dump() if svc.operating_hours else {},
+            "is_free": getattr(svc, "is_free", None),
+            "pricing_notes": getattr(svc, "pricing_notes", None),
+        }
+
+    # The LLM routes general facility/amenity queries with sub_intent=facilities_summary.
+    # When the query has no specific entity name, return ALL services so the LLM
+    # can generate a complete facilities list — no keyword matching needed here.
+    if not msg.strip():
+        all_svcs = [_to_dict(s) for s in services]
+        return {"type": "service_list", "services": all_svcs} if all_svcs else None
+
+    # Try to find a named match first
+    matched: list[dict] = []
     for svc in services:
         name = svc.name.lower()
-        cat = svc.service_category.lower()
+        cat = getattr(svc, "service_category", "").lower()
         if name in msg or cat in msg:
-            return {
-                "type": "service_details",
-                "entity_id": svc.entity_id,
-                "name": svc.name,
-                "service_category": svc.service_category,
-                "description": svc.description,
-                "location": svc.location.model_dump(),
-                "operating_hours": svc.operating_hours.model_dump(),
-                "is_free": svc.is_free,
-                "pricing_notes": svc.pricing_notes,
-            }
-    return None
+            matched.append(_to_dict(svc))
+
+    # For multiple matches or when no name matched (general list intent),
+    # return the full service catalogue so the LLM has complete context.
+    if len(matched) > 1 or (not matched):
+        all_svcs = [_to_dict(s) for s in services]
+        if all_svcs:
+            return {"type": "service_list", "services": all_svcs}
+        return None
+
+    return matched[0]
 
 
 def _lookup_dining_list(msg: str, mall_ctx) -> dict | None:

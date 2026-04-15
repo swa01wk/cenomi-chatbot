@@ -4,20 +4,20 @@
   "enrichment_rules": [
     {
       "rule_id": "er-fashion-main",
-      "description": "Fashion stores in the Main Gallery are suitable for style-conscious shoppers and gifting.",
+      "description": "Fashion stores in the Ground Floor are suitable for style-conscious shoppers and gifting.",
       "match_conditions": {
         "category": [
           "Fashion"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "style_shopping",
         "gift_friendly",
         "trendy",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -47,7 +47,7 @@
     },
     {
       "rule_id": "er-jewelry-premium-main",
-      "description": "Premium jewelry stores in the Main Gallery are ideal for special occasions and romantic gifting.",
+      "description": "Premium jewelry stores in the Ground Floor are ideal for special occasions and romantic gifting.",
       "match_conditions": {
         "category": [
           "Jewelry"
@@ -57,7 +57,7 @@
           "luxury"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
@@ -65,7 +65,7 @@
         "special_occasion",
         "romantic",
         "premium",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "couple_friendly",
@@ -134,19 +134,19 @@
     },
     {
       "rule_id": "er-beauty-main",
-      "description": "Beauty and cosmetics stores in the Main Gallery are popular for gifts and self-treats.",
+      "description": "Beauty and cosmetics stores in the Ground Floor are popular for gifts and self-treats.",
       "match_conditions": {
         "category": [
           "Beauty"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "gift_friendly",
         "self_treat",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -362,19 +362,19 @@
     },
     {
       "rule_id": "er-electronics-main",
-      "description": "Electronics stores in the Main Gallery are suited for tech lovers and gifting.",
+      "description": "Electronics stores in the Ground Floor are suited for tech lovers and gifting.",
       "match_conditions": {
         "category": [
           "Electronics"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "tech_shopping",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -586,19 +586,19 @@
     },
     {
       "rule_id": "er-retail-main",
-      "description": "General retail stores in the Main Gallery offer a variety of shopping and gifting options.",
+      "description": "General retail stores in the Ground Floor offer a variety of shopping and gifting options.",
       "match_conditions": {
         "category": [
           "Retail"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "variety_shopping",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -631,13 +631,13 @@
           "Health"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "self_care",
         "practical_shopping",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -662,19 +662,19 @@
     },
     {
       "rule_id": "er-lifestyle-main",
-      "description": "Lifestyle stores in the Main Gallery are good for home, gifting, and self-treats.",
+      "description": "Lifestyle stores in the Ground Floor are good for home, gifting, and self-treats.",
       "match_conditions": {
         "category": [
           "Lifestyle"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "lifestyle",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "solo_friendly",
@@ -700,20 +700,20 @@
     },
     {
       "rule_id": "er-kids-main",
-      "description": "Kids stores in the Main Gallery are family-focused and ideal for child gifting.",
+      "description": "Kids stores in the Ground Floor are family-focused and ideal for child gifting.",
       "match_conditions": {
         "category": [
           "Kids"
         ],
         "zone": [
-          "Main Gallery"
+          "Ground Floor"
         ]
       },
       "apply_tags": [
         "kid_friendly",
         "family_friendly",
         "child_shopping",
-        "main_gallery"
+        "ground_floor"
       ],
       "apply_audience": [
         "family_friendly",
@@ -861,9 +861,9 @@
     },
     {
       "rule_id": "er-near-cinema-main-gallery",
-      "description": "Main Gallery stores closest to Cinema Level escalator/lift are eligible for near_cinema routing.",
+      "description": "Ground Floor stores closest to Cinema Level escalator/lift are eligible for near_cinema routing.",
       "match_conditions": {
-        "zone": ["Main Gallery"],
+        "zone": ["Ground Floor"],
         "entity_type": ["dining", "store"]
       },
       "apply_tags": [
@@ -887,7 +887,7 @@
         "self_care",
         "special_occasion",
         "anchor",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -1074,7 +1074,7 @@
         "gift_friendly",
         "fashionable",
         "elegant",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -1123,7 +1123,7 @@
         "last_minute_gift": 0.6,
         "child_activity_while_parents_shop": 0
       },
-      "concierge_notes": "Season Accessorize (Main Gallery) is ideal for premium watches and elegant accessories. Perfect for special occasions or gifting. Recommend pairing with a visit to a nearby fashion store for a full style upgrade."
+      "concierge_notes": "Season Accessorize (Ground Floor) is ideal for premium watches and elegant accessories. Perfect for special occasions or gifting. Recommend pairing with a visit to a nearby fashion store for a full style upgrade."
     },
     {
       "entity_id": "t-store-005",
@@ -1135,7 +1135,7 @@
         "mid_range",
         "gift_friendly",
         "oriental_fragrance",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1255,7 +1255,7 @@
         "perfume",
         "mid_range",
         "nature_inspired",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1313,7 +1313,7 @@
         "saudi_brand",
         "women_focused",
         "anchor",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "women_friendly",
@@ -1372,7 +1372,7 @@
         "mid_range",
         "luxury",
         "oriental_fragrance",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1432,7 +1432,7 @@
         "mid_range",
         "gift_friendly",
         "stylish",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1480,7 +1480,7 @@
         "last_minute_gift": 0.5,
         "child_activity_while_parents_shop": 0
       },
-      "concierge_notes": "Season (Main Gallery) specializes in trendy accessories and bags, perfect for quick gifts or a style refresh. Suggest for teens and fashion lovers. Combine with a dessert stop for a fun shopping outing."
+      "concierge_notes": "Season (Ground Floor) specializes in trendy accessories and bags, perfect for quick gifts or a style refresh. Suggest for teens and fashion lovers. Combine with a dessert stop for a fun shopping outing."
     },
     {
       "entity_id": "t-store-011",
@@ -1491,7 +1491,7 @@
         "premium",
         "luxury",
         "heritage_brand",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -1550,7 +1550,7 @@
         "premium",
         "women_focused",
         "stylish",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "women_friendly",
@@ -1609,7 +1609,7 @@
         "premium",
         "luxury",
         "anchor",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -1721,7 +1721,7 @@
         "mid_range",
         "ethical_brand",
         "self_care",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1779,7 +1779,7 @@
         "optical",
         "mid_range",
         "practical_shopping",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1834,7 +1834,7 @@
         "premium",
         "luxury",
         "heritage_brand",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -1893,7 +1893,7 @@
         "budget",
         "gift_friendly",
         "trendy",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -1952,7 +1952,7 @@
         "mid_range",
         "gift_friendly",
         "premium_materials",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -2073,7 +2073,7 @@
         "modern_style",
         "youthful",
         "trend_focused",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -2124,7 +2124,7 @@
         "last_minute_gift": 0.6,
         "child_activity_while_parents_shop": 0.2
       },
-      "concierge_notes": "Stradivarius is perfect for those who want to keep up with the latest fashion trends at accessible prices. Great for teens and young adults. Suggest pairing a shopping trip here with a coffee break at a nearby café in the Main Gallery."
+      "concierge_notes": "Stradivarius is perfect for those who want to keep up with the latest fashion trends at accessible prices. Great for teens and young adults. Suggest pairing a shopping trip here with a coffee break at a nearby café in the Ground Floor."
     },
     {
       "entity_id": "t-store-022",
@@ -2135,7 +2135,7 @@
         "anchor_store",
         "youth_focused",
         "mid_range",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "teen_friendly",
@@ -2197,7 +2197,7 @@
         "vegan_friendly",
         "mid_range",
         "modern_style",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "eco_friendly",
@@ -2246,7 +2246,7 @@
         "last_minute_gift": 0.6,
         "child_activity_while_parents_shop": 0.1
       },
-      "concierge_notes": "Call It Spring is the go-to for vegan shoes and trendy accessories. Emphasize its eco-friendly options for conscious shoppers. Great pairing with a visit to other fashion stores in the Main Gallery."
+      "concierge_notes": "Call It Spring is the go-to for vegan shoes and trendy accessories. Emphasize its eco-friendly options for conscious shoppers. Great pairing with a visit to other fashion stores in the Ground Floor."
     },
     {
       "entity_id": "t-store-024",
@@ -2317,7 +2317,7 @@
         "traditional_wear",
         "saudi_brand",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "occasion_wear"
       ],
       "audience_fit": [
@@ -2376,7 +2376,7 @@
         "fashion",
         "traditional_wear",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "modern_traditional"
       ],
       "audience_fit": [
@@ -2435,7 +2435,7 @@
         "fine_jewelry",
         "luxury",
         "premium",
-        "main_gallery",
+        "ground_floor",
         "gift_friendly"
       ],
       "audience_fit": [
@@ -2496,7 +2496,7 @@
         "accessories_bags",
         "budget",
         "family_friendly",
-        "main_gallery",
+        "ground_floor",
         "value_shopping"
       ],
       "audience_fit": [
@@ -2556,7 +2556,7 @@
         "cosmetics_skincare",
         "perfume",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "heritage_brand"
       ],
       "audience_fit": [
@@ -2615,7 +2615,7 @@
         "health",
         "pharmacy",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "practical_shopping"
       ],
       "audience_fit": [
@@ -2671,7 +2671,7 @@
         "footwear",
         "premium",
         "modern_style",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -2730,7 +2730,7 @@
         "accessories_bags",
         "mid_range",
         "global_brand",
-        "main_gallery",
+        "ground_floor",
         "trend_focused"
       ],
       "audience_fit": [
@@ -2848,7 +2848,7 @@
         "bags_accessories",
         "mid_range",
         "saudi_brand",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -2905,7 +2905,7 @@
         "fashion",
         "lingerie_intimate",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "saudi_brand"
       ],
       "audience_fit": [
@@ -2965,7 +2965,7 @@
         "accessories_bags",
         "anchor_store",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "trendy"
       ],
       "audience_fit": [
@@ -3023,7 +3023,7 @@
         "beauty",
         "cosmetics_skincare",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "plant_based"
       ],
       "audience_fit": [
@@ -3083,7 +3083,7 @@
         "fine_jewelry",
         "luxury",
         "premium",
-        "main_gallery",
+        "ground_floor",
         "gift_friendly"
       ],
       "audience_fit": [
@@ -3143,7 +3143,7 @@
         "beauty",
         "cosmetics_skincare",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "international_brands"
       ],
       "audience_fit": [
@@ -3202,7 +3202,7 @@
         "fashion",
         "lingerie_intimate",
         "mid_range",
-        "main_gallery",
+        "ground_floor",
         "romantic"
       ],
       "audience_fit": [
@@ -3264,7 +3264,7 @@
         "premium",
         "watches",
         "saudi_brand",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -3328,7 +3328,7 @@
         "mid_range",
         "cosmetics",
         "skincare",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -3390,7 +3390,7 @@
         "accessories",
         "mid_range",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -3449,7 +3449,7 @@
         "accessories",
         "mid_range",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -3507,7 +3507,7 @@
         "anchor_store",
         "modern_style",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -3568,7 +3568,7 @@
         "watches",
         "premium",
         "individuality",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -3628,7 +3628,7 @@
         "family_friendly",
         "budget",
         "accessories",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -3687,7 +3687,7 @@
         "gift_friendly",
         "accessories",
         "premium",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "couple_friendly",
@@ -3747,7 +3747,7 @@
         "mid_range",
         "timeless",
         "accessories",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -3984,7 +3984,7 @@
         "perfume",
         "mid_range",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4043,7 +4043,7 @@
         "cosmetics",
         "mid_range",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4103,7 +4103,7 @@
         "mid_range",
         "elegant",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4161,7 +4161,7 @@
         "mid_range",
         "elegant",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4219,7 +4219,7 @@
         "health",
         "mid_range",
         "practical",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -4274,7 +4274,7 @@
         "furniture",
         "mid_range",
         "contemporary",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -4331,7 +4331,7 @@
         "mid_range",
         "saudi_brand",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4389,7 +4389,7 @@
         "mid_range",
         "online_brand",
         "practical",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -4504,7 +4504,7 @@
         "gift_friendly",
         "women_fashion",
         "trendy",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4621,7 +4621,7 @@
         "anchor",
         "mid_range",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "family_friendly",
@@ -4681,7 +4681,7 @@
         "mid_range",
         "women_fashion",
         "modest_fashion",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -4967,7 +4967,7 @@
         "traditional_wear",
         "mid_range",
         "women_fashion",
-        "main_gallery",
+        "ground_floor",
         "trendy"
       ],
       "audience_fit": [
@@ -5014,7 +5014,7 @@
         "last_minute_gift": 0.3,
         "child_activity_while_parents_shop": 0.1
       },
-      "concierge_notes": "Mene Roz blends modern style with modesty, making it a great stop for trendy abayas. Recommend for special occasions or as a thoughtful gift. Located in the Main Gallery, it's easy to pair with a dessert or coffee stop."
+      "concierge_notes": "Mene Roz blends modern style with modesty, making it a great stop for trendy abayas. Recommend for special occasions or as a thoughtful gift. Located in the Ground Floor, it's easy to pair with a dessert or coffee stop."
     },
     {
       "entity_id": "t-store-071",
@@ -5217,7 +5217,7 @@
         "fragrance",
         "mid_range",
         "luxury_perfume",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -5265,7 +5265,7 @@
         "last_minute_gift": 0.6,
         "child_activity_while_parents_shop": 0.05
       },
-      "concierge_notes": "Match perfumes offer luxurious, long-lasting scents—perfect for gifts or treating yourself. Recommend for anniversaries or special occasions. Located in the Main Gallery, it's easy to combine with a dessert or coffee stop."
+      "concierge_notes": "Match perfumes offer luxurious, long-lasting scents—perfect for gifts or treating yourself. Recommend for anniversaries or special occasions. Located in the Ground Floor, it's easy to combine with a dessert or coffee stop."
     },
     {
       "entity_id": "t-store-075",
@@ -5333,7 +5333,7 @@
         "fragrance",
         "mid_range",
         "heritage_perfume",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -5381,7 +5381,7 @@
         "last_minute_gift": 0.65,
         "child_activity_while_parents_shop": 0.05
       },
-      "concierge_notes": "Ibraq Ibrahim Alqurashi is a heritage Saudi perfume house—perfect for authentic, luxurious gifts. Recommend for anniversaries or family gifts. Located in the Main Gallery, it's easy to combine with a dessert or coffee stop."
+      "concierge_notes": "Ibraq Ibrahim Alqurashi is a heritage Saudi perfume house—perfect for authentic, luxurious gifts. Recommend for anniversaries or family gifts. Located in the Ground Floor, it's easy to combine with a dessert or coffee stop."
     },
     {
       "entity_id": "t-store-077",
@@ -5392,7 +5392,7 @@
         "mid_range",
         "modest_fashion",
         "premium",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -5438,7 +5438,7 @@
         "last_minute_gift": 0.3,
         "child_activity_while_parents_shop": 0.1
       },
-      "concierge_notes": "Shader specializes in premium, elegant abayas—ideal for refined gifts or special occasions. Recommend for those seeking modest yet stylish fashion. Located in the Main Gallery, it's easy to pair with a dessert or coffee stop."
+      "concierge_notes": "Shader specializes in premium, elegant abayas—ideal for refined gifts or special occasions. Recommend for those seeking modest yet stylish fashion. Located in the Ground Floor, it's easy to pair with a dessert or coffee stop."
     },
     {
       "entity_id": "t-store-078",
@@ -5449,7 +5449,7 @@
         "mid_range",
         "women_fashion",
         "modern",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -5496,7 +5496,7 @@
         "last_minute_gift": 0.5,
         "child_activity_while_parents_shop": 0.1
       },
-      "concierge_notes": "Arasha is the spot for modern, sophisticated women's fashion—great for gifts or a personal style update. Located in the Main Gallery, it's easy to pair with a dessert or coffee break."
+      "concierge_notes": "Arasha is the spot for modern, sophisticated women's fashion—great for gifts or a personal style update. Located in the Ground Floor, it's easy to pair with a dessert or coffee break."
     },
     {
       "entity_id": "t-store-079",
@@ -5560,7 +5560,7 @@
         "mid_range",
         "jewelry",
         "gift_friendly",
-        "main_gallery"
+        "ground_floor"
       ],
       "audience_fit": [
         "solo_friendly",
@@ -5608,7 +5608,7 @@
         "last_minute_gift": 0.7,
         "child_activity_while_parents_shop": 0.05
       },
-      "concierge_notes": "Fayendra is the destination for elegant silver and gemstone jewelry—ideal for gifts or celebrating special moments. Recommend for anniversaries or milestone gifts. Located in the Main Gallery, it's perfect to pair with a romantic dinner or dessert stop."
+      "concierge_notes": "Fayendra is the destination for elegant silver and gemstone jewelry—ideal for gifts or celebrating special moments. Recommend for anniversaries or milestone gifts. Located in the Ground Floor, it's perfect to pair with a romantic dinner or dessert stop."
     },
     {
       "entity_id": "t-store-081",
@@ -5797,7 +5797,7 @@
         "quick_lunch": 0.1,
         "child_activity_while_parents_shop": 0.1
       },
-      "concierge_notes": "RINA offers chic, contemporary women's fashion with a Saudi touch. Perfect for gifting or self-treats. Suggest pairing a shopping trip at RINA with a relaxing coffee at Starbucks in the Main Gallery."
+      "concierge_notes": "RINA offers chic, contemporary women's fashion with a Saudi touch. Perfect for gifting or self-treats. Suggest pairing a shopping trip at RINA with a relaxing coffee at Starbucks in the Ground Floor."
     },
     {
       "entity_id": "t-dining-001",
@@ -6297,7 +6297,7 @@
         "gift_for_family": 0.2,
         "child_activity_while_parents_shop": 0.2
       },
-      "concierge_notes": "Starbucks is the global go-to for coffee and snacks, perfect for solo visitors, meetings, or relaxed dates. Located in the Main Gallery, it's ideal for a shopping break or to pair with a visit to RINA."
+      "concierge_notes": "Starbucks is the global go-to for coffee and snacks, perfect for solo visitors, meetings, or relaxed dates. Located in the Ground Floor, it's ideal for a shopping break or to pair with a visit to RINA."
     },
     {
       "entity_id": "t-dining-009",
