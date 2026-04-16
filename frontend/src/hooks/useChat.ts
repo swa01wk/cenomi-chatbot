@@ -146,6 +146,7 @@ export function useChat() {
                       isStreaming: false,
                       sources: [],
                       suggestions: event.suggestions ?? [],
+                      tenantCards: (event.tenants ?? []).filter((t) => t.name),
                       debug: (event.debug as DebugPayload) ?? null,
                       feedback: { rating: null, tags: [], comment: "", submitted: false },
                     }

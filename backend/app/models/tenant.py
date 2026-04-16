@@ -43,6 +43,8 @@ class Store(BaseModel):
     features: list[str] = Field(default_factory=list)
     accepts_loyalty: bool = False
     tags: list[str] = Field(default_factory=list)
+    brand_logo: str = ""
+    banner: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -86,6 +88,8 @@ class DiningOutlet(BaseModel):
     features: list[str] = Field(default_factory=list)
     accepts_loyalty: bool = False
     tags: list[str] = Field(default_factory=list)
+    brand_logo: str = ""
+    banner: str = ""
 
 
 # ---------------------------------------------------------------------------

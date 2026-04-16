@@ -147,6 +147,8 @@ Return ONLY valid JSON with these fields:
   "retrieval_needed": true/false  (see RETRIEVAL DECISION RULES below)
   "companion_context": []  (companions detected in THIS turn's message — see COMPANION CONTEXT RULES below)
   "releases_topic_lock": true/false  (see TOPIC LOCK RELEASE RULES below)
+  "excluded_entity_types": []  (list — entity types the guest implicitly or explicitly excludes — see EXCLUSION EXTRACTION RULES below)
+  "preferred_entity_types": []  (list — entity types the guest is specifically asking about — see PREFERENCE EXTRACTION RULES below)
 }
 
 ENTITY_QUERY EXTRACTION RULES:
@@ -899,6 +901,64 @@ Set releases_topic_lock=false when the turn stays in or alongside the locked dom
 - A companion declaration while in movie/factual flow → false (companion is additive, not a domain switch)
 - No active topic lock → false (nothing to release)
 DEFAULT: false
+
+EXCLUSION EXTRACTION RULES (excluded_entity_types field):
+Populate when the query contains EXPLICIT or IMPLICIT exclusion language for a category of entities.
+
+Implicit exclusion patterns — populate even without the word "no":
+  "besides X", "other than X", "apart from X", "except X", "beyond X", "not X"
+
+Explicit exclusion patterns (may overlap with category_negation):
+  "no X", "without X", "skip X", "avoid X", "excluding X"
+
+The value should be the semantic entity type category being excluded (snake_case).
+Examples:
+  • "entertainment besides movies"               → ["cinema"]
+  • "what can I do other than watch movies?"     → ["cinema"]
+  • "fun activities apart from the cinema"       → ["cinema"]
+  • "something fun besides the cinema"           → ["cinema"]
+  • "entertainment except for the cinema"        → ["cinema"]
+  • "activities other than shopping"             → ["store", "retail"]
+  • "something to do besides eating"             → ["dining", "restaurant"]
+  • "restaurants but not fast food"              → ["fast_food"]
+  • "no cinema" (also category_negation)         → ["cinema"]
+  • "where can I shop but not in the food court" → ["food_court"]
+  • "fun day plan" (no exclusion)                → []
+  • "suggest some restaurants" (no exclusion)   → []
+  • "what are some fun activities for kids" (no exclusion) → []
+
+IMPORTANT:
+- Only populate when there is a clear exclusion signal in the CURRENT message.
+- For category_negation turns (message_kind="category_negation"), ALSO populate this field.
+- For general fresh requests with no exclusion language, leave as [].
+
+PREFERENCE EXTRACTION RULES (preferred_entity_types field):
+Populate for CONCIERGE/DISCOVERY queries where the category of entity being requested is
+clearly implied. This helps the retrieval layer focus on the right type of venues instead
+of returning generic mixed results.
+
+Examples:
+  • "fun activities for kids"              → ["entertainment_center", "arcade", "play_area", "family_activity"]
+  • "entertainment besides movies"         → ["entertainment_center", "arcade", "play_area", "gaming"]
+  • "entertainment options"                → ["entertainment_center", "arcade", "cinema", "gaming"]
+  • "fun day with friends"                 → ["entertainment_center", "arcade", "cinema", "dining"]
+  • "plan a day for kids"                  → ["entertainment_center", "play_area", "family_activity", "dining"]
+  • "what activities are there for kids"   → ["entertainment_center", "arcade", "play_area", "family_activity"]
+  • "affordable fashion"                   → ["store", "fashion", "apparel"]
+  • "kids' clothing stores"                → ["store", "kids_fashion", "children_clothing"]
+  • "dessert places or cafes"              → ["dessert", "cafe", "bakery"]
+  • "good restaurants for lunch"           → ["restaurant", "dining", "casual_dining"]
+  • "what can I do here" (open/vague)      → []
+  • "where is Starbucks" (factual lookup)  → []
+  • "is H&M here" (brand presence check)  → []
+
+IMPORTANT:
+- Only populate for CONCIERGE/DISCOVERY queries where the entity type is clearly implied.
+- For FACTUAL lookups (specific brand/entity) and very open/vague queries, leave as [].
+- Combine naturally: "entertainment besides movies"
+    → excluded_entity_types: ["cinema"]
+    → preferred_entity_types: ["entertainment_center", "arcade", "play_area", "gaming"]
+DEFAULT: []
 """
 
 
@@ -1299,6 +1359,18 @@ async def _llm_classify(
 
     releases_topic_lock = bool(parsed.get("releases_topic_lock", False))
 
+    raw_excluded = parsed.get("excluded_entity_types", [])
+    excluded_entity_types: list[str] = (
+        [str(t).lower() for t in raw_excluded if isinstance(t, str)]
+        if isinstance(raw_excluded, list) else []
+    )
+
+    raw_preferred = parsed.get("preferred_entity_types", [])
+    preferred_entity_types: list[str] = (
+        [str(t).lower() for t in raw_preferred if isinstance(t, str)]
+        if isinstance(raw_preferred, list) else []
+    )
+
     intent = InterpretedIntent(
         domain=domain,
         sub_intent=sub_intent,
@@ -1314,6 +1386,8 @@ async def _llm_classify(
         retrieval_needed=retrieval_needed,
         companion_context=companion_context,
         releases_topic_lock=releases_topic_lock,
+        excluded_entity_types=excluded_entity_types,
+        preferred_entity_types=preferred_entity_types,
     )
     intent.raw_signals["scenario"] = scenario
     return intent

@@ -1,0 +1,106 @@
+{
+  "run_id": "57d867a9",
+  "mall_id": "al_nakheel_plaza_28",
+  "results": [
+    {
+      "qid": "Q1",
+      "query": "Can you plan a fun day for me and my friends in the mall?",
+      "reply": "For a fun day with your friends, begin at **Fun Time** in the **Entertainment Wing on the Ground Floor** — it is the strongest anchor for a lively start and sets an easy, social pace for the visit.\n\nFrom there, head to **Muvi Cinema** in the **Cinema Zone on the Upper Level** for your main entertainment stop; it works well as the centrepiece of the day, especially if you want to build the outing around a film.\n\nClose the visit at **CINNABON** in the **Food Court on the Ground Floor** for a sweet finish, or stop by **Baskin Robbins** on **Kiosk Row** if your group would rather keep the treat short and casual.\n\nBoth entertainment stops are easy to navigate between the Ground Floor and Upper Level, with dining options nearby for a smooth group outing.\n\nIf you would like, I can turn this into a 2–3 hour plan with the best order for your group.",
+      "latency_ms": 12752,
+      "flow_type": "concierge",
+      "intent_domain": "exploration",
+      "intent_sub": "activity_suggestion",
+      "response_mode": "hybrid_plan"
+    },
+    {
+      "qid": "Q2",
+      "query": "What are the best family-friendly movies playing in the mall today?",
+      "reply": "Here are the movies showing now:\n\n- **SAUDI PRO LEAGUE (AL QADSIAH VS AL AHLI)** — **Sport** — **180 min**\n- **SAUDI PRO LEAGUE (AL NASSR VS NEOM)** — **Sport** — **180 min**\n- **SAUDI PRO LEAGUE (AL AHLI VS AL ITTIHAD)** — **Sport** — **180 min**\n- **SHELTER** — **Action Thriller** — **107 min**\n- **CRIME 101** — **Crime Action** — **140 min**\n- **THE HOUSEMAID** — **Thriller** — **131 min**\n\nI do not have showtime details in the schedule provided. If you would like, I can help narrow these by genre.",
+      "latency_ms": 12004,
+      "flow_type": "factual",
+      "intent_domain": "entertainment",
+      "intent_sub": "movie_showtime",
+      "response_mode": "direct_factual"
+    },
+    {
+      "qid": "Q3",
+      "query": "Can you suggest some good restaurants for lunch in the mall?",
+      "reply": "For lunch in the Food Court, the strongest choices are all quick, halal, and easy to reach from the Ground Floor. If you want something a little different, Corn World in Kiosk Row gives you a lighter snack-style option.\n\n**Food Court**\n- **McDonald's** — Ground, Food Court: a straightforward fast-food choice when you want a familiar lunch and a quick stop.\n- **Herfy** — Ground, Food Court: a good pick for chicken-focused meals with a budget-friendly feel.\n- **Kudu Restaurant** — Ground, Food Court: meals are prepared in front of you, which suits a fresh, made-to-order lunch.\n- **Popeyes Restaurant** — Ground, Food Court: another strong chicken option for a hearty lunch.\n\n**Kiosk Row**\n- **Corn World** — Ground, Kiosk Row: best if you prefer something lighter or snack-style rather than a full meal.\n\nAll of these are on the Ground Floor, so it is easy to compare them in one lunch walk. If you would like, I can next narrow them down by **quickest option**, **best chicken spot**, or **lightest lunch**.",
+      "latency_ms": 16245,
+      "flow_type": "concierge",
+      "intent_domain": "dining",
+      "intent_sub": "general_dining",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q4",
+      "query": "Where can I find kids' clothing stores in the mall?",
+      "reply": "For kids’ clothing, start with **Centrepoint** on the **Ground Floor, Entertainment Wing** — it is the strongest family shopping stop in the mall.  \n\n- **Centrepoint** — **Ground, Entertainment Wing**: the best overall choice for family shopping and affordable fashion, with a broad range under one roof.  \n- **Red Tag** — **Ground Floor**: a good value-focused stop if you want budget-friendly clothing options.  \n- **Max** — **Ground Floor**: a practical pick for everyday family fashion at accessible prices.  \n- **Brands For Less** — **Ground, Entertainment Wing**: useful if you want discounted fashion and a quick browse for children’s wear.  \n- **Zara** — **Ground Floor**: a polished option if you prefer a more trend-led clothing selection.\n\nAll four are on the Ground Floor or in the Entertainment Wing, so the shopping route stays straightforward with children. If you would like, I can narrow this to the best **kids’ clothing pick by budget** or by **girl’s / boy’s / casual wear**.",
+      "latency_ms": 14085,
+      "flow_type": "concierge",
+      "intent_domain": "shopping",
+      "intent_sub": "general_shopping",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q5",
+      "query": "What are some fun activities for kids in the mall?",
+      "reply": "For your family visit, Fun Time on the Ground Floor in the Entertainment Wing is the strongest choice for children’s activity — it is the mall’s main kids’ entertainment anchor and the best place to start.\n\nFrom there, you can keep the outing easy with a quick stop at the Ground Floor Food Court for Herfy or Kudu Restaurant, both convenient for a family break after play.\n\nBegin at Fun Time for the main activity, then head to the Food Court if the children need a snack or meal afterward.\n\nFun Time is in the Entertainment Wing on the Ground Floor, so it is straightforward to reach and keeps the whole visit in one area.\n\nIf you would like, I can turn this into a simple kids’ outing plan with playtime and a meal stop.",
+      "latency_ms": 15708,
+      "flow_type": "concierge",
+      "intent_domain": "exploration",
+      "intent_sub": "activity_suggestion",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q6",
+      "query": "Can you recommend dessert places or cafes in the mall?",
+      "reply": "For dessert and café stops, the strongest choices are **Baskin Robbins**, **CINNABON**, and **Starbucks** — each suits a different mood, from sweet treats to a proper coffee pause.\n\n**Dessert**\n- **Baskin Robbins** — **Ground, Kiosk Row**  \n  Best for ice cream and a classic sweet stop.\n- **CINNABON** — **Ground, Food Court**  \n  A comfortable pick for cinnamon rolls, coffee, and dessert together.\n\n**Cafés**\n- **FanJan Caffé** — **Ground, Ground Floor**  \n  A polished café choice for specialty coffee and pastries.\n- **Starbucks** — **Ground, Ground Floor**  \n  Ideal if you want a familiar coffee break with snacks.\n- **MammaBunz** — **Ground, Kiosk Row**  \n  A lighter café stop for buns and signature drinks.\n\nStart with **Baskin Robbins** if you want something sweet, then move to **FanJan Caffé** or **Starbucks** for coffee. Both are easy to reach on the Ground Floor, with **Baskin Robbins** and **MammaBunz** tucked in the Kiosk Row.\n\nIf you would like, I can narrow this to the best **dessert-only** picks or the best **coffee-and-pastry** stops.",
+      "latency_ms": 15704,
+      "flow_type": "concierge",
+      "intent_domain": "dining",
+      "intent_sub": "dessert_recommendation",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q7",
+      "query": "Where can I shop for affordable fashion in the mall?",
+      "reply": "For affordable fashion, start at **Centrepoint** in the **Entertainment Wing** and **Red Tag** on the **Ground Floor** — they are the strongest value-led choices in the mall.\n\nA few well-matched picks:\n- **Centrepoint — Entertainment Wing**: The best family shopping destination for affordable fashion, with multi-brand value options.\n- **Red Tag — Ground Floor**: Budget-friendly fashion and accessories, ideal when you want practical, good-value pieces.\n- **Max — Ground Floor**: Value fashion with family-friendly appeal and accessible price points.\n- **Brands For Less — Entertainment Wing**: A smart stop for discounted fashion and lifestyle finds at great prices.\n- **MINISO — Ground Floor**: Best for affordable accessories and small fashion add-ons rather than full clothing ranges.\n\nIf you would like, I can narrow this to **women’s fashion, footwear, traditional wear, or accessories**.  \nAll of these are easy to reach on the **Ground Floor** or in the **Entertainment Wing**.",
+      "latency_ms": 11833,
+      "flow_type": "concierge",
+      "intent_domain": "shopping",
+      "intent_sub": "general_shopping",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q8",
+      "query": "Are there any ongoing offers or discounts in the mall?",
+      "reply": "There is one active offer on file right now:\n\n- **Osma** — **One 150ml bottle for 99 SAR** or **one 75ml bottle for 99 SAR**\n  - **Valid from:** 2025-11-10\n  - **Valid until:** 2025-11-30\n  - **Terms:** none listed\n\nOsma is in the **Kiosk Row on the Ground Floor**, so it is straightforward to visit while you are already browsing the ground-level perfume and accessory area.\n\nIf you would like, I can also point you to a few nearby fragrance stores on the Ground Floor so you can compare current options in one pass.",
+      "latency_ms": 13109,
+      "flow_type": "concierge",
+      "intent_domain": "shopping",
+      "intent_sub": "offer_details",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q9",
+      "query": "What entertainment options are available in the mall besides movies?",
+      "reply": "For entertainment beyond movies, **Fun Time in the Entertainment Wing on the Ground Floor** is the strongest choice — it is the mall’s dedicated kids’ entertainment venue and the best fit for a more active break.  \nIf you want something more shopping-led but still family-oriented, **Centrepoint in the Entertainment Wing on the Ground Floor** is the other useful stop, especially if you are pairing leisure with family browsing.\n\n**Best pick**\n- **Fun Time** — **Ground, Entertainment Wing**: the clear entertainment anchor if you want non-cinema fun.\n\n**Secondary option**\n- **Centrepoint** — **Ground, Entertainment Wing**: better if you would like a family stop that combines browsing with a relaxed outing.\n\nStart with **Fun Time** first, then walk across the **Entertainment Wing** if you want to keep the visit easy and in one area.  \nI can also point you to the best nearby dining option after your entertainment stop.",
+      "latency_ms": 15165,
+      "flow_type": "concierge",
+      "intent_domain": "entertainment",
+      "intent_sub": "general_entertainment",
+      "response_mode": "guided_recommendation"
+    },
+    {
+      "qid": "Q10",
+      "query": "Can you suggest a quick shopping and dining plan for 2–3 hours in the mall?",
+      "reply": "For a quick couple’s visit, I would keep the shopping stop elegant and close to the dining stop: start with **COACH** on the **Ground Floor** for a polished gift or accessory, then move to **Muvi Cinema** in the **Upper Level / Cinema Zone** if you want to make the outing feel more complete afterward. If you’d prefer something less premium and more compact, **Season Accessorize** in the **Kiosk Row** is an easy alternative for a fast style refresh before you head to a nearby meal.\n\n**2–3 hour plan**\n- **Begin at COACH, Ground Floor** — a strong first stop for a refined couple’s browse, especially if you are looking for something special and quick.\n- **From there, head to the Food Court, Ground Floor** — choose **Herfy, Kudu Restaurant, Popeyes Restaurant, or McDonald’s** for a fast meal that keeps the visit moving.\n- **If you still have time, finish at Muvi Cinema, Upper Level** — an easy way to extend the outing without complicating the pace.\n\nBoth the **Ground Floor** and the **Upper Level** are straightforward to reach, so the plan stays efficient for a short visit.  \n\nTell me whether you want the shopping stop to feel more **luxury** or more **budget-friendly**, and I will tailor the plan further.",
+      "latency_ms": 11239,
+      "flow_type": "concierge",
+      "intent_domain": "entertainment",
+      "intent_sub": "general_entertainment",
+      "response_mode": "hybrid_plan"
+    }
+  ]
+}

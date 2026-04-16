@@ -61,6 +61,7 @@ export default function ChatPage({
                   isSelected={msg.id === selectedTurnId}
                   onSelect={onSelectTurn}
                   onFeedback={onFeedback}
+                  onSend={onSend}
                 />
               ))}
 

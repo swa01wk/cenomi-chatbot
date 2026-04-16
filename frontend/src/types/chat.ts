@@ -4,6 +4,14 @@ export interface Source {
   score?: number;
 }
 
+export interface TenantCard {
+  name: string;
+  category?: string;
+  image?: string;
+  floor?: string;
+  zone?: string;
+}
+
 export interface MessageFeedback {
   rating: "up" | "down" | null;
   tags: string[];
@@ -20,6 +28,7 @@ export interface ChatMessage {
   suggestions?: string[];
   debug?: DebugPayload | null;
   feedback?: MessageFeedback;
+  tenantCards?: TenantCard[];
   /** True while tokens are still arriving from the SSE stream. */
   isStreaming?: boolean;
 }

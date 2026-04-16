@@ -210,15 +210,21 @@ GUIDELINES — follow these strictly:
     When the guest asks about offers, deals, discounts, sales, or
     promotions, check the ACTIVE EVENTS & OFFERS section and the
     Relevant tenants section for offer data.
-    If offers exist, present each one clearly with:
+    If active offers exist, present each one clearly with:
     - Store name
     - What the offer/discount is
     - Validity dates
     - Any terms or conditions
     NEVER say "I don't have offer information" if the context contains
-    offers or events. If genuinely no offers are listed, say:
-    "There are no active offers right now, but you can check with
-    individual stores for the latest promotions."
+    offers or events.
+    If no ACTIVE offers are listed but RECENT EXPIRED OFFERS appear in
+    the context, present them transparently — acknowledge they have ended,
+    state what they were, and note that the guest can enquire with stores
+    directly for current in-store promotions. This shows awareness and
+    builds trust rather than a blank "no offers available" response.
+    Example: "There are no active promotions at present. Two recent offers
+    have recently concluded — [details] — though it is worth checking
+    directly with those stores for any current in-store deals."
 
 15. FOLLOW-UP AWARENESS
     When a message is marked as a follow-up, it continues the previous
@@ -336,8 +342,38 @@ GUIDELINES — follow these strictly:
     - Guest mentioned "girlfriend" → do NOT write "you, your girlfriend, and your friend"
     - Guest mentioned no children → do NOT write "keep the kids entertained"
     - Guest is solo → do NOT write "your group" or "the whole family"
+    - Guest context is EMPTY (no companions listed) → do NOT write "for a couple",
+      "couple's visit", "you and your partner", "a romantic outing", or any phrasing
+      that implies a companion the guest never mentioned.
     If you are unsure whether a companion exists, omit any reference to them entirely.
-    This rule is absolute — inventing companions is more harmful than omitting a mention."""
+    This rule is absolute — inventing companions is more harmful than omitting a mention.
+
+    SPECIFIC COMPANION INFERENCE RULES:
+    - "couple" / "romantic" → ONLY if companions list contains a partner
+      (girlfriend, boyfriend, wife, husband). NEVER infer from query phrasing alone.
+    - "family" / "kids" → ONLY if companions list contains children or family.
+    - "group" / "friends" → ONLY if companions list contains "friends" or group context.
+    When the GUEST CONTEXT block shows no companions and no occasion, treat the guest
+    as a solo visitor and use neutral first-person language throughout.
+
+26. ITINERARY & PLANNING QUERIES
+    When the guest asks for a day plan, a fun outing itinerary, or a timed visit
+    (e.g. "plan a fun day", "2–3 hours in the mall", "what should I do here?"), produce
+    a rich, actionable response that goes beyond a flat venue list:
+    a) MALL HOURS — include the mall's operating hours from the context. A guest
+       planning a visit needs to know when the mall opens and closes.
+    b) TIME ESTIMATES — assign a realistic duration to each step in the plan
+       (e.g. "45–60 min", "30 min", "2 hrs"). The total should add up sensibly.
+    c) VENUE BREADTH — cover at least 4–5 distinct venues across different
+       categories (e.g. coffee, entertainment, dining, shopping, dessert).
+       A plan with only 2–3 stops feels thin; make it worth following.
+    d) CREATIVE HOOK — include one memorable engagement tip or experience note
+       that makes the plan feel curated, not generic. Examples: a challenge idea,
+       a hidden gem in the mall, a recommended combination of stops.
+    e) DUAL OPTIONS (for 2–3 hour plans) — offer two plan variants when practical
+       (e.g. Option A: fashion-focused; Option B: coffee and cinema), so the guest
+       can pick the one that fits their mood.
+    These guidelines apply to both solo and group planning queries."""
 
 _RESPONSE_COMPOSITION = """\
 RESPONSE COMPOSITION FORMULA:
@@ -396,6 +432,13 @@ DOMAIN-SPECIFIC TEMPLATES:
   CINEMA / ENTERTAINMENT QUERIES:
     - For film listings: include format options (Standard / IMAX / VIP) if available.
     - End with a booking redirect: "Tickets are available at the cinema counter or via the app."
+    - FAMILY FILTER (critical): When the query mentions "family-friendly", "with kids",
+      "for children", or similar, evaluate EACH film in the schedule for age-appropriateness.
+      Recommend only genuinely family-suitable films (animated, family adventure, comedy).
+      Do NOT list sports event broadcasts, thrillers, crime, or mature action films as
+      family recommendations — even if they are the only films showing.
+      If no family-appropriate films are currently on, state this honestly and suggest
+      the guest check back another day or consider Fun Time (entertainment centre).
     - If a child is present: only suggest films appropriate for their age — do NOT recommend
       sports broadcasts or adult features as children's options.
     - Do NOT suggest separating the family between a cinema and a play area on a different
@@ -560,11 +603,14 @@ def _format_mall_context(mall_context: dict[str, Any]) -> str:
                 + "\n".join(svc_lines)
             )
 
-    # --- events / offers (active only) ---
-    events = [ev for ev in (mall_context.get("events_and_offers") or []) if _is_offer_active(ev)]
-    if events:
+    # --- events / offers (active + recent expired) ---
+    all_offers = list(mall_context.get("events_and_offers") or [])
+    active_events = [ev for ev in all_offers if _is_offer_active(ev)]
+    expired_events = [ev for ev in all_offers if not _is_offer_active(ev)]
+
+    if active_events:
         ev_lines = []
-        for ev in events[:6]:
+        for ev in active_events[:6]:
             ev_type = ev.get("type", "event")
             ev_title = ev.get("title", "")
             ev_desc = (ev.get("description") or "")[:200]
@@ -586,6 +632,35 @@ def _format_mall_context(mall_context: dict[str, Any]) -> str:
         sections.append(
             "ACTIVE EVENTS & OFFERS — mention these when guests ask about "
             "offers, deals, discounts, or events:\n" + "\n".join(ev_lines)
+        )
+
+    # Surface recently expired offers as historical context so the LLM can
+    # acknowledge what was running even when nothing is currently active.
+    if expired_events:
+        exp_lines = []
+        for ev in expired_events[:4]:
+            ev_type = ev.get("type", "event")
+            ev_title = ev.get("title", "")
+            ev_desc = (ev.get("description") or "")[:120]
+            ev_valid = ""
+            for key in ("valid_until", "end_date", "dates"):
+                val = ev.get(key, "")
+                if val:
+                    ev_valid = f" (ended: {val})"
+                    break
+            discount = ev.get("discount", "")
+            discount_str = f" [{discount}]" if discount else ""
+            stores = ev.get("stores", [])
+            stores_str = f" at {', '.join(stores)}" if stores else ""
+            exp_lines.append(
+                f"  - [{ev_type}] {ev_title}{discount_str}{stores_str}: "
+                f"{ev_desc}{ev_valid}"
+            )
+        sections.append(
+            "RECENT EXPIRED OFFERS (for context only — these are no longer active):\n"
+            "Use these ONLY when no active offers exist, to show awareness of past "
+            "promotions and help set expectations. Always make clear they have ended.\n"
+            + "\n".join(exp_lines)
         )
 
     return "\n\n".join(sections)

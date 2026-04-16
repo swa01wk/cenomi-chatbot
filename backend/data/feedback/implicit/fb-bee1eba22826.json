@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-bee1eba22826",
+  "session_id": "session-799ae50395424257",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-ca465382985b",
+  "user_message": "Where can I shop for affordable fashion in the mall?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "price_mismatch"
+  ],
+  "correction_details": {
+    "price_mismatch": {
+      "matched_pattern": "\\baffordable\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-04-16 07:41:13.180156"
+}

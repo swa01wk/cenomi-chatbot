@@ -9,7 +9,7 @@ import type {
   TenantSummaryResponse,
   PlaybookPerformanceResponse,
 } from "../types/api";
-import type { DebugPayload } from "../types/chat";
+import type { DebugPayload, TenantCard } from "../types/chat";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -37,7 +37,7 @@ export async function sendMessage(req: ChatRequest): Promise<ChatResponse> {
 
 export type StreamEvent =
   | { type: "token"; text: string }
-  | { type: "done"; sessionId: string; sessionState: ChatResponse["session_state"]; debug: DebugPayload | null; suggestions: string[] }
+  | { type: "done"; sessionId: string; sessionState: ChatResponse["session_state"]; debug: DebugPayload | null; suggestions: string[]; sources: Array<{ target: string }>; tenants: TenantCard[] }
   | { type: "error"; detail: string };
 
 /**
@@ -92,6 +92,8 @@ export async function* streamMessage(req: ChatRequest): AsyncGenerator<StreamEve
               sessionState: data.session_state ?? null,
               debug: (data.debug as DebugPayload) ?? null,
               suggestions: (data.suggestions as string[]) ?? [],
+              sources: (data.sources as Array<{ target: string }>) ?? [],
+              tenants: (data.tenants as TenantCard[]) ?? [],
             };
           } else if (currentEvent === "error") {
             yield { type: "error", detail: data.detail as string };

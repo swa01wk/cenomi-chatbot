@@ -167,6 +167,17 @@ class InterpretedIntent(BaseModel):
     #   different domain from the active topic_lock, even when message_kind is
     #   not "topic_switch". Consumed by update_memory to clear scene.topic_lock.
     releases_topic_lock: bool = False
+    # excluded_entity_types: LLM-extracted entity types the guest implicitly or
+    #   explicitly excludes via language like "besides movies", "other than cinema",
+    #   "something to do besides eating". Populated by the classifier LLM; consumed
+    #   by compose_context (hard filter) and generate_response (constraint instruction).
+    #   e.g. ["cinema"] for "entertainment besides movies"
+    excluded_entity_types: list[str] = Field(default_factory=list)
+    # preferred_entity_types: LLM-extracted category of entities the guest is
+    #   specifically asking about. Populated for discovery/exploration queries to
+    #   bias retrieval toward the right entity types instead of generic fallbacks.
+    #   e.g. ["entertainment_center", "arcade", "play_area"] for "fun activities for kids"
+    preferred_entity_types: list[str] = Field(default_factory=list)
     # is_gibberish: promoted from raw_signals to a typed field so choose_strategy
     #   can differentiate unintelligible input from intelligible off-topic requests
     #   when both resolve to graceful_recovery response mode.

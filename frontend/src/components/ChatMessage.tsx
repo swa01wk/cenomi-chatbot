@@ -1,13 +1,14 @@
 import { Fragment } from "react";
-import { User, Bot, ExternalLink } from "lucide-react";
+import { User, Bot, ExternalLink, MapPin, PersonStanding, Store } from "lucide-react";
 import FeedbackControls from "./FeedbackControls";
-import type { ChatMessage as ChatMessageType, MessageFeedback } from "../types/chat";
+import type { ChatMessage as ChatMessageType, MessageFeedback, TenantCard } from "../types/chat";
 
 interface ChatMessageProps {
   message: ChatMessageType;
   isSelected: boolean;
   onSelect: (id: string) => void;
   onFeedback: (id: string, update: Partial<MessageFeedback>) => void;
+  onSend?: (text: string) => void;
   isStreaming?: boolean;
 }
 
@@ -32,14 +33,75 @@ function formatContent(text: string) {
   });
 }
 
+/** Extract pill labels from bold spans in the last paragraph only.
+ *  Handles both separate spans (**coffee**, **dessert**) and a single
+ *  comma-separated span (**quick lunch, coffee, or dessert**). */
+function extractCtaPills(text: string): string[] {
+  const paragraphs = text.split(/\n\n+/).filter((p) => p.trim());
+  if (!paragraphs.length) return [];
+
+  const lastPara = paragraphs[paragraphs.length - 1];
+  const matches = lastPara.match(/\*\*([^*]+)\*\*/g);
+  if (!matches) return [];
+
+  const pills: string[] = [];
+  for (const match of matches) {
+    const inner = match.slice(2, -2);
+    // Split "quick lunch, coffee, or dessert" → ["quick lunch", "coffee", "dessert"]
+    const parts = inner
+      .split(/,|\bor\b|\band\b/i)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    pills.push(...parts);
+  }
+  return pills;
+}
+
+function TenantCardItem({ card }: { card: TenantCard }) {
+  return (
+    <div className="shrink-0 w-44 rounded-2xl bg-white shadow-md overflow-hidden border border-gray-100">
+      <div className="relative h-28 bg-gray-100">
+        {card.image ? (
+          <img
+            src={card.image}
+            alt={card.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Store size={28} className="text-gray-300" />
+          </div>
+        )}
+        <div className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/60 backdrop-blur-sm">
+          <PersonStanding size={14} className="text-white" />
+        </div>
+      </div>
+      <div className="px-3 py-2.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-gray-900 leading-tight">
+          {card.name}
+        </p>
+        {card.category && (
+          <p className="mt-0.5 text-[11px] text-gray-400">{card.category}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ChatMessage({
   message,
   isSelected,
   onSelect,
   onFeedback,
+  onSend,
 }: ChatMessageProps) {
   const streaming = message.isStreaming ?? false;
   const isUser = message.role === "user";
+  const cards = message.tenantCards;
+  const showCards = !streaming && !isUser && cards && cards.length > 0;
+  const ctaPills = !streaming && !isUser && onSend
+    ? extractCtaPills(message.content)
+    : [];
 
   return (
     <div
@@ -100,6 +162,47 @@ export default function ChatMessage({
             feedback={message.feedback}
             onFeedback={onFeedback}
           />
+        )}
+
+        {ctaPills.length > 0 && (
+          <div
+            className="flex gap-2 overflow-x-auto pb-1"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {ctaPills.map((pill) => (
+              <button
+                key={pill}
+                onClick={() => onSend!(pill)}
+                className="shrink-0 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 active:scale-95"
+              >
+                {pill}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showCards && (
+          <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-100">
+            <div
+              className="flex gap-3 overflow-x-auto pb-1"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {cards!.map((card) => (
+                <TenantCardItem key={card.name} card={card} />
+              ))}
+            </div>
+            {onSend && (
+              <button
+                onClick={() =>
+                  onSend(`How do I get to ${cards![0]?.name ?? "these stores"}?`)
+                }
+                className="mt-2.5 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700"
+              >
+                <MapPin size={12} />
+                Get Directions
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

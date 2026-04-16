@@ -245,6 +245,39 @@ _CATEGORY_KEY_TO_DOMAIN: dict[str, str] = {
     "entertainment": "entertainment",
 }
 
+# Maps LLM-emitted preferred_entity_types values to the canonical category
+# rule keys used by get_entities_by_category().  Populated by the intent
+# classifier — drives multi-category retrieval for combined queries like
+# "desserts or cafes".  No hard-coded query patterns; this simply bridges
+# the LLM's output vocabulary to the retrieval layer.
+_PREFERRED_ENTITY_TYPE_TO_CATEGORY_KEY: dict[str, str] = {
+    "cafe": "cafe",
+    "coffee": "coffee",
+    "coffee_shop": "coffee",
+    "dessert": "dessert",
+    "bakery": "dessert",
+    "sweet_treat": "dessert",
+    "ice_cream": "dessert",
+    "pastry": "dessert",
+    "restaurant": "restaurant",
+    "fast_food": "fast_food",
+    "dining": "all_dining",
+    "food": "all_dining",
+    "fashion": "fashion",
+    "clothing": "clothing",
+    "kids": "kids",
+    "jewelry": "jewelry",
+    "accessories": "accessories",
+    "perfume": "perfume",
+    "fragrance": "perfume",
+    "beauty": "beauty",
+    "cosmetics": "beauty",
+    "gift": "gift",
+    "electronics": "electronics",
+    "sportswear": "sportswear",
+    "home": "home",
+}
+
 # ── Shopping task → allowed topic blocks ──────────────────────────────────
 # When a specific shopping task is active, only topic blocks relevant to that
 # task should be opened.  All others are suppressed to prevent drift.
@@ -845,11 +878,9 @@ async def compose_context(state: ConciergeState) -> dict:
                 category_key, len(category_entities), intent.sub_intent,
             )
 
-        # For short queries with sparse results, expand with related categories
-        query_text = state.normalized_user_message or state.raw_user_message
-        is_short_query = len(query_text.strip().split()) <= 2
+        # Expand with related categories when primary results are sparse
         primary_count = len(category_entities)
-        if is_short_query and 0 < primary_count < 3:
+        if 0 < primary_count < 3:
             related_keys = get_related_categories(category_key)
             existing_ids = {e["entity_id"] for e in category_entities}
             for rel_key in related_keys:
@@ -868,6 +899,42 @@ async def compose_context(state: ConciergeState) -> dict:
                     category_key, primary_count,
                     len(category_entities) - primary_count,
                     len(category_entities),
+                )
+
+        # ── Multi-category expansion driven by LLM preferred_entity_types ──
+        # When the intent classifier emits preferred_entity_types spanning
+        # multiple category domains (e.g. ["dessert", "cafe", "bakery"] for
+        # a "desserts or cafes" query), retrieve from ALL resolved category
+        # keys and merge results.  This is entirely LLM-driven — the
+        # preferred_entity_types list comes from the intent classification
+        # LLM and is never hard-coded here.
+        preferred_types = list(getattr(intent, "preferred_entity_types", None) or [])
+        if preferred_types:
+            existing_ids = {e["entity_id"] for e in category_entities}
+            seen_secondary_keys: set[str] = set()
+            added_from_preferred = 0
+            for et in preferred_types:
+                sec_key = _PREFERRED_ENTITY_TYPE_TO_CATEGORY_KEY.get(et.lower())
+                if sec_key and sec_key != category_key and sec_key not in seen_secondary_keys:
+                    # Respect excluded domains — skip if the secondary key's domain
+                    # has been excluded by the user in this session.
+                    sec_domain = _CATEGORY_KEY_TO_DOMAIN.get(sec_key, "")
+                    if sec_domain and sec_domain in (state.scene.excluded_domains or set()):
+                        continue
+                    seen_secondary_keys.add(sec_key)
+                    supplement = mall_ctx.get_entities_by_category(sec_key)
+                    for entity in supplement:
+                        if entity["entity_id"] not in existing_ids:
+                            entity["source"] = f"related/{sec_key}"
+                            category_entities.append(entity)
+                            existing_ids.add(entity["entity_id"])
+                            added_from_preferred += 1
+            if added_from_preferred:
+                discovery_expanded = True
+                logger.info(
+                    "Preferred-type multi-category expansion for '%s': "
+                    "+%d entities from preferred_types=%s",
+                    category_key, added_from_preferred, preferred_types,
                 )
 
     # ── Entity selection via playbook ranking ─────────────────────────
@@ -928,7 +995,12 @@ async def compose_context(state: ConciergeState) -> dict:
     # ── Fallback: exploration or domain-based entity lookup ───────────
     if not entities:
         if intent.domain == "exploration":
-            entities = _exploration_entity_selection(scene, mall_ctx)
+            entities = _exploration_entity_selection(
+                scene,
+                mall_ctx,
+                preferred_entity_types=intent.preferred_entity_types,
+                excluded_entity_types=intent.excluded_entity_types,
+            )
         else:
             entities = _domain_entity_lookup(intent.domain, scene, mall_ctx)
 
@@ -1025,6 +1097,20 @@ async def compose_context(state: ConciergeState) -> dict:
                 f"Domain exclusion: removed "
                 f"{entities_before_exclusion - len(entities)} entities "
                 f"(excluded domains: {scene.excluded_domains})"
+            )
+
+    # ── LLM-extracted entity-type exclusion filter ────────────────────
+    # Applies implicit exclusion language from the classifier
+    # (e.g. "besides movies" → excluded_entity_types=["cinema"]).
+    # Runs after domain exclusion and also respects hybrid_plan exception.
+    if state.intent.excluded_entity_types and not _is_hybrid_plan:
+        entities_before_type_exclusion = len(entities)
+        entities = _apply_entity_type_exclusions(entities, state.intent.excluded_entity_types)
+        if entities_before_type_exclusion > 0 and len(entities) < entities_before_type_exclusion:
+            warnings.append(
+                f"Entity-type exclusion (LLM-extracted): removed "
+                f"{entities_before_type_exclusion - len(entities)} entities "
+                f"(excluded types: {state.intent.excluded_entity_types})"
             )
 
     # ── Apply tenant ranking biases ───────────────────────────────────
@@ -1233,14 +1319,35 @@ def _exploration_topic_blocks(mall_ctx) -> list[str]:
     return available or ["mall_overview", "dining", "services"]
 
 
-def _exploration_entity_selection(scene, mall_ctx) -> list[dict]:
+def _exploration_entity_selection(
+    scene,
+    mall_ctx,
+    preferred_entity_types: list[str] | None = None,
+    excluded_entity_types: list[str] | None = None,
+) -> list[dict]:
     """
     For vague/exploration queries, select a diverse mix of the mall's
     highlights across shopping, dining, entertainment, and services.
     Prioritize entities with high visitor appeal (concierge_notes, semantic tags).
+
+    When the classifier extracted preferred_entity_types (e.g. for "fun activities
+    for kids" → ["entertainment_center", "arcade", "play_area"]), those entity types
+    are sorted to the front of the final list so they rank above the default
+    dining/gift/movie mix.
+
+    When excluded_entity_types is provided, matching entities are removed from the
+    result before the final cap is applied (belt-and-suspenders alongside the
+    pipeline-level filter).
     """
+    preferred_set = {t.lower() for t in (preferred_entity_types or [])}
+    forbidden_set = {t.lower() for t in (excluded_entity_types or [])}
+
     entities: list[dict] = []
     seen_ids: set[str] = set()
+
+    # When preferred types are set, relax per-block caps so preferred entities
+    # from any block can surface — the final sort + cap handles prioritisation.
+    default_cap = 4 if preferred_set else None
 
     category_blocks = [
         ("dining", 5),
@@ -1255,10 +1362,18 @@ def _exploration_entity_selection(scene, mall_ctx) -> list[dict]:
         if not block:
             continue
 
+        effective_cap = default_cap if preferred_set else max_entities
+
         block_entities: list[tuple[float, dict]] = []
         for entity_ref in block.entities:
             eid = entity_ref.get("entity_id", "")
             if eid in seen_ids:
+                continue
+
+            entity_type = entity_ref.get("type", "").lower()
+
+            # Skip entities whose type is explicitly excluded by the classifier LLM
+            if forbidden_set and entity_type in forbidden_set:
                 continue
 
             entity_data = mall_ctx.get_entity_by_id(eid)
@@ -1278,6 +1393,10 @@ def _exploration_entity_selection(scene, mall_ctx) -> list[dict]:
                 if priority_scores:
                     score += max(priority_scores.values()) * 0.2
 
+            # Boost score for preferred entity types so they rank above the mix
+            if preferred_set and entity_type in preferred_set:
+                score += 1.0
+
             enriched = {
                 "entity_id": eid,
                 "name": entity_data.get("name") or entity_data.get("title", ""),
@@ -1292,9 +1411,19 @@ def _exploration_entity_selection(scene, mall_ctx) -> list[dict]:
             block_entities.append((score, enriched))
 
         block_entities.sort(key=lambda x: x[0], reverse=True)
-        for _, enriched in block_entities[:max_entities]:
+        for _, enriched in block_entities[:effective_cap]:
             seen_ids.add(enriched["entity_id"])
             entities.append(enriched)
+
+    # When preferred types are active, sort the full collected list so preferred
+    # entities lead, then fall back to score ordering for the rest.
+    if preferred_set:
+        entities.sort(
+            key=lambda e: (
+                0 if e.get("entity_type", "").lower() in preferred_set else 1,
+                -e.get("score", 0.0),
+            )
+        )
 
     return entities[:16]
 
@@ -1544,6 +1673,37 @@ def _apply_domain_exclusions(
             excluded_domains, len(entities), len(filtered),
         )
 
+    return filtered
+
+
+def _apply_entity_type_exclusions(
+    entities: list[dict],
+    excluded_entity_types: list[str],
+) -> list[dict]:
+    """
+    Hard-remove entities whose entity_type was LLM-flagged as excluded via
+    implicit exclusion language (e.g. 'besides movies' → exclude cinema types).
+
+    Complements _apply_domain_exclusions which handles explicit category_negation
+    turns. This function handles the subtler case where the user says "other than X"
+    or "besides X" without explicitly refusing a whole domain — the classifier LLM
+    extracts the implied exclusion and populates excluded_entity_types on the intent.
+
+    Unlike domain exclusions, this does NOT trigger a re-route on empty results
+    because the query still has a positive intent (the preferred types) to serve.
+    """
+    if not excluded_entity_types:
+        return entities
+    forbidden = {t.lower() for t in excluded_entity_types}
+    filtered = [
+        e for e in entities
+        if e.get("entity_type", "").lower() not in forbidden
+    ]
+    if len(filtered) < len(entities):
+        logger.debug(
+            "Entity-type exclusion filter %s: %d → %d entities",
+            excluded_entity_types, len(entities), len(filtered),
+        )
     return filtered
 
 

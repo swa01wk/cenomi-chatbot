@@ -176,6 +176,27 @@ EXCLUDED DOMAINS RULES (excluded_domains field):
   "wifey" → "wife"
   "SO" → use context to determine "girlfriend"/"boyfriend"/"wife"/"husband"
   Never store abbreviations like "gf" or "bf" in companions or target_person — always expand them.
+
+- CONTEXT ISOLATION RULE (critical — prevents stale companion context bleeding into unrelated queries):
+  When the current message is a SELF-CONTAINED general planning, exploration, or shopping
+  query that meets ALL of the following conditions:
+    1. Contains NO companion signals: no "we", "us", "our", "with my X", "for my X",
+       "me and X", "my girlfriend/wife/kids/family/friends"
+    2. Contains NO continuation language: no "after that", "what next", "now we",
+       "also", "too", "as well", "then"
+    3. Is phrased in the FIRST PERSON SINGULAR only: "I want", "can I", "suggest for me",
+       "plan for me", "what can I do", "I'd like"
+  AND the existing scene has companions or a scenario that were set in a PRIOR turn
+  (not the current message):
+    → Emit "companions": [], "scenario": null, "visit_type": null to reset to neutral.
+  This prevents a companion or scenario from a completely different earlier question
+  (e.g. a prior "date night" query) from incorrectly influencing a fresh standalone request.
+
+  DO NOT apply this reset if the message contains ANY of:
+    • Plural pronouns: "we", "us", "our", "they"
+    • Explicit companion references: "my girlfriend", "with my kids", "for my family"
+    • Continuation signals: "after that", "now", "next", "also", "then", "what about"
+    • The message is a follow-up or refinement ("something cheaper", "more options")
 """
 
 

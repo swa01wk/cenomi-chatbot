@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-989c518585b7",
+  "session_id": "cmp-q5-19eca299",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-a86e5eaef279",
+  "user_message": "What are some fun activities for kids in the mall?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "audience_mismatch"
+  ],
+  "correction_details": {
+    "audience_mismatch": {
+      "matched_pattern": "\\bfor\\s+(?:kids|children|family|adults|teens|couples)\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-04-16 08:12:09.414590"
+}

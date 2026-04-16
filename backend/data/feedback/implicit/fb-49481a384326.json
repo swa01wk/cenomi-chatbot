@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-49481a384326",
+  "session_id": "session-32569e26dcad4286",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-45423d60a9de",
+  "user_message": "Can you suggest a quick shopping and dining plan for 2-3 hours in the mall?",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-04-16 07:42:56.801665"
+}

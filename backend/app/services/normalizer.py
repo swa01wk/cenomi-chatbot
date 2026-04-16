@@ -138,6 +138,8 @@ class MallNormalizer:
             features=raw.get("features", []),
             accepts_loyalty=raw.get("accepts_loyalty", False),
             tags=raw.get("tags", []),
+            brand_logo=raw.get("brand_logo", ""),
+            banner=raw.get("banner", ""),
         )
 
     def normalize_dining(self, raw: dict[str, Any]) -> DiningOutlet:
@@ -164,6 +166,8 @@ class MallNormalizer:
             features=raw.get("features", []),
             accepts_loyalty=raw.get("accepts_loyalty", False),
             tags=raw.get("tags", []),
+            brand_logo=raw.get("brand_logo", ""),
+            banner=raw.get("banner", ""),
         )
 
     def normalize_cinema(self, raw: dict[str, Any]) -> Cinema:

@@ -265,12 +265,45 @@ async def _generate_stream(
             if r.get("status") == "found" and r.get("data")
         ]
 
+    # Enriched tenant cards from ranked/selected entities — present for concierge
+    # recommendation responses where retrieval_results is empty.
+    tenants: list[dict] = []
+    if result is not None:
+        for e in (result.context.selected_entities or []):
+            name = e.get("name", "")
+            if not name:
+                continue
+            image = ""
+            category = e.get("category", "") or e.get("cuisine_type", "")
+            entity_id = e.get("entity_id", "")
+            if entity_id:
+                try:
+                    full = mall_ctx.get_entity_by_id(entity_id)
+                    if full:
+                        image = full.get("banner") or full.get("brand_logo") or ""
+                        if not category:
+                            category = (
+                                full.get("category")
+                                or full.get("cuisine_type")
+                                or ""
+                            )
+                except Exception:
+                    pass
+            tenants.append({
+                "name": name,
+                "category": category,
+                "image": image,
+                "floor": e.get("floor", ""),
+                "zone": e.get("zone", ""),
+            })
+
     done_data = {
         "session_id": session_id,
         "session_state": session_summary.model_dump() if session_summary else {},
         "debug": debug_payload.model_dump() if debug_payload else None,
         "suggestions": suggestions,
         "sources": sources,
+        "tenants": tenants,
     }
     yield _sse("done", json.dumps(done_data, default=str))
 

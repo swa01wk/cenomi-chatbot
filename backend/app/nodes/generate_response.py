@@ -499,8 +499,11 @@ def _build_cinema_template_instruction(state: ConciergeState) -> str:
     """
     Inject cinema/entertainment-specific structure guidance.
 
-    Adds format info (IMAX/VIP/Standard) and a booking redirect for movie
-    queries, both on the factual and concierge paths.
+    Adds format info (IMAX/VIP/Standard), a booking redirect for movie
+    queries, and — when family or child context is detected — a
+    comprehensive LLM-driven family-suitability assessment instruction.
+    The LLM evaluates each film on its own merits; no genre lists are
+    hard-coded here.
     """
     domain = state.intent.domain or ""
     sub = state.intent.sub_intent or ""
@@ -514,9 +517,24 @@ def _build_cinema_template_instruction(state: ConciergeState) -> str:
     if not is_cinema_turn:
         return ""
 
+    # Detect child/family context from multiple sources:
+    # 1. Scene companions (explicit session context)
+    # 2. Intent secondary_intents / modifiers (LLM-classified signals)
+    # 3. Raw query text mentions of family/kids/children (LLM-classified via modifiers)
+    _child_tokens = {"child", "kids", "son", "daughter", "children", "baby", "toddler"}
+    _family_tokens = {"family", "family_friendly", "family_filter", "kid_friendly",
+                      "children_friendly", "kids", "child"}
     has_child = bool(
-        any(c in {"child", "kids", "son", "daughter"} for c in state.scene.companions)
+        any(c in _child_tokens for c in state.scene.companions)
         or any(d.get("type") == "child" for d in state.scene.companion_details)
+    )
+    has_family_intent = bool(
+        has_child
+        or any(m in _family_tokens for m in (state.intent.modifiers or []))
+        or any(si in _family_tokens or "family" in si for si in (state.intent.secondary_intents or []))
+        or "family" in (state.normalized_user_message or "").lower()
+        or "kids" in (state.normalized_user_message or "").lower()
+        or "children" in (state.normalized_user_message or "").lower()
     )
 
     lines: list[str] = [
@@ -527,7 +545,22 @@ def _build_cinema_template_instruction(state: ConciergeState) -> str:
         "or via the Muvi app — book ahead for peak times.'",
     ]
 
-    if has_child:
+    if has_family_intent:
+        lines.append(
+            "  • FAMILY SUITABILITY ASSESSMENT (mandatory for this query): "
+            "The guest is asking about family-friendly or child-appropriate films. "
+            "You MUST evaluate each movie listed in the schedule on its own merits. "
+            "Consider the film's genre, theme, and likely audience age range. "
+            "Only recommend films that are genuinely suitable for families with children "
+            "(e.g. animated, family adventure, comedy, light drama). "
+            "Do NOT recommend sports event broadcasts, thrillers, crime films, horror, "
+            "or mature action as family options — even if they appear in the schedule. "
+            "If none of the currently listed films are family-appropriate, state this "
+            "honestly and suggest alternatives (e.g. Fun Time entertainment centre, "
+            "or checking the cinema schedule on another day). "
+            "Do NOT list unsuitable films and call them 'family-friendly'."
+        )
+    elif has_child:
         lines.append(
             "  • Child present: only recommend films appropriate for the child's age. "
             "Do NOT suggest sports broadcasts or adult-rated thrillers as children's options. "
@@ -536,6 +569,47 @@ def _build_cinema_template_instruction(state: ConciergeState) -> str:
         )
 
     return "\n".join(lines) + "\n\n"
+
+
+def _build_entity_constraint_instruction(state: ConciergeState) -> str:
+    """
+    Inject an explicit constraint into the generation prompt when the classifier
+    LLM detected implicit exclusion language (e.g. 'besides movies', 'other than
+    cinema') or a clear preferred entity category ('fun activities for kids').
+
+    This is the generation-layer safety net: even if an excluded entity type
+    slipped past the retrieval filter, the generation LLM will not surface it.
+    Likewise, preferred types ensure the LLM focuses its response on what the
+    guest actually asked for rather than defaulting to the most prominent
+    entities in the retrieved context.
+
+    Only fires when the classifier populated at least one of these fields;
+    returns an empty string otherwise so it adds no noise to normal turns.
+    """
+    excluded = state.intent.excluded_entity_types
+    preferred = state.intent.preferred_entity_types
+    if not excluded and not preferred:
+        return ""
+
+    parts: list[str] = []
+    if excluded:
+        types_str = ", ".join(excluded)
+        parts.append(
+            f"QUERY CONSTRAINT — EXCLUSION: The guest's query contains implicit or explicit "
+            f"exclusion language (e.g. 'besides', 'other than', 'apart from'). "
+            f"The following entity types are EXCLUDED from this response: [{types_str}]. "
+            f"Do NOT recommend, mention, or reference any venue of these types — "
+            f"even if they appear prominently in the retrieved context. Treat them as invisible."
+        )
+    if preferred:
+        types_str = ", ".join(preferred)
+        parts.append(
+            f"QUERY CONSTRAINT — FOCUS: The guest is specifically asking about "
+            f"[{types_str}] type venues. Prioritise these in your response. "
+            f"Do not fill the response with other venue categories unless nothing "
+            f"relevant of the preferred types exists in the retrieved context."
+        )
+    return "\n".join(parts) + "\n\n"
 
 
 def _build_scene_acknowledgment(state: ConciergeState) -> str:
@@ -700,7 +774,14 @@ def _build_conversation_context(state: ConciergeState) -> str:
             parts.append(f"Previous topic: {state.last_intent}")
 
     if not parts:
-        return ""
+        # Explicitly signal no companion context so the LLM does not invent
+        # companions, relationships, or occasions (see Guideline 25).
+        return (
+            "VISITOR CONTEXT: No companion, occasion, or visit context has been "
+            "shared. Treat this as a standalone generic request. "
+            "Do NOT infer or invent companions (no 'couple', no 'partner', "
+            "no 'family'). Use neutral first-person language only.\n\n"
+        )
 
     frame_block = (
         "VISITOR CONTEXT (conversation frame — persists across the conversation):\n"
@@ -1143,6 +1224,7 @@ async def _build_factual_response(
         secondary_intents=secondary_intents,
         modifiers=modifiers,
         experience_mode=exp.response_experience_mode,
+        query_text=query,
     )
 
     # ── Refinement acknowledgement hint ──────────────────────────────
@@ -1167,6 +1249,11 @@ async def _build_factual_response(
     # ── Hybrid modifier instructions ──────────────────────────────────
     hybrid_instruction = _build_hybrid_filter_instruction(fact_ctx, state)
 
+    # ── Cinema family-suitability instruction (factual path) ──────────
+    # Re-uses the same LLM-driven assessment function as the concierge
+    # path, ensuring family filtering applies regardless of flow type.
+    cinema_instruction = _build_cinema_template_instruction(state)
+
     # ── CTA instruction ───────────────────────────────────────────────
     cta_instruction = get_cta_instruction(exp.cta_type)
 
@@ -1178,6 +1265,7 @@ async def _build_factual_response(
         f"{no_data_note}"
         f"{refinement_hint}"
         f"{mode_instruction}"
+        f"{cinema_instruction}"
         f"{hybrid_instruction}"
         f"{cta_instruction}"
         "IMPORTANT: Use ONLY the facts above. "
@@ -1499,6 +1587,7 @@ def _build_factual_mode_instruction(
     secondary_intents: list[str] | None = None,
     modifiers: list[str] | None = None,
     experience_mode: str = "",
+    query_text: str = "",
 ) -> str:
     """
     Build the response mode instruction for factual queries.
@@ -1513,7 +1602,15 @@ def _build_factual_mode_instruction(
     _family_filters = {"family_filter", "kid_friendly", "family_friendly"}
     _budget_filters = {"budget_filter", "budget_sensitive"}
     _romantic_filters = {"romantic_filter", "romantic"}
-    has_family_filter = bool(_family_filters & (set(secondary_intents) | set(modifiers)))
+    # Also detect family intent from query text directly — the classifier may not
+    # always emit family_filter in modifiers for "family-friendly" phrased queries.
+    _family_query_signals = {"family", "kids", "children", "child", "family-friendly"}
+    _query_lower = (query_text or "").lower()
+    _family_from_query = any(sig in _query_lower for sig in _family_query_signals)
+    has_family_filter = bool(
+        _family_filters & (set(secondary_intents) | set(modifiers))
+        or _family_from_query
+    )
     has_budget_filter = bool(_budget_filters & (set(secondary_intents) | set(modifiers)))
     has_romantic_filter = bool(_romantic_filters & (set(secondary_intents) | set(modifiers)))
 
@@ -1589,6 +1686,23 @@ def _build_factual_mode_instruction(
         experience_mode == FACTUAL_LIST
         and (scope == "movie_schedule" or strategy == "structured_fact_list")
     ) or (scope == "movie_schedule" or strategy == "structured_fact_list"):
+        # Check for family context even when experience_mode isn't FILTERED_FACTUAL_LIST.
+        # has_family_filter already incorporates query_text detection (above).
+        has_implicit_family = has_family_filter
+        if has_implicit_family:
+            return (
+                "RESPONSE MODE — FAMILY-FRIENDLY MOVIE SCHEDULE:\n"
+                "The guest is asking for family-friendly or child-appropriate films.\n"
+                "You MUST evaluate each listed movie for age-appropriateness:\n"
+                "  1. Assess each film's genre and theme.\n"
+                "  2. Mark films suitable for families: ✓ Family-friendly\n"
+                "  3. Mark films NOT suitable: ⚠ Not family-appropriate (sport broadcast / thriller / crime / adult)\n"
+                "  4. ONLY recommend films that are genuinely suitable (animated, family, comedy, light adventure).\n"
+                "  5. Do NOT list sports event broadcasts as movie recommendations.\n"
+                "  6. If NO film is family-appropriate right now, say so honestly and suggest\n"
+                "     Fun Time entertainment centre as an alternative activity.\n"
+                "Open with 'For family-friendly films today:' or 'The following films suit families:'\n\n"
+            )
         return (
             "RESPONSE MODE — MOVIE SCHEDULE:\n"
             "Present the movies now showing. For each include:\n"
@@ -2580,12 +2694,16 @@ async def generate_response(state: ConciergeState) -> dict:
         dining_template_instruction = _build_dining_template_instruction(state)
         cinema_template_instruction = _build_cinema_template_instruction(state)
 
+        # ── LLM-extracted query constraint (exclusion + preference) ───
+        entity_constraint_instruction = _build_entity_constraint_instruction(state)
+
         user_prompt = (
             f"{conversation_context}"
             f"{scene_ack}"
             f"User query:\n{query}\n\n"
             f"Playbook plan:\n{playbook}\n\n"
             f"Relevant tenants:\n{retrieval_results}\n\n"
+            f"{entity_constraint_instruction}"
             f"{category_instruction}"
             f"{dining_template_instruction}"
             f"{cinema_template_instruction}"
