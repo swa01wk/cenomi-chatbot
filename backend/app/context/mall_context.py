@@ -154,6 +154,11 @@ class MallContextLoader:
             return None
         return self._context_pack.mall_profile
 
+    def get_map_url(self) -> str:
+        """Return the Mappedin interactive map URL for this mall, or empty string."""
+        raw = self._builder._raw_json or {}
+        return raw.get("mall_profile", {}).get("map_url", "")
+
     def get_entity_by_id(self, entity_id: str) -> dict | None:
         """Look up a single canonical entity across all types."""
         canonical = self._builder._canonical

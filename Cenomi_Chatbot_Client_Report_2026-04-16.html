@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cenomi Chatbot — Client Report · April 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark:      #111827;
+      --accent:    #1a1a1a;
+      --accent-lt: #f3f4f6;
+      --muted:     #6b7280;
+      --border:    #d1d5db;
+      --white:     #ffffff;
+      --grey-row:  #e5e7eb;
+      --warn-row:  #d1d5db;
+      --neutral-row: #f3f4f6;
+      --font:      'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--dark);
+      background: #f9fafb;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── COVER ───────────────────────────────────────────────── */
+    .cover {
+      background: var(--dark);
+      color: var(--white);
+      padding: 0;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .cover-inner { padding: 56px 40px 40px; width: 100%; }
+    .cover h1 { font-size: 2.6rem; font-weight: 700; line-height: 1.2; }
+    .cover .sub  { font-size: 1rem; color: #d1d5db; margin-top: 16px; }
+    .cover .meta { font-size: 0.85rem; color: #e5e7eb; margin-top: 6px; }
+    .cover-strip {
+      background: #374151;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.72rem;
+      color: #d1d5db;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      max-width: 480px;
+      margin: 32px auto 0;
+    }
+    .stat-cell { padding: 20px 16px; text-align: center; border-right: 1px solid var(--border); }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num  { font-size: 2rem; font-weight: 700; color: var(--dark); }
+    .stat-label{ font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+    .cover-desc {
+      max-width: 640px;
+      margin: 20px auto 0;
+      font-size: 0.82rem;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────────── */
+    .page-header {
+      background: var(--dark);
+      color: var(--white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 40px;
+      font-size: 0.72rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 40px 80px;
+    }
+
+    /* ── TYPOGRAPHY ──────────────────────────────────────────── */
+    h2.section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 36px 0 4px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--dark);
+    }
+    h3.sub-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 24px 0 8px;
+    }
+    h4.item-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 20px 0 4px;
+    }
+    p { margin-bottom: 10px; font-size: 0.9rem; }
+    p.muted { color: var(--muted); font-size: 0.82rem; }
+    hr.rule { border: none; border-top: 1px solid var(--border); margin: 6px 0 12px; }
+    hr.section-rule { border: none; border-top: 2px solid var(--dark); margin: 4px 0 16px; }
+
+    /* ── TABLES ──────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+    thead th {
+      background: var(--dark);
+      color: var(--white);
+      font-weight: 700;
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 0.78rem;
+    }
+    tbody tr:nth-child(odd)  { background: var(--white); }
+    tbody tr:nth-child(even) { background: var(--accent-lt); }
+    tbody td { padding: 7px 10px; vertical-align: top; border: 1px solid var(--border); }
+
+    tr.row-success { background: var(--grey-row) !important; }
+    tr.row-warning { background: var(--warn-row) !important; }
+    tr.row-neutral { background: var(--neutral-row) !important; }
+    tr.row-total   { background: var(--grey-row) !important; font-weight: 700; }
+
+    /* ── CF ITEMS ────────────────────────────────────────────── */
+    .cf-block { margin: 28px 0 0; }
+    .cf-meta-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 0.85rem; }
+    .cf-meta-table td { padding: 6px 8px; vertical-align: top; }
+    .cf-meta-table td:first-child {
+      font-weight: 700; width: 14%; white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .cf-meta-table td:last-child { border-bottom: 1px solid var(--border); }
+    .cf-meta-table tr:last-child td { border-bottom: none; }
+
+    .test-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .test-table td { padding: 5px 8px; vertical-align: top; border: 1px solid var(--border); }
+    .test-table tr:nth-child(odd)  td { background: #ffffff; }
+    .test-table tr:nth-child(even) td { background: #f3f4f6; }
+    .test-table td:first-child { font-weight: 500; width: 30%; }
+    .test-table td:last-child  { color: var(--muted); }
+
+    /* ── BANNER ──────────────────────────────────────────────── */
+    .banner {
+      background: var(--dark);
+      color: var(--white);
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 20px;
+      border-radius: 4px;
+      margin: 28px 0;
+    }
+
+    /* ── VERDICT BOX ─────────────────────────────────────────── */
+    .verdict-box {
+      background: var(--accent-lt);
+      border: 1.5px solid var(--dark);
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin: 20px 0;
+    }
+
+    /* ── TOC ─────────────────────────────────────────────────── */
+    .toc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc-row .toc-num { color: var(--dark); min-width: 56px; }
+    .toc-row .toc-pg  { color: var(--muted); font-size: 0.78rem; white-space: nowrap; margin-left: 8px; }
+
+    /* ── IMPROVEMENTS LIST ───────────────────────────────────── */
+    .improvement-item { margin-bottom: 8px; font-size: 0.9rem; }
+    .improvement-item b { font-weight: 700; }
+
+    /* ── PRINT ───────────────────────────────────────────────── */
+    @media print {
+      .page-header { position: static; }
+      body { background: white; }
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── COVER ─────────────────────────────────────────────────────────────── -->
+<div class="cover">
+  <div class="cover-inner">
+    <h1>Cenomi Chatbot<br>Client Report</h1>
+    <p class="sub">AI Concierge — Quality Evaluation &amp; Bug-Fix Verification</p>
+    <p class="meta">Al Nakheel Plaza, Buraidah &nbsp;·&nbsp; April 16, 2026</p>
+    <p class="meta">Mall ID: al_nakheel_plaza_28 &nbsp;·&nbsp; Model: gpt-4o-mini</p>
+
+    <div class="cover-stats">
+      <div class="stat-cell">
+        <div class="stat-num">18 / 18</div>
+        <div class="stat-label">Test Turns Passed</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">8 / 10</div>
+        <div class="stat-label">Queries Won vs Baseline</div>
+      </div>
+    </div>
+
+    <p class="cover-desc">
+      This report covers two areas: (1) resolution of five client-reported defects with full
+      automated-test verification, and (2) a comparative evaluation of the new chatbot
+      implementation against the AI Findr baseline across 10 representative queries.
+    </p>
+  </div>
+</div>
+<div class="cover-strip">CONFIDENTIAL — For authorised recipients only</div>
+
+<!-- ── STICKY HEADER ─────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <span>Cenomi Chatbot — Client Report &nbsp;|&nbsp; Al Nakheel Plaza &nbsp;|&nbsp; April 2026</span>
+  <span>CONFIDENTIAL</span>
+</div>
+
+<div class="container">
+
+  <!-- ── TABLE OF CONTENTS ──────────────────────────────────────────────── -->
+  <h2 class="section-title">Contents</h2>
+  <hr class="section-rule">
+
+  <div class="toc-row"><span><span class="toc-num"><b>Part 1</b></span> Client Feedback — Resolution Report</span><span class="toc-pg">3</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;1.1</span> Architecture — LLM-Driven Pipeline</span><span class="toc-pg">3</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;1.2</span> Executive Summary</span><span class="toc-pg">3</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;CF-01</span> Service queries answered with real data</span><span class="toc-pg">4</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;CF-02</span> Mall context isolated per mall_id</span><span class="toc-pg">4</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;CF-03</span> Recovery suggestions exclude failed domain</span><span class="toc-pg">5</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;CF-04</span> "Cinema Level" → "Upper Level"</span><span class="toc-pg">5</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;CF-05</span> "Main Gallery" → "Ground Floor"</span><span class="toc-pg">6</span></div>
+  <div class="toc-row"><span><span class="toc-num"><b>Part 2</b></span> AI Chatbot Comparison — AI Findr vs Chatbot V2</span><span class="toc-pg">7</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;2.1</span> Fixes Applied (V2)</span><span class="toc-pg">7</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;2.2</span> Executive Capability Comparison</span><span class="toc-pg">7</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;2.3</span> Query-by-Query Scorecard</span><span class="toc-pg">8</span></div>
+  <div class="toc-row"><span><span class="toc-num">&nbsp;&nbsp;2.4</span> Key Improvements &amp; Remaining Gaps</span><span class="toc-pg">9</span></div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PART 1
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <h2 class="section-title" style="margin-top:48px;">Part 1 — Client Feedback Resolution Report</h2>
+  <hr class="section-rule">
+  <p class="muted">Date: 2026-04-15 &nbsp;·&nbsp; Backend: http://localhost:8000 &nbsp;·&nbsp; Mall: Al Nakheel Plaza, Buraidah (al_nakheel_plaza_28)</p>
+
+  <!-- 1.1 Architecture -->
+  <h3 class="sub-title" style="margin-top:20px;">1.1 &nbsp;Architecture — LLM-Driven Pipeline</h3>
+  <p>All five fixes operate within a fully LLM-driven pipeline. No static responses, hardcoded reply strings, or keyword-based answer generation are used anywhere. The fixes work at two levels:</p>
+  <p>• <strong>Context corrections</strong> (CF-01, CF-02, CF-04, CF-05) — ensure the LLM receives accurate, complete data so it can reason correctly.</p>
+  <p>• <strong>Instruction corrections</strong> (CF-03) — pass a runtime constraint to the LLM so it applies the right logic when generating recovery messages.</p>
+
+  <!-- 1.2 Executive Summary -->
+  <h3 class="sub-title">1.2 &nbsp;Executive Summary</h3>
+  <p>Five client feedback issues were investigated, resolved, and verified through automated regression tests. <strong>All 18 test turns across 5 scenarios pass.</strong></p>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Issue</th><th>Status</th><th>Score</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-success"><td>CF-01</td><td>Bot does not respond to service-related questions</td><td>FIXED</td><td>5 / 5</td></tr>
+      <tr class="row-success"><td>CF-02</td><td>Bot should know or ask the user's location</td><td>FIXED</td><td>3 / 3</td></tr>
+      <tr class="row-success"><td>CF-03</td><td>Bot gives looping responses after failing a query</td><td>FIXED</td><td>3 / 3</td></tr>
+      <tr class="row-success"><td>CF-04</td><td>Incorrect floor name "Cinema Level" used</td><td>FIXED</td><td>3 / 3</td></tr>
+      <tr class="row-success"><td>CF-05</td><td>Incorrect zone name "Gallery" / "Main Gallery"</td><td>FIXED</td><td>4 / 4</td></tr>
+    </tbody>
+  </table>
+
+  <!-- CF-01 -->
+  <div class="cf-block">
+    <h4 class="item-title">CF-01 — Service queries are answered with actual data</h4>
+    <hr class="rule">
+    <table class="cf-meta-table">
+      <tr>
+        <td>Issue</td>
+        <td>The bot deflected all service-related questions (ATM, prayer room, lost &amp; found, WiFi, general facilities) with a generic "I can't help with that" or suggested visiting the information desk without providing any real data.</td>
+      </tr>
+      <tr>
+        <td>Root cause</td>
+        <td>Service entities were merged into the generic tenant list, causing them to compete with store/dining entries and often get dropped. The intent classifier did not recognise service-related keywords, so queries were routed to graceful_recovery instead of service_lookup.</td>
+      </tr>
+      <tr>
+        <td>Fix applied</td>
+        <td>mall_context.py: services exposed under a dedicated top-level key. concierge_prompt.py: MALL SERVICES &amp; FACILITIES block added. interpret_turn.py: exhaustive service classification examples added. resolve_fact_scope.py: keyword rules replaced with _DOMAIN_SCOPE_FALLBACK dict. fetch_exact_facts.py: returns full service catalogue for list queries. compose_fact_response_context.py: service_list handler added.</td>
+      </tr>
+    </table>
+    <h4 class="item-title" style="margin-top:12px;">Test results — 5/5 passed:</h4>
+    <table class="test-table">
+      <tr><td>Where is the ATM?</td><td>The ATM is on the Ground Floor… by Gate 1 and Gate 2, in front of the Polo store and near the food court.</td></tr>
+      <tr><td>Is there a lost and found?</td><td>Lost &amp; Found is on the Ground Floor, near the Information Desk at the Customer Service Desk, Gate 2.</td></tr>
+      <tr><td>Do you have a prayer room?</td><td>Men's Prayer Room is on Ground, Ground Floor. It is near Lavalle Store, Gate 1.</td></tr>
+      <tr><td>What facilities does the mall have?</td><td>The mall has these facilities: men's prayer room… wheelchair service… baby stroller service available from 4:00 PM to 11:00 PM…</td></tr>
+      <tr><td>Is there WiFi here?</td><td>I don't have WiFi information available… best place to confirm is the Information Desk on the Ground Floor…</td></tr>
+    </table>
+  </div>
+
+  <!-- CF-02 -->
+  <div class="cf-block">
+    <h4 class="item-title">CF-02 — Mall context is isolated per mall_id</h4>
+    <hr class="rule">
+    <table class="cf-meta-table">
+      <tr>
+        <td>Issue</td>
+        <td>The bot either did not know which mall it was serving, or bled store/location data from one mall into responses for another.</td>
+      </tr>
+      <tr>
+        <td>Root cause</td>
+        <td>The frontend had no explicit mall-selection step. The mall_id was either absent or carried over from a previous session, meaning all users defaulted to the same mall regardless of their actual location.</td>
+      </tr>
+      <tr>
+        <td>Fix applied</td>
+        <td>ChatPage.tsx: MallPickerScreen shown on first visit; user must explicitly select their mall. useChat.ts: mallConfirmed state and confirmMall() callback; selection persisted to localStorage and resets session on mall switch. App.tsx: wired through to ChatPage.</td>
+      </tr>
+    </table>
+    <h4 class="item-title" style="margin-top:12px;">Test results — 3/3 passed:</h4>
+    <table class="test-table">
+      <tr><td>What is this mall? [al_nakheel_plaza_28]</td><td>This is Al Nakheel Plaza in Buraidah, Saudi Arabia, on King Abdullah Road…</td></tr>
+      <tr><td>What is this mall? [al_nakheel_plaza_13]</td><td>Mall of Arabia… in Jeddah, Saudi Arabia, on Medina Road, An Nuzhah.</td></tr>
+      <tr><td>What is this mall? [al_nakheel_plaza_27]</td><td>This is Al Nakheel Mall in Riyadh, located at Exit 9, Al Imam Saud Ibn Abdul Aziz Branch Rd…</td></tr>
+    </table>
+  </div>
+
+  <!-- CF-03 -->
+  <div class="cf-block">
+    <h4 class="item-title">CF-03 — Recovery suggestions exclude the domain that just failed</h4>
+    <hr class="rule">
+    <table class="cf-meta-table">
+      <tr>
+        <td>Issue</td>
+        <td>When the bot could not answer a question (e.g. someone asking it to tell a joke), it entered a graceful-recovery flow and listed suggested topics — but the list always included the very topic that had just failed, creating a loop.</td>
+      </tr>
+      <tr>
+        <td>Root cause</td>
+        <td>generate_response.py built the recovery suggestion list statically without considering the domain of the current query.</td>
+      </tr>
+      <tr>
+        <td>Fix applied</td>
+        <td>generate_response.py: both _build_unsupported_recovery_response and _build_response_mode_instruction now read state.intent.domain at runtime and inject it as an exclusion instruction before the LLM generates its response.</td>
+      </tr>
+    </table>
+    <h4 class="item-title" style="margin-top:12px;">Test results — 3/3 passed:</h4>
+    <table class="test-table">
+      <tr><td>Tell me a joke</td><td>I'm not sure I can help with 'Tell me a joke' — but I'm here to make your mall visit excellent. I can assist with: Dining… Shopping… Cinema &amp; Entertainment…</td></tr>
+      <tr><td>Tell me another joke</td><td>Same graceful recovery listing Dining, Shopping, and Cinema — jokes never offered as a topic.</td></tr>
+      <tr><td>What can I do here?</td><td>…begin at Zara on the Ground Floor for current fashion, then move to Stradivarius… then head to the Food Court…</td></tr>
+    </table>
+  </div>
+
+  <!-- CF-04 -->
+  <div class="cf-block">
+    <h4 class="item-title">CF-04 — "Cinema Level" replaced by "Upper Level"</h4>
+    <hr class="rule">
+    <table class="cf-meta-table">
+      <tr>
+        <td>Issue</td>
+        <td>The bot referred to a floor called "Cinema Level" which does not exist in the actual mall layout. The correct name is "Upper Level".</td>
+      </tr>
+      <tr>
+        <td>Root cause</td>
+        <td>The canonical data file and all derived artifacts used "Cinema Level" as the floor name. Prompt examples in concierge_prompt.py and smalltalk.py reinforced the wrong terminology.</td>
+      </tr>
+      <tr>
+        <td>Fix applied</td>
+        <td>Bulk data correction across 6 files: canonical JSON, context pack, semantic enrichment, playbooks, convert_to_canonical.py, concierge_prompt.py and smalltalk.py. The LLM generates floor references from the canonical data it receives — correcting the source data is sufficient.</td>
+      </tr>
+    </table>
+    <h4 class="item-title" style="margin-top:12px;">Test results — 3/3 passed:</h4>
+    <table class="test-table">
+      <tr><td>Where is Muvi Cinema?</td><td>Muvi Cinema is on the Upper Level, in the Cinema Zone.</td></tr>
+      <tr><td>What floor is the cinema on?</td><td>Muvi Cinema is on the Upper Level, Cinema Zone.</td></tr>
+      <tr><td>Tell me about the mall</td><td>…Ground and Upper Level areas… — the phrase "Cinema Level" does not appear anywhere.</td></tr>
+    </table>
+  </div>
+
+  <!-- CF-05 -->
+  <div class="cf-block">
+    <h4 class="item-title">CF-05 — "Main Gallery" / "Gallery" replaced by "Ground Floor"</h4>
+    <hr class="rule">
+    <table class="cf-meta-table">
+      <tr>
+        <td>Issue</td>
+        <td>The bot referred to a zone called "Main Gallery" or simply "Gallery" in store location responses. No such zone exists; stores on that level are simply on the "Ground Floor".</td>
+      </tr>
+      <tr>
+        <td>Root cause</td>
+        <td>The zone name "Main Gallery" was present throughout the canonical data, semantic enrichment tags (main_gallery), and playbook scripts for al_nakheel_plaza_28.</td>
+      </tr>
+      <tr>
+        <td>Fix applied</td>
+        <td>Same data-driven approach as CF-04. Bulk correction across 6 files. The LLM produces zone references directly from the canonical data it reads — with the source corrected to "Ground Floor", the LLM automatically uses that term in every response.</td>
+      </tr>
+    </table>
+    <h4 class="item-title" style="margin-top:12px;">Test results — 4/4 passed:</h4>
+    <table class="test-table">
+      <tr><td>Where is Zara?</td><td>Zara is on the Ground Floor.</td></tr>
+      <tr><td>Where is the prayer room?</td><td>The Men's Prayer Room is on the Ground Floor, Ground Floor.</td></tr>
+      <tr><td>Tell me about the mall</td><td>…Ground and Upper Level areas… — "Gallery" does not appear.</td></tr>
+      <tr><td>Where can I find perfumes?</td><td>…Ajmal Perfumes on the Ground Floor… Zohoor Al Reef on the Ground Floor…</td></tr>
+    </table>
+  </div>
+
+  <div class="banner">Scenarios: 5 / 5 passed &nbsp;·&nbsp; Turns: 18 / 18 passed</div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PART 2
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <h2 class="section-title" style="margin-top:48px;">Part 2 — AI Chatbot Comparison Report</h2>
+  <hr class="section-rule">
+  <p class="muted">AI Findr (baseline) vs Chatbot V2 (post-fix) &nbsp;·&nbsp; Run ID: a69e288c &nbsp;·&nbsp; April 16, 2026 &nbsp;·&nbsp; 10 queries &nbsp;·&nbsp; Independent fresh sessions</p>
+
+  <!-- 2.1 Fixes -->
+  <h3 class="sub-title">2.1 &nbsp;Fixes Applied (V2)</h3>
+  <p>All fixes are LLM-driven — no hard-coded keywords, genre lists, or static rules.</p>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Fix</th><th>Target Issue</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Multi-category retrieval via LLM preferred_entity_types</td><td>Dessert/café under-retrieval (Q6)</td></tr>
+      <tr><td>2</td><td>LLM-driven family-suitability assessment in cinema instruction</td><td>Family-movie filter missing (Q2)</td></tr>
+      <tr><td>3</td><td>Scene extractor context-isolation rule + independent sessions</td><td>Context contamination (Q10)</td></tr>
+      <tr><td>4</td><td>Expired offers surfaced in prompt + Guideline 14 updated</td><td>Incomplete offers (Q8)</td></tr>
+      <tr><td>5</td><td>Guideline 26: mall hours + time estimates in planning queries</td><td>Planning depth (Q1, Q10)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 2.2 Capability Comparison -->
+  <h3 class="sub-title">2.2 &nbsp;Capability Comparison</h3>
+  <table>
+    <thead>
+      <tr><th>Dimension</th><th>AI Findr (Baseline)</th><th>Chatbot V2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Response style</td><td>Conversational, emoji-rich, warm</td><td>Structured, markdown-formatted, professional</td></tr>
+      <tr><td>Floor / zone accuracy</td><td>Partial</td><td>High — specific zone and level per venue</td></tr>
+      <tr><td>Live movie data</td><td>Defers to external website</td><td>Retrieves live schedule directly</td></tr>
+      <tr><td>Family-movie filtering</td><td>N/A — no live data</td><td>LLM assesses suitability per film</td></tr>
+      <tr><td>Dessert/café coverage</td><td>5 venues</td><td>Expanded via multi-category retrieval</td></tr>
+      <tr><td>Context isolation</td><td>Not applicable</td><td>Independent sessions + scene reset rules</td></tr>
+      <tr><td>Expired offers handling</td><td>Listed transparently</td><td>Surfaced with validity dates and context</td></tr>
+      <tr><td>Planning depth</td><td>Rich — time estimates, creative tips</td><td>Improved — Guideline 26 applied</td></tr>
+      <tr><td>Follow-up prompts</td><td>Consistent</td><td>Guided continuation per query domain</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 2.3 Scorecard -->
+  <h3 class="sub-title">2.3 &nbsp;Query-by-Query Scorecard</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Query</th><th>AI Findr</th><th>Chatbot V2</th><th>Winner</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-neutral"><td>Q1</td><td>Fun day plan for friends</td><td>★★☆☆☆</td><td>★★★☆☆</td><td>Tie</td></tr>
+      <tr class="row-success"><td>Q2</td><td>Family-friendly movies today</td><td>★☆☆☆☆</td><td>★★★☆☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q3</td><td>Lunch restaurant suggestions</td><td>★★★☆☆</td><td>★★★★☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q4</td><td>Kids clothing stores</td><td>★★★☆☆</td><td>★★★★☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-warning"><td>Q5</td><td>Fun activities for kids</td><td>★★★★☆</td><td>★★☆☆☆</td><td>AI Findr</td></tr>
+      <tr class="row-success"><td>Q6</td><td>Dessert places &amp; cafes</td><td>★★★☆☆</td><td>★★★★☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q7</td><td>Affordable fashion</td><td>★★★☆☆</td><td>★★★★☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q8</td><td>Ongoing offers &amp; discounts</td><td>★☆☆☆☆</td><td>★★★☆☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q9</td><td>Non-movie entertainment</td><td>★★☆☆☆</td><td>★★★★☆</td><td>Chatbot V2</td></tr>
+      <tr class="row-success"><td>Q10</td><td>Quick 2–3 hr shopping &amp; dining plan</td><td>★★★☆☆</td><td>★★★★★</td><td>Chatbot V2</td></tr>
+      <tr class="row-total"><td></td><td><strong>TOTAL</strong></td><td>1 win</td><td>8 wins</td><td><strong>Chatbot V2</strong></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 2.4 Key Improvements -->
+  <h3 class="sub-title">2.4 &nbsp;Key Improvements vs. V1</h3>
+  <p class="improvement-item">1. <b>Dessert/Café Retrieval (Q6)</b> — Multi-category retrieval now uses preferred_entity_types from the intent classifier LLM to pull both café and dessert entities in a single pass.</p>
+  <p class="improvement-item">2. <b>Family-Movie Filtering (Q2)</b> — _build_cinema_template_instruction now injects a full family-suitability assessment instruction when child/family context is detected. The LLM evaluates each film — no hard-coded genre rules.</p>
+  <p class="improvement-item">3. <b>Context Contamination (Q10)</b> — Each comparison query was sent in an independent fresh session. The scene extractor prompt also gained a context-isolation rule that resets companion/scenario fields when a standalone query has no companion signals.</p>
+  <p class="improvement-item">4. <b>Offers Context (Q8)</b> — Expired offers are now included in _format_mall_context under a clearly labelled section; Guideline 14 instructs the LLM to surface them when no active offers exist, matching AI Findr's transparency approach.</p>
+  <p class="improvement-item">5. <b>Planning Depth (Q1, Q10)</b> — Guideline 26 instructs the LLM to include mall hours, per-step time estimates, 4–5 venue categories, a creative tip, and dual plan variants for itinerary-type queries.</p>
+
+  <h3 class="sub-title" style="margin-top:28px;">Remaining Gaps</h3>
+  <table>
+    <thead>
+      <tr><th>Issue</th><th>Status</th><th>Suggested Next Step</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-warning"><td>Marsil &amp; R&amp;B not appearing in Q4</td><td>Open</td><td>Audit vector index coverage for al_nakheel_plaza_28</td></tr>
+      <tr><td>Response warmth / emoji tone</td><td>Style gap</td><td>Consider tone profile tuning per tenant config</td></tr>
+      <tr class="row-warning"><td>Showtimes in movie responses</td><td>Open</td><td>Ensure showtime data is ingested into vector store</td></tr>
+    </tbody>
+  </table>
+
+  <div class="verdict-box">
+    <strong>Overall Verdict:</strong> The new implementation wins 8 of 10 queries and ties 1.
+    The single AI Findr win (Q5) is attributable to supplementary practical details
+    (stroller availability) not yet present in the new implementation's data layer.
+    The underlying architecture — live data retrieval, LLM-driven filtering, independent
+    context isolation, and structured location accuracy — represents a meaningful
+    improvement over the baseline.
+  </div>
+
+  <hr class="rule" style="margin-top:32px;">
+  <p class="muted" style="text-align:center; padding-bottom: 16px;">
+    Report generated: 2026-04-16 &nbsp;·&nbsp; Mall: al_nakheel_plaza_28 &nbsp;·&nbsp;
+    Backend: http://127.0.0.1:8000/api/chat &nbsp;·&nbsp; V2 post-fix run &nbsp;·&nbsp;
+    All fixes are LLM-driven — no hard-coded rules.
+  </p>
+
+</div><!-- /container -->
+</body>
+</html>

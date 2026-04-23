@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-6b0118de12b5",
+  "session_id": "sc5c-411c3a8e",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-2b99195ac614",
+  "user_message": "something quick before the movie",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bquick\\b",
+      "confidence": 0.65
+    }
+  },
+  "confidence": 0.65,
+  "timestamp": "2026-04-16 16:09:31.234553"
+}

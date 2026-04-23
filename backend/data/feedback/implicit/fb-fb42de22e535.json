@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-fb42de22e535",
+  "session_id": "cpx8-95c79f34",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-cb9c37e3cf6c",
+  "user_message": "what healthy food options do you have \u2014 i mean actually healthy, not just a salad",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bactually\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-04-16 16:26:19.563783"
+}

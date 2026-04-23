@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-4a4348d1555c",
+  "session_id": "cpx4-411c3a8e",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-6f5ba6f73c29",
+  "user_message": "i need to get her a birthday present too \u2014 she loves unicorns and art supplies",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-04-16 16:23:32.657977"
+}

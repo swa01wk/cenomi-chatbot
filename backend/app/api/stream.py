@@ -268,12 +268,14 @@ async def _generate_stream(
     # Enriched tenant cards from ranked/selected entities — present for concierge
     # recommendation responses where retrieval_results is empty.
     tenants: list[dict] = []
+    mall_map_url = mall_ctx.get_map_url()
     if result is not None:
         for e in (result.context.selected_entities or []):
             name = e.get("name", "")
             if not name:
                 continue
             image = ""
+            unit_number = ""
             category = e.get("category", "") or e.get("cuisine_type", "")
             entity_id = e.get("entity_id", "")
             if entity_id:
@@ -287,6 +289,8 @@ async def _generate_stream(
                                 or full.get("cuisine_type")
                                 or ""
                             )
+                        loc = full.get("location") or {}
+                        unit_number = loc.get("unit_number", "") or ""
                 except Exception:
                     pass
             tenants.append({
@@ -295,6 +299,8 @@ async def _generate_stream(
                 "image": image,
                 "floor": e.get("floor", ""),
                 "zone": e.get("zone", ""),
+                "unit_number": unit_number,
+                "map_url": mall_map_url,
             })
 
     done_data = {

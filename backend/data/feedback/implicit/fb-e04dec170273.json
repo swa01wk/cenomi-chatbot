@@ -1,0 +1,21 @@
+{
+  "event_id": "fb-e04dec170273",
+  "session_id": "session-0d0fa4d097284a24",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-e8c09acf4b0d",
+  "user_message": "fast food",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "urgency_signal",
+    "time_correction"
+  ],
+  "correction_details": {
+    "urgency_signal": {
+      "matched_pattern": "\\bfast\\b",
+      "confidence": 0.8
+    }
+  },
+  "confidence": 0.8,
+  "timestamp": "2026-04-21 08:01:37.407911"
+}

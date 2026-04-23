@@ -1485,8 +1485,6 @@ def _format_fact_context(fact_ctx: dict, state) -> str:
             parts.append(f"Floor: {loc['floor']}")
         if loc.get("zone"):
             parts.append(f"Zone: {loc['zone']}")
-        if loc.get("unit_number"):
-            parts.append(f"Unit: {loc['unit_number']}")
         if loc.get("nearby_landmarks"):
             parts.append(f"Near: {', '.join(loc['nearby_landmarks'][:3])}")
         if loc.get("directions_hint"):

@@ -1,6 +1,7 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { User, Bot, ExternalLink, MapPin, PersonStanding, Store } from "lucide-react";
 import FeedbackControls from "./FeedbackControls";
+import MapModal from "./MapModal";
 import type { ChatMessage as ChatMessageType, MessageFeedback, TenantCard } from "../types/chat";
 
 interface ChatMessageProps {
@@ -57,9 +58,26 @@ function extractCtaPills(text: string): string[] {
   return pills;
 }
 
-function TenantCardItem({ card }: { card: TenantCard }) {
+function TenantCardItem({
+  card,
+  onClick,
+}: {
+  card: TenantCard;
+  onClick?: () => void;
+}) {
+  const hasMap = Boolean(card.map_url);
   return (
-    <div className="shrink-0 w-44 rounded-2xl bg-white shadow-md overflow-hidden border border-gray-100">
+    <div
+      role={hasMap ? "button" : undefined}
+      tabIndex={hasMap ? 0 : undefined}
+      onClick={hasMap ? onClick : undefined}
+      onKeyDown={hasMap ? (e) => e.key === "Enter" && onClick?.() : undefined}
+      className={`shrink-0 w-44 rounded-2xl bg-white shadow-md overflow-hidden border border-gray-100 transition-transform ${
+        hasMap
+          ? "cursor-pointer hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+          : ""
+      }`}
+    >
       <div className="relative h-28 bg-gray-100">
         {card.image ? (
           <img
@@ -75,6 +93,11 @@ function TenantCardItem({ card }: { card: TenantCard }) {
         <div className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/60 backdrop-blur-sm">
           <PersonStanding size={14} className="text-white" />
         </div>
+        {hasMap && (
+          <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 shadow">
+            <MapPin size={12} className="text-white" />
+          </div>
+        )}
       </div>
       <div className="px-3 py-2.5">
         <p className="text-[11px] font-bold uppercase tracking-wide text-gray-900 leading-tight">
@@ -102,6 +125,13 @@ export default function ChatMessage({
   const ctaPills = !streaming && !isUser && onSend
     ? extractCtaPills(message.content)
     : [];
+
+  const [mapCard, setMapCard] = useState<TenantCard | null>(null);
+
+  function openCardMap(card: TenantCard) {
+    if (!card.map_url) return;
+    setMapCard(card);
+  }
 
   return (
     <div
@@ -188,23 +218,30 @@ export default function ChatMessage({
               style={{ scrollbarWidth: "none" }}
             >
               {cards!.map((card) => (
-                <TenantCardItem key={card.name} card={card} />
+                <TenantCardItem
+                  key={card.name}
+                  card={card}
+                  onClick={() => openCardMap(card)}
+                />
               ))}
             </div>
-            {onSend && (
-              <button
-                onClick={() =>
-                  onSend(`How do I get to ${cards![0]?.name ?? "these stores"}?`)
-                }
-                className="mt-2.5 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700"
-              >
-                <MapPin size={12} />
-                Get Directions
-              </button>
+            {cards!.some((c) => c.map_url) && (
+              <p className="mt-2 text-[10px] text-gray-400">
+                Tap a card to get directions on the mall map
+              </p>
             )}
           </div>
         )}
       </div>
+
+      {mapCard && mapCard.map_url && (
+        <MapModal
+          storeName={mapCard.name}
+          mapUrl={mapCard.map_url}
+          unitNumber={mapCard.unit_number}
+          onClose={() => setMapCard(null)}
+        />
+      )}
     </div>
   );
 }

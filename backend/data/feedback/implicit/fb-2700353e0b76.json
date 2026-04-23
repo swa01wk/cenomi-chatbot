@@ -1,0 +1,20 @@
+{
+  "event_id": "fb-2700353e0b76",
+  "session_id": "ss1-95c79f34",
+  "tenant_id": "al_nakheel_plaza_28",
+  "mall_id": "al_nakheel_plaza_28",
+  "turn_id": "msg-13a4b30c72dd",
+  "user_message": "I need to buy a jacket",
+  "previous_assistant_response": "",
+  "detected_signals": [
+    "preference_override"
+  ],
+  "correction_details": {
+    "preference_override": {
+      "matched_pattern": "\\bi\\s+(?:prefer|want|need)\\b",
+      "confidence": 0.6
+    }
+  },
+  "confidence": 0.6,
+  "timestamp": "2026-04-16 16:28:55.280977"
+}

@@ -1,7 +1,7 @@
 """
 Generate a shareable PDF client report combining:
   - CLIENT_FEEDBACK_REPORT.md  (bug-fix / resolution section)
-  - CHATBOT_COMPARISON_REPORT_V2.md  (AI Findr vs New Implementation)
+  - CHATBOT_COMPARISON_REPORT_V2.md  (AI Findr vs Chatbot V2)
 
 Output: Cenomi_Chatbot_Client_Report_2026-04-16.pdf
 """
@@ -25,12 +25,12 @@ from reportlab.platypus import (
 
 # ── Palette ────────────────────────────────────────────────────────────────
 DARK      = colors.HexColor("#111827")   # near-black
-ACCENT    = colors.HexColor("#1D4ED8")   # Cenomi blue
-ACCENT_LT = colors.HexColor("#EFF6FF")   # light blue tint
-SUCCESS   = colors.HexColor("#16A34A")
-WARNING   = colors.HexColor("#D97706")
+ACCENT    = colors.HexColor("#1A1A1A")   # near-black (B&W)
+ACCENT_LT = colors.HexColor("#F3F4F6")   # light grey tint
+SUCCESS   = colors.HexColor("#374151")   # dark grey (replaces green)
+WARNING   = colors.HexColor("#6B7280")   # medium grey (replaces amber)
 MUTED     = colors.HexColor("#6B7280")
-BORDER    = colors.HexColor("#E5E7EB")
+BORDER    = colors.HexColor("#D1D5DB")
 WHITE     = colors.white
 
 PAGE_W, PAGE_H = A4
@@ -46,10 +46,10 @@ S = {
     "cover_title": style("cover_title", fontSize=28, leading=34,
                          textColor=WHITE, alignment=TA_CENTER, fontName="Helvetica-Bold"),
     "cover_sub":   style("cover_sub",   fontSize=13, leading=18,
-                         textColor=colors.HexColor("#BFDBFE"), alignment=TA_CENTER),
+                         textColor=colors.HexColor("#D1D5DB"), alignment=TA_CENTER),
     "cover_meta":  style("cover_meta",  fontSize=10, leading=14,
-                         textColor=colors.HexColor("#DBEAFE"), alignment=TA_CENTER),
-    "h1":          style("h1", fontSize=17, leading=22, textColor=ACCENT,
+                         textColor=colors.HexColor("#E5E7EB"), alignment=TA_CENTER),
+    "h1":          style("h1", fontSize=17, leading=22, textColor=DARK,
                          fontName="Helvetica-Bold", spaceBefore=14, spaceAfter=4),
     "h2":          style("h2", fontSize=13, leading=17, textColor=DARK,
                          fontName="Helvetica-Bold", spaceBefore=12, spaceAfter=3),
@@ -57,9 +57,9 @@ S = {
                          fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=2),
     "body":        style("body", fontSize=9.5, leading=14, textColor=DARK, spaceAfter=4),
     "body_muted":  style("body_muted", fontSize=8.5, leading=13, textColor=MUTED, spaceAfter=3),
-    "tag_pass":    style("tag_pass", fontSize=8, leading=10, textColor=SUCCESS,
+    "tag_pass":    style("tag_pass", fontSize=8, leading=10, textColor=DARK,
                          fontName="Helvetica-Bold"),
-    "tag_fix":     style("tag_fix",  fontSize=8, leading=10, textColor=ACCENT,
+    "tag_fix":     style("tag_fix",  fontSize=8, leading=10, textColor=DARK,
                          fontName="Helvetica-Bold"),
     "footer":      style("footer", fontSize=7.5, leading=10, textColor=MUTED,
                          alignment=TA_CENTER),
@@ -112,9 +112,8 @@ def data_table(headers, rows, col_widths=None, tone_map=None):
 
     if tone_map:
         for row_idx, tone in tone_map.items():
-            bg = SUCCESS if tone == "success" else WARNING if tone == "warning" else MUTED
             ts.add("BACKGROUND", (0, row_idx), (-1, row_idx), colors.HexColor(
-                "#D1FAE5" if tone == "success" else "#FEF3C7" if tone == "warning" else "#F3F4F6"
+                "#E5E7EB" if tone == "success" else "#D1D5DB" if tone == "warning" else "#F3F4F6"
             ))
 
     t = Table(data, colWidths=col_widths)
@@ -142,14 +141,14 @@ class CenomiDoc(BaseDocTemplate):
     @staticmethod
     def _cover_page(canvas, doc):
         canvas.saveState()
-        # Background band
-        canvas.setFillColor(ACCENT)
+        # Background band — black
+        canvas.setFillColor(DARK)
         canvas.rect(0, PAGE_H - 90 * mm, PAGE_W, 90 * mm, fill=1, stroke=0)
-        # Bottom accent strip
-        canvas.setFillColor(colors.HexColor("#1E3A8A"))
+        # Bottom accent strip — slightly lighter black
+        canvas.setFillColor(colors.HexColor("#374151"))
         canvas.rect(0, 0, PAGE_W, 12 * mm, fill=1, stroke=0)
         canvas.setFont("Helvetica", 8)
-        canvas.setFillColor(colors.HexColor("#BFDBFE"))
+        canvas.setFillColor(colors.HexColor("#D1D5DB"))
         canvas.drawCentredString(PAGE_W / 2, 4 * mm,
             "CONFIDENTIAL — For authorised recipients only")
         canvas.restoreState()
@@ -157,8 +156,8 @@ class CenomiDoc(BaseDocTemplate):
     @staticmethod
     def _body_page(canvas, doc):
         canvas.saveState()
-        # Top bar
-        canvas.setFillColor(ACCENT)
+        # Top bar — black
+        canvas.setFillColor(DARK)
         canvas.rect(0, PAGE_H - 10 * mm, PAGE_W, 10 * mm, fill=1, stroke=0)
         canvas.setFont("Helvetica-Bold", 8)
         canvas.setFillColor(WHITE)
@@ -166,7 +165,7 @@ class CenomiDoc(BaseDocTemplate):
                           "Cenomi Chatbot — Client Report  |  Al Nakheel Plaza  |  April 2026")
         canvas.setFont("Helvetica", 8)
         canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 6 * mm, "CONFIDENTIAL")
-        # Bottom bar
+        # Bottom bar — light grey
         canvas.setFillColor(BORDER)
         canvas.rect(0, 0, PAGE_W, 10 * mm, fill=1, stroke=0)
         canvas.setFont("Helvetica", 8)
@@ -196,10 +195,10 @@ def build():
     summary_data = [
         ["", ""],
         [Paragraph("18 / 18", ParagraphStyle("cv", fontSize=24, leading=28,
-                                              textColor=SUCCESS, fontName="Helvetica-Bold",
+                                              textColor=DARK, fontName="Helvetica-Bold",
                                               alignment=TA_CENTER)),
          Paragraph("8 / 10", ParagraphStyle("cv2", fontSize=24, leading=28,
-                                             textColor=ACCENT, fontName="Helvetica-Bold",
+                                             textColor=DARK, fontName="Helvetica-Bold",
                                              alignment=TA_CENTER))],
         [Paragraph("Test Turns Passed", ParagraphStyle("cl", fontSize=9, leading=12,
                                                         textColor=MUTED, alignment=TA_CENTER)),
@@ -210,7 +209,7 @@ def build():
     usable = PAGE_W - 2 * MARGIN
     st = Table(summary_data, colWidths=[usable / 2, usable / 2])
     st.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F0F9FF")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F9FAFB")),
         ("BOX", (0, 0), (-1, -1), 0.5, BORDER),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -236,7 +235,7 @@ def build():
         ("  CF-03", "Recovery suggestions exclude failed domain", "5"),
         ("  CF-04", "\"Cinema Level\" → \"Upper Level\"", "5"),
         ("  CF-05", "\"Main Gallery\" → \"Ground Floor\"", "6"),
-        ("Part 2", "AI Chatbot Comparison — AI Findr vs New Implementation", "7"),
+        ("Part 2", "AI Chatbot Comparison — AI Findr vs Chatbot V2", "7"),
         ("  2.1", "Fixes Applied (V2)", "7"),
         ("  2.2", "Executive Capability Comparison", "7"),
         ("  2.3", "Query-by-Query Scorecard", "8"),
@@ -383,7 +382,7 @@ def build():
                     "receives — correcting the source data is sufficient."),
             "turns": [
                 ("Where is Muvi Cinema?",
-                 "Muvi Cinema is on the Upper Level, in the Cinema Zone, unit CNL001."),
+                 "Muvi Cinema is on the Upper Level, in the Cinema Zone."),
                 ("What floor is the cinema on?",
                  "Muvi Cinema is on the Upper Level, Cinema Zone."),
                 ("Tell me about the mall",
@@ -404,7 +403,7 @@ def build():
                     "every response."),
             "turns": [
                 ("Where is Zara?",
-                 "Zara is on the Ground Floor, Ground Floor, at unit GF020."),
+                 "Zara is on the Ground Floor."),
                 ("Where is the prayer room?",
                  "The Men's Prayer Room is on the Ground Floor, Ground Floor."),
                 ("Tell me about the mall",
@@ -444,8 +443,8 @@ def build():
                    for t in cf["turns"]]
         tr_table = Table(tr_data, colWidths=[usable * 0.30, usable * 0.70])
         tr_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F0FDF4")),
-            ("ROWBACKGROUNDS", (0, 0), (-1, -1), [WHITE, colors.HexColor("#F0FDF4")]),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F9FAFB")),
+            ("ROWBACKGROUNDS", (0, 0), (-1, -1), [WHITE, colors.HexColor("#F3F4F6")]),
             ("GRID", (0, 0), (-1, -1), 0.3, BORDER),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("TOPPADDING", (0, 0), (-1, -1), 3),
@@ -463,7 +462,7 @@ def build():
         colWidths=[usable],
     )
     banner.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), SUCCESS),
+        ("BACKGROUND", (0, 0), (-1, -1), DARK),
         ("TOPPADDING", (0, 0), (-1, -1), 8),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
         ("ROUNDEDCORNERS", [4]),
@@ -477,7 +476,7 @@ def build():
     # ══════════════════════════════════════════════════════════════════════
     story.append(p("Part 2 — AI Chatbot Comparison Report", "h1"))
     story.append(section_rule())
-    story.append(p("AI Findr (baseline) vs New Implementation (post-fix)  ·  "
+    story.append(p("AI Findr (baseline) vs Chatbot V2 (post-fix)  ·  "
                    "Run ID: a69e288c  ·  April 16, 2026  ·  10 queries  ·  Independent fresh sessions",
                    "body_muted"))
     story.append(sp(3))
@@ -502,7 +501,7 @@ def build():
     # 2.2 Capability comparison
     story.append(p("2.2  Capability Comparison", "h2"))
     story.append(data_table(
-        ["Dimension", "AI Findr (Baseline)", "New Implementation"],
+        ["Dimension", "AI Findr (Baseline)", "Chatbot V2"],
         [
             ("Response style",         "Conversational, emoji-rich, warm",      "Structured, markdown-formatted, professional"),
             ("Floor / zone accuracy",  "Partial",                                "High — specific zone and level per venue"),
@@ -522,16 +521,16 @@ def build():
     story.append(p("2.3  Query-by-Query Scorecard", "h2"))
     queries_data = [
         ("Q1",  "Fun day plan for friends",              "★★☆☆☆", "★★★☆☆", "Tie"),
-        ("Q2",  "Family-friendly movies today",          "★☆☆☆☆", "★★★☆☆", "New Impl"),
-        ("Q3",  "Lunch restaurant suggestions",          "★★★☆☆", "★★★★☆", "New Impl"),
-        ("Q4",  "Kids clothing stores",                  "★★★☆☆", "★★★★☆", "New Impl"),
+        ("Q2",  "Family-friendly movies today",          "★☆☆☆☆", "★★★☆☆", "Chatbot V2"),
+        ("Q3",  "Lunch restaurant suggestions",          "★★★☆☆", "★★★★☆", "Chatbot V2"),
+        ("Q4",  "Kids clothing stores",                  "★★★☆☆", "★★★★☆", "Chatbot V2"),
         ("Q5",  "Fun activities for kids",               "★★★★☆", "★★☆☆☆", "AI Findr"),
-        ("Q6",  "Dessert places & cafes",                "★★★☆☆", "★★★★☆", "New Impl"),
-        ("Q7",  "Affordable fashion",                    "★★★☆☆", "★★★★☆", "New Impl"),
-        ("Q8",  "Ongoing offers & discounts",            "★☆☆☆☆", "★★★☆☆", "New Impl"),
-        ("Q9",  "Non-movie entertainment",               "★★☆☆☆", "★★★★☆", "New Impl"),
-        ("Q10", "Quick 2–3 hr shopping & dining plan",   "★★★☆☆", "★★★★★", "New Impl"),
-        ("", "TOTAL", "1 win", "8 wins", "New Implementation"),
+        ("Q6",  "Dessert places & cafes",                "★★★☆☆", "★★★★☆", "Chatbot V2"),
+        ("Q7",  "Affordable fashion",                    "★★★☆☆", "★★★★☆", "Chatbot V2"),
+        ("Q8",  "Ongoing offers & discounts",            "★☆☆☆☆", "★★★☆☆", "Chatbot V2"),
+        ("Q9",  "Non-movie entertainment",               "★★☆☆☆", "★★★★☆", "Chatbot V2"),
+        ("Q10", "Quick 2–3 hr shopping & dining plan",   "★★★☆☆", "★★★★★", "Chatbot V2"),
+        ("", "TOTAL", "1 win", "8 wins", "Chatbot V2"),
     ]
     tone_map = {
         row_i + 1: ("warning" if row[4] == "AI Findr" else
@@ -540,7 +539,7 @@ def build():
     }
     tone_map[len(queries_data)] = "success"  # totals row
     story.append(data_table(
-        ["#", "Query", "AI Findr", "New Impl", "Winner"],
+        ["#", "Query", "AI Findr", "Chatbot V2", "Winner"],
         queries_data,
         col_widths=[usable * 0.06, usable * 0.44, usable * 0.14, usable * 0.14, usable * 0.22],
         tone_map=tone_map,
@@ -601,7 +600,7 @@ def build():
     )
     verdict_box.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), ACCENT_LT),
-        ("BOX", (0, 0), (-1, -1), 0.8, ACCENT),
+        ("BOX", (0, 0), (-1, -1), 0.8, DARK),
         ("TOPPADDING", (0, 0), (-1, -1), 8),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
         ("LEFTPADDING", (0, 0), (-1, -1), 10),

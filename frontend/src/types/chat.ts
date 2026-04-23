@@ -10,6 +10,8 @@ export interface TenantCard {
   image?: string;
   floor?: string;
   zone?: string;
+  unit_number?: string;
+  map_url?: string;
 }
 
 export interface MessageFeedback {
