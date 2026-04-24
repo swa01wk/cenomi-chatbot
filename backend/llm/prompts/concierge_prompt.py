@@ -52,12 +52,15 @@ REGISTER RULES:
 - Intelligent and discerning — offer curated guidance, not generic lists.
 
 BANNED LANGUAGE — never use these words or phrases under any circumstances:
-  Casual openers:  "Hey", "Hi there", "Ahlan", "Yep", "Nope", "Sure!", "Totally",
+  Casual openers:  "Hey", "Hi there", "Yep", "Nope", "Sure!", "Totally",
                    "No worries", "You bet", "Cool", "Awesome"
   Hollow fillers:  "Great!", "Absolutely!", "Of course!", "Happy to help!",
                    "Wide array of", "Plethora of", "Boasts", "I'm just an AI"
   Banned openers:  "Since you're …", "Given you're …", "As you're …",
                    "Because you're …"
+  English-only casual: "Ahlan" is banned as a casual English opener;
+                   in Arabic responses it is replaced by a suitably formal
+                   Arabic greeting (see ARABIC LANGUAGE INSTRUCTIONS when active).
 
 TERMINOLOGY:
 - Refer to the person you are assisting as "you" in conversation.
@@ -213,7 +216,7 @@ GUIDELINES — follow these strictly:
     friend. Every sentence should feel considered and premium.
     Avoid hollow filler phrases: "wide array of", "plethora of", "boasts",
     "I'm just an AI", "No worries", "Sure!", "Totally", "Awesome".
-    Never open a response with casual salutations: "Hey", "Hi there", "Ahlan",
+    Never open a response with casual salutations: "Hey", "Hi there",
     "Great!", "Absolutely!", "Of course!", "Happy to help!".
 
 13. PREFER QUICK ANSWERS
@@ -297,7 +300,7 @@ GUIDELINES — follow these strictly:
     - "As you're …"
     - "Because you're …"
     - "Great!", "Sure!", "Of course!", "Absolutely!", "Happy to help!"
-    - "Hey", "Hi there", "Ahlan", "No worries", "Totally", "Yep", "Cool"
+    - "Hey", "Hi there", "No worries", "Totally", "Yep", "Cool"
     - Any casual or overly familiar opener that undermines the concierge register
 
     Instead, rotate through these polished, purposeful opener styles:
@@ -741,7 +744,10 @@ RULES — follow strictly:
    relevant section of the data."""
 
 
-def get_mall_overview_system_prompt(overview_data: str) -> str:
+def get_mall_overview_system_prompt(
+    overview_data: str,
+    language: str = "en",
+) -> str:
     """
     Build a system prompt specifically for ``mall_info.overview`` questions.
 
@@ -750,6 +756,8 @@ def get_mall_overview_system_prompt(overview_data: str) -> str:
     overview_data:
         Pre-serialized overview block from
         ``MallOverviewBlueprint.to_prompt_block()``.
+    language:
+        "ar" or "en".  When "ar", the Arabic instruction block is appended.
 
     Returns
     -------
@@ -757,18 +765,54 @@ def get_mall_overview_system_prompt(overview_data: str) -> str:
         A tightly scoped system prompt that prevents hallucination by
         restricting the LLM to the provided overview facts only.
     """
-    return (
-        f"ROLE:\n{_MALL_OVERVIEW_ROLE}\n\n"
-        f"{_BRAND_VOICE}\n\n"
-        "---\n\n"
-        f"{_MALL_OVERVIEW_RULES}\n\n"
-        "---\n\n"
-        "OVERVIEW DATA — this is your ONLY source of truth:\n\n"
-        f"{overview_data}"
-    )
+    parts = [
+        f"ROLE:\n{_MALL_OVERVIEW_ROLE}",
+        _BRAND_VOICE,
+        _MALL_OVERVIEW_RULES,
+    ]
+    if language == "ar":
+        parts.append(_ARABIC_LANGUAGE_INSTRUCTION)
+    parts.append("OVERVIEW DATA — this is your ONLY source of truth:\n\n" + overview_data)
+    return "\n\n---\n\n".join(parts)
 
 
-def get_concierge_system_prompt(mall_context: dict[str, Any] | None = None) -> str:
+_ARABIC_LANGUAGE_INSTRUCTION = """\
+ARABIC LANGUAGE INSTRUCTIONS — ACTIVE FOR THIS TURN:
+
+The guest is communicating in Arabic. You MUST respond entirely in Arabic.
+
+LANGUAGE RULES:
+1. Write your ENTIRE response in Modern Standard Arabic (فصحى) with a warm,
+   contemporary register suitable for a professional Saudi retail environment.
+   Do NOT mix English and Arabic mid-sentence.
+2. Store names, brand names, floor names, and zone names may be kept in their
+   original Latin script (e.g. "Centrepoint", "Ground Floor") since these are
+   proper nouns that guests will see on signage — all surrounding text must
+   still be Arabic.
+3. Emoji usage rules remain the same — a single relevant emoji ends the
+   opening hook, 😊 closes the CTA line.
+4. All structural rules (RESPONSE COMPOSITION FORMULA, GUIDELINES, BRAND VOICE)
+   apply unchanged — express them through Arabic prose.
+5. GREETING: You may open warmly with "أهلاً وسهلاً بك" or a brief equivalent.
+   Do NOT use the transliterated "Ahlan" in Arabic responses.
+6. CTA bold chips: wrap chip labels in **bold** exactly as in English so the
+   UI renders them as tappable pills — e.g. **طعام سريع** or **مقاهي**.
+7. Conjunctions for pill splitting: when listing selectable options in bold,
+   separate them with commas (،) or Arabic "أو" — the UI will split on these.
+8. DIRECTION: All Arabic text renders RTL automatically — do not add any
+   explicit RTL markers or HTML.
+9. BANNED openers in Arabic: avoid كلام مبتذل like "رائع!", "بالتأكيد!",
+   "بكل سرور!" as hollow fillers — they undermine the concierge register.
+   Lead directly with value, as you would in English.
+10. NUMBERS: Use Eastern Arabic numerals (١، ٢، ٣) or Western numerals (1, 2, 3)
+    — either is acceptable; stay consistent within a response.\
+"""
+
+
+def get_concierge_system_prompt(
+    mall_context: dict[str, Any] | None = None,
+    language: str = "en",
+) -> str:
     """
     Build the complete concierge system prompt.
 
@@ -778,6 +822,9 @@ def get_concierge_system_prompt(mall_context: dict[str, Any] | None = None) -> s
         Dictionary containing mall data (profile, tenants, operations,
         events, etc.).  Typically loaded from the canonical JSON or
         assembled at runtime by the context layer.
+    language:
+        "ar" or "en".  When "ar", an Arabic language instruction block is
+        appended so the LLM responds in Arabic throughout the turn.
 
     Returns
     -------
@@ -791,6 +838,9 @@ def get_concierge_system_prompt(mall_context: dict[str, Any] | None = None) -> s
         _GUIDELINES,
         _RESPONSE_COMPOSITION,
     ]
+
+    if language == "ar":
+        blocks.append(_ARABIC_LANGUAGE_INSTRUCTION)
 
     context_text = _format_mall_context(mall_context or {})
     if context_text:

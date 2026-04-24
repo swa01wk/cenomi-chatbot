@@ -140,7 +140,6 @@ async def compose_fact_response_context(state: ConciergeState) -> dict:
                 "name": entity_name,
                 "floor": data.get("floor", ""),
                 "zone": data.get("zone", ""),
-                "unit_number": data.get("unit_number", ""),
                 "nearby_landmarks": data.get("nearby_landmarks", []),
                 "directions_hint": data.get("directions_hint", ""),
                 "source": "factual/location",

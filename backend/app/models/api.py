@@ -36,6 +36,15 @@ class ChatRequest(BaseModel):
             "Used for contextual enrichment (e.g. peak-time dining, closing times)."
         ),
     )
+    language: str | None = Field(
+        default=None,
+        description=(
+            "Optional explicit language override from the client UI. "
+            "Accepted values: 'ar' (Arabic), 'en' (English). "
+            "When provided, overrides server-side auto-detection. "
+            "When omitted, language is auto-detected from the message text."
+        ),
+    )
 
 
 class DebugPayload(BaseModel):

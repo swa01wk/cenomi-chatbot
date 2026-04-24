@@ -156,11 +156,37 @@ _CTA_CHIP_LABELS: dict[str, list[str]] = {
     "offer_followup":    ["Show active deals", "Latest offers"],
 }
 
+# Arabic chip labels — RTL-ready equivalents of the English labels above.
+_CTA_CHIP_LABELS_AR: dict[str, list[str]] = {
+    "movie_refinement":  ["تصفية حسب النوع", "ساعدني في الاختيار"],
+    "family_narrowing":  ["خيارات مناسبة للأطفال", "خيارات عائلية"],
+    "dining_suggestion": ["تصفية حسب المطبخ", "اقترح حلوى أو قهوة"],
+    "dining_next":       ["أماكن الحلويات", "قهوة قريبة"],
+    "shopping_narrowing": ["تصفية حسب الميزانية", "لمن هدية؟"],
+    "service_help":      ["أرشدني", "خدمات أخرى"],
+    "overview_continue": ["تسوق", "مطاعم", "سينما"],
+    "route_help":        ["المزيد من الاتجاهات", "خدمات أخرى"],
+    "cross_mall":        ["البحث في مولات أخرى", "التحقق من التوفر"],
+    "cinema_followup":   ["خيارات الحجز", "مطاعم بالقرب من السينما"],
+    "offer_followup":    ["عرض العروض النشطة", "أحدث العروض"],
+}
 
-def get_cta_suggestions(cta_type: str) -> list[str]:
+
+def get_cta_suggestions(cta_type: str, language: str = "en") -> list[str]:
     """Return 2–3 short chip labels for the given CTA type.
 
     These are meant to be rendered as quick-reply pills in the UI.
     Returns an empty list when no chips are configured for the type.
+
+    Parameters
+    ----------
+    cta_type:
+        The CTA category key (e.g. "dining_suggestion").
+    language:
+        "ar" returns Arabic chip labels; any other value returns English.
     """
+    if language == "ar":
+        ar_labels = _CTA_CHIP_LABELS_AR.get(cta_type)
+        if ar_labels:
+            return list(ar_labels)
     return list(_CTA_CHIP_LABELS.get(cta_type, []))

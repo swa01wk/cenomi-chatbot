@@ -959,6 +959,24 @@ IMPORTANT:
     → excluded_entity_types: ["cinema"]
     → preferred_entity_types: ["entertainment_center", "arcade", "play_area", "gaming"]
 DEFAULT: []
+
+ARABIC LANGUAGE HANDLING:
+This classifier handles both English and Arabic messages. Arabic visitors use natural Gulf/Saudi
+dialect. Apply all domain and mode rules identically to Arabic messages.
+
+Brand names written in Arabic script — treat exactly as the English brand equivalent:
+- زارا = Zara → shopping/brand_availability (factual)
+- نايك = Nike → shopping/brand_availability (factual)
+- ستاربكس = Starbucks → shopping/brand_availability (factual)
+- أديداس = Adidas → shopping/brand_availability (factual)
+- ماكدونالدز = McDonald's → navigation/location_query or dining
+- اتش اند ام = H&M → shopping/brand_availability (factual)
+- سيفورا = Sephora → shopping/brand_availability (factual)
+
+Arabic unsupported capabilities → clarification_request (bot cannot perform these actions):
+- "ممكن تحجز لي تاكسي؟" = "can you book me a taxi?" → clarification_request
+- "ممكن تطلب لي أكل؟" = "can you order food for me?" → clarification_request
+- "وش عن الطلبات أونلاين" / "طلبات أونلاين" = "online ordering" → clarification_request
 """
 
 

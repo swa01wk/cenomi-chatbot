@@ -135,9 +135,105 @@ _DETECTION_RULES: list[dict[str, Any]] = [
     },
 ]
 
+# ── Arabic correction-signal patterns ─────────────────────────────────────
+# These detect when an Arabic-speaking guest is correcting the bot's response.
+# Arabic does not have word-boundary anchors (\b) the same way as English, so
+# patterns use lookahead/lookbehind or rely on whitespace anchoring where needed.
+
+_ARABIC_DETECTION_RULES: list[dict[str, Any]] = [
+    # ── scene / context corrections ──────────────────────────────────
+    {
+        "patterns": [
+            r"لا[،,]?\s*أقصد",          # "no, I meant"
+            r"ليس\s+هذا",               # "not this"
+            r"كنت\s+أقصد",              # "I meant"
+            r"كنت\s+أسأل\s+عن",        # "I was asking about"
+            r"هذا\s+ليس\s+ما",          # "this is not what"
+        ],
+        "signals": [ImplicitSignalType.INCORRECT_SCENE_INFERENCE],
+        "confidence": 0.85,
+    },
+    # ── wrong context / location ─────────────────────────────────────
+    {
+        "patterns": [
+            r"بداخل",                   # "inside"
+            r"بجانب",                   # "near/next to"
+            r"الطابق\s+الخطأ",          # "wrong floor"
+            r"المكان\s+الخطأ",          # "wrong place"
+            r"منطقة\s+أخرى",            # "another area"
+        ],
+        "signals": [ImplicitSignalType.WRONG_CONTEXT, ImplicitSignalType.LOCATION_CORRECTION],
+        "confidence": 0.75,
+    },
+    # ── price mismatch ───────────────────────────────────────────────
+    {
+        "patterns": [
+            r"غالي\s+جداً",             # "too expensive"
+            r"ليس\s+غالياً",            # "not expensive"
+            r"أرخص",                    # "cheaper"
+            r"ميزانية\s+محدودة",        # "limited budget"
+            r"بسعر\s+معقول",            # "at a reasonable price"
+            r"أكثر\s+فخامة",            # "more luxurious"
+        ],
+        "signals": [ImplicitSignalType.PRICE_MISMATCH],
+        "confidence": 0.80,
+    },
+    # ── audience mismatch ────────────────────────────────────────────
+    {
+        "patterns": [
+            r"لأطفالي",                 # "for my children"
+            r"للعائلة",                 # "for the family"
+            r"مع\s+الأطفال",            # "with the children"
+            r"مناسب\s+للأطفال",         # "suitable for children"
+            r"ليس\s+للأطفال",           # "not for children"
+        ],
+        "signals": [ImplicitSignalType.AUDIENCE_MISMATCH],
+        "confidence": 0.80,
+    },
+    # ── recommendation scope error ───────────────────────────────────
+    {
+        "patterns": [
+            r"شيء\s+آخر",              # "something else"
+            r"خيارات\s+أخرى",           # "other options"
+            r"ليس\s+هذا",               # "not this"
+            r"يجب\s+أن\s+تقترح",        # "you should suggest"
+            r"بدائل\s+أخرى",            # "other alternatives"
+            r"المزيد\s+من\s+الخيارات",   # "more options"
+        ],
+        "signals": [ImplicitSignalType.RECOMMENDATION_SCOPE_ERROR],
+        "confidence": 0.70,
+    },
+    # ── urgency / time correction ────────────────────────────────────
+    {
+        "patterns": [
+            r"بسرعة",                   # "quickly"
+            r"مستعجل",                  # "in a hurry"
+            r"وقت\s+قصير",              # "short time"
+            r"قبل\s+الفيلم",            # "before the movie"
+            r"فقط\s+\d+\s+دقائق",       # "only N minutes"
+        ],
+        "signals": [ImplicitSignalType.URGENCY_SIGNAL, ImplicitSignalType.TIME_CORRECTION],
+        "confidence": 0.65,
+    },
+    # ── preference override ──────────────────────────────────────────
+    {
+        "patterns": [
+            r"أفضّل",                   # "I prefer"
+            r"أريد\s+بدلاً\s+من",       # "I want instead of"
+            r"في\s+الواقع",             # "actually"
+            r"بل\s+أريد",               # "rather I want"
+        ],
+        "signals": [ImplicitSignalType.PREFERENCE_OVERRIDE],
+        "confidence": 0.60,
+    },
+]
+
 # Pre-compile all patterns
 for rule in _DETECTION_RULES:
     rule["_compiled"] = [re.compile(p, re.IGNORECASE) for p in rule["patterns"]]
+
+for rule in _ARABIC_DETECTION_RULES:
+    rule["_compiled"] = [re.compile(p, re.UNICODE) for p in rule["patterns"]]
 
 
 class ImplicitFeedbackDetector:
@@ -178,7 +274,9 @@ class ImplicitFeedbackDetector:
         if len(text) < 3:
             return None
 
-        for rule in _DETECTION_RULES:
+        # Run both English and Arabic detection rules
+        all_rules = _DETECTION_RULES + _ARABIC_DETECTION_RULES
+        for rule in all_rules:
             for compiled in rule["_compiled"]:
                 if compiled.search(text):
                     for sig in rule["signals"]:

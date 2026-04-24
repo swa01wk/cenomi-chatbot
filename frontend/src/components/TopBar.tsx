@@ -13,21 +13,25 @@ interface TopBarProps {
   mallId: string;
   debugMode: boolean;
   sessionId: string | null;
+  language: "en" | "ar";
   onTenantChange: (id: string) => void;
   onMallChange: (id: string) => void;
   onDebugToggle: (enabled: boolean) => void;
   onReset: () => void;
   onExport: () => void;
+  onLanguageChange: (lang: "en" | "ar") => void;
 }
 
 export default function TopBar({
   mallId,
   debugMode,
   sessionId,
+  language,
   onMallChange,
   onDebugToggle,
   onReset,
   onExport,
+  onLanguageChange,
 }: TopBarProps) {
   const activeMall = MALLS.find((m) => m.id === mallId) ?? MALLS[0];
 
@@ -65,6 +69,18 @@ export default function TopBar({
       </div>
 
       <div className="flex items-center gap-1.5">
+        {/* Language toggle */}
+        <button
+          onClick={() => onLanguageChange(language === "en" ? "ar" : "en")}
+          className="flex items-center gap-1 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          title={language === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
+          dir="ltr"
+        >
+          {language === "en" ? "EN" : "عربي"}
+          <span className="text-gray-300">|</span>
+          {language === "en" ? "عربي" : "EN"}
+        </button>
+
         <button
           onClick={() => onDebugToggle(!debugMode)}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
@@ -122,7 +138,7 @@ function MallSelector({
       </select>
       <ChevronDown
         size={12}
-        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-blue-400"
+        className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-blue-400"
       />
     </div>
   );

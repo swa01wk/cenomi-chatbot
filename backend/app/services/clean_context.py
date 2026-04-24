@@ -65,6 +65,10 @@ def clean_context_builder(
         # Current turn input
         "raw_user_message": session_state["raw_user_message"],
 
+        # Language — client override when provided; empty string means
+        # load_session will auto-detect from the message text.
+        "detected_language": session_state.get("detected_language", ""),
+
         # Structured scene memory (persisted across turns)
         "scene": session_state.get("scene"),
 

@@ -116,6 +116,8 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
             "last_intent": session.last_intent,
             "conversation_mode": session.conversation_mode,
             "conversation_history": session.conversation_history,
+            # Client-supplied language override ("ar"/"en"); empty = auto-detect
+            "detected_language": getattr(request, "language", None) or "",
         },
         mall_context=mall_ctx.get_context_pack(),
     )
@@ -212,7 +214,7 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         debug_payload = _build_debug_payload(result, elapsed_ms)
 
     cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
-    suggestions = get_cta_suggestions(cta_type)
+    suggestions = get_cta_suggestions(cta_type, language=result.detected_language or "en")
 
     sources = [
         {"target": r["target"], "data": r["data"]}

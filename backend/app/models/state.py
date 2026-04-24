@@ -665,6 +665,12 @@ class ConciergeState(BaseModel):
         description="Exact context assembled by compose_fact_response_context",
     )
 
+    # ── 1g. Language ──────────────────────────────────────────────────
+    # "ar" | "en" — auto-detected or set by the client UI toggle.
+    # Flows through every prompt-building node so the LLM always responds
+    # in the guest's preferred language.
+    detected_language: str = "en"
+
     # ── 2. User Input ─────────────────────────────────────────────────
     raw_user_message: str = ""
     normalized_user_message: str = ""

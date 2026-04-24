@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import TopBar from "./components/TopBar";
 import ChatPage from "./pages/ChatPage";
 import DebugPanel from "./components/DebugPanel";
@@ -6,18 +7,26 @@ import { useChat } from "./hooks/useChat";
 export default function App() {
   const chat = useChat();
 
+  // Sync document lang/dir whenever language changes
+  useEffect(() => {
+    document.documentElement.lang = chat.language;
+    document.documentElement.dir = chat.language === "ar" ? "rtl" : "ltr";
+  }, [chat.language]);
+
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col" dir={chat.language === "ar" ? "rtl" : "ltr"}>
       <TopBar
         tenantId={chat.tenantId}
         mallId={chat.mallId}
         debugMode={chat.debugMode}
         sessionId={chat.sessionId}
+        language={chat.language}
         onTenantChange={chat.changeMallId}
         onMallChange={chat.changeMallId}
         onDebugToggle={chat.setDebugMode}
         onReset={chat.reset}
         onExport={chat.exportConversation}
+        onLanguageChange={chat.setLanguage}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -29,6 +38,7 @@ export default function App() {
             isLoading={chat.isLoading}
             selectedTurnId={chat.selectedTurnId}
             mallConfirmed={chat.mallConfirmed}
+            language={chat.language}
             onSend={chat.send}
             onSelectTurn={chat.setSelectedTurnId}
             onFeedback={chat.handleFeedback}

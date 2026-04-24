@@ -166,6 +166,121 @@ _DOMAIN_EXPANSION_WORDS: dict[str, frozenset[str]] = {
 }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Arabic keyword → English retrieval phrase map
+#
+# Arabic one-word or two-word queries are translated to English retrieval
+# phrases so they match the English-language vector corpus and canonical data.
+# These are checked BEFORE the English single-word map so Arabic queries
+# don't fall through to the "append 'in the mall'" fallback with Arabic text.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_ARABIC_EXPANSION_MAP: dict[str, str] = {
+    # ── Shopping ──────────────────────────────────────────────────────
+    "هدية": "gift ideas and gift shops in the mall",
+    "هدايا": "gift ideas and gift shops in the mall",
+    "تسوق": "shopping options and popular stores in the mall",
+    "متجر": "shopping options and popular stores in the mall",
+    "متاجر": "shopping options and popular stores in the mall",
+    "ملابس": "clothing and fashion stores in the mall",
+    "موضة": "fashion and clothing stores in the mall",
+    "أحذية": "shoe stores in the mall",
+    "مجوهرات": "jewelry stores in the mall",
+    "عطر": "perfume and fragrance stores in the mall",
+    "عطور": "perfume and fragrance stores in the mall",
+    "ساعة": "watch and accessories stores in the mall",
+    "ساعات": "watch and accessories stores in the mall",
+    "حقيبة": "bags and luggage stores in the mall",
+    "حقائب": "bags and luggage stores in the mall",
+    "إلكترونيات": "electronics and gadget stores in the mall",
+
+    # ── Dining ────────────────────────────────────────────────────────
+    "قهوة": "coffee shops and cafes in the mall",
+    "كافيه": "coffee shops and cafes in the mall",
+    "مطعم": "food and dining options in the mall",
+    "مطاعم": "food and dining options in the mall",
+    "أكل": "places to eat and restaurants in the mall",
+    "طعام": "food and dining options in the mall",
+    "جائع": "places to eat and restaurants in the mall",
+    "غداء": "lunch restaurants and quick bites in the mall",
+    "عشاء": "dinner restaurants in the mall",
+    "فطور": "breakfast spots and cafes in the mall",
+    "حلويات": "dessert shops and sweet treats in the mall",
+    "آيس كريم": "ice cream and dessert spots in the mall",
+    "شاي": "tea and coffee shops in the mall",
+    "عصير": "juice bars and healthy drink spots in the mall",
+    "بيتزا": "pizza restaurants in the mall",
+    "برغر": "burger restaurants in the mall",
+    "سوشي": "sushi and Japanese restaurants in the mall",
+    "وجبة سريعة": "fast food and quick bite options in the mall",
+
+    # ── People / occasions ────────────────────────────────────────────
+    "أطفال": "family and kids activities in the mall",
+    "عائلة": "family-friendly activities and dining in the mall",
+    "رضيع": "baby stores and family facilities in the mall",
+    "رومانسي": "romantic dining and experiences in the mall",
+    "ذكرى سنوية": "romantic dining and gift ideas for anniversary in the mall",
+    "عيد ميلاد": "birthday gift ideas and celebration spots in the mall",
+    "أصدقاء": "things to do with friends in the mall",
+
+    # ── Entertainment ─────────────────────────────────────────────────
+    "فيلم": "movie showtimes and cinema in the mall",
+    "أفلام": "movie showtimes and cinema in the mall",
+    "سينما": "cinema and movie showtimes in the mall",
+    "ترفيه": "entertainment options and activities in the mall",
+    "ألعاب": "gaming and entertainment options in the mall",
+    "ممل": "things to do and entertainment in the mall",
+
+    # ── Services / navigation ─────────────────────────────────────────
+    "صلاة": "prayer room location in the mall",
+    "مصلى": "prayer room location in the mall",
+    "موقف": "parking information and location in the mall",
+    "مواقف": "parking information and rates in the mall",
+    "صراف": "ATM and banking services in the mall",
+    "صراف آلي": "ATM and banking services in the mall",
+    "واي فاي": "WiFi and connectivity in the mall",
+    "دورة مياه": "restroom and bathroom locations in the mall",
+    "صرافة": "currency exchange services in the mall",
+    "مساعدة": "information desk and assistance in the mall",
+    "معلومات": "information desk and mall directory",
+
+    # ── Exploration ───────────────────────────────────────────────────
+    "استكشاف": "things to explore and do in the mall",
+    "اقتراح": "suggestions for things to do in the mall",
+    "الأفضل": "best things to do and see in the mall",
+    "عروض": "current offers and promotions in the mall",
+    "خصومات": "current deals and promotions in the mall",
+    "تخفيضات": "current sales and promotions in the mall",
+    "فعاليات": "current events happening in the mall",
+}
+
+_ARABIC_MULTI_WORD_EXPANSIONS: dict[str, str] = {
+    "آيس كريم": "ice cream and dessert spots in the mall",
+    "صراف آلي": "ATM and banking services in the mall",
+    "دورة مياه": "restroom and bathroom locations in the mall",
+    "وجبة سريعة": "fast food and quick bite options in the mall",
+    "غداء سريع": "quick lunch and fast casual dining in the mall",
+    "وجبة خفيفة": "light meals and healthy quick bites in the mall",
+    "ماذا بعد": "next activity or dining option in the mall",
+    "ثم ماذا": "next activity or dining option in the mall",
+    "بعد ذلك": "next activity or dining option continuing the visit",
+    "ماذا الآن": "next step in the mall visit",
+    "شيء حلو": "dessert and sweet treat options in the mall",
+    "شيء خفيف": "light meals and quick bites in the mall",
+    "شيء رومانسي": "romantic dining or gift ideas for a couple",
+    "شيء مناسب": "affordable and budget-friendly options in the mall",
+    "بعد التسوق": "dining or dessert options after shopping in the mall",
+    "بعد الغداء": "dessert or coffee options after lunch in the mall",
+    "بعد العشاء": "dessert or coffee options after dinner in the mall",
+    "بعد الفيلم": "dining options after the movie in the mall",
+    "قبل الفيلم": "quick bite or snack options before the movie in the mall",
+}
+
+# Arabic disengagement / filler phrases — never expanded.
+_ARABIC_EXPANSION_BLOCKLIST: frozenset[str] = frozenset({
+    "لا شيء", "لا يهم", "بخير", "تمام", "حسناً", "مرحبا", "شكراً", "وداعاً",
+})
+
 _MULTI_WORD_EXPANSIONS: dict[str, str] = {
     "ice cream": "ice cream and dessert spots in the mall",
     "kids zone": "kids play zone and family activities in the mall",
@@ -222,11 +337,23 @@ def expand_short_query(
         return ExpansionResult(original=cleaned, expanded=cleaned, was_expanded=False)
 
     lower = cleaned.lower()
-    lower_stripped_check = lower.rstrip("?!., ")
+    lower_stripped_check = lower.rstrip("?!.،، ")
 
     # Blocklist: disengagement / filler phrases must never be expanded.
-    if lower_stripped_check in _EXPANSION_BLOCKLIST:
+    if lower_stripped_check in _EXPANSION_BLOCKLIST or lower_stripped_check in _ARABIC_EXPANSION_BLOCKLIST:
         return ExpansionResult(original=cleaned, expanded=cleaned, was_expanded=False)
+
+    # ── Arabic multi-word exact matches ───────────────────────────────────
+    if lower_stripped_check in _ARABIC_MULTI_WORD_EXPANSIONS:
+        expanded = _ARABIC_MULTI_WORD_EXPANSIONS[lower_stripped_check]
+        logger.debug("Short query expanded (arabic-multi): %r → %r", cleaned, expanded)
+        return ExpansionResult(original=cleaned, expanded=expanded, was_expanded=True)
+
+    # ── Arabic single-word exact matches ──────────────────────────────────
+    if lower_stripped_check in _ARABIC_EXPANSION_MAP:
+        expanded = _ARABIC_EXPANSION_MAP[lower_stripped_check]
+        logger.debug("Short query expanded (arabic): %r → %r", cleaned, expanded)
+        return ExpansionResult(original=cleaned, expanded=expanded, was_expanded=True)
 
     words = lower.split()
 

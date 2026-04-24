@@ -67,6 +67,10 @@ _UNSUPPORTED_CAPABILITY_PATTERNS: tuple[str, ...] = (
     "can you order",
     "deliver food", "food delivery for me",
     "place an order",
+    # Arabic unsupported capability patterns
+    "ممكن تحجز لي تاكسي", "ممكن تطلب لي أكل", "تطلب لي أكل",
+    "اطلب لي", "أون لاين ممكن تطلب", "طلبات أونلاين",
+    "توصيل أكل", "طلب توصيل", "تحجز لي سيارة",
 )
 
 # Topic locks that should stay factual on factual flow
@@ -120,9 +124,13 @@ def _classify_confidence(state: ConciergeState) -> str:
             return CONFIDENCE_MEDIUM
         return CONFIDENCE_LOW
 
-    # Structural caps — regardless of the LLM's raw confidence score:
+    # Structural caps — applied when the LLM's raw confidence score alone is insufficient
+    # to warrant HIGH because of structural uncertainty:
     # · best_effort_shortlist: vague/exploratory request with no clear target → always cap medium
-    # · constraint_refinement: narrowing a prior answer, not a fresh prediction → always cap medium
+    # · constraint_refinement: narrowing a prior answer → cap at medium ONLY when LLM
+    #   confidence < 0.75.  A refinement turn the LLM classifies with high confidence
+    #   (e.g. "something cheaper" after a restaurant list) has a clear, unambiguous
+    #   constraint that warrants HIGH — the cap only protects against genuinely ambiguous cases.
     # · hybrid_plan: cap at medium ONLY when LLM confidence < 0.75 — clear, unambiguous
     #   multi-domain requests (e.g. "we want to catch a movie and then eat") are high-confidence
     #   and should be reported as high, not artificially downgraded.
@@ -142,19 +150,19 @@ def _classify_confidence(state: ConciergeState) -> str:
     if _is_filtered_factual_movie:
         return CONFIDENCE_HIGH
 
-    # Broad shopping queries (general_shopping sub_intent, no specific entity target)
-    # have result quality that depends on stock breadth — cap at medium even when the
-    # LLM scored high confidence, because "high confidence" here means the domain is
-    # clear, not that we'll find a precise match.
-    if (
-        state.intent.sub_intent == "general_shopping"
-        and not (state.intent.entity_query or "").strip()
-        and confidence >= 0.75
-    ):
-        return CONFIDENCE_MEDIUM
-
+    # best_effort_shortlist: genuinely vague/exploratory — hard cap at medium.
     _HARD_MEDIUM_CAP_MODES = frozenset({"best_effort_shortlist"})
-    if response_mode_hint in _HARD_MEDIUM_CAP_MODES or msg_kind == "constraint_refinement":
+    if response_mode_hint in _HARD_MEDIUM_CAP_MODES:
+        if confidence >= 0.45:
+            return CONFIDENCE_MEDIUM
+        return CONFIDENCE_LOW
+
+    # constraint_refinement: narrowing a previous answer with a clear qualifier.
+    # Allow HIGH when LLM confidence >= 0.75 (the constraint is unambiguous);
+    # cap at MEDIUM for lower-confidence refinements where the tightening is unclear.
+    if msg_kind == "constraint_refinement":
+        if confidence >= 0.75:
+            return CONFIDENCE_HIGH
         if confidence >= 0.45:
             return CONFIDENCE_MEDIUM
         return CONFIDENCE_LOW

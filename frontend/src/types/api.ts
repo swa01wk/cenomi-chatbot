@@ -7,6 +7,7 @@ export interface ChatRequest {
   mall_id?: string;
   debug?: boolean;
   context?: Record<string, unknown>;
+  language?: "en" | "ar";
 }
 
 export interface SessionSummary {

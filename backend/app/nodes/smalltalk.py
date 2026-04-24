@@ -83,6 +83,11 @@ async def _generate_farewell(state: ConciergeState) -> str:
         "; ".join(context_parts) if context_parts else "no specific context shared"
     )
 
+    lang = getattr(state, "detected_language", "en") or "en"
+    arabic_lang_note = (
+        " Respond entirely in Modern Standard Arabic (فصحى)."
+        if lang == "ar" else ""
+    )
     system_prompt = (
         "You are a distinguished digital mall concierge bidding farewell to a departing guest. "
         "Write exactly ONE gracious farewell — 2 sentences maximum. "
@@ -93,6 +98,7 @@ async def _generate_farewell(state: ConciergeState) -> str:
         "Do NOT mention specific store names. Do NOT make new recommendations. "
         "Maintain a polished, warm, and composed tone — the register of a five-star concierge. "
         "Never use casual language: no 'See you!', 'Take care!', 'Bye!', or informal phrases."
+        + arabic_lang_note
     )
 
     human_prompt = (
@@ -294,6 +300,114 @@ _KIND_TO_POOL: dict[MessageKind, str] = {
     MessageKind.EMOTIONAL: "emotional",
 }
 
+# ── Arabic response pools ──────────────────────────────────────────────────
+
+_AR_GREETING_FIRST: list[str] = [
+    "أهلاً وسهلاً بك. أنا كونسيرج المول الرقمي الخاص بك — هنا لمساعدتك في الاستمتاع "
+    "بتجربة تسوق استثنائية. سواء كنت تبحث عن مطعم، أو متجر بعينه، أو أوقات عرض السينما، "
+    "أو أي من خدماتنا، فأنا في خدمتك. كيف يمكنني مساعدتك اليوم؟",
+
+    "مرحباً بك في المول. أنا كونسيرجك المخصص لهذه الزيارة — "
+    "للتسوق، والمطاعم، والترفيه، وأي خدمات قد تحتاجها. كيف يمكنني خدمتك؟",
+
+    "أهلاً بك. أنا هنا لإرشادك في كل خطوة من خطوات زيارتك — "
+    "سواء أردت إيجاد متجر معين، أو اختيار مكان رائع لتناول الطعام، "
+    "أو معرفة عروض السينما، أو أي خدمة أخرى. بماذا تودّ أن نبدأ؟",
+]
+
+_AR_GREETING_RETURNING: list[str] = [
+    "لا تزال في خدمتك — خذ وقتك. الطابق الأرضي يضم معظم المتاجر والمطاعم، "
+    "والسينما في الطابق العلوي، وأنا هنا لإرشادك بسهولة. بماذا يمكنني مساعدتك؟",
+
+    "حاضر متى كنت مستعداً. إليك توجيه مختصر: الموضة والإكسسوارات في الطابق الأرضي، "
+    "والمطاعم بالقرب من الأتريوم المركزي، والترفيه في الطابق العلوي. هل ثمة شيء بعينه تبحث عنه؟",
+]
+
+_AR_GREETING_PERSISTENT: list[str] = [
+    "أنا هنا — لا عجلة على الإطلاق. "
+    "ما هو شيء واحد تودّ فعله أو إيجاده خلال زيارتك؟ "
+    "حتى كلمة بسيطة مثل 'طعام' أو 'هدية' تكفيني للبدء.",
+
+    "في انتظارك متى شئت. أحياناً أسهل نقطة انطلاق هي أول شيء يخطر ببالك — "
+    "متجر، أو شيء لتأكله، أو 'لا أعرف، اقترح شيئاً'. سأتولى الأمر من هناك.",
+]
+
+_AR_IDENTITY_RESPONSES: list[str] = [
+    "أنا كونسيرجك الرقمي الشخصي في هذا المول — هنا لضمان أن تكون زيارتك "
+    "سلسة وممتعة قدر الإمكان. المتاجر، والمطاعم، والسينما، والأنشطة العائلية، "
+    "والخدمات — فقط اسأل وسأتولى الباقي.",
+
+    "فكّر بي ككونسيرج مول مخصص، مدعوم بأحدث التقنيات. "
+    "لديّ معرفة كاملة بكل متجر ومطعم وخدمة هنا. بماذا تودّ الاستفسار اليوم؟",
+]
+
+_AR_CRISIS_RESPONSES: list[str] = [
+    "ما شاركته مهم، وأريدك أن تعلم ذلك. "
+    "من فضلك تواصل مع شخص تثق به، أو اتصل بخط دعم الأزمات — "
+    "لست وحدك، والمساعدة الحقيقية متاحة لك.",
+
+    "أسمعك، وصحتك النفسية هي الأهم الآن. "
+    "من فضلك تحدث مع شخص قريب منك أو اتصل بخط دعم متخصص. "
+    "تستحق الدعم الصحيح، وأتمنى أن تجده.",
+]
+
+_AR_RESPONSES: dict[str, list[str]] = {
+    "howru": [
+        "بخير، شكراً لسؤالك. كيف يمكنني مساعدتك اليوم؟",
+        "كل شيء على ما يرام — وأنا في خدمتك الكاملة. تسوق، أو مطاعم، أو سينما؟",
+        "أحوالي جيدة، شكراً. بماذا يمكنني خدمتك؟",
+    ],
+    "thanks": [
+        "بكل سرور. هل ثمة شيء آخر يمكنني مساعدتك به؟",
+        "سعيدٌ بخدمتك — لا تتردد في السؤال إن احتجت أي شيء آخر.",
+        "عفواً. أنا هنا متى احتجتني.",
+    ],
+    "thanks_with_dining_suggestion": [
+        "سعيدٌ بمساعدتك. إن لم تتناول طعاماً بعد، ثمة خيارات رائعة في المول — يسعدني أن أقترح عليك شيئاً.",
+        "كان من دواعي سروري. إن كنت تفكر في تناول شيء، يمكنني إرشادك إلى أفضل خيار.",
+    ],
+    "thanks_with_shopping_suggestion": [
+        "بكل سرور. يوجد كذلك الكثير من خيارات التسوق المميزة هنا — هل تودّ أن أدلّك على متاجر بعينها؟",
+        "كان من دواعي سروري. وإن أردت التجول في المتاجر، يسعدني إرشادك.",
+    ],
+    "thanks_with_entertainment_suggestion": [
+        "بكل سرور. إن كنت تفكر في فيلم، السينما هنا — هل تودّ معرفة ما يُعرض حالياً؟",
+        "كان من دواعي سروري. وإن كنت تبحث عن ترفيه، لدينا الكثير — فقط اسأل.",
+    ],
+    "thanks_with_generic_suggestion": [
+        "بكل سرور. لا يزال هناك الكثير لاكتشافه — مطاعم، ومتاجر، وترفيه، وخدمات. فقط اسأل.",
+        "عفواً. متى أردت استكشاف المزيد — طعاماً، أو متجراً، أو فيلماً — فأنا هنا.",
+        "أهلاً وسهلاً. إن كان لديك أي شيء آخر اليوم، يسعدني المساعدة.",
+    ],
+    "farewell": [
+        "كان من دواعي سروري مساعدتك. استمتع ببقية زيارتك — "
+        "أنا هنا إن احتجت أي إرشاد أو توصية في أي وقت.",
+
+        "أتمنى لك وقتاً رائعاً. إن احتجت أي شيء خلال زيارتك، "
+        "لا تتردد في التواصل — أنا دائماً متاح.",
+
+        "إلى اللقاء. وإن احتجت أي شيء — متجراً لإيجاده، أو مكاناً للأكل، "
+        "أو أي خدمة — فقط أرسل رسالة.",
+    ],
+    "emotional": [
+        "أفهم — دعنا نبسّط الأمر. أخبرني بشيء واحد جئت من أجله، "
+        "حتى لو كان عاماً، وسأتولى الباقي. لا داعي لأن يكون كل شيء واضحاً.",
+
+        "المساحات الكبيرة قد تكون مربكة أحياناً — هذا أمر طبيعي تماماً. "
+        "إن ساعدك ذلك، اختر شيئاً واحداً فقط: طعاماً، أو متجراً بعينه، أو فيلماً — "
+        "وسأرشدك مباشرة. ما الذي يروق لك أكثر؟",
+    ],
+    "emotional_mood_plan": [
+        "دعني أعدّ لك خطة. زيارة مريحة قد تبدأ بشيء لذيذ من المطعم، "
+        "ثم تجوّل مريح بين المتاجر، وإن أردت الاسترخاء التام، السينما هنا أيضاً. "
+        "هل تودّ أن أبني لك مساراً ممتعاً؟",
+
+        "يبدو أنك تحتاج إلى زيارة ممتعة حقاً اليوم. "
+        "إليك خطة بسيطة: شيء مميز من المطعم، ثم تجوّل هادئ بين المتاجر، "
+        "وفيلم في النهاية إن أحببت. ما الجزء الأكثر جاذبية لك الآن؟",
+    ],
+}
+
 # Domains that count as "completed" for proactive follow-up logic.
 # Ordered by priority of suggestion (most universally useful first).
 _SUGGESTION_PRIORITY: list[tuple[str, str]] = [
@@ -303,7 +417,7 @@ _SUGGESTION_PRIORITY: list[tuple[str, str]] = [
 ]
 
 
-def _pick_emotional_response(state: ConciergeState) -> str:
+def _pick_emotional_response(state: ConciergeState, use_arabic: bool = False) -> str:
     """
     Return a context-aware emotional response.
 
@@ -315,13 +429,22 @@ def _pick_emotional_response(state: ConciergeState) -> str:
         "make me happy", "cheer me up", "feel better", "give me a plan",
         "make it better", "something fun", "fun plan", "good plan",
         "pick me up", "lift my mood",
+        # Arabic mood-plan signals
+        "اجعلني سعيداً", "خطة ممتعة", "شيء ممتع", "أشعر بتحسن",
     )
     if any(sig in msg for sig in _MOOD_PLAN_SIGNALS):
-        return random.choice(_RESPONSES["emotional_mood_plan"])
-    return random.choice(_RESPONSES["emotional"])
+        pool_key = "emotional_mood_plan"
+    else:
+        pool_key = "emotional"
+
+    if use_arabic:
+        ar_pool = _AR_RESPONSES.get(pool_key)
+        if ar_pool:
+            return random.choice(ar_pool)
+    return random.choice(_RESPONSES[pool_key])
 
 
-def _pick_thanks_response(state: ConciergeState) -> str:
+def _pick_thanks_response(state: ConciergeState, use_arabic: bool = False) -> str:
     """
     Return a context-aware thanks response.
 
@@ -343,12 +466,15 @@ def _pick_thanks_response(state: ConciergeState) -> str:
     ]
 
     if unexplored and (completed or active):
-        # Suggest the first unexplored domain that makes sense given context.
         pool_key = unexplored[0]
-        return random.choice(_RESPONSES[pool_key])
+    else:
+        pool_key = "thanks_with_generic_suggestion"
 
-    # No meaningful context — use the generic pool.
-    return random.choice(_RESPONSES["thanks_with_generic_suggestion"])
+    if use_arabic:
+        ar_pool = _AR_RESPONSES.get(pool_key)
+        if ar_pool:
+            return random.choice(ar_pool)
+    return random.choice(_RESPONSES[pool_key])
 
 
 def is_smalltalk(state: ConciergeState) -> bool:
@@ -364,12 +490,14 @@ def is_smalltalk(state: ConciergeState) -> bool:
 @traced_node("smalltalk")
 async def smalltalk(state: ConciergeState) -> dict:
     kind: MessageKind = state.intent.message_kind
+    lang = getattr(state, "detected_language", "en") or "en"
+    use_arabic = lang == "ar"
 
     if kind == MessageKind.CRISIS:
-        response_text = random.choice(_CRISIS_RESPONSES)
+        response_text = random.choice(_AR_CRISIS_RESPONSES if use_arabic else _CRISIS_RESPONSES)
         experience_mode = "crisis_support"
     elif kind == MessageKind.IDENTITY:
-        response_text = random.choice(_IDENTITY_RESPONSES)
+        response_text = random.choice(_AR_IDENTITY_RESPONSES if use_arabic else _IDENTITY_RESPONSES)
         experience_mode = "identity_response"
     elif kind == MessageKind.GREETING:
         # greeting_streak is how many consecutive greetings have already been
@@ -377,12 +505,20 @@ async def smalltalk(state: ConciergeState) -> dict:
         # It hasn't been incremented for the CURRENT turn yet, so streak=0 means
         # this is the very first greeting.
         streak = state.scene.greeting_streak
-        if streak == 0:
-            response_text = random.choice(_GREETING_FIRST)
-        elif streak == 1:
-            response_text = random.choice(_GREETING_RETURNING)
+        if use_arabic:
+            if streak == 0:
+                response_text = random.choice(_AR_GREETING_FIRST)
+            elif streak == 1:
+                response_text = random.choice(_AR_GREETING_RETURNING)
+            else:
+                response_text = random.choice(_AR_GREETING_PERSISTENT)
         else:
-            response_text = random.choice(_GREETING_PERSISTENT)
+            if streak == 0:
+                response_text = random.choice(_GREETING_FIRST)
+            elif streak == 1:
+                response_text = random.choice(_GREETING_RETURNING)
+            else:
+                response_text = random.choice(_GREETING_PERSISTENT)
         experience_mode = "greeting_scaffold"
     elif kind == MessageKind.FAREWELL:
         # LLM-generated: personalises the goodbye using scene context
@@ -391,17 +527,19 @@ async def smalltalk(state: ConciergeState) -> dict:
         response_text = await _generate_farewell(state)
         experience_mode = "farewell_personalised"
     elif kind == MessageKind.THANKS:
-        response_text = _pick_thanks_response(state)
+        response_text = _pick_thanks_response(state, use_arabic=use_arabic)
         experience_mode = "thanks_response"
     elif kind == MessageKind.EMOTIONAL:
-        response_text = _pick_emotional_response(state)
+        response_text = _pick_emotional_response(state, use_arabic=use_arabic)
         experience_mode = "emotional_response"
     elif kind in _KIND_TO_POOL:
-        response_text = random.choice(_RESPONSES[_KIND_TO_POOL[kind]])
+        pool_key = _KIND_TO_POOL[kind]
+        ar_pool = _AR_RESPONSES.get(pool_key)
+        response_text = random.choice(ar_pool if use_arabic and ar_pool else _RESPONSES[pool_key])
         experience_mode = "smalltalk"
     else:
         # Unexpected SMALLTALK_KINDS member — fall back to greeting
-        response_text = random.choice(_GREETING_FIRST)
+        response_text = random.choice(_AR_GREETING_FIRST if use_arabic else _GREETING_FIRST)
         experience_mode = "greeting_scaffold"
 
     category = kind.value  # string value for logging / metadata

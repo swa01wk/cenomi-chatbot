@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { SendHorizonal } from "lucide-react";
-import { MAX_MESSAGE_LENGTH } from "../lib/constants";
+import { MAX_MESSAGE_LENGTH, UI_COPY_AR } from "../lib/constants";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
+  language?: "en" | "ar";
 }
 
-export default function ChatInput({ onSend, disabled }: ChatInputProps) {
+export default function ChatInput({ onSend, disabled, language = "en" }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -39,6 +40,10 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   const charCount = input.length;
   const overLimit = charCount > MAX_MESSAGE_LENGTH;
+  const placeholder =
+    language === "ar"
+      ? UI_COPY_AR.inputPlaceholder
+      : "Ask about stores, dining, entertainment...";
 
   return (
     <div className="border-t border-gray-100 bg-white px-4 py-3">
@@ -49,14 +54,15 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about stores, dining, entertainment..."
+            placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-12 text-sm leading-relaxed transition-colors focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
+            dir="auto"
+            className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pe-12 text-sm leading-relaxed transition-colors focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
           />
           {charCount > 0 && (
             <span
-              className={`absolute bottom-1.5 right-3 text-[10px] ${
+              className={`absolute bottom-1.5 end-3 text-[10px] ${
                 overLimit ? "text-red-500" : "text-gray-300"
               }`}
             >

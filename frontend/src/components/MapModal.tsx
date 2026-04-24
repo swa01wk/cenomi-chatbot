@@ -11,13 +11,19 @@ interface MapModalProps {
 export default function MapModal({
   storeName,
   mapUrl,
+  unitNumber,
   onClose,
 }: MapModalProps) {
-  // Load the base map URL; navigation to the store is done via postMessage once ready.
-  const base = mapUrl.endsWith("#/") ? mapUrl : mapUrl.replace(/#\/?$/, "") + "#/";
+  // Use Mappedin Web enterprise hash routing to navigate directly to the
+  // location profile page, bypassing the home/search screen entirely.
+  // Route: #/profile?location=<locationName|externalId>
+  const iframeSrc = (() => {
+    const baseUrl = mapUrl.replace(/#.*$/, "");
+    const locationParam = encodeURIComponent(unitNumber || storeName);
+    return `${baseUrl}#/profile?location=${locationParam}`;
+  })();
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const navigatedRef = useRef(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -28,22 +34,21 @@ export default function MapModal({
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Once Mappedin signals it is ready, navigate to the store location.
-  // state "/" keeps the normal map view (store highlighted with popup),
-  // as opposed to "/directions" which opens the turn-by-turn panel.
+  // Fallback: once Mappedin signals it is ready, also send a postMessage in case
+  // the URL param was not processed (e.g. older viewer versions).
   useEffect(() => {
+    const navigated = { current: false };
     function handleMessage(event: MessageEvent) {
       if (!event.data || typeof event.data !== "object") return;
-      if (event.data.type === "app-loaded" && !navigatedRef.current) {
-        navigatedRef.current = true;
+      if (event.data.type === "app-loaded" && !navigated.current) {
+        navigated.current = true;
         const win = iframeRef.current?.contentWindow;
         if (!win) return;
         win.postMessage(
           {
             type: "set-state",
             payload: {
-              state: "/",
-              location: storeName,
+              location: unitNumber || storeName,
             },
           },
           "*"
@@ -52,7 +57,7 @@ export default function MapModal({
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [storeName]);
+  }, [storeName, unitNumber]);
 
   return (
     <div
@@ -90,7 +95,7 @@ export default function MapModal({
         <div className="flex-1 overflow-hidden">
           <iframe
             ref={iframeRef}
-            src={base}
+            src={iframeSrc}
             title={`Mall map — ${storeName}`}
             className="h-full w-full border-0"
             allow="fullscreen"

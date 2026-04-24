@@ -97,6 +97,11 @@ async def _generate_stream(
             else base_config
         )
 
+        # Propagate time_of_day from request into scene when provided
+        scene = session.scene
+        if getattr(request, "time_of_day", ""):
+            scene = scene.model_copy(update={"time_of_day": request.time_of_day})
+
         initial_state = clean_context_builder(
             session_state={
                 "session_id": session_id,
@@ -104,10 +109,12 @@ async def _generate_stream(
                 "mall_id": request.mall_id,
                 "raw_user_message": request.message,
                 "active_tenant_parameters": config,
-                "scene": session.scene,
+                "scene": scene,
                 "last_intent": session.last_intent,
                 "conversation_mode": session.conversation_mode,
                 "conversation_history": session.conversation_history,
+                # Client-supplied language override ("ar"/"en"); empty = auto-detect
+                "detected_language": getattr(request, "language", None) or "",
             },
             mall_context=mall_ctx.get_context_pack(),
         )
@@ -255,7 +262,7 @@ async def _generate_stream(
     suggestions: list[str] = []
     if result is not None:
         cta_type = getattr(result.debug_enrichment, "experience_cta_type", "") or ""
-        suggestions = get_cta_suggestions(cta_type)
+        suggestions = get_cta_suggestions(cta_type, language=result.detected_language or "en")
 
     sources: list[dict] = []
     if result is not None:
@@ -275,7 +282,6 @@ async def _generate_stream(
             if not name:
                 continue
             image = ""
-            unit_number = ""
             category = e.get("category", "") or e.get("cuisine_type", "")
             entity_id = e.get("entity_id", "")
             if entity_id:
@@ -289,8 +295,6 @@ async def _generate_stream(
                                 or full.get("cuisine_type")
                                 or ""
                             )
-                        loc = full.get("location") or {}
-                        unit_number = loc.get("unit_number", "") or ""
                 except Exception:
                     pass
             tenants.append({
@@ -299,7 +303,7 @@ async def _generate_stream(
                 "image": image,
                 "floor": e.get("floor", ""),
                 "zone": e.get("zone", ""),
-                "unit_number": unit_number,
+                "unit_number": e.get("unit_number", ""),
                 "map_url": mall_map_url,
             })
 

@@ -173,6 +173,13 @@ async def _generate_narrowing_question(
 
     scene_str = "; ".join(context_parts) if context_parts else "no specific context"
 
+    lang = getattr(state, "detected_language", "en") or "en"
+    arabic_suffix = (
+        "\n\nIMPORTANT: The guest is communicating in Arabic. "
+        "Write your output entirely in Arabic (Modern Standard Arabic). "
+        "Output only the Arabic question or the single word PASS (always in English)."
+        if lang == "ar" else ""
+    )
     system_prompt = (
         "You are a distinguished digital mall concierge. The guest has just replied "
         "with a short affirmation (e.g. 'sure', 'okay', 'yes go for it').\n\n"
@@ -214,6 +221,7 @@ async def _generate_narrowing_question(
         "- No last concierge message, fashion + wedding scene "
         "→ 'Is this for the bride, the groom, or another guest?'\n"
         "- No last concierge message, dining + kids → 'Would you prefer something quick or a sit-down meal?'"
+        + arabic_suffix
     )
 
     human_prompt = (
@@ -1163,7 +1171,7 @@ async def _build_factual_response(
     warnings: list[str] = []
     mall_ctx = get_mall_context(state.mall_id)
     mall_context = mall_ctx.get_canonical_for_prompt()
-    system_prompt = get_concierge_system_prompt(mall_context)
+    system_prompt = get_concierge_system_prompt(mall_context, language=state.detected_language)
 
     scope = state.fact_scope or "store_lookup"
 
@@ -1356,7 +1364,7 @@ def _format_fact_context(fact_ctx: dict, state) -> str:
             for e in at_home:
                 floor = e.get("floor", "")
                 floor_label = f"{floor} Floor" if floor and not floor.lower().endswith(("floor", "level")) else floor
-                loc_parts = [p for p in [floor_label, e.get("zone"), e.get("unit_number")] if p]
+                loc_parts = [p for p in [floor_label, e.get("zone")] if p]
                 loc_str = f" — {', '.join(loc_parts)}" if loc_parts else ""
                 parts.append(f"  • {e.get('name', '')}{loc_str}")
         else:
@@ -1371,7 +1379,7 @@ def _format_fact_context(fact_ctx: dict, state) -> str:
             for e in other:
                 floor = e.get("floor", "")
                 floor_label = f"{floor} Floor" if floor and not floor.lower().endswith(("floor", "level")) else floor
-                loc_parts = [p for p in [floor_label, e.get("zone"), e.get("unit_number")] if p]
+                loc_parts = [p for p in [floor_label, e.get("zone")] if p]
                 loc_str = f" — {', '.join(loc_parts)}" if loc_parts else ""
                 parts.append(
                     f"  • {e.get('name', '')} at {e.get('mall_name', '')}{loc_str}"
@@ -1717,9 +1725,11 @@ def _build_factual_mode_instruction(
     if experience_mode == ROUTE_HINT or response_mode == "route_hint" or scope == "route_hint":
         return (
             f"RESPONSE MODE — LOCATION GUIDE{entity_ref}:\n"
-            "Answer directly with floor, zone, and a direction hint. "
-            "Format: '[Name] is on [Floor], [Zone]. [Direction hint if available].'\n"
-            "Be conversational — like a friend pointing the way. Keep it short.\n\n"
+            "Answer directly with floor, zone, nearby landmarks, and a direction hint. "
+            "Format: '[Name] is on [Floor], [Zone] — near [landmark]. [Direction hint if available].'\n"
+            "Use landmark references (e.g. near the main entrance, next to the food court) to make wayfinding easy. "
+            "If no landmark is available, use the direction hint alone. "
+            "Be conversational — like a friend pointing the way. Keep it short. Never mention unit or store codes.\n\n"
         )
 
     # ── Direct lookup template (experience layer: direct_lookup) ─────────────
@@ -1754,11 +1764,11 @@ def _build_factual_mode_instruction(
             "Use ONLY the structured data above. Follow this format strictly:\n"
             "1) If AT OTHER CENOMI MALLS has results AND current mall does not:\n"
             "   → One brief sentence: '[Query] isn't at your current mall, but I found [entity name(s)] at [N] other Cenomi mall(s):'\n"
-            "   → Then a clean bulleted list: '• [Entity name] — [Mall name], [Floor], [Zone] (Unit [unit])'\n"
+            "   → Then a clean bulleted list: '• [Entity name] — [Mall name], [Floor], [Zone]'\n"
             "   → NEVER start with 'I do not have information' or an apology when results exist.\n"
             "2) If current mall has results: confirm it first, then mention other malls.\n"
             "3) If nothing found anywhere: acknowledge honestly in one sentence.\n"
-            "Be specific — always include mall name, floor, zone, and unit number when available.\n"
+            "Be specific — always include mall name, floor, and zone when available.\n"
             "Be conversational — write like a helpful concierge, not a database readout.\n\n"
         )
     return (
@@ -1840,7 +1850,7 @@ async def _build_mall_info_response(
     composer = ConciergeComposer(mall_ctx)
     overview = composer.compose_mall_overview()
 
-    system_prompt = get_mall_overview_system_prompt(overview.to_prompt_block())
+    system_prompt = get_mall_overview_system_prompt(overview.to_prompt_block(), language=state.detected_language)
     query = state.normalized_user_message or state.raw_user_message
 
     sub = state.intent.sub_intent
@@ -1927,7 +1937,7 @@ async def _build_cross_mall_response(
     warnings: list[str] = []
     mall_ctx = get_mall_context(state.mall_id)
     mall_context = mall_ctx.get_canonical_for_prompt()
-    system_prompt = get_concierge_system_prompt(mall_context)
+    system_prompt = get_concierge_system_prompt(mall_context, language=state.detected_language)
 
     entities = state.context.selected_entities
     home_entities = [e for e in entities if e.get("is_home_mall")]
@@ -2529,7 +2539,7 @@ async def generate_response(state: ConciergeState) -> dict:
         warnings.extend(cross_warnings)
     else:
         mall_context = mall_ctx.get_canonical_for_prompt()
-        system_prompt = get_concierge_system_prompt(mall_context)
+        system_prompt = get_concierge_system_prompt(mall_context, language=state.detected_language)
 
         # ── Emotional recovery tone modifier ──────────────────────────
         # When the guest was recently frustrated or disengaged, append a

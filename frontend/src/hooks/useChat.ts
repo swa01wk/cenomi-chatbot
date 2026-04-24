@@ -6,6 +6,7 @@ import type { ChatMessage, DebugPayload, MessageFeedback } from "../types/chat";
 
 const STORAGE_KEY = "cenomi_active_mall";
 const STORAGE_KEY_CONFIRMED = "cenomi_mall_confirmed";
+const STORAGE_KEY_LANGUAGE = "cenomi_language";
 
 function getStoredMallId(): string {
   try {
@@ -35,6 +36,23 @@ function storeActiveMall(mallId: string, confirmed = false): void {
   }
 }
 
+function getStoredLanguage(): "en" | "ar" {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_LANGUAGE);
+    return stored === "ar" ? "ar" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+function storeLanguage(lang: "en" | "ar"): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_LANGUAGE, lang);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 const USE_MOCK = false;
 
 function generateId(): string {
@@ -49,6 +67,7 @@ export function useChat() {
   const [debugMode, setDebugMode] = useState(false);
   const [mallId, setMallId] = useState<string>(getStoredMallId);
   const [mallConfirmed, setMallConfirmed] = useState<boolean>(getStoredMallConfirmed);
+  const [language, setLanguageState] = useState<"en" | "ar">(getStoredLanguage);
   // tenantId always mirrors mallId in this system
   const tenantId = mallId;
   const turnCountRef = useRef(0);
@@ -109,6 +128,7 @@ export function useChat() {
           tenant_id: tenantId,
           mall_id: mallId,
           debug: debugMode,
+          language,
         })) {
           if (event.type === "token") {
             if (firstToken) {
@@ -196,7 +216,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [sessionId, tenantId, mallId, debugMode],
+    [sessionId, tenantId, mallId, debugMode, language],
   );
 
   const handleFeedback = useCallback(
@@ -288,6 +308,14 @@ export function useChat() {
     [mallId, reset],
   );
 
+  const setLanguage = useCallback((lang: "en" | "ar") => {
+    storeLanguage(lang);
+    setLanguageState(lang);
+    // Update the document direction and lang attribute on toggle
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, []);
+
   const exportConversation = useCallback(() => {
     const data = {
       session_id: sessionId,
@@ -326,6 +354,7 @@ export function useChat() {
     tenantId,
     mallId,
     mallConfirmed,
+    language,
     selectedTurnId,
     selectedTurn,
     send,
@@ -335,6 +364,7 @@ export function useChat() {
     setDebugMode,
     changeMallId,
     confirmMall,
+    setLanguage,
     setSelectedTurnId,
   };
 }

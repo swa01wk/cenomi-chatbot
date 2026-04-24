@@ -19,6 +19,7 @@ from app.models.tenant import TenantConfig
 from app.nodes._tracing import traced_node
 from app.services.tenant_params import load_tenant_config
 from app.utils.ids import generate_message_id
+from app.utils.language import detect_language
 from llm.prompts.query_expander import expand_short_query
 
 
@@ -38,6 +39,10 @@ async def load_session(state: ConciergeState) -> dict:
             warnings.append("Tenant config not found — using defaults")
 
     normalized = state.raw_user_message.strip()
+
+    # Language detection: honour client override if already set;
+    # otherwise auto-detect from the raw message.
+    language = state.detected_language or detect_language(normalized)
 
     scene_ctx = None
     if state.scene and (
@@ -79,9 +84,10 @@ async def load_session(state: ConciergeState) -> dict:
         "active_tenant_parameters": tenant_config,
         "normalized_user_message": normalized,
         "expanded_query": expansion.expanded,
+        "detected_language": language,
         "messages": [user_message],
         "_trace_summary": (
-            f"Session loaded for {mall_id}, turn {turn_id}"
+            f"Session loaded for {mall_id}, turn {turn_id}, lang={language}"
             + (f" | expanded: {expansion.expanded!r}" if expansion.was_expanded else "")
         ),
     }

@@ -12,6 +12,15 @@ export const SUGGESTED_QUERIES = [
   "Coffee and dessert?",
 ];
 
+export const SUGGESTED_QUERIES_AR = [
+  "أين يمكنني تناول الطعام؟",
+  "هدية لصديقتي",
+  "شيء سريع قبل الفيلم",
+  "أفكار للخروج العائلي",
+  "ماذا يمكنني أن أفعل هنا؟",
+  "قهوة وحلويات؟",
+];
+
 export const FEEDBACK_REASONS = [
   "not_relevant",
   "too_generic",
@@ -37,6 +46,45 @@ export const FEEDBACK_REASON_LABELS: Record<string, string> = {
   asked_too_many_questions: "Asked too many questions",
   should_recommend_something_else: "Should recommend something else",
 };
+
+export const FEEDBACK_REASON_LABELS_AR: Record<string, string> = {
+  not_relevant: "غير ذات صلة",
+  too_generic: "عامة جداً",
+  too_long: "طويلة جداً",
+  wrong_assumption: "افتراض خاطئ",
+  wanted_exact_details: "أردت تفاصيل دقيقة",
+  wrong_store_suggestion: "اقتراح متجر خاطئ",
+  wrong_dining_suggestion: "اقتراح مطعم خاطئ",
+  tone_felt_robotic: "النبرة تبدو آلية",
+  asked_too_many_questions: "طرح أسئلة كثيرة جداً",
+  should_recommend_something_else: "يجب اقتراح شيء آخر",
+};
+
+/** UI copy strings for Arabic mode */
+export const UI_COPY_AR = {
+  welcomeTitle: "كونسيرج سينومي몰",
+  welcomeSubtitle: "اسألني عن المتاجر والمطاعم والترفيه أو أي خدمة. سأساعدك في التخطيط لزيارتك.",
+  mallPickerTitle: "كونسيرج مول سينومي",
+  mallPickerSubtitle: "أي مول سينومي ستزور اليوم؟",
+  inputPlaceholder: "اسأل عن المتاجر والمطاعم والترفيه...",
+  thinking: "جاري التفكير...",
+  tapForDirections: "انقر على البطاقة للحصول على اتجاهات على خريطة المول",
+  resetSession: "إعادة تعيين",
+  exportConversation: "تصدير",
+  debugOn: "تشغيل التصحيح",
+  debug: "تصحيح",
+  activeMall: "المول النشط",
+};
+
+/** Returns the correct set of suggested queries for the given language. */
+export function getSuggestedQueries(language: "en" | "ar"): string[] {
+  return language === "ar" ? [...SUGGESTED_QUERIES_AR] : [...SUGGESTED_QUERIES];
+}
+
+/** Returns the correct feedback reason labels for the given language. */
+export function getFeedbackReasonLabels(language: "en" | "ar"): Record<string, string> {
+  return language === "ar" ? FEEDBACK_REASON_LABELS_AR : FEEDBACK_REASON_LABELS;
+}
 
 export const MALLS = [
   { id: "al_nakheel_plaza_28", label: "Al Nakheel Plaza", city: "Buraidah" },

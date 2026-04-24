@@ -1,26 +1,37 @@
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Send } from "lucide-react";
-import { FEEDBACK_REASONS, FEEDBACK_REASON_LABELS } from "../lib/constants";
+import { FEEDBACK_REASONS, getFeedbackReasonLabels } from "../lib/constants";
 import type { MessageFeedback } from "../types/chat";
 
 interface FeedbackControlsProps {
   messageId: string;
   feedback: MessageFeedback;
   onFeedback: (messageId: string, update: Partial<MessageFeedback>) => void;
+  language?: "en" | "ar";
 }
 
 export default function FeedbackControls({
   messageId,
   feedback,
   onFeedback,
+  language = "en",
 }: FeedbackControlsProps) {
+  const FEEDBACK_REASON_LABELS = getFeedbackReasonLabels(language);
   const [showReasons, setShowReasons] = useState(false);
   const [comment, setComment] = useState("");
 
   if (feedback.submitted) {
+    const thankYou =
+      language === "ar"
+        ? feedback.rating === "up"
+          ? "شكراً على ملاحظتك!"
+          : "تم تسجيل ملاحظتك — سنتحسن"
+        : feedback.rating === "up"
+          ? "Thanks for the feedback!"
+          : "Feedback recorded — we'll improve";
     return (
       <span className="animate-fade-in text-xs text-gray-400">
-        {feedback.rating === "up" ? "Thanks for the feedback!" : "Feedback recorded — we'll improve"}
+        {thankYou}
       </span>
     );
   }
@@ -79,7 +90,7 @@ export default function FeedbackControls({
       {showReasons && feedback.rating === "down" && (
         <div className="animate-fade-in space-y-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3">
           <p className="text-xs font-medium text-gray-500">
-            What went wrong?
+            {language === "ar" ? "ما الذي حدث خطأ؟" : "What went wrong?"}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {FEEDBACK_REASONS.map((reason) => (
@@ -101,7 +112,7 @@ export default function FeedbackControls({
               type="text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Optional: tell us more..."
+              placeholder={language === "ar" ? "اختياري: أخبرنا بالمزيد..." : "Optional: tell us more..."}
               className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (feedback.tags.length > 0 || comment.trim())) {

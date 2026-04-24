@@ -11,6 +11,7 @@ interface ChatMessageProps {
   onFeedback: (id: string, update: Partial<MessageFeedback>) => void;
   onSend?: (text: string) => void;
   isStreaming?: boolean;
+  language?: "en" | "ar";
 }
 
 function formatContent(text: string) {
@@ -34,28 +35,31 @@ function formatContent(text: string) {
   });
 }
 
-/** Extract pill labels from bold spans in the last paragraph only.
+/** Extract pill labels from bold spans in the message.
+ *  Scans paragraphs from last to first and returns the first paragraph
+ *  that yields ≥ 2 pills — preserving preference for a closing CTA while
+ *  falling back to earlier paragraphs when the last one has no bold items.
  *  Handles both separate spans (**coffee**, **dessert**) and a single
- *  comma-separated span (**quick lunch, coffee, or dessert**). */
+ *  comma-separated span (**quick lunch, coffee, or dessert**).
+ *  Also splits on Arabic conjunctions: ، (Arabic comma) and أو (or). */
 function extractCtaPills(text: string): string[] {
   const paragraphs = text.split(/\n\n+/).filter((p) => p.trim());
-  if (!paragraphs.length) return [];
-
-  const lastPara = paragraphs[paragraphs.length - 1];
-  const matches = lastPara.match(/\*\*([^*]+)\*\*/g);
-  if (!matches) return [];
-
-  const pills: string[] = [];
-  for (const match of matches) {
-    const inner = match.slice(2, -2);
-    // Split "quick lunch, coffee, or dessert" → ["quick lunch", "coffee", "dessert"]
-    const parts = inner
-      .split(/,|\bor\b|\band\b/i)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    pills.push(...parts);
+  for (const para of [...paragraphs].reverse()) {
+    const matches = para.match(/\*\*([^*]+)\*\*/g);
+    if (!matches) continue;
+    const pills: string[] = [];
+    for (const match of matches) {
+      const inner = match.slice(2, -2);
+      // Split on English connectors (or, and), Arabic connectors (أو, و), and commas (including ،)
+      const parts = inner
+        .split(/[,،]|\bor\b|\band\b|\bأو\b|\bو\b/iu)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      pills.push(...parts);
+    }
+    if (pills.length >= 2) return pills;
   }
-  return pills;
+  return [];
 }
 
 function TenantCardItem({
@@ -90,11 +94,11 @@ function TenantCardItem({
             <Store size={28} className="text-gray-300" />
           </div>
         )}
-        <div className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/60 backdrop-blur-sm">
+        <div className="absolute top-2 end-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/60 backdrop-blur-sm">
           <PersonStanding size={14} className="text-white" />
         </div>
         {hasMap && (
-          <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 shadow">
+          <div className="absolute bottom-2 end-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 shadow">
             <MapPin size={12} className="text-white" />
           </div>
         )}
@@ -117,6 +121,7 @@ export default function ChatMessage({
   onSelect,
   onFeedback,
   onSend,
+  language = "en",
 }: ChatMessageProps) {
   const streaming = message.isStreaming ?? false;
   const isUser = message.role === "user";
@@ -162,7 +167,7 @@ export default function ChatMessage({
                 } ${isSelected ? "ring-2 ring-blue-400" : ""}`
           }`}
         >
-          <div className="whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap" dir="auto">
             {formatContent(message.content)}
             {streaming && (
               <span className="streaming-cursor ml-px inline-block" aria-hidden="true" />
@@ -191,6 +196,7 @@ export default function ChatMessage({
             messageId={message.id}
             feedback={message.feedback}
             onFeedback={onFeedback}
+            language={language}
           />
         )}
 
@@ -226,7 +232,7 @@ export default function ChatMessage({
               ))}
             </div>
             {cards!.some((c) => c.map_url) && (
-              <p className="mt-2 text-[10px] text-gray-400">
+              <p className="mt-2 text-[10px] text-gray-400" dir="auto">
                 Tap a card to get directions on the mall map
               </p>
             )}
