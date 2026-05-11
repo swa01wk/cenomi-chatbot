@@ -6,6 +6,53 @@ Format: `## [vX.Y] — YYYY-MM-DD` with sections Added / Changed / Fixed.
 
 ---
 
+## [v1.7] — 2026-04-24
+
+### Added
+
+**Bilingual Concierge — English / Arabic**
+
+End-to-end language support for Assistant output and UX chrome.
+
+- **`ChatRequest.language` (`backend/app/models/api.py`)** — Optional client override `"en"` | `"ar"`. When omitted, `load_session` auto-detects from the normalized user message via `app/utils/language.py` (`detect_language`).
+- **`GraphState.detected_language` (`backend/app/models/state.py`)** — Carried through the graph; concierge system prompts (`llm/prompts/concierge_prompt.py`), smalltalk pools, closure-question side prompts in `generate_response.py`, and CTA chips (`cta_generator.py` / `get_cta_suggestions`) receive Arabic instructions when `ar`.
+- **Blocking + streaming APIs** (`concierge.py`, `stream.py`) — Persist `detected_language` on the reply path; SSE `done` suggestions are localized.
+
+**Frontend — RTL + Language Toggle**
+
+- **`TopBar`** — EN / عربي toggle; title tooltips for switch target language.
+- **`App.tsx`** — Sync `document.documentElement.lang` / `dir`; root container `dir` for RTL when Arabic.
+- **Copy** — `constants.ts`: `getSuggestedQueries`, `getFeedbackReasonLabels`, Arabic UI copy for welcome, typing indicator, placeholders (`ChatPage.tsx`, `ChatInput.tsx`, `FeedbackControls.tsx`).
+- **`useChat.ts`** — Persists preference in `localStorage` key `cenomi_language`; sends `language` on every chat/stream request (`types/api.ts`, `client.ts`).
+
+**CTA Pills + Tenant Cards + Mall Map Modal**
+
+- **`ChatMessage.tsx`** — Extracts quick-reply **pills** from `**bold**` spans (English and Arabic separators: commas, `،`, `أو`, `و`); renders horizontal **tenant cards** (`TenantCard`) when structured card metadata is present.
+- **`MapModal.tsx`** **(new)** — Full-screen Mappedin iframe: `#/profile?location=…` deep link plus optional `postMessage` fallback (`app-loaded` / `set-state`).
+
+**QA / Evaluation Tooling**
+
+- **`backend/scripts/run_arabic_tests.py`** — Runs test suites with `language: "ar"` on each request.
+- **`docs/evaluation-methodology.md`**, **`docs/pipeline-stability-and-query-capability.md`** — Methodology and stability references for operators.
+- **`backend/scripts/run_pipeline_evaluation.py`**, **`run_comparison_queries.py`**, **`generate_evaluation_report.py`** — Pipeline and comparison helpers; **`generate_client_report.py`** (repo root) — client-facing report generation.
+- **`backend/scripts/audit_session.py`** — Expanded session audit utilities.
+- **Tests:** `backend/tests/test_client_feedback.py`, `backend/tests/test_concierge_scenarios.py`; refinements elsewhere (e.g. `test_e2e_scenarios.py`).
+
+**Data**
+
+- **`backend/scripts/arabic_translations_cache.json`** — Auxiliary cache for Arabic-related scripting.
+- **`backend/data/semantic/al_nakheel_plaza_28.json`**, **`backend/data/playbooks/al_nakheel_plaza_28.json`** — Incremental refreshes for mall 28.
+
+### Changed
+
+**`backend/llm/prompts/query_expander.py`**, **`concierge_prompt.py`**, **`generate_response.py`** — Prompt and expansion adjustments for bilingual grounding and Arabic output quality.
+
+**`frontend/src/styles/index.css`** — Styling tweaks for RTL / new components.
+
+**Files changed:** `backend/app/models/api.py`, `backend/app/models/state.py`, `backend/app/utils/language.py`, `backend/app/nodes/load_session.py`, `backend/app/nodes/generate_response.py`, `backend/app/nodes/smalltalk.py`, `backend/app/services/concierge.py`, `backend/app/services/clean_context.py`, `backend/app/services/cta_generator.py`, `backend/app/api/stream.py`, `backend/llm/prompts/concierge_prompt.py`, `backend/llm/prompts/query_expander.py`, `backend/scripts/run_arabic_tests.py`, `backend/scripts/audit_session.py`, `frontend/src/App.tsx`, `frontend/src/pages/ChatPage.tsx`, `frontend/src/components/TopBar.tsx`, `frontend/src/components/ChatMessage.tsx`, `frontend/src/components/ChatInput.tsx`, `frontend/src/components/FeedbackControls.tsx`, `frontend/src/components/MapModal.tsx` *(new)*, `frontend/src/hooks/useChat.ts`, `frontend/src/api/client.ts`, `frontend/src/lib/constants.ts`, `frontend/src/types/api.ts`, `frontend/src/types/chat.ts`, mall 28 semantic/playbook JSON, docs under `docs/`, assorted `backend/scripts/` and test artefacts as committed.
+
+---
+
 ## [v1.6] — 2026-03-31
 
 ### Added
